@@ -1,0 +1,604 @@
+/* ==========================================================================
+   DOCTEURFLOTTE — DESIGN SYSTEM TÉLÉMATIQUE DE CLASSE MONDIALE (v2.0)
+   Inspiré des standards d'opérations connectées Samsara & consoles Flespi
+   Thème : Carbon Space Cockpit (Dark) / Alpine High-Contrast Slate (Light)
+   ========================================================================== */
+
+@import './cockpit-utilities.css';
+
+:root {
+  /* ==========================================================================
+     DIRECTION ARTISTIQUE : "PRECISION TELEMETRY & INDUSTRIAL SLATE"
+     Thème Clair par défaut : Fond #F8FAFC, Cartes #FFFFFF, Bordures #E2E8F0, Texte #0F172A
+     ========================================================================== */
+  color-scheme: light;
+  --df-bg-base: #F8FAFC;
+  --df-bg-surface-1: #FFFFFF;
+  --df-bg-surface-2: #F1F5F9;
+  --df-bg-surface-3: #E2E8F0;
+  --df-bg-card: #FFFFFF;
+  --df-bg-glass: #FFFFFF;
+  --df-bg-glass-elevated: #FFFFFF;
+
+  /* Bordures Hairline Franches 1px solid */
+  --df-border-subtle: #E2E8F0;
+  --df-border-hairline: #E2E8F0;
+  --df-border-medium: #CBD5E1;
+  --df-border-focus: #2563EB;
+  --df-border-glow: #2563EB;
+  --df-border-card-top: #E2E8F0;
+
+  /* Typographie & Lisibilité Haute Densité */
+  --df-text-main: #0F172A;
+  --df-text-secondary: #475569;
+  --df-text-muted: #94A3B8;
+  --df-text-faint: #CBD5E1;
+  --df-text-on-accent: #FFFFFF;
+
+  /* Accents de marque (Cobalt Technique) */
+  --df-accent-blue: #2563EB;
+  --df-accent-blue-hover: #1D4ED8;
+  --df-accent-blue-subtle: #EFF6FF;
+  --df-accent-cyan: #2563EB;
+  --df-accent-cyan-subtle: #EFF6FF;
+  --df-gradient-primary: #2563EB;
+  --df-gradient-card: transparent;
+  --df-gradient-telemetry: #10B981;
+
+  /* Statuts Télématiques Sémantiques Normés */
+  --df-status-ok: #10B981;
+  --df-status-ok-bg: #ECFDF5;
+  --df-status-ok-text: #065F46;
+  --df-status-ok-border: #10B981;
+
+  --df-status-warning: #F59E0B;
+  --df-status-warning-bg: #FFFBEB;
+  --df-status-warning-text: #92400E;
+  --df-status-warning-border: #F59E0B;
+
+  --df-status-danger: #EF4444;
+  --df-status-danger-bg: #FEF2F2;
+  --df-status-danger-text: #991B1B;
+  --df-status-danger-border: #EF4444;
+
+  --df-status-info: #2563EB;
+  --df-status-info-bg: #EFF6FF;
+  --df-status-info-text: #1E40AF;
+  --df-status-info-border: #2563EB;
+
+  /* Télémétrie en temps réel (États IoT / Traccar) */
+  --df-telemetry-live: #10B981;
+  --df-telemetry-motion: #2563EB;
+  --df-telemetry-idle: #F59E0B;
+  --df-telemetry-offline: #64748B;
+
+  /* Tag Données Démo Synthétiques */
+  --df-badge-demo-color: #F59E0B;
+  --df-badge-demo-bg: #FFFBEB;
+  --df-badge-demo-border: #F59E0B;
+
+  /* Rayons de courbure techniques stricts */
+  --df-radius-xs: 2px;
+  --df-radius-sm: 4px;
+  --df-radius-md: 6px;
+  --df-radius-lg: 8px;
+  --df-radius-xl: 8px;
+  --df-radius-full: 9999px;
+
+  /* Ombres nettes et discrètes */
+  --df-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --df-shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+  --df-shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --df-shadow-glow-cyan: none;
+  --df-shadow-glow-blue: none;
+
+  /* Transitions nettes et chirurgicales */
+  --df-transition-fast: 100ms cubic-bezier(0.16, 1, 0.3, 1);
+  --df-transition-smooth: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Typographie */
+  --df-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --df-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* ==========================================================================
+     COCKPIT TÉLÉMATIQUE HAUTE DENSITÉ (VARIABLES SÉMANTIQUES DÉDIÉES)
+     Thème Clair (Alpine High-Contrast Slate)
+     ========================================================================== */
+  --df-cockpit-bg: #F8FAFC;
+  --df-cockpit-header-bg: rgba(255, 255, 255, 0.95);
+  --df-cockpit-sidebar-bg: #FFFFFF;
+  --df-cockpit-card-bg: #F1F5F9;
+  --df-cockpit-card-hover: #E2E8F0;
+  --df-cockpit-border: #E2E8F0;
+  --df-cockpit-border-strong: #CBD5E1;
+  --df-cockpit-text-title: #0F172A;
+  --df-cockpit-text-body: #334155;
+  --df-cockpit-text-muted: #64748B;
+  --df-cockpit-input-bg: #FFFFFF;
+  --df-cockpit-map-bg: #F1F5F9;
+  --df-cockpit-landmass-fill: #FFFFFF;
+  --df-cockpit-landmass-stroke: #2563EB;
+  --df-cockpit-grid-stroke: rgba(148, 163, 184, 0.25);
+  --df-cockpit-hud-bg: rgba(255, 255, 255, 0.95);
+  --df-cockpit-hud-border: #CBD5E1;
+  --df-cockpit-hud-text: #0F172A;
+  --df-cockpit-hud-btn-bg: #F1F5F9;
+  --df-cockpit-hud-btn-hover: #E2E8F0;
+}
+
+@keyframes dfPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* --- PALETTE DE COULEURS MODE SOMBRE (COCKPIT SAMSARA / FLESPI) --- */
+html.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --df-bg-base: #090D16;
+  --df-bg-surface-1: #111827;
+  --df-bg-surface-2: #161F30;
+  --df-bg-surface-3: #1F2937;
+  --df-bg-card: #111827;
+  --df-bg-glass: #111827;
+  --df-bg-glass-elevated: #111827;
+
+  --df-border-subtle: #1F2937;
+  --df-border-hairline: #1F2937;
+  --df-border-medium: #374151;
+  --df-border-focus: #2563EB;
+  --df-border-glow: #2563EB;
+  --df-border-card-top: #1F2937;
+
+  --df-text-main: #F8FAFC;
+  --df-text-secondary: #94A3B8;
+  --df-text-muted: #64748B;
+  --df-text-faint: #475569;
+  --df-text-on-accent: #FFFFFF;
+
+  --df-accent-blue: #2563EB;
+  --df-accent-blue-hover: #1D4ED8;
+  --df-accent-blue-subtle: rgba(37, 99, 235, 0.12);
+  --df-accent-cyan: #2563EB;
+  --df-accent-cyan-subtle: rgba(37, 99, 235, 0.12);
+  --df-gradient-primary: #2563EB;
+  --df-gradient-card: transparent;
+  --df-gradient-telemetry: #10B981;
+
+  --df-status-ok: #10B981;
+  --df-status-ok-bg: #ECFDF5;
+  --df-status-ok-text: #065F46;
+  --df-status-ok-border: #10B981;
+
+  --df-status-warning: #F59E0B;
+  --df-status-warning-bg: #FFFBEB;
+  --df-status-warning-text: #92400E;
+  --df-status-warning-border: #F59E0B;
+
+  --df-status-danger: #EF4444;
+  --df-status-danger-bg: #FEF2F2;
+  --df-status-danger-text: #991B1B;
+  --df-status-danger-border: #EF4444;
+
+  --df-status-info: #2563EB;
+  --df-status-info-bg: #EFF6FF;
+  --df-status-info-text: #1E40AF;
+  --df-status-info-border: #2563EB;
+
+  --df-telemetry-live: #10B981;
+  --df-telemetry-motion: #2563EB;
+  --df-telemetry-idle: #F59E0B;
+  --df-telemetry-offline: #64748B;
+
+  --df-badge-demo-color: #F59E0B;
+  --df-badge-demo-bg: rgba(245, 158, 11, 0.12);
+  --df-badge-demo-border: #F59E0B;
+
+  --df-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --df-shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --df-shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  --df-shadow-glow-cyan: none;
+  --df-shadow-glow-blue: none;
+
+  /* ==========================================================================
+     COCKPIT TÉLÉMATIQUE HAUTE DENSITÉ (VARIABLES SÉMANTIQUES DÉDIÉES)
+     Thème Sombre (Carbon Space Cockpit Samsara / Flespi)
+     ========================================================================== */
+  --df-cockpit-bg: #020617;
+  --df-cockpit-header-bg: rgba(2, 6, 23, 0.95);
+  --df-cockpit-sidebar-bg: rgba(2, 6, 23, 0.95);
+  --df-cockpit-card-bg: rgba(15, 23, 42, 0.6);
+  --df-cockpit-card-hover: rgba(15, 23, 42, 1);
+  --df-cockpit-border: #1E293B;
+  --df-cockpit-border-strong: #334155;
+  --df-cockpit-text-title: #F8FAFC;
+  --df-cockpit-text-body: #CBD5E1;
+  --df-cockpit-text-muted: #94A3B8;
+  --df-cockpit-input-bg: rgba(15, 23, 42, 0.9);
+  --df-cockpit-map-bg: #090D16;
+  --df-cockpit-landmass-fill: #080E1A;
+  --df-cockpit-landmass-stroke: #1E3A8A;
+  --df-cockpit-grid-stroke: rgba(30, 41, 59, 0.35);
+  --df-cockpit-hud-bg: rgba(17, 24, 39, 0.94);
+  --df-cockpit-hud-border: #334155;
+  --df-cockpit-hud-text: #F8FAFC;
+  --df-cockpit-hud-btn-bg: #111827;
+  --df-cockpit-hud-btn-hover: #1F2937;
+}
+
+/* ==========================================================================
+   RESET & STRUCTURE GLOBALE AVEC TRAME TÉLÉMATIQUE
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+  max-width: 100vw;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--df-font-sans);
+  background-color: var(--df-bg-base);
+  color: var(--df-text-main);
+  line-height: 1.55;
+  height: 100%;
+  min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Fond par défaut mode clair haute lisibilité */
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.03) 1px, transparent 0),
+    radial-gradient(ellipse 65% 50% at 20% 10%, rgba(29, 78, 216, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 85% 85%, rgba(2, 132, 199, 0.03) 0%, transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, var(--df-bg-base) 100%);
+  background-size: 28px 28px, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+  transition: background-color var(--df-transition-smooth), color var(--df-transition-smooth);
+}
+
+html.dark body {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(0, 210, 255, 0.04) 1px, transparent 0),
+    radial-gradient(ellipse 65% 50% at 20% 10%, rgba(37, 99, 235, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 85% 85%, rgba(0, 210, 255, 0.05) 0%, transparent 55%),
+    linear-gradient(180deg, #080c14 0%, var(--df-bg-base) 100%);
+}
+
+a {
+  color: var(--df-accent-blue);
+  text-decoration: none;
+  transition: color var(--df-transition-fast);
+}
+
+a:hover {
+  color: var(--df-accent-cyan);
+}
+
+/* ==========================================================================
+   CONTENEURS ET MISE EN PAGE
+   ========================================================================== */
+
+.df-container {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem 1.5rem;
+}
+
+/* ==========================================================================
+   CARTES ET GLASSMORPHISM SAMSARA
+   ========================================================================== */
+
+.df-glass {
+  background: var(--df-bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--df-border-subtle);
+  border-top: 1px solid var(--df-border-card-top);
+  border-radius: var(--df-radius-lg);
+  box-shadow: var(--df-shadow-md);
+  transition: transform var(--df-transition-smooth), border-color var(--df-transition-smooth), box-shadow var(--df-transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.df-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background var(--df-transition-smooth);
+}
+
+.df-glass:hover {
+  border-color: var(--df-border-medium);
+  box-shadow: var(--df-shadow-lg);
+}
+
+.df-glass:hover::before {
+  background: var(--df-gradient-primary);
+}
+
+.df-card-interactive {
+  cursor: pointer;
+}
+
+.df-card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: var(--df-border-focus);
+}
+
+/* ==========================================================================
+   TYPOGRAPHIE & DONNÉES TÉLÉMATIQUES TABULAIRES
+   ========================================================================== */
+
+.df-mono {
+  font-family: var(--df-font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.df-telemetry-strip {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0.85rem;
+  background: var(--df-bg-surface-2);
+  border: 1px solid var(--df-border-subtle);
+  border-radius: var(--df-radius-sm);
+  font-size: 0.75rem;
+  font-family: var(--df-font-mono);
+  color: var(--df-text-secondary);
+}
+
+/* ==========================================================================
+   BOUTONS DE CONSOLE D'OPÉRATION
+   ========================================================================== */
+
+.df-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.52rem 1.15rem;
+  border-radius: var(--df-radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  outline: none;
+  transition: all var(--df-transition-fast);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.df-btn:focus-visible {
+  outline: 2px solid var(--df-accent-cyan);
+  outline-offset: 2px;
+}
+
+.df-btn-primary {
+  background: var(--df-gradient-primary);
+  color: var(--df-text-on-accent);
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35);
+}
+
+.df-btn-primary:hover:not(:disabled) {
+  opacity: 0.95;
+  box-shadow: var(--df-shadow-glow-cyan);
+  transform: translateY(-1px);
+}
+
+.df-btn-secondary {
+  background: var(--df-bg-surface-2);
+  color: var(--df-text-secondary);
+  border-color: var(--df-border-medium);
+}
+
+.df-btn-secondary:hover:not(:disabled) {
+  background: var(--df-bg-surface-3);
+  color: var(--df-text-main);
+  border-color: var(--df-accent-cyan);
+}
+
+.df-btn-outline {
+  background: transparent;
+  color: var(--df-text-main);
+  border-color: var(--df-border-medium);
+}
+
+.df-btn-outline:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--df-accent-cyan);
+}
+
+.df-btn-danger {
+  background: var(--df-status-danger-bg);
+  color: var(--df-status-danger);
+  border-color: var(--df-status-danger-border);
+}
+
+.df-btn-danger:hover:not(:disabled) {
+  background: var(--df-status-danger);
+  color: #fff;
+}
+
+.df-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ==========================================================================
+   BADGES DE STATUT & BALISES TÉLÉMATIQUES
+   ========================================================================== */
+
+.df-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--df-radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.df-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.df-badge-ok {
+  background: var(--df-status-ok-bg);
+  color: var(--df-status-ok);
+  border: 1px solid var(--df-status-ok-border);
+}
+
+.df-badge-warning {
+  background: var(--df-status-warning-bg);
+  color: var(--df-status-warning);
+  border: 1px solid var(--df-status-warning-border);
+}
+
+.df-badge-danger {
+  background: var(--df-status-danger-bg);
+  color: var(--df-status-danger);
+  border: 1px solid var(--df-status-danger-border);
+}
+
+.df-badge-info {
+  background: var(--df-status-info-bg);
+  color: var(--df-status-info);
+  border: 1px solid var(--df-status-info-border);
+}
+
+.df-badge-demo {
+  background: var(--df-badge-demo-bg);
+  color: var(--df-badge-demo-color);
+  border: 1px solid var(--df-badge-demo-border);
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);
+}
+
+/* ==========================================================================
+   JAUGES ET BARRES D'INTERVALLE D'ENTRETIEN PRÉVENTIF
+   ========================================================================== */
+
+.df-gauge {
+  width: 100%;
+  height: 6px;
+  background: var(--df-bg-surface-3);
+  border-radius: var(--df-radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.df-gauge-fill {
+  height: 100%;
+  border-radius: var(--df-radius-full);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s;
+}
+
+.df-gauge-ok {
+  background: var(--df-status-ok);
+}
+
+.df-gauge-warning {
+  background: var(--df-status-warning);
+}
+
+.df-gauge-danger {
+  background: var(--df-status-danger);
+}
+
+/* ==========================================================================
+   ANIMATIONS RADAR ET BALISES CLIGNOTANTES
+   ========================================================================== */
+
+@keyframes pulseBeacon {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.df-pulse-live {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--df-telemetry-live);
+  animation: pulseBeacon 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  display: inline-block;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.1);
+  }
+}
+
+.df-pulse {
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+/* Shimmer pour les états de chargement (Skeleton) */
+@keyframes dfShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.df-skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+  background-size: 200% 100%;
+  animation: dfShimmer 1.8s infinite;
+  border-radius: var(--df-radius-sm);
+}

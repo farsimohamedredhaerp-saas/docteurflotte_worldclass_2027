@@ -1,0 +1,96 @@
+name: docteurflotte
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: docteurflotte_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-docteurflotte}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docteurflotte_dev_password_local_only}
+      POSTGRES_DB: ${POSTGRES_DB:-docteurflotte_dev}
+    ports:
+      # Port hôte 5434 par défaut pour éviter le conflit avec les instances PostgreSQL 5432/5433 existantes
+      - "${POSTGRES_PORT:-5434}:5432"
+    volumes:
+      - docteurflotte_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-docteurflotte} -d ${POSTGRES_DB:-docteurflotte_dev}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: docteurflotte_redis
+    restart: unless-stopped
+    ports:
+      # Port hôte 6380 par défaut pour éviter le conflit avec le port 6379 existant
+      - "${REDIS_PORT:-6380}:6379"
+    volumes:
+      - docteurflotte_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  traccar:
+    image: traccar/traccar:6.15.2
+    container_name: docteurflotte_traccar
+    restart: unless-stopped
+    ports:
+      # Port Web UI & API REST Traccar (8085 pour éviter le port 8082 tiers)
+      - "${TRACCAR_WEB_PORT:-8085}:8082"
+      # Port OsmAnd / Traccar Client standard pour smartphones et boîtiers GPS HTTP
+      - "${TRACCAR_PORT_OSMAND:-5055}:5055"
+      # Port matériel standard Teltonika
+      - "${TRACCAR_PORT_TELTONIKA:-5023}:5023"
+    volumes:
+      - ./traccar/traccar.xml:/opt/traccar/conf/traccar.xml:ro
+      - docteurflotte_traccardata:/opt/traccar/data
+      - docteurflotte_traccarlogs:/opt/traccar/logs
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Ollama — IA Souveraine (CPU-only, offline, Loi 18-07 ANPDP)
+  # Modèle Qwen 2.5 1.5B Instruct spécialisé DocteurFlotte
+  # ────────────────────────────────────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: docteurflotte_ollama
+    restart: unless-stopped
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - docteurflotte_ollama_data:/root/.ollama
+      - ./ollama/Modelfile.docteurflotte:/tmp/Modelfile.docteurflotte:ro
+    environment:
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_KEEP_ALIVE=5m
+      - OLLAMA_FLASH_ATTENTION=1
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "3.0"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  docteurflotte_pgdata:
+    name: docteurflotte_pgdata
+  docteurflotte_redisdata:
+    name: docteurflotte_redisdata
+  docteurflotte_traccardata:
+    name: docteurflotte_traccardata
+  docteurflotte_traccarlogs:
+    name: docteurflotte_traccarlogs
+  docteurflotte_ollama_data:
+    name: docteurflotte_ollama_data

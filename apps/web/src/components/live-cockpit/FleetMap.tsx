@@ -1,0 +1,1368 @@
+'use client';
+
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import {
+  VehicleTelemetryState,
+  GeofenceZone,
+} from './types';
+import {
+  IconCrosshair,
+  IconLayers,
+  IconNavigation,
+} from '../navigation/TechIcons';
+import { SovereignMapLibre } from './SovereignMapLibre';
+import { useTheme } from '../../context/ThemeContext';
+
+interface FleetMapProps {
+  vehicles: VehicleTelemetryState[];
+  selectedVehicle?: VehicleTelemetryState;
+  onSelectVehicle: (id: string) => void;
+  geofences: GeofenceZone[];
+}
+
+// Projection standard Web Mercator (EPSG:3857)
+function lon2tile(lon: number, zoom: number): number {
+  return ((lon + 180) / 360) * Math.pow(2, zoom);
+}
+
+function lat2tile(lat: number, zoom: number): number {
+  const latRad = (lat * Math.PI) / 180;
+  return (
+    ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) *
+    Math.pow(2, zoom)
+  );
+}
+
+function tile2lon(x: number, zoom: number): number {
+  return (x / Math.pow(2, zoom)) * 360 - 180;
+}
+
+function tile2lat(y: number, zoom: number): number {
+  const n = Math.PI - (2 * Math.PI * y) / Math.pow(2, zoom);
+  return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+}
+
+// Corridors logistiques souverains en Algérie
+const STRATEGIC_CORRIDORS = [
+  {
+    name: 'A1 Autoroute Est-Ouest (Frontière Ouest -> Frontière Est)',
+    points: [
+      { lat: 34.88, lng: -1.31 }, // Tlemcen
+      { lat: 35.20, lng: -0.63 }, // Sidi Bel Abbès
+      { lat: 35.70, lng: -0.63 }, // Oran
+      { lat: 35.93, lng: 0.09 },  // Mostaganem
+      { lat: 36.16, lng: 1.33 },  // Chlef
+      { lat: 36.47, lng: 2.83 },  // Blida
+      { lat: 36.75, lng: 3.05 },  // Alger
+      { lat: 36.73, lng: 3.28 },  // Boumerdès
+      { lat: 36.37, lng: 3.90 },  // Bouira
+      { lat: 36.19, lng: 5.41 },  // Sétif
+      { lat: 36.36, lng: 6.61 },  // Constantine
+      { lat: 36.75, lng: 7.40 },  // Skikda embranchement
+      { lat: 36.90, lng: 7.76 },  // Annaba
+      { lat: 36.88, lng: 8.44 },  // El Tarf (Frontière Tunisie)
+    ],
+  },
+  {
+    name: 'RN1 La Trans-Saharienne (Alger -> Grand Sud -> In Guezzam)',
+    points: [
+      { lat: 36.75, lng: 3.05 }, // Alger
+      { lat: 36.47, lng: 2.83 }, // Blida (Chiffa)
+      { lat: 36.26, lng: 2.75 }, // Médéa
+      { lat: 35.88, lng: 2.92 }, // Berrouaghia
+      { lat: 34.67, lng: 3.25 }, // Djelfa
+      { lat: 33.80, lng: 2.86 }, // Laghouat
+      { lat: 32.49, lng: 3.67 }, // Ghardaïa (M'Zab)
+      { lat: 30.58, lng: 2.87 }, // El Menia
+      { lat: 27.20, lng: 2.47 }, // In Salah
+      { lat: 25.50, lng: 3.80 }, // Arak
+      { lat: 22.79, lng: 5.52 }, // Tamanrasset
+      { lat: 18.96, lng: 5.71 }, // In Guezzam (Frontière Niger)
+    ],
+  },
+  {
+    name: 'RN5 / RN3 Axe Pétrolier Hassi Messaoud & Djanet',
+    points: [
+      { lat: 36.36, lng: 6.61 }, // Constantine
+      { lat: 35.56, lng: 6.17 }, // Batna
+      { lat: 34.85, lng: 5.73 }, // Biskra
+      { lat: 33.10, lng: 6.06 }, // Touggourt
+      { lat: 31.95, lng: 5.33 }, // Ouargla
+      { lat: 31.68, lng: 6.07 }, // Hassi Messaoud
+      { lat: 28.05, lng: 9.60 }, // In Amenas
+      { lat: 26.49, lng: 8.48 }, // Illizi
+      { lat: 24.55, lng: 9.48 }, // Djanet
+    ],
+  },
+  {
+    name: 'RN50 Axe Stratégique Minier Gara Djebilet - Tindouf - Béchar',
+    points: [
+      { lat: 31.62, lng: -2.22 }, // Béchar
+      { lat: 31.02, lng: -2.73 }, // Abadla
+      { lat: 29.41, lng: -3.25 }, // Tabelbala
+      { lat: 28.42, lng: -5.67 }, // Hassi Khebi
+      { lat: 27.67, lng: -8.14 }, // Tindouf
+      { lat: 26.88, lng: -7.15 }, // Gara Djebilet
+    ],
+  },
+  {
+    name: 'Rocade Pétrochimique Hassi R\'Mel - Arzew',
+    points: [
+      { lat: 32.93, lng: 3.27 }, // Hassi R'Mel
+      { lat: 33.80, lng: 2.86 }, // Laghouat
+      { lat: 34.33, lng: 1.39 }, // Aflou
+      { lat: 34.88, lng: 0.15 }, // Saïda
+      { lat: 35.40, lng: 0.14 }, // Mascara
+      { lat: 35.85, lng: -0.28 }, // Arzew (Pôle GNL)
+    ],
+  },
+];
+
+// Polygone du Territoire Souverain de l'Algérie (100% hors-ligne, zéro dépendance externe)
+const ALGERIA_TERRITORY_POLYGON = [
+  // 1. Façade Maritime Méditerranéenne (Ouest -> Est)
+  { lat: 35.08, lng: -2.21 }, // Marsa Ben M'Hidi (Frontière Maroc)
+  { lat: 35.15, lng: -1.86 }, // Ghazaouet
+  { lat: 35.30, lng: -1.39 }, // Béni Saf
+  { lat: 35.70, lng: -0.64 }, // Oran / Cap Falcon
+  { lat: 35.85, lng: -0.28 }, // Arzew
+  { lat: 35.93, lng: 0.09 },  // Mostaganem
+  { lat: 36.51, lng: 1.31 },  // Ténès
+  { lat: 36.59, lng: 2.44 },  // Tipaza
+  { lat: 36.75, lng: 3.06 },  // Baie d'Alger
+  { lat: 36.91, lng: 3.91 },  // Dellys
+  { lat: 36.75, lng: 5.08 },  // Béjaïa
+  { lat: 36.82, lng: 5.77 },  // Jijel
+  { lat: 36.88, lng: 6.91 },  // Skikda
+  { lat: 36.90, lng: 7.76 },  // Annaba
+  { lat: 36.90, lng: 8.44 },  // El Kala (Frontière Tunisie)
+
+  // 2. Frontière Est (Tunisie & Libye)
+  { lat: 36.45, lng: 8.35 }, // Souk Ahras
+  { lat: 35.40, lng: 8.30 }, // Tébessa
+  { lat: 34.00, lng: 8.10 }, // El Oued
+  { lat: 33.00, lng: 9.20 }, // Chott Rharsa
+  { lat: 30.25, lng: 9.60 }, // Ghadamès
+  { lat: 27.50, lng: 9.80 }, // Frontière Libye
+  { lat: 24.96, lng: 10.18 }, // Ghat
+  { lat: 23.50, lng: 11.99 }, // Djanet Sud-Est
+
+  // 3. Frontière Sud (Niger & Mali)
+  { lat: 21.50, lng: 11.00 }, // Passe de Salvador
+  { lat: 19.14, lng: 8.50 },  // Frontière Niger
+  { lat: 18.96, lng: 5.71 },  // In Guezzam (Extrême Sud)
+  { lat: 19.50, lng: 3.00 },  // Frontière Sud Mali
+  { lat: 21.33, lng: 0.95 },  // Bordj Badji Mokhtar
+  { lat: 23.50, lng: -1.50 }, // Erg Chech
+  { lat: 25.00, lng: -4.83 }, // Chenachane (Frontière Mauritanie)
+
+  // 4. Frontière Ouest (Mauritanie, Sahara Occidental & Maroc)
+  { lat: 26.00, lng: -6.50 }, // Erg Iguidi
+  { lat: 27.30, lng: -8.67 }, // Tindouf Ouest (Frontière Mauritanie)
+  { lat: 28.50, lng: -8.67 }, // Tindouf Nord
+  { lat: 29.80, lng: -7.00 }, // Hammada du Draa
+  { lat: 31.62, lng: -2.22 }, // Béchar
+  { lat: 32.30, lng: -1.50 }, // Béni Ounif
+  { lat: 33.50, lng: -1.80 }, // El Aricha
+  { lat: 34.85, lng: -1.80 }, // Maghnia
+  { lat: 35.08, lng: -2.21 }, // Retour Marsa Ben M'Hidi
+];
+
+// Pôles Logistiques, Énergétiques et Portuaires Majeurs d'Algérie
+const STRATEGIC_HUBS = [
+  { name: 'ALGER (Hub Central & Siège)', lat: 36.75, lng: 3.06, type: 'PORT' },
+  { name: 'ORAN (Hub Ouest)', lat: 35.70, lng: -0.64, type: 'PORT' },
+  { name: 'ARZEW (Pôle GNL)', lat: 35.85, lng: -0.28, type: 'ENERGY' },
+  { name: 'ANNABA (Sidérologie)', lat: 36.90, lng: 7.76, type: 'PORT' },
+  { name: 'SKIKDA (Pétrochimie)', lat: 36.88, lng: 6.91, type: 'PORT' },
+  { name: 'BÉJAÏA (Terminal Portuaire)', lat: 36.75, lng: 5.08, type: 'PORT' },
+  { name: 'CONSTANTINE (Hub Est)', lat: 36.36, lng: 6.61, type: 'HUB' },
+  { name: 'SÉTIF (Hauts-Plateaux)', lat: 36.19, lng: 5.41, type: 'HUB' },
+  { name: 'GHARDAÏA (Plateforme M\'Zab)', lat: 32.49, lng: 3.67, type: 'HUB' },
+  { name: 'HASSI MESSAOUD (Pétrole)', lat: 31.68, lng: 6.07, type: 'ENERGY' },
+  { name: 'HASSI R\'MEL (Gaz Naturel)', lat: 32.93, lng: 3.27, type: 'ENERGY' },
+  { name: 'BÉCHAR (Sud-Ouest)', lat: 31.62, lng: -2.22, type: 'HUB' },
+  { name: 'TINDOUF (Gara Djebilet)', lat: 27.67, lng: -8.14, type: 'MINE' },
+  { name: 'TAMANRASSET (Hoggar Grand Sud)', lat: 22.79, lng: 5.52, type: 'HUB' },
+  { name: 'IN GUEZZAM (Frontière)', lat: 18.96, lng: 5.71, type: 'BORDER' },
+  { name: 'BISKRA (Porte du Sahara)', lat: 34.85, lng: 5.73, type: 'HUB' },
+];
+
+export function FleetMap({
+  vehicles,
+  selectedVehicle,
+  onSelectVehicle,
+  geofences,
+}: FleetMapProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+
+  // État de la vue cartographique (Centré sur l'Algérie)
+  const [centerLat, setCenterLat] = useState(35.2);
+  const [centerLng, setCenterLng] = useState(3.0);
+  const [zoom, setZoom] = useState(6.2); // Zoom idéal pour visualiser le réseau national algérien
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [followVehicle, setFollowVehicle] = useState(true);
+
+  // Calques
+  const [showTiles, setShowTiles] = useState(true); // Réactivé par défaut : OpenStreetMap en ligne
+  const [showGeofences, setShowGeofences] = useState(true);
+  const [showBreadcrumbs, setShowBreadcrumbs] = useState(true);
+  const [showCorridors, setShowCorridors] = useState(true);
+  const [showHubs, setShowHubs] = useState(true);
+  const [mapStyle, setMapStyle] = useState<'DARK' | 'OSM'>(theme === 'light' ? 'OSM' : 'DARK');
+  const [mapEngine, setMapEngine] = useState<'SOVEREIGN_LOCAL' | 'OSM_TILES' | 'PMTILES'>('OSM_TILES');
+
+  useEffect(() => {
+    setMapStyle(theme === 'light' ? 'OSM' : 'DARK');
+  }, [theme]);
+
+  // Mode OpenStreetMap actif si sélectionné et activé
+  const isOsmActive = mapEngine === 'OSM_TILES' && showTiles;
+
+  // Curseur GPS
+  const [cursorGeo, setCursorGeo] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Dimensions dynamiques
+  const [dims, setDims] = useState({ width: 900, height: 700 });
+
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const parentRect = containerRef.current.parentElement?.getBoundingClientRect();
+        const w = containerRef.current.clientWidth || Math.round(rect.width) || Math.round(parentRect?.width || 0) || 900;
+        const h = containerRef.current.clientHeight || Math.round(rect.height) || Math.round(parentRect?.height || 0) || (window.innerHeight - 100) || 700;
+        setDims({ width: w, height: h });
+      }
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
+  // Suivi verrouillé du véhicule sélectionné
+  useEffect(() => {
+    if (followVehicle && selectedVehicle) {
+      setCenterLat(selectedVehicle.gps.latitude);
+      setCenterLng(selectedVehicle.gps.longitude);
+    }
+  }, [followVehicle, selectedVehicle?.gps.latitude, selectedVehicle?.gps.longitude]);
+
+  // Conversion GPS -> Pixels écran (coordonnées entières stables pour éviter les écarts d'hydratation SSR)
+  const projectGeoToPixel = useCallback(
+    (lat: number, lng: number) => {
+      const centerTileX = lon2tile(centerLng, zoom);
+      const centerTileY = lat2tile(centerLat, zoom);
+      const pointTileX = lon2tile(lng, zoom);
+      const pointTileY = lat2tile(lat, zoom);
+
+      const x = Math.round(dims.width / 2 + (pointTileX - centerTileX) * 256);
+      const y = Math.round(dims.height / 2 + (pointTileY - centerTileY) * 256);
+      return { x, y };
+    },
+    [centerLat, centerLng, zoom, dims.width, dims.height]
+  );
+
+  // Conversion Pixels écran -> GPS
+  const unprojectPixelToGeo = useCallback(
+    (px: number, py: number) => {
+      const centerTileX = lon2tile(centerLng, zoom);
+      const centerTileY = lat2tile(centerLat, zoom);
+
+      const tileX = centerTileX + (px - dims.width / 2) / 256;
+      const tileY = centerTileY + (py - dims.height / 2) / 256;
+
+      return {
+        lat: tile2lat(tileY, zoom),
+        lng: tile2lon(tileX, zoom),
+      };
+    },
+    [centerLat, centerLng, zoom, dims.width, dims.height]
+  );
+
+  // Calcul des tuiles cartographiques visibles (Slippy Map Tiles) - uniquement si activé en mode connecté
+  const visibleTiles = useMemo(() => {
+    if (!isOsmActive) return [];
+
+    const intZoom = Math.floor(zoom);
+    const scale = Math.pow(2, zoom - intZoom);
+    const tileSize = 256 * scale;
+
+    const centerTileX = lon2tile(centerLng, intZoom);
+    const centerTileY = lat2tile(centerLat, intZoom);
+
+    const minX = Math.floor(centerTileX - dims.width / (2 * tileSize)) - 1;
+    const maxX = Math.ceil(centerTileX + dims.width / (2 * tileSize)) + 1;
+    const minY = Math.floor(centerTileY - dims.height / (2 * tileSize)) - 1;
+    const maxY = Math.ceil(centerTileY + dims.height / (2 * tileSize)) + 1;
+
+    const tiles: { x: number; y: number; z: number; left: number; top: number; size: number }[] = [];
+    const maxCoord = Math.pow(2, intZoom);
+
+    for (let x = minX; x <= maxX; x++) {
+      for (let y = minY; y <= maxY; y++) {
+        if (y < 0 || y >= maxCoord) continue;
+        const normalizedX = ((x % maxCoord) + maxCoord) % maxCoord;
+
+        const left = dims.width / 2 + (x - centerTileX) * tileSize;
+        const top = dims.height / 2 + (y - centerTileY) * tileSize;
+
+        tiles.push({
+          x: normalizedX,
+          y,
+          z: intZoom,
+          left,
+          top,
+          size: tileSize,
+        });
+      }
+    }
+    return tiles;
+  }, [centerLat, centerLng, zoom, dims.width, dims.height, isOsmActive]);
+
+  // URL des tuiles cartographiques souveraines (100% libre, zéro clé API requise, zéro filigrane)
+  const getTileUrl = (x: number, y: number, z: number) => {
+    // Rotation équilibrée des sous-domaines OpenStreetMap gratuits sans clé API
+    const subdomains = ['a', 'b', 'c'];
+    const s = subdomains[(x + y) % subdomains.length];
+    return `https://${s}.tile.openstreetmap.org/${z}/${x}/${y}.png`;
+  };
+
+  // Interactions Souris : Pan / Drag
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+      setCursorGeo(unprojectPixelToGeo(px, py));
+    }
+
+    if (!isDragging) return;
+
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    setDragStart({ x: e.clientX, y: e.clientY });
+
+    setFollowVehicle(false); // Désactive le verrouillage si l'utilisateur navigue manuellement
+
+    const centerTileX = lon2tile(centerLng, zoom) - dx / 256;
+    const centerTileY = lat2tile(centerLat, zoom) - dy / 256;
+
+    setCenterLng(tile2lon(centerTileX, zoom));
+    setCenterLat(tile2lat(centerTileY, zoom));
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const zoomDelta = e.deltaY < 0 ? 0.2 : -0.2;
+    setZoom((prev) => Math.max(4.5, Math.min(14, prev + zoomDelta)));
+  };
+
+  const recenterAlgeria = () => {
+    setFollowVehicle(false);
+    setCenterLat(35.2);
+    setCenterLng(3.0);
+    setZoom(6.2);
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      suppressHydrationWarning
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      onWheel={handleWheel}
+      style={{
+        position: 'relative',
+        flex: 1,
+        width: '100%',
+        height: '100%',
+        minHeight: '100%',
+        alignSelf: 'stretch',
+        background: isLight ? '#F1F5F9' : '#090D16',
+        overflow: 'hidden',
+        userSelect: 'none',
+        cursor: isDragging ? 'grabbing' : 'grab',
+        transition: 'background-color 0.2s ease-in-out',
+      }}
+    >
+      {mapEngine === 'PMTILES' ? (
+        <SovereignMapLibre
+          vehicles={vehicles}
+          selectedVehicle={selectedVehicle}
+          onSelectVehicle={onSelectVehicle}
+          geofences={geofences}
+          onFallbackRequested={(target) => {
+            const next = target || 'OSM_TILES';
+            setMapEngine(next);
+            setShowTiles(next === 'OSM_TILES');
+          }}
+        />
+      ) : (
+        <>
+          {/* 1. FOND DE TUILES CARTOGRAPHIQUES OPENSTREETMAP (MODE CONNECTÉ) */}
+          {isOsmActive && (
+            <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+              {visibleTiles.map((t) => (
+                <img
+                  key={`${t.z}-${t.x}-${t.y}`}
+                  src={getTileUrl(t.x, t.y, t.z)}
+                  alt=""
+                  loading="lazy"
+                  style={{
+                    position: 'absolute',
+                    left: `${t.left}px`,
+                    top: `${t.top}px`,
+                    width: `${t.size}px`,
+                    opacity: mapStyle === 'DARK' ? 0.88 : 1,
+                    filter:
+                      mapStyle === 'DARK'
+                        ? 'invert(100%) hue-rotate(180deg) brightness(85%) contrast(125%)'
+                        : 'none',
+                    pointerEvents: 'none',
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* 2. CALQUE VECTORIEL SVG : CONTOUR NATIONAL SOUVERAIN, CORRIDORS, GÉOREPÉRAGE & PÔLES */}
+          <svg
+            suppressHydrationWarning
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+            }}
+          >
+            {/* Grille technique de repère radar */}
+            <defs>
+              <pattern id="radarGrid" width="100" height="100" patternUnits="userSpaceOnUse">
+                <path
+                  d="M 100 0 L 0 0 0 100"
+                  fill="none"
+                  stroke={isLight ? 'rgba(148, 163, 184, 0.25)' : 'rgba(30, 41, 59, 0.35)'}
+                  strokeWidth="0.5"
+                />
+              </pattern>
+            </defs>
+            <rect
+              width="100%"
+              height="100%"
+              fill="url(#radarGrid)"
+              opacity={isOsmActive ? 0.12 : 1}
+            />
+
+            {/* Masse continentale souveraine de l'Algérie (100% Hors-Ligne, 0 dépendance externe) */}
+            {(() => {
+              const algeriaPath =
+                ALGERIA_TERRITORY_POLYGON.map((pt, idx) => {
+                  const { x, y } = projectGeoToPixel(pt.lat, pt.lng);
+                  return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                }).join(' ') + ' Z';
+
+              return (
+                <g id="sovereign-dz-landmass">
+                  {/* Fond terrestre contrasté (transparent si tuiles OSM actives pour ne pas masquer les rues) */}
+                  <path
+                    d={algeriaPath}
+                    fill={isOsmActive ? 'transparent' : (isLight ? '#FFFFFF' : '#080E1A')}
+                    stroke={isOsmActive ? (isLight ? '#2563EB' : '#38BDF8') : (isLight ? '#2563EB' : '#1E3A8A')}
+                    strokeWidth={isOsmActive ? '2' : (isLight ? '2' : '2.5')}
+                    strokeLinejoin="round"
+                    style={{
+                      filter: isOsmActive
+                        ? 'none'
+                        : (isLight
+                          ? 'drop-shadow(0 2px 10px rgba(37, 99, 235, 0.15))'
+                          : 'drop-shadow(0 0 20px rgba(30, 58, 138, 0.45))'),
+                    }}
+                  />
+                  {/* Ligne frontière pointillée souveraine */}
+                  <path
+                    d={algeriaPath}
+                    fill="none"
+                    stroke={isLight ? '#3B82F6' : '#38BDF8'}
+                    strokeWidth="1.2"
+                    strokeDasharray="6,4"
+                    strokeLinejoin="round"
+                    opacity={isLight ? '0.6' : '0.75'}
+                  />
+                </g>
+              );
+            })()}
+
+            {/* Pôles et Hubs Logistiques Stratégiques */}
+            {showHubs &&
+              STRATEGIC_HUBS.map((hub, idx) => {
+                const { x, y } = projectGeoToPixel(hub.lat, hub.lng);
+                if (x < -100 || x > dims.width + 100 || y < -100 || y > dims.height + 100) return null;
+
+                const isPort = hub.type === 'PORT';
+                const isEnergy = hub.type === 'ENERGY';
+                const color = isPort ? '#38BDF8' : isEnergy ? '#F59E0B' : '#10B981';
+
+                return (
+                  <g key={idx} opacity={zoom >= 5.2 ? 0.95 : 0.4}>
+                    <circle cx={x} cy={y} r="3" fill={color} />
+                    <circle cx={x} cy={y} r="8" fill="none" stroke={color} strokeWidth="0.75" opacity="0.6" />
+                    {zoom >= 6.0 && (
+                      <text
+                        x={x + 10}
+                        y={y + 3}
+                        fill={isLight ? '#334155' : '#94A3B8'}
+                        fontSize="10"
+                        fontFamily="JetBrains Mono, monospace"
+                        fontWeight="600"
+                        style={{ pointerEvents: 'none' }}
+                      >
+                        {hub.name}
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+
+        {/* Tracé des Corridors Routiers Stratégiques */}
+        {showCorridors &&
+          STRATEGIC_CORRIDORS.map((corridor, idx) => {
+            const pathData = corridor.points
+              .map((pt, pIdx) => {
+                const { x, y } = projectGeoToPixel(pt.lat, pt.lng);
+                return `${pIdx === 0 ? 'M' : 'L'} ${x} ${y}`;
+              })
+              .join(' ');
+
+            return (
+              <g key={idx}>
+                {/* Lueur extérieure du corridor */}
+                <path
+                  d={pathData}
+                  fill="none"
+                  stroke={isLight ? 'rgba(37, 99, 235, 0.25)' : 'rgba(37, 99, 235, 0.4)'}
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Axe central pointillé */}
+                <path
+                  d={pathData}
+                  fill="none"
+                  stroke={isLight ? '#2563EB' : '#38BDF8'}
+                  strokeWidth="1.5"
+                  strokeDasharray="4,4"
+                  strokeLinecap="round"
+                />
+              </g>
+            );
+          })}
+
+        {/* Zones de Géorepérage (Geofences Souveraines) */}
+        {showGeofences &&
+          geofences.map((geo) => {
+            const { x, y } = projectGeoToPixel(geo.centerLat, geo.centerLng);
+            // Rayon calculé en pixels selon l'échelle mercator courante
+            const edgePoint = projectGeoToPixel(
+              geo.centerLat,
+              geo.centerLng + (geo.radiusKm / (111.32 * Math.cos((geo.centerLat * Math.PI) / 180)))
+            );
+            const radiusPx = Math.max(12, Math.abs(edgePoint.x - x));
+
+            return (
+              <g key={geo.id}>
+                <circle cx={x} cy={y} r={radiusPx} fill={geo.colorHex} fillOpacity="0.12" />
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={radiusPx}
+                  fill="none"
+                  stroke={geo.colorHex}
+                  strokeWidth="1.5"
+                  strokeDasharray="4,3"
+                />
+                <text
+                  x={x}
+                  y={y - radiusPx - 6}
+                  textAnchor="middle"
+                  fill={geo.colorHex}
+                  fontSize="11"
+                  fontFamily="JetBrains Mono, monospace"
+                  fontWeight="bold"
+                >
+                  {geo.name}
+                </text>
+              </g>
+            );
+          })}
+
+        {/* Trace Historique 15 min (Breadcrumbs) du Véhicule Sélectionné */}
+        {showBreadcrumbs && selectedVehicle && selectedVehicle.breadcrumbs.length > 1 && (
+          <g>
+            {selectedVehicle.breadcrumbs.map((pt, index) => {
+              if (index === 0) return null;
+              const prev = selectedVehicle.breadcrumbs[index - 1];
+              const p1 = projectGeoToPixel(prev.latitude, prev.longitude);
+              const p2 = projectGeoToPixel(pt.latitude, pt.longitude);
+              const opacity = 0.3 + (index / selectedVehicle.breadcrumbs.length) * 0.7;
+
+              return (
+                <line
+                  key={index}
+                  x1={p1.x}
+                  y1={p1.y}
+                  x2={p2.x}
+                  y2={p2.y}
+                  stroke="#10B981"
+                  strokeWidth="3"
+                  strokeOpacity={opacity}
+                  strokeLinecap="round"
+                />
+              );
+            })}
+          </g>
+        )}
+      </svg>
+
+      {/* 3. MARQUEURS VÉHICULES INTERACTIFS (HAUTE PRÉCISION) */}
+      <div suppressHydrationWarning style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        {vehicles.map((v) => {
+          const { x, y } = projectGeoToPixel(v.gps.latitude, v.gps.longitude);
+
+          // Si le véhicule est hors du viewport, ne pas rendre le composant lourd
+          if (x < -100 || x > dims.width + 100 || y < -100 || y > dims.height + 100) {
+            return null;
+          }
+
+          const isSelected = v.id === selectedVehicle?.id;
+
+          let colorHex = '#64748B'; // slate
+          if (v.status === 'MOTION') colorHex = '#10B981'; // emerald
+          if (v.status === 'IDLE_WARNING') colorHex = '#F59E0B'; // amber
+          if (v.status === 'DTC_CRITICAL') colorHex = '#EF4444'; // rose
+
+          return (
+            <div
+              key={v.id}
+              suppressHydrationWarning
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectVehicle(v.id);
+                setFollowVehicle(true);
+              }}
+              style={{
+                position: 'absolute',
+                left: `${x}px`,
+                top: `${y}px`,
+                transform: 'translate(-50%, -50%)',
+                pointerEvents: 'auto',
+                cursor: 'pointer',
+                zIndex: isSelected ? 30 : 15,
+                transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
+            >
+              {/* Halo d'impulsion si sélectionné ou critique */}
+              {isSelected && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: '-8px',
+                    borderRadius: '50%',
+                    backgroundColor: colorHex,
+                    opacity: 0.35,
+                    animation: 'dfPulse 1.8s infinite',
+                    pointerEvents: 'none',
+                  }}
+                />
+              )}
+
+              {/* Disque Central & Flèche de Cap rotative avec Différenciation Mode 0 / Mode 1 / Mode 2 */}
+              <div
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: isLight ? '#FFFFFF' : '#090D16',
+                  border: isSelected
+                    ? `2px solid ${isLight ? '#2563EB' : '#FFFFFF'}`
+                    : v.telemetryMode === 'MODE_0_ZERO_HARDWARE'
+                    ? '2px dashed #8B5CF6'
+                    : v.telemetryMode === 'MODE_1_GPS_ONLY'
+                    ? '2px solid #38BDF8'
+                    : `2px solid ${colorHex}`,
+                  boxShadow: isLight
+                    ? `0 2px 8px rgba(0, 0, 0, 0.15), 0 0 10px ${colorHex}44`
+                    : `0 2px 10px rgba(0, 0, 0, 0.6), 0 0 12px ${colorHex}55`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+                  transition: 'all 0.15s ease-out',
+                }}
+              >
+                <div
+                  style={{
+                    transform: `rotate(${v.gps.headingDegrees}deg)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'transform 0.2s ease-out',
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill={colorHex} stroke={isLight ? '#FFFFFF' : '#000'} strokeWidth="1.5">
+                    <polygon points="12 2 19 21 12 17 5 21 12 2" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Étiquette Haute Densité Accrochée au Véhicule */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '38px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  whiteSpace: 'nowrap',
+                  background: isLight
+                    ? '#FFFFFF'
+                    : isSelected
+                    ? '#111827'
+                    : 'rgba(9, 13, 22, 0.92)',
+                  border: `1px solid ${
+                    isSelected
+                      ? '#2563EB'
+                      : isLight
+                      ? '#CBD5E1'
+                      : '#334155'
+                  }`,
+                  borderRadius: '4px',
+                  padding: '3px 7px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontSize: '11px',
+                  boxShadow: isLight
+                    ? '0 2px 8px rgba(0, 0, 0, 0.1)'
+                    : '0 2px 8px rgba(0, 0, 0, 0.5)',
+                  backdropFilter: 'blur(8px)',
+                  color: isLight ? '#0F172A' : '#F8FAFC',
+                }}
+              >
+                {/* Badge Mode Matériel (Mode 0, Mode 1, Mode 2) */}
+                {v.telemetryMode === 'MODE_0_ZERO_HARDWARE' ? (
+                  <span
+                    style={{
+                      background: 'rgba(139, 92, 246, 0.18)',
+                      color: '#A78BFA',
+                      border: '1px solid rgba(139, 92, 246, 0.5)',
+                      fontSize: '9px',
+                      padding: '1px 4px',
+                      borderRadius: '2px',
+                      fontWeight: 700,
+                    }}
+                    title="Mode 0 : Cinématique Valhalla & Pleins Naftal (Zéro Boîtier)"
+                  >
+                    M0 Valhalla
+                  </span>
+                ) : v.telemetryMode === 'MODE_1_GPS_ONLY' ? (
+                  <span
+                    style={{
+                      background: 'rgba(56, 189, 248, 0.18)',
+                      color: '#38BDF8',
+                      border: '1px solid rgba(56, 189, 248, 0.5)',
+                      fontSize: '9px',
+                      padding: '1px 4px',
+                      borderRadius: '2px',
+                      fontWeight: 700,
+                    }}
+                    title="Mode 1 : GPS Standard Traccar / Teltonika"
+                  >
+                    M1 GPS
+                  </span>
+                ) : (
+                  <span
+                    style={{
+                      background: 'rgba(16, 185, 129, 0.18)',
+                      color: '#10B981',
+                      border: '1px solid rgba(16, 185, 129, 0.5)',
+                      fontSize: '9px',
+                      padding: '1px 4px',
+                      borderRadius: '2px',
+                      fontWeight: 700,
+                    }}
+                    title="Mode 2 : Télémétrie Moteur Bus CAN J1939 Complète"
+                  >
+                    M2 CAN
+                  </span>
+                )}
+                <span style={{ fontWeight: 700 }}>{v.registrationNumber}</span>
+                <span style={{ color: isLight ? '#CBD5E1' : '#64748B' }}>|</span>
+                <span style={{ color: colorHex, fontWeight: 700 }}>
+                  {Math.round(v.gps.speedKmh)} km/h
+                </span>
+                {v.can.fuelDropAnomalyDetected && (
+                  <span
+                    style={{
+                      background: '#991B1B',
+                      color: '#FECDD3',
+                      fontSize: '9px',
+                      padding: '1px 4px',
+                      borderRadius: '2px',
+                      fontWeight: 800,
+                    }}
+                  >
+                    VOL
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+        </>
+      )}
+
+      {/* Badge statut de souveraineté cartographique (Haut-Gauche) */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '12px',
+          left: '12px',
+          zIndex: 40,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(9, 13, 22, 0.94)',
+          backdropFilter: 'blur(10px)',
+          border: `1px solid ${
+            mapEngine === 'SOVEREIGN_LOCAL'
+              ? '#10B981'
+              : isLight
+              ? '#CBD5E1'
+              : '#334155'
+          }`,
+          borderRadius: '4px',
+          padding: '6px 12px',
+          fontFamily: 'JetBrains Mono, monospace',
+          fontSize: '11px',
+          boxShadow: isLight
+            ? '0 2px 8px rgba(0, 0, 0, 0.08)'
+            : '0 4px 12px rgba(0, 0, 0, 0.5)',
+        }}
+      >
+        <span
+          style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            backgroundColor:
+              mapEngine === 'SOVEREIGN_LOCAL'
+                ? '#10B981'
+                : mapEngine === 'OSM_TILES'
+                ? '#38BDF8'
+                : '#A78BFA',
+            boxShadow: `0 0 8px ${
+              mapEngine === 'SOVEREIGN_LOCAL'
+                ? '#10B981'
+                : mapEngine === 'OSM_TILES'
+                ? '#38BDF8'
+                : '#A78BFA'
+            }`,
+          }}
+        />
+        <span style={{ fontWeight: 700, color: isLight ? '#0F172A' : '#F8FAFC' }}>
+          {mapEngine === 'SOVEREIGN_LOCAL'
+            ? '100% SOUVERAIN (HORS-LIGNE)'
+            : mapEngine === 'OSM_TILES'
+            ? 'OPENSTREETMAP (CONNECTÉ)'
+            : 'MAPLIBRE PMTILES DÉCONNECTÉ'}
+        </span>
+        <span style={{ color: isLight ? '#94A3B8' : '#475569' }}>•</span>
+        <span style={{ color: mapEngine === 'SOVEREIGN_LOCAL' ? (isLight ? '#065F46' : '#A7F3D0') : (isLight ? '#475569' : '#94A3B8'), fontSize: '10px' }}>
+          {mapEngine === 'SOVEREIGN_LOCAL'
+            ? '0 Requête • 0 Clé API • Loi 18-07'
+            : mapEngine === 'OSM_TILES'
+            ? 'Tuiles OpenStreetMap Libres'
+            : 'Byte-Range 206 Local'}
+        </span>
+
+        {/* Bouton de bascule rapide 1-clic */}
+        <button
+          onClick={() => {
+            if (mapEngine === 'OSM_TILES') {
+              setMapEngine('SOVEREIGN_LOCAL');
+              setShowTiles(false);
+            } else {
+              setMapEngine('OSM_TILES');
+              setShowTiles(true);
+            }
+          }}
+          style={{
+            marginLeft: '6px',
+            padding: '2px 8px',
+            borderRadius: '3px',
+            fontSize: '10px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            border: `1px solid ${isLight ? '#CBD5E1' : '#475569'}`,
+            background: isLight ? '#F1F5F9' : '#1E293B',
+            color: isLight ? '#2563EB' : '#38BDF8',
+          }}
+          title="Basculer instantanément entre OpenStreetMap et le mode 100% Souverain Local"
+        >
+          {mapEngine === 'OSM_TILES' ? '⇄ Passer en Souverain Local' : '⇄ Activer OpenStreetMap'}
+        </button>
+      </div>
+
+      {/* 4. CONTRÔLES FLOTTANTS DE NAVIGATION (HAUT-DROIT) */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px',
+          zIndex: 40,
+        }}
+      >
+        <button
+          onClick={() => setZoom((z) => Math.min(14, z + 0.5))}
+          title="Zoomer (+)"
+          style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '4px',
+            background: isLight ? '#FFFFFF' : '#111827',
+            border: `1px solid ${isLight ? '#CBD5E1' : '#334155'}`,
+            color: isLight ? '#0F172A' : '#F8FAFC',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '18px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: isLight
+              ? '0 2px 8px rgba(0, 0, 0, 0.08)'
+              : '0 2px 8px rgba(0, 0, 0, 0.4)',
+          }}
+        >
+          +
+        </button>
+
+        <button
+          onClick={() => setZoom((z) => Math.max(4.5, z - 0.5))}
+          title="Dézoomer (-)"
+          style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '4px',
+            background: isLight ? '#FFFFFF' : '#111827',
+            border: `1px solid ${isLight ? '#CBD5E1' : '#334155'}`,
+            color: isLight ? '#0F172A' : '#F8FAFC',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '18px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: isLight
+              ? '0 2px 8px rgba(0, 0, 0, 0.08)'
+              : '0 2px 8px rgba(0, 0, 0, 0.4)',
+          }}
+        >
+          -
+        </button>
+
+        <button
+          onClick={() => setFollowVehicle(!followVehicle)}
+          title={followVehicle ? 'Suivi caméra verrouillé sur véhicule' : 'Activer le mode suivi'}
+          style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '4px',
+            background: followVehicle && selectedVehicle
+              ? (isLight ? '#DBEAFE' : '#1E3A8A')
+              : (isLight ? '#FFFFFF' : '#111827'),
+            border: `1px solid ${
+              followVehicle && selectedVehicle
+                ? '#3B82F6'
+                : isLight
+                ? '#CBD5E1'
+                : '#334155'
+            }`,
+            color: followVehicle && selectedVehicle
+              ? (isLight ? '#1D4ED8' : '#93C5FD')
+              : (isLight ? '#64748B' : '#94A3B8'),
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: isLight
+              ? '0 2px 8px rgba(0, 0, 0, 0.08)'
+              : '0 2px 8px rgba(0, 0, 0, 0.4)',
+          }}
+        >
+          <IconCrosshair size={16} strokeWidth={2} />
+        </button>
+
+        <button
+          onClick={recenterAlgeria}
+          title="Recentrer sur la carte de l'Algérie"
+          style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '4px',
+            background: isLight ? '#FFFFFF' : '#111827',
+            border: `1px solid ${isLight ? '#CBD5E1' : '#334155'}`,
+            color: isLight ? '#2563EB' : '#38BDF8',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '11px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: isLight
+              ? '0 2px 8px rgba(0, 0, 0, 0.08)'
+              : '0 2px 8px rgba(0, 0, 0, 0.4)',
+          }}
+        >
+          DZ
+        </button>
+      </div>
+
+      {/* 5 & 6. CONTENEUR FLOTTANT BAS UNIFIÉ (CALQUES + TÉLÉMÉTRIE SANS AUCUNE SUPERPOSITION) */}
+      <div
+        suppressHydrationWarning
+        style={{
+          position: 'absolute',
+          bottom: '8px',
+          left: '12px',
+          right: '12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px',
+          zIndex: 40,
+          pointerEvents: 'none',
+        }}
+      >
+        {/* LIGNE 1 : BARRE FLOTTANTE DE GESTION DES CALQUES */}
+        <div
+          style={{
+            alignSelf: 'flex-start',
+            maxWidth: '100%',
+            background: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(17, 24, 39, 0.94)',
+            backdropFilter: 'blur(12px)',
+            border: `1px solid ${isLight ? '#CBD5E1' : '#334155'}`,
+            borderRadius: '4px',
+            padding: '4px 8px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            overflowX: 'auto',
+            whiteSpace: 'nowrap',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '11px',
+            color: isLight ? '#334155' : '#CBD5E1',
+            boxShadow: isLight
+              ? '0 2px 8px rgba(0, 0, 0, 0.08)'
+              : '0 4px 12px rgba(0, 0, 0, 0.5)',
+            scrollbarWidth: 'none',
+            pointerEvents: 'auto',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isLight ? '#64748B' : '#64748B', borderRight: `1px solid ${isLight ? '#CBD5E1' : '#334155'}`, paddingRight: '8px', flexShrink: 0 }}>
+            <IconLayers size={13} />
+            <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Calques</span>
+          </div>
+
+          {/* Sélecteur Moteur Cartographique Souverain */}
+          <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+            <button
+              onClick={() => {
+                setMapEngine('OSM_TILES');
+                setShowTiles(true);
+              }}
+              style={{
+                padding: '3px 8px',
+                borderRadius: '3px',
+                border: `1px solid ${mapEngine === 'OSM_TILES' ? '#38BDF8' : isLight ? '#CBD5E1' : '#334155'}`,
+                background: mapEngine === 'OSM_TILES'
+                  ? (isLight ? '#E0F2FE' : '#0C4A6E')
+                  : (isLight ? '#F1F5F9' : '#111827'),
+                color: mapEngine === 'OSM_TILES'
+                  ? (isLight ? '#0369A1' : '#BAE6FD')
+                  : (isLight ? '#475569' : '#94A3B8'),
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                flexShrink: 0,
+              }}
+              title="Afficher les tuiles des rues OpenStreetMap (100% libre, aucune clé requise)"
+            >
+              <span
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: mapEngine === 'OSM_TILES' ? '#38BDF8' : '#64748B',
+                }}
+              />
+              <span>OpenStreetMap (OSM)</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setMapEngine('SOVEREIGN_LOCAL');
+                setShowTiles(false);
+              }}
+              style={{
+                padding: '3px 8px',
+                borderRadius: '3px',
+                border: `1px solid ${mapEngine === 'SOVEREIGN_LOCAL' ? '#10B981' : isLight ? '#CBD5E1' : '#334155'}`,
+                background: mapEngine === 'SOVEREIGN_LOCAL'
+                  ? (isLight ? '#ECFDF5' : '#064E3B')
+                  : (isLight ? '#F1F5F9' : '#111827'),
+                color: mapEngine === 'SOVEREIGN_LOCAL'
+                  ? (isLight ? '#065F46' : '#A7F3D0')
+                  : (isLight ? '#475569' : '#94A3B8'),
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                flexShrink: 0,
+              }}
+              title="Moteur Vectoriel Déconnecté 100% Hors-Ligne (Zéro requête externe, conforme Loi 18-07)"
+            >
+              <span
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: mapEngine === 'SOVEREIGN_LOCAL' ? '#10B981' : '#64748B',
+                }}
+              />
+              <span>100% Souverain Local</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setMapEngine('PMTILES');
+                setShowTiles(false);
+              }}
+              style={{
+                padding: '3px 8px',
+                borderRadius: '3px',
+                border: `1px solid ${mapEngine === 'PMTILES' ? '#8B5CF6' : isLight ? '#CBD5E1' : '#334155'}`,
+                background: mapEngine === 'PMTILES'
+                  ? (isLight ? '#EDE9FE' : '#4C1D95')
+                  : (isLight ? '#F1F5F9' : '#111827'),
+                color: mapEngine === 'PMTILES'
+                  ? (isLight ? '#6D28D9' : '#DDD6FE')
+                  : (isLight ? '#475569' : '#94A3B8'),
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontSize: '10px',
+                flexShrink: 0,
+              }}
+              title="Moteur MapLibre PMTiles Local (/maps/algeria.pmtiles)"
+            >
+              PMTiles Local
+            </button>
+          </div>
+
+          {/* Style de carte OSM (si activé) */}
+          {mapEngine === 'OSM_TILES' && (
+            <button
+              onClick={() => setMapStyle(mapStyle === 'DARK' ? 'OSM' : 'DARK')}
+              style={{
+                padding: '3px 8px',
+                borderRadius: '3px',
+                border: `1px solid ${isLight ? '#CBD5E1' : '#475569'}`,
+                background: isLight ? '#F1F5F9' : '#1E293B',
+                color: isLight ? '#0F172A' : '#F8FAFC',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontSize: '10px',
+                flexShrink: 0,
+              }}
+              title="Basculer entre Cockpit Nuit et Rues Jour"
+            >
+              {mapStyle === 'DARK' ? '🌙 Nuit OSM' : '☀️ Jour OSM'}
+            </button>
+          )}
+
+          {/* Toggle Pôles & Hubs Stratégiques */}
+          <button
+            onClick={() => setShowHubs(!showHubs)}
+            style={{
+              padding: '3px 8px',
+              borderRadius: '3px',
+              border: `1px solid ${showHubs ? '#F59E0B' : isLight ? '#CBD5E1' : '#334155'}`,
+              background: showHubs
+                ? (isLight ? '#FEF3C7' : '#78350F')
+                : (isLight ? '#F1F5F9' : 'transparent'),
+              color: showHubs
+                ? (isLight ? '#B45309' : '#FDE68A')
+                : (isLight ? '#475569' : '#64748B'),
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontSize: '10px',
+              flexShrink: 0,
+            }}
+            title="Afficher/Masquer les pôles logistiques, énergétiques et portuaires"
+          >
+            Hubs DZ ({STRATEGIC_HUBS.length})
+          </button>
+
+          {/* Toggle Géorepérage */}
+          <button
+            onClick={() => setShowGeofences(!showGeofences)}
+            style={{
+              padding: '3px 8px',
+              borderRadius: '3px',
+              border: `1px solid ${showGeofences ? '#2563EB' : isLight ? '#CBD5E1' : '#334155'}`,
+              background: showGeofences
+                ? (isLight ? '#EFF6FF' : '#1E3A8A')
+                : (isLight ? '#F1F5F9' : 'transparent'),
+              color: showGeofences
+                ? (isLight ? '#1D4ED8' : '#BFDBFE')
+                : (isLight ? '#475569' : '#64748B'),
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontSize: '10px',
+              flexShrink: 0,
+            }}
+          >
+            Géorepérage ({geofences.length})
+          </button>
+
+          {/* Toggle Tracé 15m */}
+          <button
+            onClick={() => setShowBreadcrumbs(!showBreadcrumbs)}
+            style={{
+              padding: '3px 8px',
+              borderRadius: '3px',
+              border: `1px solid ${showBreadcrumbs ? '#059669' : isLight ? '#CBD5E1' : '#334155'}`,
+              background: showBreadcrumbs
+                ? (isLight ? '#ECFDF5' : '#064E3B')
+                : (isLight ? '#F1F5F9' : 'transparent'),
+              color: showBreadcrumbs
+                ? (isLight ? '#065F46' : '#A7F3D0')
+                : (isLight ? '#475569' : '#64748B'),
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontSize: '10px',
+              flexShrink: 0,
+            }}
+          >
+            Trace 15m
+          </button>
+
+          {/* Toggle Corridors */}
+          <button
+            onClick={() => setShowCorridors(!showCorridors)}
+            style={{
+              padding: '3px 8px',
+              borderRadius: '3px',
+              border: `1px solid ${showCorridors ? '#0284C7' : isLight ? '#CBD5E1' : '#334155'}`,
+              background: showCorridors
+                ? (isLight ? '#E0F2FE' : '#0C4A6E')
+                : (isLight ? '#F1F5F9' : 'transparent'),
+              color: showCorridors
+                ? (isLight ? '#0369A1' : '#BAE6FD')
+                : (isLight ? '#475569' : '#64748B'),
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontSize: '10px',
+              flexShrink: 0,
+            }}
+          >
+            Corridors RN/A1
+          </button>
+        </div>
+
+        {/* LIGNE 2 : BARRE BASSE COMPLÈTE DE TÉLÉMÉTRIE & DONNÉES GÉOSPATIALES */}
+        <div
+          style={{
+            width: '100%',
+            height: '28px',
+            background: isLight ? 'rgba(255, 255, 255, 0.92)' : 'rgba(15, 23, 42, 0.92)',
+            backdropFilter: 'blur(12px)',
+            border: `1px solid ${isLight ? '#CBD5E1' : '#334155'}`,
+            borderRadius: '4px',
+            padding: '0 10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '10px',
+            color: isLight ? '#64748B' : '#94A3B8',
+            boxShadow: isLight
+              ? '0 2px 8px rgba(0, 0, 0, 0.08)'
+              : '0 4px 12px rgba(0, 0, 0, 0.5)',
+            overflow: 'hidden',
+            pointerEvents: 'auto',
+            boxSizing: 'border-box',
+          }}
+        >
+          {/* Données de Zoom & Coordonnées GPS Curseur */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, overflow: 'hidden' }}>
+            <span style={{ flexShrink: 0 }}>
+              Zoom: <strong style={{ color: isLight ? '#0F172A' : '#F8FAFC' }}>{zoom.toFixed(1)}x</strong>
+            </span>
+            <span style={{ color: isLight ? '#CBD5E1' : '#475569', flexShrink: 0 }}>•</span>
+            {cursorGeo ? (
+              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                GPS: <strong style={{ color: isLight ? '#0F172A' : '#F8FAFC' }}>{cursorGeo.lat.toFixed(4)}°N, {cursorGeo.lng.toFixed(4)}°E</strong>
+              </span>
+            ) : (
+              <span style={{ color: isLight ? '#94A3B8' : '#64748B', whiteSpace: 'nowrap' }}>
+                Survolez la carte pour les coordonnées
+              </span>
+            )}
+          </div>
+
+          {/* Attribution Cartographique & Souveraineté */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            {isOsmActive && (
+              <>
+                <span style={{ fontSize: '9px', color: isLight ? '#64748B' : '#94A3B8', whiteSpace: 'nowrap' }}>
+                  © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', color: 'inherit' }}>OpenStreetMap</a>
+                </span>
+                <span style={{ color: isLight ? '#CBD5E1' : '#475569' }}>•</span>
+              </>
+            )}
+            <span style={{ color: '#10B981', fontWeight: 700, fontSize: '9px', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+              SOUVERAINETÉ GNSS • DZ
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

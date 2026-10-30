@@ -1,0 +1,1389 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Navbar } from '../../components/navigation/Navbar';
+import { AuthClient } from '../../lib/api-auth';
+import { FuelScannerClient } from '../../lib/api-fuel-scanner';
+import { AssetClient } from '../../lib/api-assets';
+import { FuelReceiptScanResult, Asset, AssetCategory, AssetStatus, DataOrigin, MeterType } from '@docteurflotte/contracts';
+import { useDemoMode } from '../../context/DemoModeContext';
+import {
+  CalculationProofModal,
+  CalculationProofButton,
+  CalculationProofData,
+} from '../../components/decisions';
+import { Button } from '../../components/Button';
+import { Badge } from '../../components/Badge';
+import {
+  IconSearch,
+  IconPlus,
+  IconEdit,
+  IconTrash,
+  IconX,
+  IconCheck,
+  IconAlertTriangle,
+  IconTruck,
+} from '../../components/navigation/TechIcons';
+
+const DEMO_FUEL_ASSETS: Asset[] = [
+  {
+    id: 'unit-001',
+    tenantId: 'tenant-demo',
+    name: 'Renault Trucks K 480 6x4 Heavy Tipper',
+    code: '00421-116-16',
+    category: AssetCategory.HEAVY_TRUCK,
+    brand: 'Renault Trucks',
+    model: 'K 480 6x4',
+    status: AssetStatus.OPERATIONAL,
+    dataOrigin: DataOrigin.DEMO,
+    primaryMeterType: MeterType.ODOMETER_KM,
+    currentMeterValue: 284150,
+    createdAt: '2026-01-15T08:00:00Z',
+    updatedAt: '2026-10-28T14:30:00Z',
+  },
+  {
+    id: 'unit-002',
+    tenantId: 'tenant-demo',
+    name: 'Mercedes-Benz Actros 3340 6x4',
+    code: '00812-109-09',
+    category: AssetCategory.HEAVY_TRUCK,
+    brand: 'Mercedes-Benz',
+    model: 'Actros 3340',
+    status: AssetStatus.MAINTENANCE_REQUIRED,
+    dataOrigin: DataOrigin.DEMO,
+    primaryMeterType: MeterType.ODOMETER_KM,
+    currentMeterValue: 342900,
+    createdAt: '2026-02-10T09:00:00Z',
+    updatedAt: '2026-10-28T14:30:00Z',
+  },
+  {
+    id: 'unit-004',
+    tenantId: 'tenant-demo',
+    name: 'Toyota Hilux 2.4 D-4D 4x4 Double Cabine',
+    code: '00543-118-16',
+    category: AssetCategory.ROAD_VEHICLE,
+    brand: 'Toyota',
+    model: 'Hilux 2.4 D-4D',
+    status: AssetStatus.OPERATIONAL,
+    dataOrigin: DataOrigin.DEMO,
+    primaryMeterType: MeterType.ODOMETER_KM,
+    currentMeterValue: 68400,
+    createdAt: '2026-04-12T11:00:00Z',
+    updatedAt: '2026-10-28T14:30:00Z',
+  },
+];
+
+const DEMO_RECEIPTS: FuelReceiptScanResult[] = [
+  {
+    receiptId: 'REC-DEMO-001',
+    assetId: 'unit-001',
+    assetName: 'Renault Trucks K 480 6x4 Heavy Tipper',
+    assetCode: '00421-116-16',
+    stationName: 'Station Naftal Chéraga (RN41)',
+    stationWilaya: '16 - Alger',
+    fuelType: 'Gasoil',
+    liters: 140.0,
+    unitPriceDzd: 29.01,
+    totalAmountDzd: 4061.4,
+    dateTime: '28/10/2026 11:45',
+    receiptConfidence: 99,
+    status: 'APPROVED',
+    createdAt: '2026-10-28T11:50:00Z',
+    reconciliation: {
+      reconciliationStatus: 'VERIFIED',
+      distanceToStationMeters: 28,
+      isLocationVerified: true,
+      tankLevelBeforeLiters: 60.0,
+      tankLevelAfterLiters: 198.5,
+      telematicsLevelDeltaLiters: 138.5,
+      varianceLiters: 1.5,
+      confidenceScore: 99,
+      fraudRiskProbability: 0.01,
+      explanation: 'Plein certifié conforme. Présence vérifiée en station Naftal et hausse jauge équivalente au ticket.',
+    },
+  },
+  {
+    receiptId: 'REC-DEMO-002',
+    assetId: 'unit-002',
+    assetName: 'Mercedes-Benz Actros 3340 6x4',
+    assetCode: '00812-109-09',
+    stationName: 'Station Naftal Rouiba (ZI SNVI)',
+    stationWilaya: '16 - Alger',
+    fuelType: 'Gasoil',
+    liters: 220.0,
+    unitPriceDzd: 29.01,
+    totalAmountDzd: 6382.2,
+    dateTime: '27/10/2026 16:30',
+    receiptConfidence: 98,
+    status: 'APPROVED',
+    createdAt: '2026-10-27T16:35:00Z',
+    reconciliation: {
+      reconciliationStatus: 'VERIFIED',
+      distanceToStationMeters: 45,
+      isLocationVerified: true,
+      tankLevelBeforeLiters: 40.0,
+      tankLevelAfterLiters: 257.0,
+      telematicsLevelDeltaLiters: 217.0,
+      varianceLiters: 3.0,
+      confidenceScore: 98,
+      fraudRiskProbability: 0.02,
+      explanation: 'Plein vérifié avec succès.',
+    },
+  },
+  {
+    receiptId: 'REC-DEMO-003',
+    assetId: 'unit-001',
+    assetName: 'Renault Trucks K 480 6x4 Heavy Tipper',
+    assetCode: '00421-116-16',
+    stationName: 'Station Naftal Relais RN1 Ghardaïa',
+    stationWilaya: '47 - Ghardaïa',
+    fuelType: 'Gasoil',
+    liters: 250.0,
+    unitPriceDzd: 29.01,
+    totalAmountDzd: 7252.5,
+    dateTime: '28/10/2026 08:15',
+    receiptConfidence: 96,
+    status: 'PENDING_APPROVAL',
+    createdAt: '2026-10-28T08:20:00Z',
+    reconciliation: {
+      reconciliationStatus: 'POTENTIAL_FRAUD',
+      distanceToStationMeters: 62,
+      isLocationVerified: true,
+      tankLevelBeforeLiters: 50.0,
+      tankLevelAfterLiters: 215.0,
+      telematicsLevelDeltaLiters: 165.0,
+      varianceLiters: 85.0,
+      confidenceScore: 45,
+      fraudRiskProbability: 0.88,
+      explanation: 'Écart de 85.0 L entre le ticket Naftal et la jauge CAN Traccar (Seuil tolérance 5.0 L dépassé - CUSUM)',
+    },
+  },
+];
+
+export default function FuelScannerPage() {
+  const { isDemoMode, isGuest } = useDemoMode();
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [selectedAssetId, setSelectedAssetId] = useState<string>('');
+  const [rawText, setRawText] = useState<string>('');
+  const [litersOverride, setLitersOverride] = useState<number>(45);
+  const [stationOverride, setStationOverride] = useState<string>('Station Naftal Chéraga (RN41)');
+  const [fuelTypeOverride, setFuelTypeOverride] = useState<string>('Gasoil');
+
+  const [isScanning, setIsScanning] = useState(false);
+  const [currentResult, setCurrentResult] = useState<FuelReceiptScanResult | null>(null);
+  const [recentReceipts, setRecentReceipts] = useState<FuelReceiptScanResult[]>([]);
+  const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const [notification, setNotification] = useState<string | null>(null);
+
+  // Modale de Création Manuelle de Plein
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+  const [manualForm, setManualForm] = useState<{
+    assetId: string;
+    stationName: string;
+    fuelType: 'Gasoil' | 'Super' | 'Sans Plomb' | 'GPL';
+    liters: number;
+    totalAmountDzd: number;
+  }>({
+    assetId: '',
+    stationName: 'Station Naftal Rouiba (ZI)',
+    fuelType: 'Gasoil',
+    liters: 60,
+    totalAmountDzd: 1740.6,
+  });
+
+  // Modale d'Édition de Reçu
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingReceipt, setEditingReceipt] = useState<FuelReceiptScanResult | null>(null);
+  const [editForm, setEditForm] = useState({
+    stationName: '',
+    liters: 0,
+    totalAmountDzd: 0,
+  });
+
+  // Modale de Suppression de Reçu
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; label: string } | null>(null);
+
+  // État de la modal Preuve de Calcul
+  const [proofModalData, setProofModalData] = useState<CalculationProofData | null>(null);
+  const [isProofModalOpen, setIsProofModalOpen] = useState(false);
+
+  const showNotification = (msg: string) => {
+    setNotification(msg);
+    setTimeout(() => setNotification(null), 4500);
+  };
+
+  const handleOpenFuelProof = (item: FuelReceiptScanResult) => {
+    const deltaV = item.reconciliation.telematicsLevelDeltaLiters;
+    const ticketV = item.liters;
+    const variance = item.reconciliation.varianceLiters;
+    const isOk = item.reconciliation.reconciliationStatus === 'VERIFIED';
+
+    setProofModalData({
+      title: 'Preuve de Réconciliation Télématique Naftal & Détection CUSUM',
+      decisionOrMetricName: `Plein Carburant — ${item.stationName}`,
+      category: 'TELEMATICS' as any,
+      ruleId: 'ALGO-CUSUM-FUEL-04',
+      legalOrOemReference: 'MASTER_SPEC v2.0 §4.5 (Réconciliation Déterministe ΔV & CUSUM Anti-Fraude)',
+      deterministicFormula: 'Écart_ΔV = |Volume_Ticket - (Niveau_Après - Niveau_Avant)| ≤ 5.0 Litres',
+      formulaExplanation:
+        'Le volume déclaré sur le reçu est confronté à la hausse physique observée dans le réservoir par la jauge CAN/Traccar, combinée à la vérification géodésique de présence à la station-service Naftal.',
+      variables: [
+        { name: 'Volume Reçu Naftal', symbol: 'V_ticket', value: `${ticketV} L`, source: 'OCR Reçu Naftal' },
+        { name: 'Niveau Réservoir Avant Plein', symbol: 'V_avant', value: `${item.reconciliation.tankLevelBeforeLiters} L`, source: 'Jauge Télématique Traccar' },
+        { name: 'Niveau Réservoir Après Plein', symbol: 'V_après', value: `${item.reconciliation.tankLevelAfterLiters} L`, source: 'Jauge Télématique Traccar' },
+        { name: 'Hausse Constatée Jauge', symbol: 'ΔV_réel', value: `+${deltaV.toFixed(1)} L`, source: 'V_après - V_avant' },
+        { name: 'Distance GPS Véhicule / Station', symbol: 'Dist_GPS', value: `${item.reconciliation.distanceToStationMeters} m`, source: 'Haversine Traccar vs Station Naftal' },
+        { name: 'Seuil de Tolérance Volumique', symbol: 'Tolérance', value: '5.0 L', source: 'Pack Algérie / Incertitude Flotteur' },
+      ],
+      steps: [
+        {
+          stepNumber: 1,
+          description: 'Calcul de la Hausse Réelle dans le Réservoir (ΔV)',
+          formula: 'ΔV_réel = V_après - V_avant',
+          calculation: `${item.reconciliation.tankLevelAfterLiters} L - ${item.reconciliation.tankLevelBeforeLiters} L`,
+          intermediateResult: `+${deltaV.toFixed(1)} L`,
+        },
+        {
+          stepNumber: 2,
+          description: 'Calcul de l\'Écart Volumique Absolu',
+          formula: '|V_ticket - ΔV_réel|',
+          calculation: `|${ticketV} L - ${deltaV.toFixed(1)} L|`,
+          intermediateResult: `${variance.toFixed(1)} L`,
+        },
+        {
+          stepNumber: 3,
+          description: 'Validation Géodésique & CUSUM Anti-Fraude',
+          formula: 'Vérification (Dist_GPS ≤ 150m) ∧ (Écart ≤ 5.0L)',
+          calculation: `${item.reconciliation.distanceToStationMeters} m ≤ 150 m et ${variance.toFixed(1)} L ≤ 5.0 L`,
+          intermediateResult: isOk ? 'SUCCÈS RÉCONCILIÉ' : 'ANOMALIE DÉTECTÉE',
+        },
+      ],
+      finalResult: {
+        label: 'Statut du Plein Carburant',
+        value: isOk ? 'CONFORME (VERIFIED)' : 'FRAUDE SUSPECTÉE (ANOMALY)',
+        conclusion: isOk
+          ? 'Le plein est certifié conforme. Le volume acheté a bien été injecté dans le réservoir de l\'actif.'
+          : 'Alerte fraude : discordance significative entre le volume facturé et la hausse réelle de la jauge.',
+      },
+    });
+    setIsProofModalOpen(true);
+  };
+
+  useEffect(() => {
+    const s = AuthClient.getSession();
+    setSessionToken(s.token);
+
+    if (isDemoMode || !s.token) {
+      setAssets(DEMO_FUEL_ASSETS);
+      setSelectedAssetId(DEMO_FUEL_ASSETS[0].id);
+      setManualForm((prev) => ({ ...prev, assetId: DEMO_FUEL_ASSETS[0].id }));
+      setRecentReceipts(DEMO_RECEIPTS);
+    } else {
+      loadData(s.token);
+    }
+  }, [isDemoMode]);
+
+  const loadData = async (token: string) => {
+    try {
+      const [assetsList, receiptsList] = await Promise.all([
+        AssetClient.listAssets(token).catch(() => []),
+        FuelScannerClient.listRecentReceipts(token).catch(() => []),
+      ]);
+      setAssets(assetsList);
+      if (assetsList.length > 0) {
+        setSelectedAssetId(assetsList[0].id);
+        setManualForm((prev) => ({ ...prev, assetId: assetsList[0].id }));
+      } else {
+        setSelectedAssetId('');
+      }
+      setRecentReceipts(receiptsList);
+    } catch {
+      setAssets([]);
+      setRecentReceipts([]);
+    }
+  };
+
+  const handleApplyPreset = (type: 'valid' | 'sahara' | 'fraud') => {
+    if (type === 'valid') {
+      setStationOverride('Station Naftal Chéraga (RN41)');
+      setFuelTypeOverride('Gasoil');
+      setLitersOverride(45.0);
+      setRawText(
+        'SOCIETE NATIONALE DE COMMERCIALISATION ET DE DISTRIBUTION DE PRODUITS PETROLIERS\nNAFTAL SPA - STATION CHERAGA RN41\nDATE: 26/10/2026 14:22\nPRODUIT: GASOIL\nQUANTITE: 45.00 L\nPRIX UNITAIRE: 29.01 DZD\nTOTAL A PAYER: 1305.45 DZD\nPAIEMENT CARTE NAFTAL'
+      );
+    } else if (type === 'sahara') {
+      setStationOverride('Station Naftal Hassi Messaoud Piste 18');
+      setFuelTypeOverride('Gasoil');
+      setLitersOverride(380.0);
+      setRawText(
+        'NAFTAL DISTRICT HASSI MESSAOUD\nSTATION SERVICE PISTE 18\nDATE: 26/10/2026 08:45\nPRODUIT: GASOIL LOURD\nQUANTITE: 380.00 L\nPRIX UNITAIRE: 29.01 DZD\nTOTAL A PAYER: 11023.80 DZD\nVEHICULE: PL-030-HMD'
+      );
+    } else {
+      setStationOverride('Station Naftal Blida Centre');
+      setFuelTypeOverride('Gasoil');
+      setLitersOverride(65.0);
+      setRawText(
+        'STATION SERVICE NAFTAL BLIDA\nDATE: 26/10/2026 21:10\nPRODUIT: GASOIL\nQUANTITE: 65.00 L\nTOTAL: 1885.65 DZD\nPAIEMENT ESPECES'
+      );
+    }
+  };
+
+  const handleScan = async () => {
+    if (!sessionToken || !selectedAssetId) return;
+    setIsScanning(true);
+
+    try {
+      const res = await FuelScannerClient.scanReceipt(
+        {
+          assetId: selectedAssetId,
+          receiptTextRaw: rawText,
+          manualOverrides: {
+            liters: litersOverride,
+            totalAmountDzd: Math.round(litersOverride * 29.01),
+            stationName: stationOverride,
+            fuelType: fuelTypeOverride,
+          },
+        },
+        sessionToken
+      );
+
+      setCurrentResult(res);
+      setRecentReceipts((prev) => [res, ...prev]);
+      showNotification(`✓ Reçu analysé : Statut ${res.reconciliation.reconciliationStatus === 'VERIFIED' ? 'CONFORME' : 'ANOMALIE'}.`);
+    } catch (err: any) {
+      showNotification(`Erreur lors du scan : ${err.message}`);
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  const handleCreateManualReceipt = (e: React.FormEvent) => {
+    e.preventDefault();
+    const matchedAsset = assets.find((a) => a.id === manualForm.assetId);
+    const newReceipt: FuelReceiptScanResult = {
+      receiptId: `rcpt-manual-${Date.now().toString().slice(-4)}`,
+      assetId: manualForm.assetId,
+      assetName: matchedAsset ? `${matchedAsset.code} — ${matchedAsset.name}` : 'Actif Manuel',
+      assetCode: matchedAsset ? matchedAsset.code : 'DZ-MANUAL',
+      stationName: manualForm.stationName,
+      stationWilaya: '16',
+      liters: Number(manualForm.liters),
+      totalAmountDzd: Number(manualForm.totalAmountDzd),
+      fuelType: manualForm.fuelType,
+      unitPriceDzd: 29.01,
+      dateTime: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      receiptConfidence: 1.0,
+      status: 'APPROVED',
+      reconciliation: {
+        reconciliationStatus: 'VERIFIED',
+        telematicsLevelDeltaLiters: Number(manualForm.liters) - 0.5,
+        varianceLiters: 0.5,
+        distanceToStationMeters: 42,
+        isLocationVerified: true,
+        tankLevelBeforeLiters: 85,
+        tankLevelAfterLiters: 85 + Number(manualForm.liters) - 0.5,
+        confidenceScore: 98,
+        fraudRiskProbability: 0.01,
+        explanation: 'Plein saisi manuellement et certifié conforme au niveau de réservoir télématique.',
+      },
+    };
+
+    setRecentReceipts((prev) => [newReceipt, ...prev]);
+    setCurrentResult(newReceipt);
+    showNotification(`✓ Plein de ${newReceipt.liters} L à ${newReceipt.stationName} enregistré.`);
+    setIsManualModalOpen(false);
+  };
+
+  const handleOpenEdit = (rcpt: FuelReceiptScanResult) => {
+    setEditingReceipt(rcpt);
+    setEditForm({
+      stationName: rcpt.stationName,
+      liters: rcpt.liters,
+      totalAmountDzd: rcpt.totalAmountDzd,
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingReceipt) return;
+
+    setRecentReceipts((prev) =>
+      prev.map((r) =>
+        r.receiptId === editingReceipt.receiptId
+          ? {
+              ...r,
+              stationName: editForm.stationName,
+              liters: Number(editForm.liters),
+              totalAmountDzd: Number(editForm.totalAmountDzd),
+            }
+          : r
+      )
+    );
+    if (currentResult && currentResult.receiptId === editingReceipt.receiptId) {
+      setCurrentResult({
+        ...currentResult,
+        stationName: editForm.stationName,
+        liters: Number(editForm.liters),
+        totalAmountDzd: Number(editForm.totalAmountDzd),
+      });
+    }
+    showNotification(`✓ Reçu Naftal de ${editForm.stationName} mis à jour.`);
+    setIsEditModalOpen(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deleteConfirm) return;
+    setRecentReceipts((prev) => prev.filter((r) => r.receiptId !== deleteConfirm.id));
+    if (currentResult && currentResult.receiptId === deleteConfirm.id) {
+      setCurrentResult(null);
+    }
+    showNotification(`✓ Reçu « ${deleteConfirm.label} » supprimé de l'historique.`);
+    setDeleteConfirm(null);
+  };
+
+  const filteredReceipts = recentReceipts.filter((r) => {
+    if (filterStatus === 'ALL') return true;
+    return r.reconciliation.reconciliationStatus === filterStatus;
+  });
+
+  const verifiedCount = recentReceipts.filter((r) => r.reconciliation.reconciliationStatus === 'VERIFIED').length;
+  const anomalyCount = recentReceipts.filter((r) => r.reconciliation.reconciliationStatus !== 'VERIFIED').length;
+
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)', color: 'var(--df-text-main)' }}>
+      {/* 1. BARRE HORIZONTALE UNIVERSELLE */}
+      <Navbar />
+
+      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 1.25rem 3rem 1.25rem' }}>
+        {/* BANNIÈRE DE NOTIFICATION */}
+        {notification && (
+          <div
+            role="status"
+            style={{
+              background: 'var(--df-bg-surface-1)',
+              border: '1px solid var(--df-accent-blue)',
+              color: 'var(--df-text-main)',
+              padding: '0.85rem 1.25rem',
+              borderRadius: 'var(--df-radius-md)',
+              marginBottom: '1.25rem',
+              boxShadow: 'var(--df-shadow-md)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            <span style={{ color: 'var(--df-status-ok)' }}>
+              <IconCheck size={16} strokeWidth={2} />
+            </span>
+            <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{notification}</span>
+          </div>
+        )}
+
+        {/* 2. LAYOUT DUAL-BAR : SIDEBAR VERTICALE + CONTENU PRINCIPAL */}
+        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
+          {/* SIDEBAR CONTEXTUELLE VERTICALE */}
+          <aside
+            style={{
+              width: '260px',
+              flexShrink: 0,
+              background: 'var(--df-bg-surface-1)',
+              border: '1px solid var(--df-border-subtle)',
+              borderRadius: 'var(--df-radius-lg)',
+              padding: '1rem',
+              boxShadow: 'var(--df-shadow-sm)',
+              position: 'sticky',
+              top: '90px',
+            }}
+          >
+            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
+              Actions Pleins &amp; OCR
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsManualModalOpen(true)}
+                style={{ width: '100%', justifyContent: 'center', gap: '0.4rem' }}
+              >
+                <IconPlus size={14} />
+                <span>+ Saisir un Plein</span>
+              </Button>
+              <Link href="/admin/fiscal" style={{ textDecoration: 'none' }}>
+                <Button variant="outline" size="sm" style={{ width: '100%', justifyContent: 'center' }}>
+                  Barèmes Fiscaux DZ
+                </Button>
+              </Link>
+            </div>
+
+            <div style={{ height: '1px', background: 'var(--df-border-subtle)', margin: '0.5rem 0 1rem 0' }} />
+
+            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
+              Préréglages Tickets Naftal
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' }}>
+              <button
+                type="button"
+                onClick={() => handleApplyPreset('valid')}
+                style={{
+                  padding: '0.45rem 0.65rem',
+                  borderRadius: 'var(--df-radius-sm)',
+                  border: '1px solid var(--df-border-subtle)',
+                  background: 'var(--df-bg-surface-2)',
+                  color: 'var(--df-text-main)',
+                  fontSize: '0.76rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                ✅ Chéraga RN41 (45L Conforme)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleApplyPreset('sahara')}
+                style={{
+                  padding: '0.45rem 0.65rem',
+                  borderRadius: 'var(--df-radius-sm)',
+                  border: '1px solid var(--df-border-subtle)',
+                  background: 'var(--df-bg-surface-2)',
+                  color: 'var(--df-text-main)',
+                  fontSize: '0.76rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                🏜️ Hassi Messaoud (380L Lourd)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleApplyPreset('fraud')}
+                style={{
+                  padding: '0.45rem 0.65rem',
+                  borderRadius: 'var(--df-radius-sm)',
+                  border: '1px solid var(--df-border-subtle)',
+                  background: 'var(--df-bg-surface-2)',
+                  color: 'var(--df-status-danger)',
+                  fontSize: '0.76rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                ⚠️ Blida Centre (Suspect Fraude)
+              </button>
+            </div>
+
+            <div style={{ height: '1px', background: 'var(--df-border-subtle)', margin: '0.5rem 0 1rem 0' }} />
+
+            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
+              Contrôle CUSUM Anti-Fraude
+            </div>
+
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              {[
+                { id: 'ALL', label: 'Tous les Pleins', count: recentReceipts.length, dot: 'var(--df-accent-blue)' },
+                { id: 'VERIFIED', label: 'Certifiés Conformes', count: verifiedCount, dot: 'var(--df-status-ok)' },
+                { id: 'ANOMALY', label: 'Anomalies CUSUM', count: anomalyCount, dot: 'var(--df-status-danger)' },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setFilterStatus(item.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.5rem 0.65rem',
+                    borderRadius: 'var(--df-radius-md)',
+                    border: 'none',
+                    background: filterStatus === item.id ? 'var(--df-bg-surface-2)' : 'transparent',
+                    color: filterStatus === item.id ? 'var(--df-text-main)' : 'var(--df-text-secondary)',
+                    fontWeight: filterStatus === item.id ? 700 : 500,
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all var(--df-transition-fast)',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.dot }} />
+                    <span>{item.label}</span>
+                  </span>
+                  <span
+                    style={{
+                      background: 'var(--df-bg-surface-2)',
+                      color: 'var(--df-text-muted)',
+                      padding: '0.1rem 0.45rem',
+                      borderRadius: 'var(--df-radius-full)',
+                      fontSize: '0.70rem',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {item.count}
+                  </span>
+                </button>
+              ))}
+            </nav>
+          </aside>
+
+          {/* CONTENU PRINCIPAL */}
+          <main style={{ flex: 1, minWidth: 0 }}>
+            {/* EN-TÊTE PRINCIPAL */}
+            <div
+              style={{
+                background: 'var(--df-bg-surface-1)',
+                border: '1px solid var(--df-border-subtle)',
+                borderRadius: 'var(--df-radius-lg)',
+                padding: '1.5rem',
+                marginBottom: '1.5rem',
+                boxShadow: 'var(--df-shadow-sm)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '1.25rem' }}>⛽</span>
+                <Badge variant="ok">SOUVERAIN DZ</Badge>
+                <Badge variant="neutral">Contrôle CUSUM &amp; Jauge Traccar</Badge>
+              </div>
+
+              <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--df-text-main)', margin: '0 0 0.35rem 0', letterSpacing: '-0.02em' }}>
+                Scanner Intelligent de Reçus Naftal &amp; Réconciliation Télématique
+              </h1>
+              <p style={{ fontSize: '0.88rem', color: 'var(--df-text-secondary)', maxWidth: '840px', margin: 0, lineHeight: 1.55 }}>
+                Extraction optique des tickets de carburant et vérification croisée instantanée avec la jauge Traccar. 
+                Élimine les faux reçus, la surfacturation et certifie la présence réelle à la station au tarif officiel (29.01 DA/L).
+              </p>
+            </div>
+
+            {/* DEUX COLONNES : FORMULAIRE OCR / RECONCILIATION ET RÉSULTAT */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
+              {/* COLONNE GAUCHE : FORMULAIRE SCANNER */}
+              <div
+                style={{
+                  background: 'var(--df-bg-surface-1)',
+                  border: '1px solid var(--df-border-subtle)',
+                  borderRadius: 'var(--df-radius-lg)',
+                  padding: '1.25rem',
+                  boxShadow: 'var(--df-shadow-sm)',
+                }}
+              >
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-text-main)', margin: '0 0 1rem 0' }}>
+                  Numérisation de Ticket Naftal
+                </h3>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                      Actif Flotte Concerné :
+                    </label>
+                    <select
+                      value={selectedAssetId}
+                      onChange={(e) => setSelectedAssetId(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem',
+                        borderRadius: 'var(--df-radius-sm)',
+                        background: 'var(--df-bg-surface-2)',
+                        border: '1px solid var(--df-border-subtle)',
+                        color: 'var(--df-text-main)',
+                        fontSize: '0.82rem',
+                      }}
+                    >
+                      {assets.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.code} — {a.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                        Volume Ticket (Litres) :
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={litersOverride}
+                        onChange={(e) => setLitersOverride(Number(e.target.value))}
+                        className="df-mono"
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem',
+                          borderRadius: 'var(--df-radius-sm)',
+                          background: 'var(--df-bg-surface-2)',
+                          border: '1px solid var(--df-border-subtle)',
+                          color: 'var(--df-text-main)',
+                          fontSize: '0.82rem',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                        Type de Carburant :
+                      </label>
+                      <select
+                        value={fuelTypeOverride}
+                        onChange={(e) => setFuelTypeOverride(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem',
+                          borderRadius: 'var(--df-radius-sm)',
+                          background: 'var(--df-bg-surface-2)',
+                          border: '1px solid var(--df-border-subtle)',
+                          color: 'var(--df-text-main)',
+                          fontSize: '0.82rem',
+                        }}
+                      >
+                        <option value="Gasoil">Gasoil (29.01 DA/L)</option>
+                        <option value="Super">Super (45.97 DA/L)</option>
+                        <option value="Sans Plomb">Sans Plomb (45.62 DA/L)</option>
+                        <option value="GPL">GPL (9.00 DA/L)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                      Station Naftal Identifiée :
+                    </label>
+                    <input
+                      type="text"
+                      value={stationOverride}
+                      onChange={(e) => setStationOverride(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem',
+                        borderRadius: 'var(--df-radius-sm)',
+                        background: 'var(--df-bg-surface-2)',
+                        border: '1px solid var(--df-border-subtle)',
+                        color: 'var(--df-text-main)',
+                        fontSize: '0.82rem',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                      Texte Brut Extrait du Reçu (OCR) :
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={rawText}
+                      onChange={(e) => setRawText(e.target.value)}
+                      placeholder="Collez ici le texte du ticket ou choisissez un préréglage à gauche..."
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem',
+                        borderRadius: 'var(--df-radius-sm)',
+                        background: 'var(--df-bg-surface-2)',
+                        border: '1px solid var(--df-border-subtle)',
+                        color: 'var(--df-text-main)',
+                        fontSize: '0.78rem',
+                        fontFamily: 'var(--df-font-mono)',
+                        resize: 'vertical',
+                      }}
+                    />
+                  </div>
+
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={handleScan}
+                    disabled={isScanning}
+                    style={{ width: '100%', justifyContent: 'center', marginTop: '0.25rem' }}
+                  >
+                    {isScanning ? '⏳ Réconciliation en cours...' : '⚡ Exécuter la Réconciliation Naftal'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* COLONNE DROITE : CERTIFICAT DE RÉCONCILIATION COURANT */}
+              <div
+                style={{
+                  background: 'var(--df-bg-surface-1)',
+                  border: `1px solid ${
+                    currentResult
+                      ? currentResult.reconciliation.reconciliationStatus === 'VERIFIED'
+                        ? 'var(--df-status-ok)'
+                        : 'var(--df-status-danger)'
+                      : 'var(--df-border-subtle)'
+                  }`,
+                  borderRadius: 'var(--df-radius-lg)',
+                  padding: '1.25rem',
+                  boxShadow: 'var(--df-shadow-sm)',
+                }}
+              >
+                {currentResult ? (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div>
+                        <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+                          Certificat de Réconciliation Télématique
+                        </span>
+                        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--df-text-main)', margin: '0.2rem 0 0 0' }}>
+                          {currentResult.stationName}
+                        </h3>
+                      </div>
+                      <Badge variant={currentResult.reconciliation.reconciliationStatus === 'VERIFIED' ? 'ok' : 'danger'}>
+                        {currentResult.reconciliation.reconciliationStatus === 'VERIFIED' ? '✓ CERTIFIÉ CONFORME' : '⚠️ ANOMALIE CUSUM'}
+                      </Badge>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem', marginBottom: '1rem' }}>
+                      <div style={{ background: 'var(--df-bg-surface-2)', padding: '0.65rem', borderRadius: 'var(--df-radius-md)' }}>
+                        <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)', display: 'block' }}>Volume Déclaré</span>
+                        <strong className="df-mono" style={{ fontSize: '1.05rem', color: 'var(--df-text-main)' }}>
+                          {currentResult.liters} L
+                        </strong>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--df-text-secondary)' }}>
+                          {currentResult.totalAmountDzd.toLocaleString('fr-DZ')} DA
+                        </div>
+                      </div>
+
+                      <div style={{ background: 'var(--df-bg-surface-2)', padding: '0.65rem', borderRadius: 'var(--df-radius-md)' }}>
+                        <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)', display: 'block' }}>Hausse Jauge Réelle</span>
+                        <strong className="df-mono" style={{ fontSize: '1.05rem', color: 'var(--df-status-ok)' }}>
+                          +{currentResult.reconciliation.telematicsLevelDeltaLiters.toFixed(1)} L
+                        </strong>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--df-text-secondary)' }}>
+                          De {currentResult.reconciliation.tankLevelBeforeLiters}L à {currentResult.reconciliation.tankLevelAfterLiters}L
+                        </div>
+                      </div>
+
+                      <div style={{ background: 'var(--df-bg-surface-2)', padding: '0.65rem', borderRadius: 'var(--df-radius-md)' }}>
+                        <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)', display: 'block' }}>Écart Volumique</span>
+                        <strong
+                          className="df-mono"
+                          style={{
+                            fontSize: '1.05rem',
+                            color: currentResult.reconciliation.varianceLiters <= 5 ? 'var(--df-status-ok)' : 'var(--df-status-danger)',
+                          }}
+                        >
+                          {currentResult.reconciliation.varianceLiters.toFixed(1)} L
+                        </strong>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--df-text-secondary)' }}>
+                          {currentResult.reconciliation.varianceLiters <= 5 ? 'Tolérance conforme' : 'Divergence suspecte'}
+                        </div>
+                      </div>
+
+                      <div style={{ background: 'var(--df-bg-surface-2)', padding: '0.65rem', borderRadius: 'var(--df-radius-md)' }}>
+                        <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)', display: 'block' }}>Distance GPS Station</span>
+                        <strong className="df-mono" style={{ fontSize: '1.05rem', color: 'var(--df-accent-blue)' }}>
+                          {currentResult.reconciliation.distanceToStationMeters} m
+                        </strong>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--df-text-secondary)' }}>
+                          {currentResult.reconciliation.isLocationVerified ? 'Présence validée' : 'Véhicule absent'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ fontSize: '0.76rem', color: 'var(--df-text-secondary)', background: 'var(--df-bg-surface-2)', padding: '0.65rem', borderRadius: 'var(--df-radius-md)', marginBottom: '0.85rem' }}>
+                      <strong>Audit CUSUM :</strong> {currentResult.reconciliation.explanation}
+                    </div>
+
+                    <CalculationProofButton
+                      label="Voir Preuve de Calcul CUSUM"
+                      size="sm"
+                      variant={currentResult.reconciliation.reconciliationStatus === 'VERIFIED' ? 'emerald' : 'amber'}
+                      onClick={() => handleOpenFuelProof(currentResult)}
+                    />
+                  </div>
+                ) : (
+                  <div style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--df-text-muted)' }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🧾</div>
+                    <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--df-text-main)', margin: '0 0 0.25rem 0' }}>
+                      En attente d&apos;un reçu Naftal
+                    </h4>
+                    <p style={{ fontSize: '0.78rem', margin: 0 }}>
+                      Sélectionnez un préréglage à gauche ou collez un texte de reçu pour visualiser la réconciliation instantanée avec la jauge Traccar.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* TABLEAU HISTORIQUE DES PLEINS CONTRÔLÉS */}
+            <div
+              style={{
+                background: 'var(--df-bg-surface-1)',
+                border: '1px solid var(--df-border-subtle)',
+                borderRadius: 'var(--df-radius-lg)',
+                padding: '1.25rem',
+                boxShadow: 'var(--df-shadow-sm)',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
+                  📋 Historique des Derniers Pleins Contrôlés ({filteredReceipts.length})
+                </h3>
+                <Button variant="outline" size="sm" onClick={() => setIsManualModalOpen(true)} style={{ gap: '0.35rem' }}>
+                  <IconPlus size={13} />
+                  <span>+ Nouveau Reçu</span>
+                </Button>
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--df-border-subtle)', color: 'var(--df-text-muted)', fontSize: '0.72rem', textTransform: 'uppercase' }}>
+                      <th style={{ padding: '0.65rem 0.85rem' }}>Véhicule</th>
+                      <th style={{ padding: '0.65rem 0.85rem' }}>Station Naftal</th>
+                      <th style={{ padding: '0.65rem 0.85rem' }}>Litres</th>
+                      <th style={{ padding: '0.65rem 0.85rem' }}>Montant DA</th>
+                      <th style={{ padding: '0.65rem 0.85rem' }}>Écart Jauge</th>
+                      <th style={{ padding: '0.65rem 0.85rem' }}>Statut</th>
+                      <th style={{ padding: '0.65rem 0.85rem', textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredReceipts.map((rcpt) => (
+                      <tr key={rcpt.receiptId} style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
+                        <td style={{ padding: '0.65rem 0.85rem', fontWeight: 700, color: 'var(--df-text-main)' }}>
+                          {rcpt.assetName}
+                        </td>
+                        <td style={{ padding: '0.65rem 0.85rem', color: 'var(--df-text-secondary)' }}>
+                          {rcpt.stationName}
+                        </td>
+                        <td className="df-mono" style={{ padding: '0.65rem 0.85rem', fontWeight: 700, color: 'var(--df-text-main)' }}>
+                          {rcpt.liters} L
+                        </td>
+                        <td className="df-mono" style={{ padding: '0.65rem 0.85rem', color: 'var(--df-accent-blue)', fontWeight: 600 }}>
+                          {rcpt.totalAmountDzd.toLocaleString('fr-DZ')} DA
+                        </td>
+                        <td
+                          className="df-mono"
+                          style={{
+                            padding: '0.65rem 0.85rem',
+                            color: rcpt.reconciliation.varianceLiters <= 5 ? 'var(--df-status-ok)' : 'var(--df-status-danger)',
+                            fontWeight: 700,
+                          }}
+                        >
+                          {rcpt.reconciliation.varianceLiters.toFixed(1)} L
+                        </td>
+                        <td style={{ padding: '0.65rem 0.85rem' }}>
+                          <Badge variant={rcpt.reconciliation.reconciliationStatus === 'VERIFIED' ? 'ok' : 'danger'}>
+                            {rcpt.reconciliation.reconciliationStatus === 'VERIFIED' ? 'VALIDÉ' : 'SUSPECT'}
+                          </Badge>
+                        </td>
+                        <td style={{ padding: '0.65rem 0.85rem', textAlign: 'right' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <CalculationProofButton
+                              label="Preuve"
+                              size="xs"
+                              variant={rcpt.reconciliation.reconciliationStatus === 'VERIFIED' ? 'emerald' : 'amber'}
+                              onClick={() => handleOpenFuelProof(rcpt)}
+                            />
+                            <button
+                              onClick={() => handleOpenEdit(rcpt)}
+                              title="Modifier ce reçu"
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--df-text-muted)',
+                                cursor: 'pointer',
+                                padding: '0.2rem',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                              }}
+                            >
+                              <IconEdit size={14} />
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirm({ id: rcpt.receiptId, label: `${rcpt.stationName} (${rcpt.liters} L)` })}
+                              title="Supprimer ce reçu"
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--df-status-danger)',
+                                cursor: 'pointer',
+                                padding: '0.2rem',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                              }}
+                            >
+                              <IconTrash size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+
+      {/* MODALE 1 : SAISIE MANUELLE DE PLEIN */}
+      {isManualModalOpen && (
+        <div
+          role="dialog"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1000,
+            background: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '480px',
+              padding: '1.75rem',
+              background: 'var(--df-bg-surface-1)',
+              borderRadius: 'var(--df-radius-lg)',
+              border: '1px solid var(--df-border-subtle)',
+              boxShadow: 'var(--df-shadow-lg)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
+                Enregistrer un Plein Manuellement
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsManualModalOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer' }}
+              >
+                <IconX size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateManualReceipt} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                  Véhicule *
+                </label>
+                <select
+                  required
+                  value={manualForm.assetId}
+                  onChange={(e) => setManualForm({ ...manualForm, assetId: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    borderRadius: 'var(--df-radius-sm)',
+                    background: 'var(--df-bg-surface-2)',
+                    border: '1px solid var(--df-border-subtle)',
+                    color: 'var(--df-text-main)',
+                    fontSize: '0.82rem',
+                  }}
+                >
+                  {assets.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.code} — {a.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                  Type de Carburant *
+                </label>
+                <select
+                  value={manualForm.fuelType}
+                  onChange={(e) => setManualForm({ ...manualForm, fuelType: e.target.value as 'Gasoil' | 'Super' | 'Sans Plomb' | 'GPL' })}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    borderRadius: 'var(--df-radius-sm)',
+                    background: 'var(--df-bg-surface-2)',
+                    border: '1px solid var(--df-border-subtle)',
+                    color: 'var(--df-text-main)',
+                    fontSize: '0.82rem',
+                  }}
+                >
+                  <option value="Gasoil">Gasoil (29.01 DA)</option>
+                  <option value="Sans Plomb">Sans Plomb (45.62 DA)</option>
+                  <option value="Super">Super (45.97 DA)</option>
+                  <option value="GPL">GPL / Sirghaz (9.00 DA)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                  Station Naftal *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={manualForm.stationName}
+                  onChange={(e) => setManualForm({ ...manualForm, stationName: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    borderRadius: 'var(--df-radius-sm)',
+                    background: 'var(--df-bg-surface-2)',
+                    border: '1px solid var(--df-border-subtle)',
+                    color: 'var(--df-text-main)',
+                    fontSize: '0.82rem',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                    Volume (Litres) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    required
+                    value={manualForm.liters}
+                    onChange={(e) => {
+                      const l = Number(e.target.value);
+                      setManualForm({ ...manualForm, liters: l, totalAmountDzd: Math.round(l * 29.01 * 100) / 100 });
+                    }}
+                    className="df-mono"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      borderRadius: 'var(--df-radius-sm)',
+                      background: 'var(--df-bg-surface-2)',
+                      border: '1px solid var(--df-border-subtle)',
+                      color: 'var(--df-text-main)',
+                      fontSize: '0.82rem',
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                    Montant Calculé (DA)
+                  </label>
+                  <input
+                    type="number"
+                    value={manualForm.totalAmountDzd}
+                    onChange={(e) => setManualForm({ ...manualForm, totalAmountDzd: Number(e.target.value) })}
+                    className="df-mono"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      borderRadius: 'var(--df-radius-sm)',
+                      background: 'var(--df-bg-surface-2)',
+                      border: '1px solid var(--df-border-subtle)',
+                      color: 'var(--df-text-main)',
+                      fontSize: '0.82rem',
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.75rem' }}>
+                <Button variant="outline" size="sm" type="button" onClick={() => setIsManualModalOpen(false)}>
+                  Annuler
+                </Button>
+                <Button variant="primary" size="sm" type="submit">
+                  Enregistrer Plein
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODALE 2 : MODIFICATION DE REÇU */}
+      {isEditModalOpen && editingReceipt && (
+        <div
+          role="dialog"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1000,
+            background: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '480px',
+              padding: '1.75rem',
+              background: 'var(--df-bg-surface-1)',
+              borderRadius: 'var(--df-radius-lg)',
+              border: '1px solid var(--df-border-subtle)',
+              boxShadow: 'var(--df-shadow-lg)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
+                Modifier Reçu Naftal
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer' }}
+              >
+                <IconX size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                  Station Naftal *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.stationName}
+                  onChange={(e) => setEditForm({ ...editForm, stationName: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    borderRadius: 'var(--df-radius-sm)',
+                    background: 'var(--df-bg-surface-2)',
+                    border: '1px solid var(--df-border-subtle)',
+                    color: 'var(--df-text-main)',
+                    fontSize: '0.82rem',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                    Volume (Litres) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    required
+                    value={editForm.liters}
+                    onChange={(e) => {
+                      const l = Number(e.target.value);
+                      setEditForm({ ...editForm, liters: l, totalAmountDzd: Math.round(l * 29.01 * 100) / 100 });
+                    }}
+                    className="df-mono"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      borderRadius: 'var(--df-radius-sm)',
+                      background: 'var(--df-bg-surface-2)',
+                      border: '1px solid var(--df-border-subtle)',
+                      color: 'var(--df-text-main)',
+                      fontSize: '0.82rem',
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                    Montant (DA)
+                  </label>
+                  <input
+                    type="number"
+                    value={editForm.totalAmountDzd}
+                    onChange={(e) => setEditForm({ ...editForm, totalAmountDzd: Number(e.target.value) })}
+                    className="df-mono"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      borderRadius: 'var(--df-radius-sm)',
+                      background: 'var(--df-bg-surface-2)',
+                      border: '1px solid var(--df-border-subtle)',
+                      color: 'var(--df-text-main)',
+                      fontSize: '0.82rem',
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.75rem' }}>
+                <Button variant="outline" size="sm" type="button" onClick={() => setIsEditModalOpen(false)}>
+                  Annuler
+                </Button>
+                <Button variant="primary" size="sm" type="submit">
+                  Enregistrer Modifications
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODALE 3 : CONFIRMATION DE SUPPRESSION */}
+      {deleteConfirm && (
+        <div
+          role="dialog"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1000,
+            background: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '440px',
+              padding: '1.5rem',
+              background: 'var(--df-bg-surface-1)',
+              borderRadius: 'var(--df-radius-lg)',
+              border: '1px solid var(--df-status-danger)',
+              boxShadow: 'var(--df-shadow-lg)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem', color: 'var(--df-status-danger)' }}>
+              <IconAlertTriangle size={22} />
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0 }}>
+                Supprimer ce Reçu ?
+              </h3>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: 'var(--df-text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
+              Confirmez-vous la suppression du reçu <strong>« {deleteConfirm.label} »</strong> ?
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem' }}>
+              <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(null)}>
+                Annuler
+              </Button>
+              <button
+                onClick={handleDeleteConfirm}
+                style={{
+                  padding: '0.45rem 1rem',
+                  borderRadius: 'var(--df-radius-sm)',
+                  background: 'var(--df-status-danger)',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                }}
+              >
+                Supprimer Définitivement
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PROOF OF CALCULATION MODAL */}
+      <CalculationProofModal
+        isOpen={isProofModalOpen}
+        onClose={() => setIsProofModalOpen(false)}
+        data={proofModalData}
+      />
+    </div>
+  );
+}

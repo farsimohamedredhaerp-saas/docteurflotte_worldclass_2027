@@ -1,0 +1,554 @@
+// Prisma Schema — Maintenance Préventive, Proactive et Prédictive 4.0
+// Plateforme SaaS Souveraine DocteurFlotte (Transport Routier & Engins BTP)
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AssetCategory {
+  LIGHT_COMMERCIAL
+  HEAVY_TRUCK
+  CONSTRUCTION_MACHINERY_BTP
+  GENERATOR
+}
+
+enum ProtocolType {
+  OBD2_CAN
+  SAE_J1939
+  OPENDBC_CUSTOM
+}
+
+enum SubsystemType {
+  ENGINE
+  HYDRAULICS
+  TRANSMISSION
+  BRAKES_APS
+  COOLING
+  FILTRATION
+  TIRES_TRACKS
+  ELECTRICAL
+  FUEL_SYSTEM
+}
+
+enum TelemetryProtocol {
+  OBD2
+  J1939
+  DBC_SIGNAL
+}
+
+enum DtcSeverityLevel {
+  INFO
+  PROACTIVE_WARNING
+  CRITICAL_IMMOBILIZATION
+}
+
+enum ComponentHealthStatus {
+  OPTIMAL
+  MONITORING
+  PROACTIVE_DUE
+  PREDICTIVE_ALERT
+  CRITICAL_OVERDUE
+}
+
+enum WorkOrderTriggerSource {
+  PREVENTIVE_KM_HOURS
+  PREDICTIVE_RUL_DRIFT
+  TELEMETRY_DTC_CRITICAL
+}
+
+enum WorkOrderPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT_CRITICAL
+}
+
+enum WorkOrderStatus {
+  DRAFT
+  OPEN
+  IN_PROGRESS
+  WAITING_PARTS
+  COMPLETED
+}
+
+enum PartCategory {
+  OIL_FILTER
+  FUEL_FILTER
+  WATER_SEPARATOR
+  AIR_FILTER_PRIMARY
+  AIR_FILTER_SAFETY
+  HYDRAULIC_FILTER
+  APS_DRYER_CARTRIDGE
+  ENGINE_OIL
+  HYDRAULIC_OIL
+  GEAR_OIL
+  BRAKE_PAD
+  TIMING_KIT
+}
+
+enum CrossReferenceConfidence {
+  EXACT_OEM_MATCH
+  HIGH_PERFORMANCE_HEAVY_DUTY
+}
+
+enum InventoryStockStatus {
+  IN_STOCK
+  LOW_STOCK_ALERT
+  OUT_OF_STOCK
+  OVERSTOCKED
+}
+
+enum StockMovementType {
+  PURCHASE_RECEIPT
+  WORK_ORDER_ISSUE
+  WORK_ORDER_RETURN
+  TRANSFER_IN
+  TRANSFER_OUT
+  INVENTORY_ADJUSTMENT
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  APPROVED
+  ORDERED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+// 0. Référentiel WMI Constructeurs (Décodage VIN/PIN 100% Hors-Ligne ISO 3779)
+model OemWmiRegistry {
+  wmi             String        @id @db.VarChar(3) // Ex: "VF6", "YS2", "CAT", "LZG", "VF1"
+  make            String        @db.VarChar(64)
+  country         String        @db.VarChar(64)
+  defaultCategory AssetCategory @default(HEAVY_TRUCK)
+  defaultProtocol ProtocolType  @default(SAE_J1939)
+
+  createdAt       DateTime      @default(now()) @db.Timestamptz(6)
+
+  @@index([make])
+  @@map("oem_wmi_registries")
+}
+
+// 1. Actif Véhicule & Engin BTP Multi-Tenant
+model VehicleAsset {
+  id                   String        @id @default(uuid()) @db.Uuid
+  tenantId             String        @db.VarChar(64)
+  vin                  String        @unique @db.VarChar(17)
+  registrationNumber   String        @db.VarChar(32)
+  assetCategory        AssetCategory @default(HEAVY_TRUCK)
+  make                 String        @db.VarChar(64)
+  model                String        @db.VarChar(64)
+  year                 Int
+  engineModel          String?       @db.VarChar(64)
+  gvwrClass            String?       @db.VarChar(32) // PTAC Class 8, etc.
+  protocolType         ProtocolType  @default(SAE_J1939)
+
+  currentOdometerKm    Float         @default(0.0)
+  currentEngineHours   Float         @default(0.0)
+  totalIdleHours       Float         @default(0.0)
+  avgDailyKm           Float         @default(250.0)
+  avgDailyEngineHours  Float         @default(8.0)
+  severeDutyFactor     Float         @default(1.0) // 0.5 à 1.0 (BTP, poussière, fortes chaleurs)
+  globalHealthScore    Float         @default(100.0) // 0 à 100
+
+  createdAt            DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime      @updatedAt @db.Timestamptz(6)
+
+  healthStates         ComponentHealthState[]
+  workOrders           MaintenanceWorkOrder[]
+
+  @@index([tenantId, assetCategory])
+  @@index([tenantId, globalHealthScore])
+  @@map("vehicle_assets")
+}
+
+// 2. Cache local des modèles & référentiel constructeur embarqué
+model OemVehicleCatalog {
+  id                         String   @id @default(uuid()) @db.Uuid
+  make                       String   @db.VarChar(64)
+  model                      String   @db.VarChar(64)
+  year                       Int
+  vehicleType                String   @db.VarChar(64) // Truck, Tractor, Excavator, LCV
+  engineModel                String?  @db.VarChar(64)
+  engineDisplacementL        Float?
+  fuelType                   String?  @db.VarChar(32)
+  gvwr                       String?  @db.VarChar(64)
+  oilCapacityLiters          Float?
+  oilViscositySpec           String?  @db.VarChar(64) // ex: "15W-40 CK-4", "10W-40 E6/E9"
+  hydraulicOilCapacityLiters Float?
+  hydraulicOilSpec           String?  @db.VarChar(64) // ex: "ISO VG 46"
+  sourceRepo                 String   @default("LOCAL_OEM_SEED") @db.VarChar(64)
+
+  createdAt                  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([make, model, year], name: "make_model_year")
+  @@index([make, model])
+  @@map("oem_vehicle_catalogs")
+}
+
+// 3. Référentiel Constructeur & Règles de Maintenance PM1-PM4
+model OemMaintenanceTemplate {
+  id            String                   @id @default(uuid()) @db.Uuid
+  templateCode  String                   @unique @db.VarChar(64)
+  nameFr        String                   @db.VarChar(128)
+  assetCategory AssetCategory            @default(HEAVY_TRUCK)
+  descriptionFr String?                  @db.Text
+  rules         MaintenanceScheduleRule[]
+
+  createdAt     DateTime                 @default(now()) @db.Timestamptz(6)
+
+  @@index([assetCategory])
+  @@map("oem_maintenance_templates")
+}
+
+model MaintenanceScheduleRule {
+  id                     String                 @id @default(uuid()) @db.Uuid
+  templateId             String                 @db.Uuid
+  template               OemMaintenanceTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  ruleCode               String                 @unique @db.VarChar(64) // BTP_PM1_250H, etc.
+  nameFr                 String                 @db.VarChar(128)
+  subsystem              SubsystemType
+
+  intervalKm             Int?
+  intervalEngineHours    Int?                   // 250h PM1, 500h PM2, 1000h PM3, 2000h PM4
+  intervalMonths         Int?
+  estimatedDurationHours Float                  @default(2.5)
+  estimatedPartsCostDzd  Float                  @default(0.0)
+
+  standardTasksJson      Json                   // Opérations, pièces, filtres, viscosité huile
+
+  healthStates           ComponentHealthState[]
+
+  @@index([templateId, ruleCode])
+  @@index([subsystem])
+  @@map("maintenance_schedule_rules")
+}
+
+// 4. Catalogue Pièces, Fluides & Équivalences OEM Locales
+model OemPartCatalog {
+  id                 String             @id @default(uuid()) @db.Uuid
+  internalSku        String             @unique @db.VarChar(64)
+  category           PartCategory
+  nameFr             String             @db.VarChar(128)
+  oemReference       String             @db.VarChar(64) // ex: "1R-1808", "7421380488"
+  oemBrand           String             @db.VarChar(64) // ex: "Caterpillar", "Renault Trucks"
+  technicalSpecsJson Json               // micron rating, filetage, viscosité, normes ACEA/API/ISO
+  unitPriceDzd       Float              @default(0.0)
+
+  createdAt          DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime           @updatedAt @db.Timestamptz(6)
+
+  crossReferences    PartCrossReference[]
+  inventoryItems     PartInventoryItem[]
+  purchaseOrderItems PurchaseOrderItem[]
+
+  @@index([category, oemBrand])
+  @@index([oemReference])
+  @@map("oem_part_catalogs")
+}
+
+model PartCrossReference {
+  id                  String                   @id @default(uuid()) @db.Uuid
+  partId              String                   @db.Uuid
+  part                OemPartCatalog           @relation(fields: [partId], references: [id], onDelete: Cascade)
+  aftermarketBrand    String                   @db.VarChar(64) // DONALDSON, MANN_FILTER, FLEETGUARD, BOSCH, PARKER_RACOR, HENGST
+  equivalentReference String                   @db.VarChar(64) // ex: "P551808", "LF16015", "WD 13 145/18"
+  confidenceLevel     CrossReferenceConfidence @default(EXACT_OEM_MATCH)
+
+  createdAt           DateTime                 @default(now()) @db.Timestamptz(6)
+
+  @@unique([partId, aftermarketBrand, equivalentReference])
+  @@index([aftermarketBrand, equivalentReference])
+  @@map("part_cross_references")
+}
+
+// 5. Dictionnaire Unifié des Codes Défauts (J1939 SPN/FMI + OBD-II + OpenDBC)
+model TelemetryDtcCatalog {
+  id                       String            @id @default(uuid()) @db.Uuid
+  protocol                 TelemetryProtocol
+  codeString               String            @unique @db.VarChar(64) // P0087, SPN-100-FMI-1, CAN-ENGINE-TEMP
+  spn                      Int?
+  fmi                      Int?
+  pgn                      Int?
+  canFrameId               String?           @db.VarChar(32)
+  subsystem                SubsystemType     @default(ENGINE)
+  titleFr                  String            @db.VarChar(256)
+  technicalDescriptionFr   String            @db.Text
+  rawSourceUrl             String            @db.VarChar(512)
+  severityLevel            DtcSeverityLevel  @default(PROACTIVE_WARNING)
+  rulPenaltyFactor         Float             @default(0.10) // 0.05 à 0.40 pénalité immédiate sur le RUL
+  recommendedWorkshopAction String           @db.Text
+
+  createdAt                DateTime          @default(now()) @db.Timestamptz(6)
+
+  @@index([protocol, codeString])
+  @@index([spn, fmi])
+  @@index([subsystem, severityLevel])
+  @@map("telemetry_dtc_catalogs")
+}
+
+// 6. Base Locale de Décodage CAN-bus (.dbc / J1939)
+model DbcCanMessage {
+  id              String         @id @default(uuid()) @db.Uuid
+  dbcFileName     String         @db.VarChar(128)
+  frameIdDec      Int
+  frameIdHex      String         @db.VarChar(32) // ex: "0x18FEEE00", "0x0CF00400"
+  messageName     String         @db.VarChar(128)
+  dlc             Int            @default(8)
+  transmitterNode String?        @db.VarChar(64)
+
+  createdAt       DateTime       @default(now()) @db.Timestamptz(6)
+  signals         DbcCanSignal[]
+
+  @@unique([dbcFileName, frameIdDec])
+  @@index([dbcFileName, messageName])
+  @@map("dbc_can_messages")
+}
+
+model DbcCanSignal {
+  id             String        @id @default(uuid()) @db.Uuid
+  messageId      String        @db.Uuid
+  message        DbcCanMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  signalName     String        @db.VarChar(128)
+  startBit       Int
+  bitLength      Int
+  isLittleEndian Boolean       @default(true) // true: Intel @1, false: Motorola @0
+  isSigned       Boolean       @default(false)
+  scaleFactor    Float         @default(1.0)
+  offset         Float         @default(0.0)
+  minVal         Float         @default(0.0)
+  maxVal         Float         @default(65535.0)
+  unit           String?       @db.VarChar(32)
+  mappedSpn      Int?
+
+  createdAt      DateTime      @default(now()) @db.Timestamptz(6)
+
+  @@index([messageId, signalName])
+  @@index([mappedSpn])
+  @@map("dbc_can_signals")
+}
+
+// 7. Seuils Physiques CAN-Bus & Paramètres Weibull
+model PredictiveSensorThreshold {
+  id                String        @id @default(uuid()) @db.Uuid
+  parameterCode     String        @unique @db.VarChar(64) // SPN_110_COOLANT_TEMP, SPN_100_OIL_PRESS, etc.
+  spn               Int?
+  subsystem         SubsystemType
+  labelFr           String        @db.VarChar(128)
+  unit              String        @db.VarChar(16) // C, BAR, VOLT
+
+  normalMin         Float
+  normalMax         Float
+  warningThreshold  Float
+  criticalThreshold Float
+
+  weibullShapeBeta  Float         @default(2.4)
+  weibullScaleEta   Float         @default(1000.0)
+
+  updatedAt         DateTime      @updatedAt @db.Timestamptz(6)
+
+  @@index([subsystem, spn])
+  @@map("predictive_sensor_thresholds")
+}
+
+// 8. État Prédictif & RUL par Sous-Système
+model ComponentHealthState {
+  id                     String                @id @default(uuid()) @db.Uuid
+  vehicleId              String                @db.Uuid
+  vehicle                VehicleAsset          @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  tenantId               String                @db.VarChar(64)
+  subsystem              SubsystemType
+  scheduleRuleId         String?               @db.Uuid
+  scheduleRule           MaintenanceScheduleRule? @relation(fields: [scheduleRuleId], references: [id])
+
+  lastServiceDate        DateTime?             @db.Timestamptz(6)
+  lastServiceKm          Float                 @default(0.0)
+  lastServiceHours       Float                 @default(0.0)
+
+  wearIndexPercent       Float                 @default(0.0) // 0 à 100%
+  rulRemainingKm         Float?
+  rulRemainingHours      Float?
+  rulRemainingDays       Int                   @default(90)
+  degradationVelocity    Float                 @default(1.0) // Accélération d'usure
+  apsFailureRiskScore    Float                 @default(0.0) // Score Scania APS (0 à 1)
+  failureProbability30d  Float                 @default(0.05) // 0 à 1 (Loi de Weibull)
+  status                 ComponentHealthStatus @default(OPTIMAL)
+
+  observedMetricsJson    Json?                 // Dernières valeurs CAN réelles
+  activeDtcCodes         String[]              @default([])
+
+  updatedAt              DateTime              @updatedAt @db.Timestamptz(6)
+
+  @@unique([vehicleId, subsystem])
+  @@index([tenantId, subsystem, status])
+  @@index([tenantId, rulRemainingDays])
+  @@map("component_health_states")
+}
+
+// 9. Ordres de Travail Atelier (OT)
+model MaintenanceWorkOrder {
+  id                 String                 @id @default(uuid()) @db.Uuid
+  workOrderNumber    String                 @unique @db.VarChar(32) // OT-2026-XXXX
+  vehicleId          String                 @db.Uuid
+  vehicle            VehicleAsset           @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  tenantId           String                 @db.VarChar(64)
+  triggerSource      WorkOrderTriggerSource
+  subsystem          SubsystemType
+  priority           WorkOrderPriority      @default(MEDIUM)
+  status             WorkOrderStatus        @default(OPEN)
+
+  titleFr            String                 @db.VarChar(256)
+  diagnosisSummaryFr String                 @db.Text
+  requiredPartsJson  Json?                  // Références pièces, filtres, huiles
+  estimatedCostDzd   Float                  @default(0.0)
+  downtimeHours      Float                  @default(4.0)
+
+  openedAt           DateTime               @default(now()) @db.Timestamptz(6)
+  completedAt        DateTime?              @db.Timestamptz(6)
+
+  stockMovements     StockMovement[]
+
+  @@index([tenantId, status, priority])
+  @@index([vehicleId, status])
+  @@map("maintenance_work_orders")
+}
+
+// 10. Magasins & Dépôts Physiques Multi-Tenant
+model WarehouseStore {
+  id                 String              @id @default(uuid()) @db.Uuid
+  tenantId           String              @db.VarChar(64)
+  code               String              @db.VarChar(32) // ex: "MAG-ALGER-CENTRE", "DEPOT-HASSI-MESSAOUD", "ATELIER-ORAN"
+  name               String              @db.VarChar(128)
+  locationWilaya     String              @db.VarChar(64) // ex: "16 - Alger", "30 - Ouargla", "31 - Oran"
+  address            String?             @db.VarChar(256)
+  managerName        String?             @db.VarChar(128)
+  isCentralHub       Boolean             @default(false)
+  isActive           Boolean             @default(true)
+
+  createdAt          DateTime            @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime            @updatedAt @db.Timestamptz(6)
+
+  inventoryItems     PartInventoryItem[]
+  stockMovements     StockMovement[]
+  purchaseOrders     PurchaseOrder[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId, locationWilaya])
+  @@map("warehouse_stores")
+}
+
+// 11. Stocks Physiques par Pièce et par Dépôt
+model PartInventoryItem {
+  id                    String               @id @default(uuid()) @db.Uuid
+  tenantId              String               @db.VarChar(64)
+  warehouseId           String               @db.Uuid
+  warehouse             WarehouseStore       @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  partId                String               @db.Uuid
+  part                  OemPartCatalog       @relation(fields: [partId], references: [id], onDelete: Cascade)
+
+  quantityOnHand        Float                @default(0.0) // Stock physique réel
+  quantityReserved      Float                @default(0.0) // Réservé pour OT en cours
+  quantityAvailable     Float                @default(0.0) // onHand - reserved
+  minimumStockThreshold Float                @default(2.0) // Seuil réapprovisionnement automatique
+  reorderQuantity       Float                @default(5.0) // Quantité recommandée (EOQ / Wilson)
+  binLocation           String?              @db.VarChar(64) // ex: "A-02-B3" (Rayon/Étagère/Bac)
+  averageUnitCostDzd    Float                @default(0.0) // CUMP en Dinars Algériens
+  lastRestockDate       DateTime?            @db.Timestamptz(6)
+  status                InventoryStockStatus @default(IN_STOCK)
+
+  createdAt             DateTime             @default(now()) @db.Timestamptz(6)
+  updatedAt             DateTime             @updatedAt @db.Timestamptz(6)
+
+  movements             StockMovement[]
+
+  @@unique([tenantId, warehouseId, partId])
+  @@index([tenantId, status])
+  @@index([partId])
+  @@map("part_inventory_items")
+}
+
+// 12. Journal Immuable des Mouvements de Stock / Audit Traçabilité
+model StockMovement {
+  id                 String            @id @default(uuid()) @db.Uuid
+  tenantId           String            @db.VarChar(64)
+  warehouseId        String            @db.Uuid
+  warehouse          WarehouseStore    @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  inventoryItemId    String            @db.Uuid
+  inventoryItem      PartInventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+
+  movementType       StockMovementType
+  quantity           Float             // Positif pour entrée, négatif pour sortie
+  balanceAfter       Float             // Stock restant après mouvement
+  unitCostDzd        Float             @default(0.0)
+  totalCostDzd       Float             @default(0.0)
+
+  workOrderId        String?           @db.Uuid
+  workOrder          MaintenanceWorkOrder? @relation(fields: [workOrderId], references: [id], onDelete: SetNull)
+  purchaseOrderId    String?           @db.Uuid
+  purchaseOrder      PurchaseOrder?    @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
+
+  referenceDocNumber String?           @db.VarChar(64) // N° BL, N° OT, N° Bon de Sortie
+  performedBy        String            @db.VarChar(128)
+  notes              String?           @db.Text
+
+  createdAt          DateTime          @default(now()) @db.Timestamptz(6)
+
+  @@index([tenantId, movementType, createdAt])
+  @@index([inventoryItemId])
+  @@index([workOrderId])
+  @@map("stock_movements")
+}
+
+// 13. Commandes d'Achats & Réapprovisionnement Magasin
+model PurchaseOrder {
+  id                   String              @id @default(uuid()) @db.Uuid
+  tenantId             String              @db.VarChar(64)
+  poNumber             String              @unique @db.VarChar(32) // ex: "BC-2026-0042"
+  warehouseId          String              @db.Uuid
+  warehouse            WarehouseStore      @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+
+  supplierName         String              @db.VarChar(128) // ex: "Comptoir Algérien des Filtres", "Bergerat Monnoyeur Algérie"
+  supplierNif          String?             @db.VarChar(32) // NIF fiscal algérien
+  status               PurchaseOrderStatus @default(DRAFT)
+  totalAmountDzd       Float               @default(0.0)
+  expectedDeliveryDate DateTime?           @db.Timestamptz(6)
+  createdFromAlert     Boolean             @default(false) // Déclenché auto par rupture de stock
+  notes                String?             @db.Text
+
+  createdAt            DateTime            @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime            @updatedAt @db.Timestamptz(6)
+
+  items                PurchaseOrderItem[]
+  stockMovements       StockMovement[]
+
+  @@index([tenantId, status])
+  @@index([warehouseId])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id                 String         @id @default(uuid()) @db.Uuid
+  purchaseOrderId    String         @db.Uuid
+  purchaseOrder      PurchaseOrder  @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  partId             String         @db.Uuid
+  part               OemPartCatalog @relation(fields: [partId], references: [id], onDelete: Restrict)
+
+  orderedBrand       String         @db.VarChar(64) // OEM ou Aftermarket (Donaldson, Mann, Fleetguard, etc.)
+  orderedReference   String         @db.VarChar(64)
+  quantityOrdered    Float
+  quantityReceived   Float          @default(0.0)
+  unitPriceDzd       Float          @default(0.0)
+  totalPriceDzd      Float          @default(0.0)
+
+  createdAt          DateTime       @default(now()) @db.Timestamptz(6)
+
+  @@index([purchaseOrderId])
+  @@index([partId])
+  @@map("purchase_order_items")
+}

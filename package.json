@@ -1,0 +1,29 @@
+{
+  "name": "docteurflotte-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plateforme SaaS decisionnelle, controle de gestion et maintenance des actifs operationnels",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint --concurrency=1",
+    "typecheck": "turbo run typecheck --concurrency=1",
+    "test": "turbo run test --concurrency=1",
+    "sync:telemetry": "node --experimental-strip-types scripts/sync-open-telemetry-data.ts",
+    "seed:maintenance": "node --experimental-strip-types prisma/seed-maintenance.ts",
+    "seed:prisma": "npx prisma db seed",
+    "verify": "node scripts/guardrails/verify-all.cjs"
+  },
+  "prisma": {
+    "seed": "node --experimental-strip-types prisma/seed-maintenance.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "turbo": "^2.4.4",
+    "typescript": "^5.7.3"
+  }
+}

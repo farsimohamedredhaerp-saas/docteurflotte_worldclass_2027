@@ -1,0 +1,4808 @@
+[
+  {
+    "brand": {
+      "slug": "renault-trucks",
+      "name": "Renault Trucks",
+      "country": "FR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "t-k-series",
+      "name": "T 480 / K 480",
+      "category": "HEAVY_TRUCK",
+      "body_type": "TRACTOR_HEAD",
+      "year_start": 2013,
+      "year_end": 2026,
+      "popularity_dz_rank": 1
+    },
+    "variant": {
+      "engine_code": "DTI_13_480",
+      "engine_name": "DTI 13 (12.8L)",
+      "wmi": "VF6",
+      "displacement_cc": 12777,
+      "power_hp": 480.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 650.0,
+      "ptac_kg": 44000.0,
+      "curb_weight_kg": 8800.0,
+      "consumption_mixed_l_100km": 33.5,
+      "consumption_idle_l_hour": 14.5,
+      "oil_capacity_liters": 36.0,
+      "oil_norm_spec": "10W-40 Renault Trucks RLD-3 / Volvo VDS-4.5"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "renault-trucks",
+      "name": "Renault Trucks",
+      "country": "FR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "kerax",
+      "name": "Kerax 440 / K 440",
+      "category": "HEAVY_TRUCK",
+      "body_type": "TIPPER",
+      "year_start": 2006,
+      "year_end": 2024,
+      "popularity_dz_rank": 2
+    },
+    "variant": {
+      "engine_code": "DXI_11_440",
+      "engine_name": "DXi 11 Euro 3 (10.8L)",
+      "wmi": "VF6",
+      "displacement_cc": 10837,
+      "power_hp": 440.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 510.0,
+      "ptac_kg": 40000.0,
+      "curb_weight_kg": 9200.0,
+      "consumption_mixed_l_100km": 36.0,
+      "consumption_idle_l_hour": 15.0,
+      "oil_capacity_liters": 36.0,
+      "oil_norm_spec": "15W-40 API CI-4 / RLD-2"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "shacman",
+      "name": "Shacman",
+      "country": "CN",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "x3000-f3000",
+      "name": "X3000 / F3000 6x4",
+      "category": "HEAVY_TRUCK",
+      "body_type": "TIPPER",
+      "year_start": 2012,
+      "year_end": 2026,
+      "popularity_dz_rank": 3
+    },
+    "variant": {
+      "engine_code": "WEICHAI_WP12_430",
+      "engine_name": "Weichai WP12.430E201",
+      "wmi": "LZG",
+      "displacement_cc": 11596,
+      "power_hp": 430.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 400.0,
+      "ptac_kg": 41000.0,
+      "curb_weight_kg": 12500.0,
+      "consumption_mixed_l_100km": 39.5,
+      "consumption_idle_l_hour": 16.5,
+      "oil_capacity_liters": 28.0,
+      "oil_norm_spec": "15W-40 API CI-4 / Weichai Special HD"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "snvi",
+      "name": "SNVI",
+      "country": "DZ",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "k66-k120",
+      "name": "K66 / K120",
+      "category": "HEAVY_TRUCK",
+      "body_type": "RIGID_TRUCK",
+      "year_start": 1985,
+      "year_end": 2026,
+      "popularity_dz_rank": 4
+    },
+    "variant": {
+      "engine_code": "DEUTZ_F6L912",
+      "engine_name": "Deutz F6L912 (Air-Cooled)",
+      "wmi": "VFA",
+      "displacement_cc": 5655,
+      "power_hp": 120.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 150.0,
+      "ptac_kg": 12000.0,
+      "curb_weight_kg": 4800.0,
+      "consumption_mixed_l_100km": 22.0,
+      "consumption_idle_l_hour": 8.5,
+      "oil_capacity_liters": 14.5,
+      "oil_norm_spec": "15W-40 API CG-4 / Deutz DQC II (Air-Cooled)"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "snvi",
+      "name": "SNVI",
+      "country": "DZ",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "tc-100-v8",
+      "name": "TC 100 V8",
+      "category": "HEAVY_TRUCK",
+      "body_type": "TRACTOR_HEAD",
+      "year_start": 1988,
+      "year_end": 2024,
+      "popularity_dz_rank": 5
+    },
+    "variant": {
+      "engine_code": "DEUTZ_F8L413F",
+      "engine_name": "Deutz F8L413F V8 (Air-Cooled 11.3L)",
+      "wmi": "VFA",
+      "displacement_cc": 11300,
+      "power_hp": 256.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 350.0,
+      "ptac_kg": 38000.0,
+      "curb_weight_kg": 7200.0,
+      "consumption_mixed_l_100km": 35.0,
+      "consumption_idle_l_hour": 14.0,
+      "oil_capacity_liters": 24.0,
+      "oil_norm_spec": "15W-40 API CH-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "man",
+      "name": "MAN",
+      "country": "DE",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "tgs",
+      "name": "TGS 33.440 / 40.440",
+      "category": "HEAVY_TRUCK",
+      "body_type": "TRACTOR_HEAD",
+      "year_start": 2008,
+      "year_end": 2026,
+      "popularity_dz_rank": 6
+    },
+    "variant": {
+      "engine_code": "MAN_D2066_LF",
+      "engine_name": "D2066 LF (10.5L Euro 3/4)",
+      "wmi": "WMA",
+      "displacement_cc": 10518,
+      "power_hp": 440.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 590.0,
+      "ptac_kg": 40000.0,
+      "curb_weight_kg": 8750.0,
+      "consumption_mixed_l_100km": 36.0,
+      "consumption_idle_l_hour": 15.5,
+      "oil_capacity_liters": 40.0,
+      "oil_norm_spec": "10W-40 MAN M 3277 / M 3477"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "mercedes-benz",
+      "name": "Mercedes-Benz",
+      "country": "DE",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "actros",
+      "name": "Actros 2041 / 3344",
+      "category": "HEAVY_TRUCK",
+      "body_type": "TRACTOR_HEAD",
+      "year_start": 2003,
+      "year_end": 2026,
+      "popularity_dz_rank": 7
+    },
+    "variant": {
+      "engine_code": "MB_OM_501_LA",
+      "engine_name": "OM 501 LA V6 (11.9L)",
+      "wmi": "WDB",
+      "displacement_cc": 11946,
+      "power_hp": 435.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 650.0,
+      "ptac_kg": 44000.0,
+      "curb_weight_kg": 8600.0,
+      "consumption_mixed_l_100km": 34.5,
+      "consumption_idle_l_hour": 14.8,
+      "oil_capacity_liters": 38.0,
+      "oil_norm_spec": "10W-40 MB-Approval 228.5 / 228.51"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "scania",
+      "name": "Scania",
+      "country": "SE",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "r-g-series",
+      "name": "R 450 / G 410 Streamline",
+      "category": "HEAVY_TRUCK",
+      "body_type": "TRACTOR_HEAD",
+      "year_start": 2013,
+      "year_end": 2026,
+      "popularity_dz_rank": 8
+    },
+    "variant": {
+      "engine_code": "SCANIA_DC13_148",
+      "engine_name": "DC13 148 (12.7L Euro 5/6)",
+      "wmi": "YS2",
+      "displacement_cc": 12740,
+      "power_hp": 450.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 700.0,
+      "ptac_kg": 44000.0,
+      "curb_weight_kg": 8400.0,
+      "consumption_mixed_l_100km": 31.5,
+      "consumption_idle_l_hour": 13.5,
+      "oil_capacity_liters": 38.0,
+      "oil_norm_spec": "10W-40 Scania LDF-3 / LDF-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "volvo-trucks",
+      "name": "Volvo Trucks",
+      "country": "SE",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "fh-fm",
+      "name": "FH 460 / FM 400",
+      "category": "HEAVY_TRUCK",
+      "body_type": "TRACTOR_HEAD",
+      "year_start": 2010,
+      "year_end": 2026,
+      "popularity_dz_rank": 9
+    },
+    "variant": {
+      "engine_code": "VOLVO_D13C_460",
+      "engine_name": "D13C 460 (12.8L)",
+      "wmi": "YV2",
+      "displacement_cc": 12777,
+      "power_hp": 460.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 690.0,
+      "ptac_kg": 44000.0,
+      "curb_weight_kg": 8500.0,
+      "consumption_mixed_l_100km": 32.0,
+      "consumption_idle_l_hour": 13.8,
+      "oil_capacity_liters": 37.0,
+      "oil_norm_spec": "10W-40 Volvo VDS-4 / VDS-4.5"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "sinotruk",
+      "name": "Sinotruk Howo",
+      "country": "CN",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "howo-371",
+      "name": "HOWO 371 / A7",
+      "category": "HEAVY_TRUCK",
+      "body_type": "TIPPER",
+      "year_start": 2010,
+      "year_end": 2026,
+      "popularity_dz_rank": 10
+    },
+    "variant": {
+      "engine_code": "SINOTRUK_WD615_47",
+      "engine_name": "WD615.47 (9.7L Euro 2)",
+      "wmi": "LZZ",
+      "displacement_cc": 9726,
+      "power_hp": 371.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 380.0,
+      "ptac_kg": 38000.0,
+      "curb_weight_kg": 12200.0,
+      "consumption_mixed_l_100km": 38.5,
+      "consumption_idle_l_hour": 16.0,
+      "oil_capacity_liters": 26.0,
+      "oil_norm_spec": "15W-40 API CF-4 / CH-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "isuzu",
+      "name": "Isuzu",
+      "country": "JP",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "npr-nqr",
+      "name": "NPR 71 / NQR 75",
+      "category": "HEAVY_TRUCK",
+      "body_type": "RIGID_TRUCK",
+      "year_start": 2007,
+      "year_end": 2026,
+      "popularity_dz_rank": 11
+    },
+    "variant": {
+      "engine_code": "ISUZU_4HK1_TCN",
+      "engine_name": "4HK1-TCN (5.2L Turbo)",
+      "wmi": "JAA",
+      "displacement_cc": 5193,
+      "power_hp": 150.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 140.0,
+      "ptac_kg": 7500.0,
+      "curb_weight_kg": 2850.0,
+      "consumption_mixed_l_100km": 17.5,
+      "consumption_idle_l_hour": 6.2,
+      "oil_capacity_liters": 13.0,
+      "oil_norm_spec": "10W-40 ACEA E7 / API CI-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "hyundai",
+      "name": "Hyundai",
+      "country": "KR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "hd65-hd72",
+      "name": "HD65 / HD72",
+      "category": "HEAVY_TRUCK",
+      "body_type": "RIGID_TRUCK",
+      "year_start": 2005,
+      "year_end": 2026,
+      "popularity_dz_rank": 12
+    },
+    "variant": {
+      "engine_code": "HYUNDAI_D4DB",
+      "engine_name": "D4DB (3.9L Turbo Intercooler)",
+      "wmi": "KMF",
+      "displacement_cc": 3907,
+      "power_hp": 130.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 100.0,
+      "ptac_kg": 6500.0,
+      "curb_weight_kg": 2550.0,
+      "consumption_mixed_l_100km": 16.8,
+      "consumption_idle_l_hour": 5.8,
+      "oil_capacity_liters": 8.5,
+      "oil_norm_spec": "15W-40 API CH-4 / CI-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "renault",
+      "name": "Renault",
+      "country": "FR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "kangoo-ii",
+      "name": "Kangoo II / Express",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2008,
+      "year_end": 2021,
+      "popularity_dz_rank": 13
+    },
+    "variant": {
+      "engine_code": "RENAULT_K9K_808",
+      "engine_name": "1.5 dCi 85 / 90 (K9K)",
+      "wmi": "VF1",
+      "displacement_cc": 1461,
+      "power_hp": 90.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 60.0,
+      "ptac_kg": 1980.0,
+      "curb_weight_kg": 1250.0,
+      "consumption_mixed_l_100km": 4.7,
+      "consumption_idle_l_hour": 1.1,
+      "oil_capacity_liters": 4.5,
+      "oil_norm_spec": "5W-30 Renault RN0720 / ACEA C4 (ou 5W-40 RN0710)"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "renault",
+      "name": "Renault",
+      "country": "FR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "kangoo-ii-75",
+      "name": "Kangoo II Express 1.5 dCi 75",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2008,
+      "year_end": 2021,
+      "popularity_dz_rank": 13
+    },
+    "variant": {
+      "engine_code": "RENAULT_K9K_802",
+      "engine_name": "1.5 dCi 75 (K9K)",
+      "wmi": "VF1",
+      "displacement_cc": 1461,
+      "power_hp": 75.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 60.0,
+      "ptac_kg": 1950.0,
+      "curb_weight_kg": 1230.0,
+      "consumption_mixed_l_100km": 4.9,
+      "consumption_idle_l_hour": 1.1,
+      "oil_capacity_liters": 4.5,
+      "oil_norm_spec": "5W-30 Renault RN0720 / ACEA C4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "renault",
+      "name": "Renault",
+      "country": "FR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "kangoo-ii-110",
+      "name": "Kangoo II Express 1.5 dCi 110",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2008,
+      "year_end": 2021,
+      "popularity_dz_rank": 13
+    },
+    "variant": {
+      "engine_code": "RENAULT_K9K_804",
+      "engine_name": "1.5 dCi 110 (K9K)",
+      "wmi": "VF1",
+      "displacement_cc": 1461,
+      "power_hp": 110.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 60.0,
+      "ptac_kg": 2050.0,
+      "curb_weight_kg": 1280.0,
+      "consumption_mixed_l_100km": 4.6,
+      "consumption_idle_l_hour": 1.2,
+      "oil_capacity_liters": 4.5,
+      "oil_norm_spec": "5W-30 Renault RN0720 / ACEA C4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "renault",
+      "name": "Renault",
+      "country": "FR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "master-iii",
+      "name": "Master III",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2010,
+      "year_end": 2024,
+      "popularity_dz_rank": 14
+    },
+    "variant": {
+      "engine_code": "RENAULT_M9T_704",
+      "engine_name": "2.3 dCi M9T 135/150",
+      "wmi": "VF1",
+      "displacement_cc": 2299,
+      "power_hp": 150.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 80.0,
+      "ptac_kg": 3500.0,
+      "curb_weight_kg": 1950.0,
+      "consumption_mixed_l_100km": 9.8,
+      "consumption_idle_l_hour": 3.2,
+      "oil_capacity_liters": 8.9,
+      "oil_norm_spec": "5W-30 Renault RN0720 / ACEA C4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "renault",
+      "name": "Renault",
+      "country": "FR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "trafic-iii",
+      "name": "Trafic II / III",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2006,
+      "year_end": 2024,
+      "popularity_dz_rank": 15
+    },
+    "variant": {
+      "engine_code": "RENAULT_R9M_450",
+      "engine_name": "1.6 dCi 125 / 2.0 dCi",
+      "wmi": "VF1",
+      "displacement_cc": 1598,
+      "power_hp": 125.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 80.0,
+      "ptac_kg": 2900.0,
+      "curb_weight_kg": 1750.0,
+      "consumption_mixed_l_100km": 6.5,
+      "consumption_idle_l_hour": 1.8,
+      "oil_capacity_liters": 6.0,
+      "oil_norm_spec": "5W-30 Renault RN0720 / ACEA C4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "renault",
+      "name": "Renault",
+      "country": "FR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "clio-iv",
+      "name": "Clio IV / Clio Campus",
+      "category": "PASSENGER_CAR",
+      "body_type": "SEDAN",
+      "year_start": 2006,
+      "year_end": 2020,
+      "popularity_dz_rank": 16
+    },
+    "variant": {
+      "engine_code": "RENAULT_K9K_608",
+      "engine_name": "1.5 dCi 85 / 90 (K9K)",
+      "wmi": "VF1",
+      "displacement_cc": 1461,
+      "power_hp": 90.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 45.0,
+      "ptac_kg": 1650.0,
+      "curb_weight_kg": 1100.0,
+      "consumption_mixed_l_100km": 3.8,
+      "consumption_idle_l_hour": 0.9,
+      "oil_capacity_liters": 4.5,
+      "oil_norm_spec": "5W-30 RN0720 / ACEA C4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "toyota",
+      "name": "Toyota",
+      "country": "JP",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "hilux",
+      "name": "Hilux 4x4 Double Cabine",
+      "category": "LCV",
+      "body_type": "PICKUP",
+      "year_start": 2015,
+      "year_end": 2026,
+      "popularity_dz_rank": 17
+    },
+    "variant": {
+      "engine_code": "TOYOTA_2GD_FTV",
+      "engine_name": "2.4 D-4D (2GD-FTV)",
+      "wmi": "AHT",
+      "displacement_cc": 2393,
+      "power_hp": 150.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 80.0,
+      "ptac_kg": 3000.0,
+      "curb_weight_kg": 1975.0,
+      "consumption_mixed_l_100km": 8.8,
+      "consumption_idle_l_hour": 2.8,
+      "oil_capacity_liters": 7.5,
+      "oil_norm_spec": "5W-30 ACEA C2 / Toyota Genuine DL-1"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "toyota",
+      "name": "Toyota",
+      "country": "JP",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "land-cruiser-hzj79",
+      "name": "Land Cruiser HZJ79 Pick-up / HZJ76",
+      "category": "LCV",
+      "body_type": "PICKUP",
+      "year_start": 1999,
+      "year_end": 2026,
+      "popularity_dz_rank": 18
+    },
+    "variant": {
+      "engine_code": "TOYOTA_1HZ",
+      "engine_name": "1HZ 4.2L 6-Cylindres Atmosphérique",
+      "wmi": "JTE",
+      "displacement_cc": 4164,
+      "power_hp": 130.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 130.0,
+      "ptac_kg": 3200.0,
+      "curb_weight_kg": 2150.0,
+      "consumption_mixed_l_100km": 12.5,
+      "consumption_idle_l_hour": 3.8,
+      "oil_capacity_liters": 9.3,
+      "oil_norm_spec": "15W-40 API CF / CI-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "peugeot",
+      "name": "Peugeot",
+      "country": "FR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "partner",
+      "name": "Partner / Partner Tepee",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2008,
+      "year_end": 2024,
+      "popularity_dz_rank": 19
+    },
+    "variant": {
+      "engine_code": "PSA_DV6DTED",
+      "engine_name": "1.6 HDi 92 (DV6DTED)",
+      "wmi": "VF3",
+      "displacement_cc": 1560,
+      "power_hp": 92.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 60.0,
+      "ptac_kg": 1950.0,
+      "curb_weight_kg": 1320.0,
+      "consumption_mixed_l_100km": 5.6,
+      "consumption_idle_l_hour": 1.4,
+      "oil_capacity_liters": 3.75,
+      "oil_norm_spec": "5W-30 PSA B71 2290 / ACEA C2"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "peugeot",
+      "name": "Peugeot",
+      "country": "FR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "301",
+      "name": "301 / 208",
+      "category": "PASSENGER_CAR",
+      "body_type": "SEDAN",
+      "year_start": 2012,
+      "year_end": 2024,
+      "popularity_dz_rank": 20
+    },
+    "variant": {
+      "engine_code": "PSA_DV6_92",
+      "engine_name": "1.6 HDi 92 (DV6)",
+      "wmi": "VF3",
+      "displacement_cc": 1560,
+      "power_hp": 92.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 50.0,
+      "ptac_kg": 1590.0,
+      "curb_weight_kg": 1090.0,
+      "consumption_mixed_l_100km": 4.1,
+      "consumption_idle_l_hour": 1.0,
+      "oil_capacity_liters": 3.75,
+      "oil_norm_spec": "5W-30 PSA B71 2290 / ACEA C2"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "citroen",
+      "name": "Citroën",
+      "country": "FR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "berlingo-ii",
+      "name": "Berlingo II / Multispace",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2008,
+      "year_end": 2020,
+      "popularity_dz_rank": 21
+    },
+    "variant": {
+      "engine_code": "PSA_DV6D_90",
+      "engine_name": "1.6 HDi 90 / 92",
+      "wmi": "VF7",
+      "displacement_cc": 1560,
+      "power_hp": 92.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 60.0,
+      "ptac_kg": 1960.0,
+      "curb_weight_kg": 1330.0,
+      "consumption_mixed_l_100km": 5.6,
+      "consumption_idle_l_hour": 1.4,
+      "oil_capacity_liters": 3.75,
+      "oil_norm_spec": "5W-30 PSA B71 2290 / Total Quartz Ineo ECS"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "volkswagen",
+      "name": "Volkswagen",
+      "country": "DE",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "caddy-iii-iv",
+      "name": "Caddy III / IV Maxi",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2004,
+      "year_end": 2020,
+      "popularity_dz_rank": 22
+    },
+    "variant": {
+      "engine_code": "VW_CAYD_16TDI",
+      "engine_name": "1.6 TDI 102 (CAYD)",
+      "wmi": "WV1",
+      "displacement_cc": 1598,
+      "power_hp": 102.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 60.0,
+      "ptac_kg": 2180.0,
+      "curb_weight_kg": 1420.0,
+      "consumption_mixed_l_100km": 5.2,
+      "consumption_idle_l_hour": 1.2,
+      "oil_capacity_liters": 4.3,
+      "oil_norm_spec": "5W-30 VW 504.00 / 507.00 LongLife III"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "volkswagen",
+      "name": "Volkswagen",
+      "country": "DE",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "golf-vii",
+      "name": "Golf VII / Golf VI",
+      "category": "PASSENGER_CAR",
+      "body_type": "SEDAN",
+      "year_start": 2008,
+      "year_end": 2020,
+      "popularity_dz_rank": 23
+    },
+    "variant": {
+      "engine_code": "VW_CRBC_20TDI",
+      "engine_name": "2.0 TDI 110 / 150 (CRBC)",
+      "wmi": "WVW",
+      "displacement_cc": 1968,
+      "power_hp": 150.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 50.0,
+      "ptac_kg": 1850.0,
+      "curb_weight_kg": 1350.0,
+      "consumption_mixed_l_100km": 4.4,
+      "consumption_idle_l_hour": 1.1,
+      "oil_capacity_liters": 4.7,
+      "oil_norm_spec": "5W-30 VW 507.00 / ACEA C3"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "hyundai",
+      "name": "Hyundai",
+      "country": "KR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "accent",
+      "name": "Accent / i20",
+      "category": "PASSENGER_CAR",
+      "body_type": "SEDAN",
+      "year_start": 2006,
+      "year_end": 2022,
+      "popularity_dz_rank": 24
+    },
+    "variant": {
+      "engine_code": "HYUNDAI_D4FB_16CRDI",
+      "engine_name": "1.6 CRDi 128 (D4FB)",
+      "wmi": "KMH",
+      "displacement_cc": 1582,
+      "power_hp": 128.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 43.0,
+      "ptac_kg": 1610.0,
+      "curb_weight_kg": 1180.0,
+      "consumption_mixed_l_100km": 4.6,
+      "consumption_idle_l_hour": 1.1,
+      "oil_capacity_liters": 5.3,
+      "oil_norm_spec": "5W-30 ACEA C3 / API CH-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "hyundai",
+      "name": "Hyundai",
+      "country": "KR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "h100-bongo",
+      "name": "H100 / Porter II",
+      "category": "LCV",
+      "body_type": "PICKUP",
+      "year_start": 2004,
+      "year_end": 2024,
+      "popularity_dz_rank": 25
+    },
+    "variant": {
+      "engine_code": "HYUNDAI_D4CB_25CRDI",
+      "engine_name": "2.5 CRDi 130 (D4CB)",
+      "wmi": "KMF",
+      "displacement_cc": 2497,
+      "power_hp": 130.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 65.0,
+      "ptac_kg": 3050.0,
+      "curb_weight_kg": 1650.0,
+      "consumption_mixed_l_100km": 8.5,
+      "consumption_idle_l_hour": 2.2,
+      "oil_capacity_liters": 7.4,
+      "oil_norm_spec": "10W-40 / 15W-40 API CH-4 / CI-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "kia",
+      "name": "Kia",
+      "country": "KR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "k2700-k2500",
+      "name": "K2700 / K2500 Bongo",
+      "category": "LCV",
+      "body_type": "PICKUP",
+      "year_start": 2004,
+      "year_end": 2024,
+      "popularity_dz_rank": 26
+    },
+    "variant": {
+      "engine_code": "KIA_J2_27D",
+      "engine_name": "2.7 D J2 Atmosphérique",
+      "wmi": "KNE",
+      "displacement_cc": 2665,
+      "power_hp": 83.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 60.0,
+      "ptac_kg": 2980.0,
+      "curb_weight_kg": 1580.0,
+      "consumption_mixed_l_100km": 9.2,
+      "consumption_idle_l_hour": 2.4,
+      "oil_capacity_liters": 6.5,
+      "oil_norm_spec": "15W-40 API CF-4 / CI-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "kia",
+      "name": "Kia",
+      "country": "KR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "picanto",
+      "name": "Picanto / Rio",
+      "category": "PASSENGER_CAR",
+      "body_type": "SEDAN",
+      "year_start": 2011,
+      "year_end": 2024,
+      "popularity_dz_rank": 27
+    },
+    "variant": {
+      "engine_code": "KIA_G4LA_12",
+      "engine_name": "1.2 MPI 85 ch (G4LA)",
+      "wmi": "KN3",
+      "displacement_cc": 1248,
+      "power_hp": 85.0,
+      "fuel_type": "PETROL",
+      "tank_liters": 35.0,
+      "ptac_kg": 1370.0,
+      "curb_weight_kg": 960.0,
+      "consumption_mixed_l_100km": 4.8,
+      "consumption_idle_l_hour": 0.8,
+      "oil_capacity_liters": 3.5,
+      "oil_norm_spec": "5W-30 API SN / ACEA A5"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "fiat",
+      "name": "Fiat",
+      "country": "IT",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "ducato",
+      "name": "Ducato / Boxer",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2014,
+      "year_end": 2026,
+      "popularity_dz_rank": 28
+    },
+    "variant": {
+      "engine_code": "FIAT_22_MULTIJET",
+      "engine_name": "2.2 MultiJet3 140",
+      "wmi": "ZFA",
+      "displacement_cc": 2184,
+      "power_hp": 140.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 90.0,
+      "ptac_kg": 3500.0,
+      "curb_weight_kg": 1900.0,
+      "consumption_mixed_l_100km": 8.9,
+      "consumption_idle_l_hour": 2.6,
+      "oil_capacity_liters": 6.5,
+      "oil_norm_spec": "0W-30 / 5W-30 Fiat 9.55535-DS1"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "dacia",
+      "name": "Dacia",
+      "country": "RO",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "dokker",
+      "name": "Dokker / Lodgy",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2012,
+      "year_end": 2021,
+      "popularity_dz_rank": 29
+    },
+    "variant": {
+      "engine_code": "RENAULT_K9K_612",
+      "engine_name": "1.5 dCi 85 / 90 (K9K)",
+      "wmi": "UU1",
+      "displacement_cc": 1461,
+      "power_hp": 90.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 50.0,
+      "ptac_kg": 1850.0,
+      "curb_weight_kg": 1230.0,
+      "consumption_mixed_l_100km": 4.9,
+      "consumption_idle_l_hour": 1.1,
+      "oil_capacity_liters": 4.5,
+      "oil_norm_spec": "5W-30 RN0720 / ACEA C4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "dacia",
+      "name": "Dacia",
+      "country": "RO",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "duster-logan",
+      "name": "Duster / Logan / Sandero",
+      "category": "PASSENGER_CAR",
+      "body_type": "SEDAN",
+      "year_start": 2010,
+      "year_end": 2026,
+      "popularity_dz_rank": 30
+    },
+    "variant": {
+      "engine_code": "RENAULT_K9K_858",
+      "engine_name": "1.5 dCi 110 (K9K)",
+      "wmi": "UU1",
+      "displacement_cc": 1461,
+      "power_hp": 110.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 50.0,
+      "ptac_kg": 1750.0,
+      "curb_weight_kg": 1250.0,
+      "consumption_mixed_l_100km": 5.2,
+      "consumption_idle_l_hour": 1.2,
+      "oil_capacity_liters": 4.5,
+      "oil_norm_spec": "5W-30 RN0720 / ACEA C4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "iveco",
+      "name": "Iveco",
+      "country": "IT",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "daily",
+      "name": "Daily 35S / 50C",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2006,
+      "year_end": 2024,
+      "popularity_dz_rank": 31
+    },
+    "variant": {
+      "engine_code": "IVECO_F1A_23",
+      "engine_name": "2.3 HPI 130 / 140 (F1A)",
+      "wmi": "ZFC",
+      "displacement_cc": 2287,
+      "power_hp": 136.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 70.0,
+      "ptac_kg": 3500.0,
+      "curb_weight_kg": 2100.0,
+      "consumption_mixed_l_100km": 8.8,
+      "consumption_idle_l_hour": 2.4,
+      "oil_capacity_liters": 6.5,
+      "oil_norm_spec": "5W-30 Urania Daily LS / ACEA C2"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "jac",
+      "name": "JAC Motors",
+      "country": "CN",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "1040k",
+      "name": "1040K / HFC 1045",
+      "category": "HEAVY_TRUCK",
+      "body_type": "RIGID_TRUCK",
+      "year_start": 2008,
+      "year_end": 2026,
+      "popularity_dz_rank": 32
+    },
+    "variant": {
+      "engine_code": "JAC_HFC4DA1",
+      "engine_name": "2.8 Turbo Diesel (HFC4DA1)",
+      "wmi": "LJ1",
+      "displacement_cc": 2771,
+      "power_hp": 108.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 80.0,
+      "ptac_kg": 4500.0,
+      "curb_weight_kg": 2200.0,
+      "consumption_mixed_l_100km": 13.5,
+      "consumption_idle_l_hour": 3.5,
+      "oil_capacity_liters": 6.0,
+      "oil_norm_spec": "15W-40 API CF-4 / CI-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "caterpillar",
+      "name": "Caterpillar",
+      "country": "US",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "cat-320d-336d",
+      "name": "Pelle Hydraulique 320D / 336D",
+      "category": "CONSTRUCTION",
+      "body_type": "EXCAVATOR",
+      "year_start": 2008,
+      "year_end": 2026,
+      "popularity_dz_rank": 19
+    },
+    "variant": {
+      "engine_code": "CAT_C64_ACERT",
+      "engine_name": "Cat C6.4 Acert (6.4L Turbo)",
+      "wmi": "CAT",
+      "displacement_cc": 6400,
+      "power_hp": 148.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 410.0,
+      "ptac_kg": 22000.0,
+      "curb_weight_kg": 22000.0,
+      "consumption_mixed_l_100km": 0.0,
+      "consumption_idle_l_hour": 18.5,
+      "oil_capacity_liters": 30.0,
+      "oil_norm_spec": "15W-40 Cat ECF-2 / API CI-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 0,
+        "severe_km": 0,
+        "normal_hours": 500,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "caterpillar",
+      "name": "Caterpillar",
+      "country": "US",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "cat-966h",
+      "name": "Chargeuse sur Pneus 966H",
+      "category": "CONSTRUCTION",
+      "body_type": "EXCAVATOR",
+      "year_start": 2006,
+      "year_end": 2024,
+      "popularity_dz_rank": 20
+    },
+    "variant": {
+      "engine_code": "CAT_C11_ACERT",
+      "engine_name": "Cat C11 Acert (11.1L)",
+      "wmi": "CAT",
+      "displacement_cc": 11100,
+      "power_hp": 262.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 380.0,
+      "ptac_kg": 24000.0,
+      "curb_weight_kg": 24000.0,
+      "consumption_mixed_l_100km": 0.0,
+      "consumption_idle_l_hour": 22.0,
+      "oil_capacity_liters": 36.0,
+      "oil_norm_spec": "15W-40 Cat ECF-3 / API CJ-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 0,
+        "severe_km": 0,
+        "normal_hours": 500,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "jcb",
+      "name": "JCB",
+      "country": "UK",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "3cx-4cx",
+      "name": "Chargeuse-Pelleteuse 3CX / 4CX",
+      "category": "CONSTRUCTION",
+      "body_type": "EXCAVATOR",
+      "year_start": 2005,
+      "year_end": 2026,
+      "popularity_dz_rank": 21
+    },
+    "variant": {
+      "engine_code": "JCB_DIESELMAX_444",
+      "engine_name": "JCB Dieselmax 444 (4.4L Turbo)",
+      "wmi": "JCB",
+      "displacement_cc": 4400,
+      "power_hp": 92.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 160.0,
+      "ptac_kg": 8500.0,
+      "curb_weight_kg": 8070.0,
+      "consumption_mixed_l_100km": 0.0,
+      "consumption_idle_l_hour": 8.5,
+      "oil_capacity_liters": 15.0,
+      "oil_norm_spec": "15W-40 API CI-4 / CH-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 0,
+        "severe_km": 0,
+        "normal_hours": 500,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "cirta",
+      "name": "Cirta",
+      "country": "DZ",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "c-6807",
+      "name": "Tracteur Agricole C 6807",
+      "category": "AGRI_TRACTOR",
+      "body_type": "STANDARD",
+      "year_start": 1980,
+      "year_end": 2026,
+      "popularity_dz_rank": 22
+    },
+    "variant": {
+      "engine_code": "DEUTZ_F4L912",
+      "engine_name": "Deutz F4L912 (Air-Cooled 3.8L)",
+      "wmi": "VFA",
+      "displacement_cc": 3770,
+      "power_hp": 68.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 80.0,
+      "ptac_kg": 3500.0,
+      "curb_weight_kg": 3100.0,
+      "consumption_mixed_l_100km": 0.0,
+      "consumption_idle_l_hour": 6.5,
+      "oil_capacity_liters": 11.0,
+      "oil_norm_spec": "15W-40 API CD / CF"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "daf",
+      "name": "DAF",
+      "country": "NL",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "xf-105-460",
+      "name": "XF 105.460 / XF 460",
+      "category": "HEAVY_TRUCK",
+      "body_type": "TRACTOR_HEAD",
+      "year_start": 2006,
+      "year_end": 2024,
+      "popularity_dz_rank": 8
+    },
+    "variant": {
+      "engine_code": "DAF_MX13_340",
+      "engine_name": "PACCAR MX-13 460 (12.9L Euro 5)",
+      "wmi": "XLR",
+      "displacement_cc": 12902,
+      "power_hp": 460.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 850.0,
+      "ptac_kg": 44000.0,
+      "curb_weight_kg": 8600.0,
+      "consumption_mixed_l_100km": 33.0,
+      "consumption_idle_l_hour": 14.0,
+      "oil_capacity_liters": 40.0,
+      "oil_norm_spec": "10W-40 DAF Extended Drain / ACEA E6"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "iveco",
+      "name": "Iveco",
+      "country": "IT",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "stralis-440-480",
+      "name": "Stralis 440 / 480 Active Time/Space",
+      "category": "HEAVY_TRUCK",
+      "body_type": "TRACTOR_HEAD",
+      "year_start": 2004,
+      "year_end": 2022,
+      "popularity_dz_rank": 9
+    },
+    "variant": {
+      "engine_code": "IVECO_CURSOR_13",
+      "engine_name": "Cursor 13 F3B (12.9L Euro 3/5)",
+      "wmi": "WJM",
+      "displacement_cc": 12882,
+      "power_hp": 440.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 600.0,
+      "ptac_kg": 44000.0,
+      "curb_weight_kg": 8400.0,
+      "consumption_mixed_l_100km": 34.0,
+      "consumption_idle_l_hour": 14.5,
+      "oil_capacity_liters": 35.0,
+      "oil_norm_spec": "15W-40 / 10W-40 Petronas Urania LD 7 / ACEA E7"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "mercedes-benz",
+      "name": "Mercedes-Benz",
+      "country": "DE",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "atego-1218-1518",
+      "name": "Atego 1218 / 1518 Distribution",
+      "category": "HEAVY_TRUCK",
+      "body_type": "RIGID_TRUCK",
+      "year_start": 2004,
+      "year_end": 2026,
+      "popularity_dz_rank": 10
+    },
+    "variant": {
+      "engine_code": "MB_OM_904_LA",
+      "engine_name": "OM 904 LA (4.25L Turbo 177ch)",
+      "wmi": "WDB",
+      "displacement_cc": 4249,
+      "power_hp": 177.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 180.0,
+      "ptac_kg": 15000.0,
+      "curb_weight_kg": 5100.0,
+      "consumption_mixed_l_100km": 21.0,
+      "consumption_idle_l_hour": 7.5,
+      "oil_capacity_liters": 15.8,
+      "oil_norm_spec": "10W-40 MB-Approval 228.3 / 228.5"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "fuso",
+      "name": "Fuso",
+      "country": "JP",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "canter-3-0",
+      "name": "Canter 6C15 / 7C15",
+      "category": "HEAVY_TRUCK",
+      "body_type": "RIGID_TRUCK",
+      "year_start": 2011,
+      "year_end": 2026,
+      "popularity_dz_rank": 11
+    },
+    "variant": {
+      "engine_code": "FUSO_4P10_150",
+      "engine_name": "4P10-T4 3.0L Common Rail 150ch",
+      "wmi": "TYB",
+      "displacement_cc": 2998,
+      "power_hp": 150.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 100.0,
+      "ptac_kg": 6500.0,
+      "curb_weight_kg": 2600.0,
+      "consumption_mixed_l_100km": 15.5,
+      "consumption_idle_l_hour": 4.8,
+      "oil_capacity_liters": 6.5,
+      "oil_norm_spec": "5W-30 / 10W-40 ACEA E7/E9 / MB 228.3"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "faw",
+      "name": "FAW Jiefang",
+      "country": "CN",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "j6p-390-420",
+      "name": "J6P 390 / 420 6x4",
+      "category": "HEAVY_TRUCK",
+      "body_type": "TIPPER",
+      "year_start": 2012,
+      "year_end": 2026,
+      "popularity_dz_rank": 12
+    },
+    "variant": {
+      "engine_code": "FAW_CA6DL2_39",
+      "engine_name": "CA6DL2-39E3 / CA6DM2 (11.0L Euro 3)",
+      "wmi": "LFP",
+      "displacement_cc": 11050,
+      "power_hp": 390.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 400.0,
+      "ptac_kg": 40000.0,
+      "curb_weight_kg": 12600.0,
+      "consumption_mixed_l_100km": 38.0,
+      "consumption_idle_l_hour": 16.0,
+      "oil_capacity_liters": 28.0,
+      "oil_norm_spec": "15W-40 API CI-4 / FAW Heavy Duty"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "toyota",
+      "name": "Toyota",
+      "country": "JP",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "coaster-1hz",
+      "name": "Coaster Minibus 30-Places",
+      "category": "BUS",
+      "body_type": "MINIBUS",
+      "year_start": 1993,
+      "year_end": 2026,
+      "popularity_dz_rank": 13
+    },
+    "variant": {
+      "engine_code": "TOYOTA_1HZ_BUS",
+      "engine_name": "1HZ 4.2L 6-Cylindres Diesel Atmosphérique",
+      "wmi": "JTE",
+      "displacement_cc": 4164,
+      "power_hp": 130.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 95.0,
+      "ptac_kg": 5500.0,
+      "curb_weight_kg": 3350.0,
+      "consumption_mixed_l_100km": 13.8,
+      "consumption_idle_l_hour": 3.8,
+      "oil_capacity_liters": 9.8,
+      "oil_norm_spec": "15W-40 API CF / CI-4 Toyota Genuine"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 28000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 800,
+        "severe_hours": 550
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 28000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 63000,
+        "normal_hours": 2000,
+        "severe_hours": 1400
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 84000,
+        "normal_hours": 3000,
+        "severe_hours": 2100
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 70000,
+        "normal_hours": 2500,
+        "severe_hours": 1750
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "hyundai",
+      "name": "Hyundai",
+      "country": "KR",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "county-minibus",
+      "name": "County Minibus 29-Places",
+      "category": "BUS",
+      "body_type": "MINIBUS",
+      "year_start": 2004,
+      "year_end": 2026,
+      "popularity_dz_rank": 14
+    },
+    "variant": {
+      "engine_code": "HYUNDAI_D4DB_COUNTY",
+      "engine_name": "D4DB (3.9L Turbo Intercooler 130ch)",
+      "wmi": "KMF",
+      "displacement_cc": 3907,
+      "power_hp": 130.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 95.0,
+      "ptac_kg": 6670.0,
+      "curb_weight_kg": 4100.0,
+      "consumption_mixed_l_100km": 15.2,
+      "consumption_idle_l_hour": 4.2,
+      "oil_capacity_liters": 9.5,
+      "oil_norm_spec": "15W-40 API CH-4 / CI-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 28000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 800,
+        "severe_hours": 550
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 28000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 63000,
+        "normal_hours": 2000,
+        "severe_hours": 1400
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 84000,
+        "normal_hours": 3000,
+        "severe_hours": 2100
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 70000,
+        "normal_hours": 2500,
+        "severe_hours": 1750
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "snvi",
+      "name": "SNVI",
+      "country": "DZ",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "safir-100l6",
+      "name": "Autocar Safir / 100 L6",
+      "category": "BUS",
+      "body_type": "INTERCITY_BUS",
+      "year_start": 1998,
+      "year_end": 2024,
+      "popularity_dz_rank": 15
+    },
+    "variant": {
+      "engine_code": "CUMMINS_6BT_59",
+      "engine_name": "Cummins 6BT 5.9L Turbo Intercooler",
+      "wmi": "VFA",
+      "displacement_cc": 5883,
+      "power_hp": 180.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 200.0,
+      "ptac_kg": 12000.0,
+      "curb_weight_kg": 7200.0,
+      "consumption_mixed_l_100km": 24.0,
+      "consumption_idle_l_hour": 8.0,
+      "oil_capacity_liters": 16.5,
+      "oil_norm_spec": "15W-40 API CI-4 / Cummins CES 20076"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 40000,
+        "severe_km": 28000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 800,
+        "severe_hours": 550
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 28000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 63000,
+        "normal_hours": 2000,
+        "severe_hours": 1400
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 84000,
+        "normal_hours": 3000,
+        "severe_hours": 2100
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 70000,
+        "normal_hours": 2500,
+        "severe_hours": 1750
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "toyota",
+      "name": "Toyota",
+      "country": "JP",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "hiace-2kd",
+      "name": "HiAce Commuter / Fourgon",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2004,
+      "year_end": 2024,
+      "popularity_dz_rank": 16
+    },
+    "variant": {
+      "engine_code": "TOYOTA_2KD_FTV",
+      "engine_name": "2.5 D-4D 102ch (2KD-FTV)",
+      "wmi": "JTF",
+      "displacement_cc": 2494,
+      "power_hp": 102.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 70.0,
+      "ptac_kg": 3000.0,
+      "curb_weight_kg": 1850.0,
+      "consumption_mixed_l_100km": 8.5,
+      "consumption_idle_l_hour": 2.1,
+      "oil_capacity_liters": 6.9,
+      "oil_norm_spec": "5W-30 / 10W-40 API CF-4 / ACEA B3/B4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "mitsubishi",
+      "name": "Mitsubishi",
+      "country": "JP",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "l200-4d56",
+      "name": "L200 Double Cabine 4x4",
+      "category": "LCV",
+      "body_type": "PICKUP",
+      "year_start": 2006,
+      "year_end": 2022,
+      "popularity_dz_rank": 17
+    },
+    "variant": {
+      "engine_code": "MITSUBISHI_4D56_CR",
+      "engine_name": "2.5 DI-D Common Rail 136ch (4D56)",
+      "wmi": "MMC",
+      "displacement_cc": 2477,
+      "power_hp": 136.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 75.0,
+      "ptac_kg": 2850.0,
+      "curb_weight_kg": 1860.0,
+      "consumption_mixed_l_100km": 8.9,
+      "consumption_idle_l_hour": 2.4,
+      "oil_capacity_liters": 6.5,
+      "oil_norm_spec": "5W-30 / 10W-40 API CF / ACEA B3/B4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "dfsk",
+      "name": "DFSK (Dongfeng Sokon)",
+      "country": "CN",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "k01-c31",
+      "name": "K01 / K02 / C31 Mini-Camion",
+      "category": "LCV",
+      "body_type": "PICKUP",
+      "year_start": 2008,
+      "year_end": 2026,
+      "popularity_dz_rank": 18
+    },
+    "variant": {
+      "engine_code": "DFSK_DK12",
+      "engine_name": "DK12 1.2L 16V EFI Essence (88ch)",
+      "wmi": "LVT",
+      "displacement_cc": 1240,
+      "power_hp": 88.0,
+      "fuel_type": "PETROL",
+      "tank_liters": 40.0,
+      "ptac_kg": 1990.0,
+      "curb_weight_kg": 990.0,
+      "consumption_mixed_l_100km": 6.8,
+      "consumption_idle_l_hour": 1.2,
+      "oil_capacity_liters": 4.2,
+      "oil_norm_spec": "10W-40 API SN / SM"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "volkswagen",
+      "name": "Volkswagen",
+      "country": "DE",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "crafter-20tdi",
+      "name": "Crafter Grand Fourgon 2.0 TDI",
+      "category": "LCV",
+      "body_type": "VAN",
+      "year_start": 2011,
+      "year_end": 2024,
+      "popularity_dz_rank": 19
+    },
+    "variant": {
+      "engine_code": "VW_CKUB_20TDI",
+      "engine_name": "2.0 TDI BiTurbo 163ch (CKUB)",
+      "wmi": "WV1",
+      "displacement_cc": 1968,
+      "power_hp": 163.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 75.0,
+      "ptac_kg": 3500.0,
+      "curb_weight_kg": 2150.0,
+      "consumption_mixed_l_100km": 8.2,
+      "consumption_idle_l_hour": 2.2,
+      "oil_capacity_liters": 8.4,
+      "oil_norm_spec": "5W-30 VW 504.00 / 507.00 LongLife III"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "isuzu",
+      "name": "Isuzu",
+      "country": "JP",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "d-max",
+      "name": "D-Max Double Cab 4x4",
+      "category": "LCV",
+      "body_type": "PICKUP",
+      "year_start": 2007,
+      "year_end": 2024,
+      "popularity_dz_rank": 20
+    },
+    "variant": {
+      "engine_code": "ISUZU_4JK1_TCX",
+      "engine_name": "2.5 Ddi Turbo Intercooler 136ch (4JK1-TCX)",
+      "wmi": "MP1",
+      "displacement_cc": 2499,
+      "power_hp": 136.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 76.0,
+      "ptac_kg": 2950.0,
+      "curb_weight_kg": 1880.0,
+      "consumption_mixed_l_100km": 8.4,
+      "consumption_idle_l_hour": 2.3,
+      "oil_capacity_liters": 7.0,
+      "oil_norm_spec": "10W-40 ACEA E7 / API CI-4"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 15000,
+        "severe_km": 10000,
+        "normal_hours": 350,
+        "severe_hours": 250
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 20000,
+        "severe_km": 14000,
+        "normal_hours": 400,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 21000,
+        "normal_hours": 500,
+        "severe_hours": 350
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 45000,
+        "severe_km": 31000,
+        "normal_hours": 1000,
+        "severe_hours": 700
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1500,
+        "severe_hours": 1050
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 60000,
+        "severe_km": 42000,
+        "normal_hours": 1200,
+        "severe_hours": 850
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "komatsu",
+      "name": "Komatsu",
+      "country": "JP",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "pc200-8",
+      "name": "Pelle Hydraulique PC200-8 / PC220-8",
+      "category": "CONSTRUCTION",
+      "body_type": "EXCAVATOR",
+      "year_start": 2007,
+      "year_end": 2026,
+      "popularity_dz_rank": 21
+    },
+    "variant": {
+      "engine_code": "KOMATSU_SAA6D107E_1",
+      "engine_name": "SAA6D107E-1 (6.69L Turbo 150ch)",
+      "wmi": "KM1",
+      "displacement_cc": 6690,
+      "power_hp": 150.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 400.0,
+      "ptac_kg": 20900.0,
+      "curb_weight_kg": 20900.0,
+      "consumption_mixed_l_100km": 0.0,
+      "consumption_idle_l_hour": 16.5,
+      "oil_capacity_liters": 23.1,
+      "oil_norm_spec": "15W-40 API CI-4 / JASO DH-1"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 0,
+        "severe_km": 0,
+        "normal_hours": 500,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "sdlg",
+      "name": "SDLG (Shandong Lingong)",
+      "country": "CN",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "lg956l",
+      "name": "Chargeuse sur Pneus LG956L / LG958L",
+      "category": "CONSTRUCTION",
+      "body_type": "EXCAVATOR",
+      "year_start": 2011,
+      "year_end": 2026,
+      "popularity_dz_rank": 22
+    },
+    "variant": {
+      "engine_code": "WEICHAI_WD10G220",
+      "engine_name": "Weichai WD10G220E23 (9.7L 220ch)",
+      "wmi": "LDC",
+      "displacement_cc": 9726,
+      "power_hp": 220.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 300.0,
+      "ptac_kg": 17500.0,
+      "curb_weight_kg": 17500.0,
+      "consumption_mixed_l_100km": 0.0,
+      "consumption_idle_l_hour": 19.0,
+      "oil_capacity_liters": 20.0,
+      "oil_norm_spec": "15W-40 API CH-4 / CI-4 Weichai Special"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 0,
+        "severe_km": 0,
+        "normal_hours": 500,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  },
+  {
+    "brand": {
+      "slug": "liugong",
+      "name": "LiuGong",
+      "country": "CN",
+      "is_common_dz": true
+    },
+    "model": {
+      "slug": "clg856",
+      "name": "Chargeuse sur Pneus CLG856",
+      "category": "CONSTRUCTION",
+      "body_type": "EXCAVATOR",
+      "year_start": 2008,
+      "year_end": 2026,
+      "popularity_dz_rank": 23
+    },
+    "variant": {
+      "engine_code": "CUMMINS_6CTA83",
+      "engine_name": "Cummins 6CTA8.3 (8.3L Turbo 215ch)",
+      "wmi": "LG1",
+      "displacement_cc": 8300,
+      "power_hp": 215.0,
+      "fuel_type": "DIESEL",
+      "tank_liters": 300.0,
+      "ptac_kg": 17100.0,
+      "curb_weight_kg": 17100.0,
+      "consumption_mixed_l_100km": 0.0,
+      "consumption_idle_l_hour": 18.5,
+      "oil_capacity_liters": 24.0,
+      "oil_norm_spec": "15W-40 API CI-4 / Cummins CES 20078"
+    },
+    "tasks_count": 6,
+    "tasks": [
+      {
+        "task_code": "ENGINE_OIL_AND_FILTER",
+        "task_name": "Vidange huile moteur et remplacement filtre à huile",
+        "subsystem": "ENGINE",
+        "normal_km": 0,
+        "severe_km": 0,
+        "normal_hours": 500,
+        "severe_hours": 300
+      },
+      {
+        "task_code": "FUEL_FILTER_REPLACE",
+        "task_name": "Remplacement filtre à carburant et purge du préfiltre décanteur d'eau",
+        "subsystem": "FILTERS",
+        "normal_km": 30000,
+        "severe_km": 18000,
+        "normal_hours": 800,
+        "severe_hours": 500
+      },
+      {
+        "task_code": "AIR_FILTER_REPLACE",
+        "task_name": "Contrôle / soufflage et remplacement cartouche filtre à air moteur",
+        "subsystem": "FILTERS",
+        "normal_km": 40000,
+        "severe_km": 24000,
+        "normal_hours": 1000,
+        "severe_hours": 600
+      },
+      {
+        "task_code": "BRAKE_SYSTEM_INSPECTION",
+        "task_name": "Contrôle d'usure des garnitures/plaquettes et purge liquide de frein",
+        "subsystem": "BRAKES",
+        "normal_km": 90000,
+        "severe_km": 54000,
+        "normal_hours": 2000,
+        "severe_hours": 1200
+      },
+      {
+        "task_code": "COOLANT_FLUSH_THERMOSTAT",
+        "task_name": "Vidange circuit refroidissement, rinçage radiateur et contrôle thermostat",
+        "subsystem": "COOLING",
+        "normal_km": 120000,
+        "severe_km": 72000,
+        "normal_hours": 3000,
+        "severe_hours": 1800
+      },
+      {
+        "task_code": "GEARBOX_DIFFERENTIAL_OIL",
+        "task_name": "Vidange boîte de vitesses et pont(s) différentiel(s)",
+        "subsystem": "TRANSMISSION",
+        "normal_km": 100000,
+        "severe_km": 60000,
+        "normal_hours": 2500,
+        "severe_hours": 1500
+      }
+    ]
+  }
+]

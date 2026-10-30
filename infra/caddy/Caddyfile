@@ -1,0 +1,84 @@
+# Configuration Caddy Reverse Proxy pour DocteurFlotte SaaS
+# Remplacez les domaines par votre domaine ou sous-domaine de production
+# Ex: app.docteurflotte.dz, api.docteurflotte.dz, traccar.docteurflotte.dz, maps.docteurflotte.dz
+
+{$DOMAIN_WEB:localhost} {
+    # Sous-route pour les tuiles cartographiques souveraines PMTiles
+    handle_path /maps/* {
+        root * /var/www/maps
+        file_server
+
+        @pmtiles path *.pmtiles
+        header @pmtiles {
+            Accept-Ranges bytes
+            Access-Control-Allow-Origin *
+            Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+            Access-Control-Allow-Headers "Range, If-Modified-Since, Cache-Control"
+            Access-Control-Expose-Headers "Content-Length, Content-Range, ETag"
+            Cache-Control "public, no-transform, max-age=2592000"
+        }
+
+        @assets path /fonts/* /sprites/* /style.json
+        header @assets {
+            Access-Control-Allow-Origin *
+            Cache-Control "public, max-age=2592000"
+        }
+    }
+
+    handle {
+        encode gzip zstd
+        reverse_proxy web:3000
+
+        header {
+            Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+            X-Content-Type-Options "nosniff"
+            X-Frame-Options "DENY"
+            Referrer-Policy "strict-origin-when-cross-origin"
+            Permissions-Policy "geolocation=(self), camera=(self), microphone=()"
+        }
+    }
+}
+
+{$DOMAIN_MAPS:maps.localhost} {
+    root * /var/www/maps
+    file_server
+
+    @pmtiles path *.pmtiles
+    header @pmtiles {
+        Accept-Ranges bytes
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+        Access-Control-Allow-Headers "Range, If-Modified-Since, Cache-Control"
+        Access-Control-Expose-Headers "Content-Length, Content-Range, ETag"
+        Cache-Control "public, no-transform, max-age=2592000"
+    }
+
+    @assets path /fonts/* /sprites/* /style.json
+    header @assets {
+        Access-Control-Allow-Origin *
+        Cache-Control "public, max-age=2592000"
+    }
+}
+
+{$DOMAIN_API:localhost:3001} {
+    encode gzip zstd
+    reverse_proxy api:3001
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}
+
+{$DOMAIN_TRACCAR:localhost:8085} {
+    encode gzip zstd
+    reverse_proxy traccar:8082
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+    }
+}

@@ -1,0 +1,139 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: docteurflotte_postgres_prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-docteurflotte_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Veuillez définir POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-docteurflotte_prod}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./postgres/001-init-rls.sql:/docker-entrypoint-initdb.d/001-init-rls.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-docteurflotte_app} -d ${POSTGRES_DB:-docteurflotte_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - docteurflotte_prod_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: docteurflotte_redis_prod
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?Veuillez définir REDIS_PASSWORD}"]
+    volumes:
+      - redis_prod_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - docteurflotte_prod_net
+
+  traccar:
+    image: traccar/traccar:6.15.2-alpine
+    container_name: docteurflotte_traccar_prod
+    restart: unless-stopped
+    ports:
+      - "5055:5055"       # OsmAnd / Protocole HTTP Mobile
+      - "5023:5023"       # Teltonika FMB920 / FMB120 (TCP)
+      - "5023:5023/udp"   # Teltonika (UDP)
+    volumes:
+      - traccar_prod_data:/opt/traccar/data
+      - traccar_prod_logs:/opt/traccar/logs
+      - ./traccar/traccar.xml:/opt/traccar/conf/traccar.xml:ro
+    networks:
+      - docteurflotte_prod_net
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    container_name: docteurflotte_api_prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${POSTGRES_USER:-docteurflotte_app}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_NAME: ${POSTGRES_DB:-docteurflotte_prod}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Veuillez définir JWT_SECRET}
+      MISSION_ORDER_SIGNING_SECRET: ${MISSION_ORDER_SIGNING_SECRET:?Veuillez définir MISSION_ORDER_SIGNING_SECRET}
+      CORS_ORIGINS: https://${DOMAIN_WEB:-app.votreflotte.dz}
+      TRACCAR_API_URL: http://traccar:8082
+      TRACCAR_URL: http://traccar:8082
+      TRACCAR_USER: ${TRACCAR_USER:-admin}
+      TRACCAR_PASSWORD: ${TRACCAR_PASSWORD:?Veuillez définir TRACCAR_PASSWORD}
+      TRACCAR_WEBHOOK_SECRET: ${TRACCAR_WEBHOOK_SECRET:-}
+      FLESPI_WEBHOOK_TOKEN: ${FLESPI_WEBHOOK_TOKEN:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - docteurflotte_prod_net
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-https://api.votreflotte.dz}
+        NEXT_PUBLIC_NEST_API_URL: ${PUBLIC_API_URL:-https://api.votreflotte.dz}
+    container_name: docteurflotte_web_prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-https://api.votreflotte.dz}
+      NEXT_PUBLIC_NEST_API_URL: ${PUBLIC_API_URL:-https://api.votreflotte.dz}
+    depends_on:
+      - api
+    networks:
+      - docteurflotte_prod_net
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: docteurflotte_caddy_prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN_WEB: ${DOMAIN_WEB:-app.votreflotte.dz}
+      DOMAIN_API: ${DOMAIN_API:-api.votreflotte.dz}
+      DOMAIN_TRACCAR: ${DOMAIN_TRACCAR:-traccar.votreflotte.dz}
+      DOMAIN_MAPS: ${DOMAIN_MAPS:-maps.votreflotte.dz}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - maps_prod_data:/var/www/maps:ro
+      - caddy_prod_data:/data
+      - caddy_prod_config:/config
+    depends_on:
+      - web
+      - api
+      - traccar
+    networks:
+      - docteurflotte_prod_net
+
+volumes:
+  postgres_prod_data:
+  redis_prod_data:
+  traccar_prod_data:
+  traccar_prod_logs:
+  maps_prod_data:
+  caddy_prod_data:
+  caddy_prod_config:
+
+networks:
+  docteurflotte_prod_net:
+    driver: bridge

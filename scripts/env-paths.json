@@ -1,0 +1,58 @@
+{
+  "description": "Chemins d'exécutables et d'environnement pour l'hôte local Windows",
+  "updatedAt": "2026-10-24T14:24:00Z",
+  "runtimes": {
+    "node": {
+      "bin": "C:\\Users\\MAGICSOFTDZ\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "directory": "C:\\Users\\MAGICSOFTDZ\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin",
+      "version": "v24.22.1"
+    },
+    "pnpm": {
+      "cjs": "C:\\Users\\MAGICSOFTDZ\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\node_modules\\pnpm\\bin\\pnpm.cjs",
+      "ps1": "C:\\Users\\MAGICSOFTDZ\\AppData\\Roaming\\npm\\pnpm.ps1",
+      "version": "10.4.1"
+    },
+    "python": {
+      "bin": "C:\\Users\\MAGICSOFTDZ\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "directory": "C:\\Users\\MAGICSOFTDZ\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python",
+      "version": "3.12.14"
+    }
+  },
+  "workspace": {
+    "root": "e:\\docteurflotte_2027",
+    "apps": {
+      "api": "e:\\docteurflotte_2027\\apps\\api",
+      "web": "e:\\docteurflotte_2027\\apps\\web"
+    },
+    "packages": {
+      "contracts": "e:\\docteurflotte_2027\\packages\\contracts"
+    },
+    "infra": "e:\\docteurflotte_2027\\infra"
+  },
+  "services": {
+    "postgres": {
+      "host": "localhost",
+      "port": 5434,
+      "user": "docteurflotte_dev",
+      "db": "docteurflotte_dev"
+    },
+    "redis": {
+      "host": "localhost",
+      "port": 6380
+    },
+    "traccar": {
+      "host": "localhost",
+      "webPort": 8085,
+      "gpsPortOsmAnd": 5055,
+      "gpsPortTeltonika": 5023
+    },
+    "api": {
+      "host": "localhost",
+      "port": 3001
+    },
+    "web": {
+      "host": "localhost",
+      "port": 3000
+    }
+  }
+}

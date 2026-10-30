@@ -1,0 +1,172 @@
+{
+  "bomFormat": "CycloneDX-lite",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:docteurflotte-sbom-1793294732319",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-10-29T17:25:32.319Z",
+    "component": {
+      "type": "application",
+      "name": "docteurflotte-monorepo",
+      "version": "0.1.0"
+    }
+  },
+  "components": [
+    {
+      "name": "@docteurflotte/api",
+      "version": "0.1.0",
+      "type": "application",
+      "dependencies": [
+        {
+          "name": "@docteurflotte/contracts",
+          "version": "workspace:*"
+        },
+        {
+          "name": "@nestjs/common",
+          "version": "^10.4.15"
+        },
+        {
+          "name": "@nestjs/config",
+          "version": "^3.3.0"
+        },
+        {
+          "name": "@nestjs/core",
+          "version": "^10.4.15"
+        },
+        {
+          "name": "@nestjs/platform-express",
+          "version": "^10.4.15"
+        },
+        {
+          "name": "class-transformer",
+          "version": "^0.5.1"
+        },
+        {
+          "name": "class-validator",
+          "version": "^0.14.1"
+        },
+        {
+          "name": "ioredis",
+          "version": "^5.6.0"
+        },
+        {
+          "name": "pg",
+          "version": "^8.13.3"
+        },
+        {
+          "name": "reflect-metadata",
+          "version": "^0.2.2"
+        },
+        {
+          "name": "rxjs",
+          "version": "^7.8.1"
+        }
+      ],
+      "devDependencies": [
+        {
+          "name": "@nestjs/cli",
+          "version": "^10.4.9"
+        },
+        {
+          "name": "@nestjs/schematics",
+          "version": "^10.2.3"
+        },
+        {
+          "name": "@nestjs/testing",
+          "version": "^10.4.15"
+        },
+        {
+          "name": "@types/express",
+          "version": "^5.0.0"
+        },
+        {
+          "name": "@types/jest",
+          "version": "^29.5.14"
+        },
+        {
+          "name": "@types/node",
+          "version": "^22.13.4"
+        },
+        {
+          "name": "@types/pg",
+          "version": "^8.11.11"
+        },
+        {
+          "name": "@types/supertest",
+          "version": "^6.0.2"
+        },
+        {
+          "name": "jest",
+          "version": "^29.7.0"
+        },
+        {
+          "name": "supertest",
+          "version": "^7.0.0"
+        },
+        {
+          "name": "ts-jest",
+          "version": "^29.2.5"
+        },
+        {
+          "name": "ts-node",
+          "version": "^10.9.2"
+        },
+        {
+          "name": "typescript",
+          "version": "^5.7.3"
+        }
+      ]
+    },
+    {
+      "name": "@docteurflotte/web",
+      "version": "0.1.0",
+      "type": "application",
+      "dependencies": [
+        {
+          "name": "@docteurflotte/contracts",
+          "version": "workspace:*"
+        },
+        {
+          "name": "lucide-react",
+          "version": "^1.63.0"
+        },
+        {
+          "name": "next",
+          "version": "^15.1.7"
+        },
+        {
+          "name": "react",
+          "version": "^19.0.0"
+        },
+        {
+          "name": "react-dom",
+          "version": "^19.0.0"
+        }
+      ],
+      "devDependencies": [
+        {
+          "name": "@types/node",
+          "version": "^22.13.4"
+        },
+        {
+          "name": "@types/react",
+          "version": "^19.0.8"
+        },
+        {
+          "name": "@types/react-dom",
+          "version": "^19.0.3"
+        },
+        {
+          "name": "typescript",
+          "version": "^5.7.3"
+        }
+      ]
+    },
+    {
+      "name": "@docteurflotte/contracts",
+      "version": "0.1.0",
+      "type": "library",
+      "dependencies": []
+    }
+  ]
+}
