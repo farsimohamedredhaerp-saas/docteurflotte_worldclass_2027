@@ -2,17 +2,13 @@
 
 import React, { useState } from 'react';
 import {
-  AlertTriangle,
   Clock,
-  ShieldCheck,
   CheckCircle2,
   Wrench,
   Receipt,
-  FileQuestion,
-  HelpCircle,
   Calculator,
-  ArrowRight,
   Flame,
+  AlertCircle,
 } from 'lucide-react';
 
 interface MockDriftCard {
@@ -35,13 +31,13 @@ const INITIAL_PROACTIVE_CARDS: MockDriftCard[] = [
     id: 'anom-kerax-001',
     vehiclePlate: '00412-116-17',
     subsystem: 'MOTEUR',
-    anomalyType: 'DERIVE_THERMIQUE_LENTE_RADIATEUR',
+    anomalyType: 'DÉRIVE THERMIQUE LENTE RADIATEUR',
     severity: 'WARNING',
     metric: 'Température Liquide Refroidissement',
     drift: '+4.5°C sur 10 jours à charge égale (88.0°C -> 92.5°C)',
     physicalLaw: 'Dérive transfert convectif radiateur (poussières / sable Tell-Atlas)',
     estimatedCostDzd: 18000,
-    inactionRiskDzd: 350000, // Joint de culasse
+    inactionRiskDzd: 350000,
     cooldownHoursRemaining: 71,
     status: 'ACTIVE_CARD',
   },
@@ -49,13 +45,13 @@ const INITIAL_PROACTIVE_CARDS: MockDriftCard[] = [
     id: 'anom-actros-002',
     vehiclePlate: '01894-112-16',
     subsystem: 'FREINAGE',
-    anomalyType: 'USURE_ACCELEREE_ARCHARD_GARNITURES',
+    anomalyType: 'USURE ACCÉLÉRÉE ARCHARD GARNITURES',
     severity: 'CRITICAL',
     metric: 'Épaisseur Plaquettes Essieu 1 (Knorr SN7)',
     drift: '3.8 mm (Cote critique ENACTA: 3.0 mm, RUL estimée: 12 jours)',
     physicalLaw: 'Loi d Archard W = k·F·d/H (Traversée descendante Gorges de la Chiffa)',
     estimatedCostDzd: 44000,
-    inactionRiskDzd: 220000, // Destruction disques et refus contrôle ENACTA
+    inactionRiskDzd: 220000,
     cooldownHoursRemaining: 68,
     status: 'ACTIVE_CARD',
   },
@@ -92,140 +88,336 @@ export function ProactiveAnomaliesWidget() {
   const minDelta = Math.min(delta1, delta2, delta3);
 
   let winningScenario = 'AUCUN_SCENARIO_VALIDE';
-  if (delta1 <= 5) winningScenario = 'SCENARIO_1_BRUT_HT';
-  else if (delta2 <= 5) winningScenario = 'SCENARIO_2_TTC_19PCT';
-  else if (delta3 <= 5) winningScenario = 'SCENARIO_3_TIMBRE_OU_REMISE';
+  if (delta1 <= 5) winningScenario = 'SCÉNARIO 1 : ÉGALITÉ BRUTE HT';
+  else if (delta2 <= 5) winningScenario = 'SCÉNARIO 2 : TVA 19% ALGÉRIE';
+  else if (delta3 <= 5) winningScenario = 'SCÉNARIO 3 : TIMBRE DGI / REMISE';
 
   const isReconciled = minDelta <= 5;
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl space-y-6">
-      {/* En-tête avec bascule d'onglets */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Flame className="w-5 h-5 text-amber-400" />
-            <h3 className="text-lg font-semibold text-white">
-              Piliers 4 & 7 : Daemon Proactif 08h00 & Matrice de Réconciliation Factures
-            </h3>
+    <div
+      style={{
+        background: '#FFFFFF',
+        color: '#0F172A',
+        border: '1px solid #E2E8F0',
+        borderRadius: '16px',
+        padding: '24px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+      }}
+    >
+      {/* ── EN-TÊTE DU BLOC ── */}
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          borderBottom: '1px solid #E2E8F0',
+          paddingBottom: '16px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
+              background: '#FFFBEB',
+              border: '1px solid #FDE68A',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#D97706',
+            }}
+          >
+            <Flame size={22} />
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Machine à états avec Cooldown 72h anti-echo storm et calcul arithmétique déterministe HT / TVA 19% / Timbre DGI.
-          </p>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                Piliers 4 &amp; 7 : Daemon Proactif 08h00 &amp; Réconciliation Factures
+              </h3>
+            </div>
+            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
+              Machine à états avec Cooldown 72h anti-echo storm et calcul arithmétique déterministe HT / TVA 19% / Timbre DGI.
+            </div>
+          </div>
         </div>
 
-        <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
+        {/* Boutons d'onglets */}
+        <div
+          style={{
+            display: 'flex',
+            background: '#F1F5F9',
+            padding: '3px',
+            borderRadius: '10px',
+            border: '1px solid #CBD5E1',
+            gap: '4px',
+          }}
+        >
           <button
             onClick={() => setActiveTab('PROACTIVE_DAEMON')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${
-              activeTab === 'PROACTIVE_DAEMON'
-                ? 'bg-amber-600 text-white'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            style={{
+              padding: '6px 14px',
+              fontSize: '12px',
+              fontWeight: 700,
+              borderRadius: '7px',
+              border: 'none',
+              cursor: 'pointer',
+              background: activeTab === 'PROACTIVE_DAEMON' ? '#D97706' : 'transparent',
+              color: activeTab === 'PROACTIVE_DAEMON' ? '#FFFFFF' : '#475569',
+            }}
           >
             Veille Proactive 08h00
           </button>
           <button
             onClick={() => setActiveTab('INVOICE_RECONCILER')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${
-              activeTab === 'INVOICE_RECONCILER'
-                ? 'bg-amber-600 text-white'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            style={{
+              padding: '6px 14px',
+              fontSize: '12px',
+              fontWeight: 700,
+              borderRadius: '7px',
+              border: 'none',
+              cursor: 'pointer',
+              background: activeTab === 'INVOICE_RECONCILER' ? '#D97706' : 'transparent',
+              color: activeTab === 'INVOICE_RECONCILER' ? '#FFFFFF' : '#475569',
+            }}
           >
             Matrice Factures (3 Scénarios)
           </button>
         </div>
       </div>
 
-      {/* ONGLET 1 : VEILLE PROACTIVE 08h00 (PILIER 7) */}
+      {/* ── ONGLET 1 : VEILLE PROACTIVE 08h00 (PILIER 7) ── */}
       {activeTab === 'PROACTIVE_DAEMON' && (
-        <div className="space-y-4">
-          <div className="p-3 bg-amber-950/20 border border-amber-800/40 rounded-lg text-xs text-amber-300 flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-400" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div
+            style={{
+              padding: '12px 16px',
+              background: '#FFFBEB',
+              border: '1px solid #FDE68A',
+              borderRadius: '10px',
+              fontSize: '12px',
+              color: '#92400E',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '8px',
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Clock size={16} color="#d97706" />
               <strong>Verrou Anti-Echo Storm Actif :</strong> Aucune ré-émission d'alerte sous 72h si non acquittée ou si un Ordre de Travail est en cours.
             </span>
-            <span className="font-mono text-amber-400">Scan Dérives TimescaleDB : OK</span>
+            <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>Scan Dérives TimescaleDB : OPÉRATIONNEL</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gap: '16px',
+            }}
+          >
             {cards.map((card) => (
               <div
                 key={card.id}
-                className="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4 hover:border-slate-700 transition"
+                style={{
+                  background: '#F8FAFC',
+                  border: '1px solid #CBD5E1',
+                  borderRadius: '12px',
+                  padding: '18px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
               >
-                <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 text-xs font-bold rounded bg-amber-950 text-amber-400 border border-amber-800/50">
+                {/* En-tête de carte */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderBottom: '1px solid #E2E8F0',
+                    paddingBottom: '10px',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span
+                      style={{
+                        background: '#0F172A',
+                        color: '#FFFFFF',
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        fontFamily: 'monospace',
+                      }}
+                    >
                       {card.vehiclePlate}
                     </span>
-                    <span className="text-xs text-slate-300 font-semibold">{card.subsystem}</span>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                      {card.subsystem}
+                    </span>
                   </div>
 
                   <span
-                    className={`px-2 py-0.5 text-[11px] font-medium rounded ${
-                      card.status === 'WORK_ORDER_CREATED'
-                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                        : card.status === 'SNOOZED'
-                        ? 'bg-slate-800 text-slate-400'
-                        : 'bg-amber-950 text-amber-400 border border-amber-800'
-                    }`}
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      background:
+                        card.status === 'WORK_ORDER_CREATED'
+                          ? '#ECFDF5'
+                          : card.status === 'SNOOZED'
+                          ? '#E2E8F0'
+                          : '#FEF3C7',
+                      color:
+                        card.status === 'WORK_ORDER_CREATED'
+                          ? '#065F46'
+                          : card.status === 'SNOOZED'
+                          ? '#475569'
+                          : '#92400E',
+                      border:
+                        card.status === 'WORK_ORDER_CREATED'
+                          ? '1px solid #A7F3D0'
+                          : card.status === 'SNOOZED'
+                          ? '1px solid #CBD5E1'
+                          : '1px solid #FDE68A',
+                    }}
                   >
                     {card.status === 'WORK_ORDER_CREATED'
-                      ? '✓ OT Créé'
+                      ? '✓ Ordre de Travail Créé'
                       : card.status === 'SNOOZED'
                       ? 'Mise en veille 72h'
-                      : 'Zero-Prompt 08h00'}
+                      : 'Zero-Prompt Matinal 08h00'}
                   </span>
                 </div>
 
+                {/* Détails anomalie */}
                 <div>
-                  <h4 className="text-sm font-semibold text-white">{card.anomalyType.replace(/_/g, ' ')}</h4>
-                  <p className="text-xs text-slate-400 mt-1">{card.metric}</p>
-                  <p className="text-xs font-mono text-amber-300 mt-1 bg-slate-900/80 p-2 rounded border border-slate-800">
+                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                    {card.anomalyType}
+                  </h4>
+                  <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>{card.metric}</div>
+                  <div
+                    style={{
+                      marginTop: '6px',
+                      background: '#FFFFFF',
+                      border: '1px solid #E2E8F0',
+                      borderRadius: '6px',
+                      padding: '8px 12px',
+                      fontSize: '12px',
+                      fontFamily: 'monospace',
+                      fontWeight: 700,
+                      color: '#B45309',
+                    }}
+                  >
                     {card.drift}
-                  </p>
+                  </div>
                 </div>
 
-                <div className="text-[11px] text-slate-400 bg-slate-900/40 p-2 rounded">
-                  <strong>Preuve Physique :</strong> {card.physicalLaw}
+                <div
+                  style={{
+                    fontSize: '11px',
+                    color: '#475569',
+                    background: '#F1F5F9',
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <strong style={{ color: '#0F172A' }}>Preuve Physique :</strong> {card.physicalLaw}
                 </div>
 
                 {/* Arbitrage Financier DZD */}
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="bg-slate-900 p-2 rounded border border-slate-800">
-                    <span className="text-slate-400 block text-[10px]">Action Préventive</span>
-                    <span className="text-emerald-400 font-bold font-mono">
-                      {card.estimatedCostDzd.toLocaleString()} DZD
-                    </span>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <div
+                    style={{
+                      background: '#FFFFFF',
+                      border: '1px solid #BBF7D0',
+                      borderRadius: '8px',
+                      padding: '8px 10px',
+                    }}
+                  >
+                    <div style={{ fontSize: '10px', fontWeight: 700, color: '#166534', textTransform: 'uppercase' }}>
+                      Action Préventive :
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 800, color: '#047857', fontFamily: 'monospace', marginTop: '2px' }}>
+                      {card.estimatedCostDzd.toLocaleString('fr-DZ')} DZD
+                    </div>
                   </div>
-                  <div className="bg-slate-900 p-2 rounded border border-slate-800">
-                    <span className="text-slate-400 block text-[10px]">Risque Inaction</span>
-                    <span className="text-rose-400 font-bold font-mono">
-                      {card.inactionRiskDzd.toLocaleString()} DZD
-                    </span>
+
+                  <div
+                    style={{
+                      background: '#FFFFFF',
+                      border: '1px solid #FECACA',
+                      borderRadius: '8px',
+                      padding: '8px 10px',
+                    }}
+                  >
+                    <div style={{ fontSize: '10px', fontWeight: 700, color: '#991B1B', textTransform: 'uppercase' }}>
+                      Risque Inaction :
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 800, color: '#DC2626', fontFamily: 'monospace', marginTop: '2px' }}>
+                      {card.inactionRiskDzd.toLocaleString('fr-DZ')} DZD
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
-                  <span className="text-[11px] text-slate-500 font-mono">
-                    Cooldown restant : {card.cooldownHoursRemaining}h
+                {/* Actions */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingTop: '8px',
+                    borderTop: '1px solid #E2E8F0',
+                  }}
+                >
+                  <span style={{ fontSize: '11px', color: '#64748B', fontFamily: 'monospace' }}>
+                    Cooldown actif : <strong>{card.cooldownHoursRemaining}h</strong>
                   </span>
 
                   {card.status === 'ACTIVE_CARD' && (
-                    <div className="flex gap-2">
+                    <div style={{ display: 'flex', gap: '6px' }}>
                       <button
                         onClick={() => handleSnooze(card.id)}
-                        className="px-2.5 py-1 text-xs text-slate-300 bg-slate-800 hover:bg-slate-700 rounded transition"
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          borderRadius: '6px',
+                          border: '1px solid #CBD5E1',
+                          background: '#FFFFFF',
+                          color: '#334155',
+                          cursor: 'pointer',
+                        }}
                       >
                         Snooze 72h
                       </button>
                       <button
                         onClick={() => handleCreateWorkOrder(card.id)}
-                        className="px-3 py-1 text-xs font-medium text-white bg-amber-600 hover:bg-amber-500 rounded transition flex items-center gap-1"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '6px 14px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          borderRadius: '6px',
+                          border: 'none',
+                          background: '#059669',
+                          color: '#FFFFFF',
+                          cursor: 'pointer',
+                        }}
                       >
-                        <Wrench className="w-3 h-3" /> Créer OT 1-Clic
+                        <Wrench size={13} /> Créer OT 1-Clic
                       </button>
                     </div>
                   )}
@@ -236,115 +428,281 @@ export function ProactiveAnomaliesWidget() {
         </div>
       )}
 
-      {/* ONGLET 2 : MATRICE DE RÉCONCILIATION FACTURES ATELIER (PILIER 4) */}
+      {/* ── ONGLET 2 : MATRICE DE RÉCONCILIATION FACTURES ATELIER (PILIER 4) ── */}
       {activeTab === 'INVOICE_RECONCILER' && (
-        <div className="space-y-5">
-          <div className="p-3 bg-sky-950/20 border border-sky-800/40 rounded-lg text-xs text-sky-300 flex items-center gap-2">
-            <Calculator className="w-4 h-4 text-sky-400" />
-            <strong>Règle Déterministe d'Immunité Fiscale :</strong> Validation automatique si au moins l'un des 3 scénarios (HT direct, TTC 19% TVA algérienne, Timbre fiscal DGI 1% / Remise) concorde à ± 5 DZD près.
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div
+            style={{
+              padding: '12px 16px',
+              background: '#EFF6FF',
+              border: '1px solid #BFDBFE',
+              borderRadius: '10px',
+              fontSize: '12px',
+              color: '#1E40AF',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <Calculator size={18} color="#2563eb" />
+            <span>
+              <strong>Règle Déterministe d'Immunité Fiscale :</strong> Validation automatique si au moins l'un des 3 scénarios (HT direct, TVA algérienne 19%, Timbre fiscal DGI 1% / Remise) concorde à ± 5 DZD près.
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gap: '20px',
+            }}
+          >
             {/* Colonne Saisie Facture */}
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4">
-              <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                <Receipt className="w-4 h-4 text-amber-400" />
+            <div
+              style={{
+                background: '#F8FAFC',
+                border: '1px solid #CBD5E1',
+                borderRadius: '12px',
+                padding: '18px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+              }}
+            >
+              <h4
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  color: '#475569',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  margin: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <Receipt size={16} color="#d97706" />
                 Données Extraites du Bon d'Atelier
               </h4>
 
-              <div className="space-y-3 text-xs">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px' }}>
                 <div>
-                  <label className="text-slate-400 block mb-1">Ligne 1 : Plaquettes Knorr SN7 (DZD)</label>
+                  <label style={{ display: 'block', color: '#475569', marginBottom: '4px', fontWeight: 600 }}>
+                    Ligne 1 : Plaquettes Knorr SN7 (DZD)
+                  </label>
                   <input
                     type="number"
                     value={line1Total}
                     onChange={(e) => setLine1Total(Number(e.target.value))}
-                    className="w-full bg-slate-900 border border-slate-800 rounded p-2 text-slate-200 font-mono"
+                    style={{
+                      width: '100%',
+                      background: '#FFFFFF',
+                      border: '1px solid #CBD5E1',
+                      borderRadius: '6px',
+                      padding: '8px 10px',
+                      fontSize: '13px',
+                      fontFamily: 'monospace',
+                      fontWeight: 700,
+                      color: '#0F172A',
+                    }}
                   />
                 </div>
 
                 <div>
-                  <label className="text-slate-400 block mb-1">Ligne 2 : Disques de frein 45mm (DZD)</label>
+                  <label style={{ display: 'block', color: '#475569', marginBottom: '4px', fontWeight: 600 }}>
+                    Ligne 2 : Disques de frein 45mm (DZD)
+                  </label>
                   <input
                     type="number"
                     value={line2Total}
                     onChange={(e) => setLine2Total(Number(e.target.value))}
-                    className="w-full bg-slate-900 border border-slate-800 rounded p-2 text-slate-200 font-mono"
+                    style={{
+                      width: '100%',
+                      background: '#FFFFFF',
+                      border: '1px solid #CBD5E1',
+                      borderRadius: '6px',
+                      padding: '8px 10px',
+                      fontSize: '13px',
+                      fontFamily: 'monospace',
+                      fontWeight: 700,
+                      color: '#0F172A',
+                    }}
                   />
                 </div>
 
-                <div className="p-2.5 bg-slate-900 rounded border border-slate-800/80 flex justify-between font-mono">
-                  <span className="text-slate-400">Somme des Lignes (HT) :</span>
-                  <span className="text-white font-bold">{sumLines.toLocaleString()} DZD</span>
+                <div
+                  style={{
+                    padding: '10px 12px',
+                    background: '#FFFFFF',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span style={{ color: '#475569', fontWeight: 600 }}>Somme des Lignes (HT) :</span>
+                  <span style={{ fontSize: '14px', fontWeight: 800, color: '#0F172A', fontFamily: 'monospace' }}>
+                    {sumLines.toLocaleString('fr-DZ')} DZD
+                  </span>
                 </div>
 
-                <div className="border-t border-slate-800 pt-3">
-                  <label className="text-amber-400 block mb-1 font-semibold">Total Réclamé en Bas de Page (DZD)</label>
+                <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '10px' }}>
+                  <label style={{ display: 'block', color: '#B45309', marginBottom: '4px', fontWeight: 800 }}>
+                    Total Réclamé en Bas de Page (DZD)
+                  </label>
                   <input
                     type="number"
                     value={claimedTotal}
                     onChange={(e) => setClaimedTotal(Number(e.target.value))}
-                    className="w-full bg-slate-900 border border-amber-500/50 rounded p-2 text-amber-300 font-mono font-bold text-sm"
+                    style={{
+                      width: '100%',
+                      background: '#FFFBEB',
+                      border: '2px solid #F59E0B',
+                      borderRadius: '6px',
+                      padding: '8px 10px',
+                      fontSize: '15px',
+                      fontFamily: 'monospace',
+                      fontWeight: 800,
+                      color: '#92400E',
+                    }}
                   />
                 </div>
               </div>
             </div>
 
             {/* Colonne Résultat Matrice 3 Scénarios */}
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4">
-              <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <div
+              style={{
+                background: '#F8FAFC',
+                border: '1px solid #CBD5E1',
+                borderRadius: '12px',
+                padding: '18px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+              }}
+            >
+              <h4
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  color: '#475569',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  margin: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <CheckCircle2 size={16} color="#059669" />
                 Évaluation Déterministe en Centimes Entiers
               </h4>
 
-              <div className="space-y-2 text-xs">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
                 {/* Scénario 1 */}
                 <div
-                  className={`p-3 rounded-lg border flex items-center justify-between ${
-                    winningScenario === 'SCENARIO_1_BRUT_HT'
-                      ? 'bg-emerald-950/40 border-emerald-500/60 text-emerald-300'
-                      : 'bg-slate-900 border-slate-800 text-slate-400'
-                  }`}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    border: delta1 <= 5 ? '1px solid #86EFAC' : '1px solid #E2E8F0',
+                    background: delta1 <= 5 ? '#F0FDF4' : '#FFFFFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
                 >
                   <div>
-                    <strong className="block text-slate-200">1. Égalité Brute HT</strong>
-                    <span className="text-[11px]">|Somme - Total| = {delta1.toFixed(2)} DZD</span>
+                    <strong style={{ color: delta1 <= 5 ? '#166534' : '#334155' }}>
+                      1. Égalité Brute HT
+                    </strong>
+                    <div style={{ fontSize: '11px', color: '#64748B', fontFamily: 'monospace' }}>
+                      |Somme - Total| = {delta1.toFixed(2)} DZD
+                    </div>
                   </div>
-                  <span className="font-mono text-xs font-bold">
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      fontFamily: 'monospace',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      background: delta1 <= 5 ? '#DCFCE7' : '#F1F5F9',
+                      color: delta1 <= 5 ? '#15803D' : '#64748B',
+                    }}
+                  >
                     {delta1 <= 5 ? '✓ CONCORDE' : '✕ ÉCART'}
                   </span>
                 </div>
 
                 {/* Scénario 2 */}
                 <div
-                  className={`p-3 rounded-lg border flex items-center justify-between ${
-                    winningScenario === 'SCENARIO_2_TTC_19PCT'
-                      ? 'bg-emerald-950/40 border-emerald-500/60 text-emerald-300'
-                      : 'bg-slate-900 border-slate-800 text-slate-400'
-                  }`}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    border: delta2 <= 5 ? '1px solid #86EFAC' : '1px solid #E2E8F0',
+                    background: delta2 <= 5 ? '#F0FDF4' : '#FFFFFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
                 >
                   <div>
-                    <strong className="block text-slate-200">2. Soumission avec TVA 19%</strong>
-                    <span className="text-[11px]">|Somme × 1.19 - Total| = {delta2.toFixed(2)} DZD</span>
+                    <strong style={{ color: delta2 <= 5 ? '#166534' : '#334155' }}>
+                      2. Soumission avec TVA 19%
+                    </strong>
+                    <div style={{ fontSize: '11px', color: '#64748B', fontFamily: 'monospace' }}>
+                      |Somme × 1.19 - Total| = {delta2.toFixed(2)} DZD
+                    </div>
                   </div>
-                  <span className="font-mono text-xs font-bold">
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      fontFamily: 'monospace',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      background: delta2 <= 5 ? '#DCFCE7' : '#F1F5F9',
+                      color: delta2 <= 5 ? '#15803D' : '#64748B',
+                    }}
+                  >
                     {delta2 <= 5 ? '✓ CONCORDE' : '✕ ÉCART'}
                   </span>
                 </div>
 
                 {/* Scénario 3 */}
                 <div
-                  className={`p-3 rounded-lg border flex items-center justify-between ${
-                    winningScenario === 'SCENARIO_3_TIMBRE_OU_REMISE'
-                      ? 'bg-emerald-950/40 border-emerald-500/60 text-emerald-300'
-                      : 'bg-slate-900 border-slate-800 text-slate-400'
-                  }`}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    border: delta3 <= 5 ? '1px solid #86EFAC' : '1px solid #E2E8F0',
+                    background: delta3 <= 5 ? '#F0FDF4' : '#FFFFFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
                 >
                   <div>
-                    <strong className="block text-slate-200">3. Timbre DGI (1%) ou Remise</strong>
-                    <span className="text-[11px]">|Somme + Timbre - Remise - Total| = {delta3.toFixed(2)} DZD</span>
+                    <strong style={{ color: delta3 <= 5 ? '#166534' : '#334155' }}>
+                      3. Timbre DGI (1%) ou Remise
+                    </strong>
+                    <div style={{ fontSize: '11px', color: '#64748B', fontFamily: 'monospace' }}>
+                      |Somme + Timbre - Remise - Total| = {delta3.toFixed(2)} DZD
+                    </div>
                   </div>
-                  <span className="font-mono text-xs font-bold">
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      fontFamily: 'monospace',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      background: delta3 <= 5 ? '#DCFCE7' : '#F1F5F9',
+                      color: delta3 <= 5 ? '#15803D' : '#64748B',
+                    }}
+                  >
                     {delta3 <= 5 ? '✓ CONCORDE' : '✕ ÉCART'}
                   </span>
                 </div>
@@ -352,16 +710,25 @@ export function ProactiveAnomaliesWidget() {
 
               {/* Statut Final */}
               <div
-                className={`p-3 rounded-lg border text-center ${
-                  isReconciled
-                    ? 'bg-emerald-950/60 border-emerald-500 text-emerald-300'
-                    : 'bg-rose-950/60 border-rose-500 text-rose-300'
-                }`}
+                style={{
+                  padding: '12px',
+                  borderRadius: '10px',
+                  border: isReconciled ? '2px solid #10B981' : '2px solid #EF4444',
+                  background: isReconciled ? '#ECFDF5' : '#FEF2F2',
+                  textAlign: 'center',
+                }}
               >
-                <div className="text-xs uppercase font-bold tracking-wider">
+                <div
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    color: isReconciled ? '#065F46' : '#991B1B',
+                  }}
+                >
                   {isReconciled ? '✓ STATUT : RÉCONCILIÉ AUTOMATIQUE' : '⚠ STATUT : RELECTURE MANUELLE REQUISE'}
                 </div>
-                <div className="text-[11px] mt-1 opacity-90">
+                <div style={{ fontSize: '11px', marginTop: '4px', color: isReconciled ? '#047857' : '#B91C1C' }}>
                   {isReconciled
                     ? `Validé via ${winningScenario} (Écart min: ${minDelta.toFixed(2)} DZD ≤ 5.00 DZD tolérance).`
                     : `Écart arithmétique inconciliable (> 5 DZD). Risque d'erreur ou de surfacturation.`}

@@ -8,10 +8,10 @@ import {
   ShieldCheck,
   Wrench,
   Gauge,
-  Cpu,
   RefreshCw,
   SlidersHorizontal,
   FileCheck,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface StructuredSpecs {
@@ -34,7 +34,7 @@ interface SearchResult {
 
 const QUICK_PRESETS = [
   { label: 'Culasse Kerax 440 (Couples Nm)', query: 'couple de serrage culasse kerax 440' },
-  { label: 'DTC P0087 Shacman Common Rail', query: 'P0087 shacman pression rampe faible' },
+  { label: 'DTC P0087 Shacman Common Rail', query: 'P0087 shacman pression rampe' },
   { label: 'Contrôle Freinage ENACTA (Décret 03-223)', query: 'seuil déséquilibre freinage ENACTA' },
   { label: 'DTC SPN 3216 FMI 14 Sonde NOx', query: 'SPN 3216 FMI 14 sonde nox' },
   { label: 'Disques Actros SN7 & Épaisseurs', query: 'usure plaquettes actros sn7' },
@@ -123,70 +123,167 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
   }, [selectedSubsystem]);
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl space-y-6">
-      {/* En-tête */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-lg font-semibold text-white">
-              Pilier 3 : RAG Hybride Souverain & Reciprocal Rank Fusion (RRF)
-            </h3>
-            <span className="px-2 py-0.5 text-xs font-medium bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">
-              BM25 + pg_trgm + JSONB
-            </span>
+    <div
+      style={{
+        background: '#FFFFFF',
+        color: '#0F172A',
+        border: '1px solid #E2E8F0',
+        borderRadius: '16px',
+        padding: '24px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+      }}
+    >
+      {/* ── EN-TÊTE DU BLOC ── */}
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          borderBottom: '1px solid #E2E8F0',
+          paddingBottom: '16px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
+              background: '#ECFDF5',
+              border: '1px solid #A7F3D0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#059669',
+            }}
+          >
+            <BookOpen size={22} />
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Recherche technique déterministe sous les 20 ms : Manuels constructeurs (Kerax 440, Shacman WP12, Actros) & Barème ENACTA Algérie.
-          </p>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                Pilier 3 : RAG Hybride Souverain &amp; Reciprocal Rank Fusion (RRF)
+              </h3>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  background: '#EFF6FF',
+                  color: '#2563EB',
+                  border: '1px solid #BFDBFE',
+                }}
+              >
+                BM25 + pg_trgm + JSONB
+              </span>
+            </div>
+            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
+              Recherche technique déterministe sous les 20 ms : Manuels constructeurs (Kerax 440, Shacman WP12, Actros) &amp; Barème ENACTA Algérie.
+            </div>
+          </div>
         </div>
 
         <button
           onClick={handleSeedCatalog}
           disabled={isSeeding}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            fontSize: '12px',
+            fontWeight: 700,
+            borderRadius: '8px',
+            background: '#F1F5F9',
+            color: '#1E293B',
+            border: '1px solid #CBD5E1',
+            cursor: isSeeding ? 'not-allowed' : 'pointer',
+          }}
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isSeeding ? 'animate-spin' : ''}`} />
+          <RefreshCw size={14} className={isSeeding ? 'animate-spin' : ''} />
           {isSeeding ? 'Amorçage...' : 'Amorcer Catalogue OEM/ENACTA'}
         </button>
       </div>
 
       {seedStatus && (
-        <div className="p-3 bg-emerald-950/40 border border-emerald-800/60 rounded-lg text-xs text-emerald-300 flex items-center gap-2">
-          <FileCheck className="w-4 h-4 text-emerald-400" />
+        <div
+          style={{
+            padding: '10px 14px',
+            background: '#F0FDF4',
+            border: '1px solid #BBF7D0',
+            borderRadius: '8px',
+            fontSize: '12px',
+            color: '#166534',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
+          <CheckCircle2 size={16} color="#16a34a" />
           {seedStatus}
         </div>
       )}
 
-      {/* Barre de Recherche & Filtres */}
-      <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+      {/* ── BARRE DE RECHERCHE & PRESETS ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: '280px' }}>
+            <Search
+              size={18}
+              style={{ position: 'absolute', left: '12px', top: '11px', color: '#64748B' }}
+            />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && executeSearch()}
-              placeholder="Ex: couple de serrage culasse kerax, P0087 shacman, déséquilibre freinage ENACTA..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"
+              placeholder="Ex: couple de serrage culasse kerax, P0087 shacman, seuil déséquilibre freinage ENACTA..."
+              style={{
+                width: '100%',
+                background: '#F8FAFC',
+                color: '#0F172A',
+                border: '1px solid #CBD5E1',
+                borderRadius: '8px',
+                padding: '9px 12px 9px 38px',
+                fontSize: '14px',
+                fontWeight: 500,
+                outline: 'none',
+              }}
             />
           </div>
 
           <button
             onClick={() => executeSearch()}
             disabled={isLoading}
-            className="flex items-center justify-center gap-2 px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '9px 20px',
+              background: '#059669',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+            }}
           >
-            {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+            {isLoading ? <RefreshCw size={15} className="animate-spin" /> : <Search size={15} />}
             Rechercher
           </button>
         </div>
 
-        {/* Boutons Rapides */}
-        <div className="flex flex-wrap gap-2 pt-1">
-          <span className="text-xs text-slate-500 flex items-center gap-1">
-            <SlidersHorizontal className="w-3 h-3" /> Exemples DZ :
+        {/* Exemples rapides cliquables */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <SlidersHorizontal size={13} /> Exemples Algérie :
           </span>
           {QUICK_PRESETS.map((preset, idx) => (
             <button
@@ -195,7 +292,16 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
                 setQuery(preset.query);
                 executeSearch(preset.query);
               }}
-              className="text-xs px-2.5 py-1 rounded-md bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/60 transition"
+              style={{
+                background: '#F1F5F9',
+                color: '#334155',
+                border: '1px solid #CBD5E1',
+                borderRadius: '6px',
+                padding: '4px 10px',
+                fontSize: '11px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
             >
               {preset.label}
             </button>
@@ -203,83 +309,217 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
         </div>
       </div>
 
-      {/* Synthèse Optionnelle Qwen */}
+      {/* ── SYNTHÈSE TECHNIQUE QWEN ── */}
       {synthesis && (
-        <div className="p-4 bg-emerald-950/20 border border-emerald-500/30 rounded-xl space-y-2">
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-            <Sparkles className="w-4 h-4" /> Synthèse Technique Décisionnelle (Qwen 2.5)
+        <div
+          style={{
+            padding: '14px 18px',
+            background: '#F0FDF4',
+            border: '1px solid #86EFAC',
+            borderRadius: '10px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '6px',
+          }}
+        >
+          <div style={{ fontSize: '12px', fontWeight: 800, color: '#166534', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Sparkles size={16} /> Synthèse Technique Décisionnelle (Qwen 2.5 Local)
           </div>
-          <p className="text-sm text-slate-200 leading-relaxed">{synthesis}</p>
+          <div style={{ fontSize: '13px', color: '#1E293B', lineHeight: '1.6' }}>{synthesis}</div>
         </div>
       )}
 
-      {/* Résultats RRF */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between text-xs text-slate-400">
-          <span>{results.length} fiche(s) technique(s) identifiée(s)</span>
-          {executionMs > 0 && <span>Temps d'exécution RRF SQL : {executionMs} ms</span>}
+      {/* ── LISTE DES RÉSULTATS HYBRIDES RRF ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: '#64748B' }}>
+          <span style={{ fontWeight: 600 }}>{results.length} fiche(s) technique(s) identifiée(s)</span>
+          {executionMs > 0 && <span style={{ fontFamily: 'monospace' }}>Temps d'exécution RRF SQL : {executionMs} ms</span>}
         </div>
 
         {results.length === 0 && !isLoading && (
-          <div className="p-8 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl">
+          <div
+            style={{
+              padding: '32px',
+              textAlign: 'center',
+              color: '#64748B',
+              background: '#F8FAFC',
+              border: '1px dashed #CBD5E1',
+              borderRadius: '12px',
+              fontSize: '13px',
+            }}
+          >
             Aucun manuel technique ou barème trouvé. Cliquez sur "Amorcer Catalogue OEM/ENACTA" pour charger la base de données.
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {results.map((item) => (
             <div
               key={item.id}
-              className="bg-slate-950 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition space-y-4"
+              style={{
+                background: '#F8FAFC',
+                border: '1px solid #CBD5E1',
+                borderRadius: '12px',
+                padding: '18px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+              }}
             >
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 text-xs font-semibold rounded bg-sky-950 text-sky-400 border border-sky-800/60">
+              {/* En-tête de la carte */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '8px',
+                  borderBottom: '1px solid #E2E8F0',
+                  paddingBottom: '10px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span
+                    style={{
+                      background: '#0F172A',
+                      color: '#FFFFFF',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      letterSpacing: '0.04em',
+                    }}
+                  >
                     {item.manufacturer}
                   </span>
-                  <span className="text-xs text-slate-400 font-medium">{item.model_series}</span>
-                  <span className="text-slate-600">•</span>
-                  <span className="text-xs text-emerald-400 font-medium">{item.subsystem}</span>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#1E293B' }}>
+                    {item.model_series}
+                  </span>
+                  <span style={{ color: '#94A3B8' }}>•</span>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      background: '#ECFDF5',
+                      color: '#065F46',
+                      border: '1px solid #A7F3D0',
+                    }}
+                  >
+                    {item.subsystem}
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400">Score RRF : </span>
-                    <span className="text-xs font-mono font-bold text-amber-400">
-                      {item.rrf_score.toFixed(5)}
-                    </span>
-                  </div>
-                  <span className="px-2 py-0.5 text-[11px] font-mono bg-slate-800 text-slate-300 rounded">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '12px', color: '#475569' }}>
+                    Score RRF : <strong style={{ color: '#D97706', fontFamily: 'monospace' }}>{item.rrf_score.toFixed(5)}</strong>
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontFamily: 'monospace',
+                      background: '#E2E8F0',
+                      color: '#334155',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                    }}
+                  >
                     BM25 #{item.lexical_rank} | Trgm #{item.semantic_rank}
                   </span>
                 </div>
               </div>
 
+              {/* Titre et contenu */}
               <div>
-                <h4 className="text-sm font-semibold text-white mb-2">{item.section_title}</h4>
-                <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line bg-slate-900/60 p-3 rounded-lg border border-slate-800/60">
+                <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#0F172A', margin: '0 0 6px 0' }}>
+                  {item.section_title}
+                </h4>
+                <div
+                  style={{
+                    background: '#FFFFFF',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
+                    fontSize: '12px',
+                    color: '#334155',
+                    lineHeight: '1.6',
+                    whiteSpace: 'pre-line',
+                  }}
+                >
                   {item.content}
-                </p>
+                </div>
               </div>
 
-              {/* Spécifications Métriques JSONB Extraites */}
+              {/* Spécifications numériques déterministes */}
               {item.structured_specs && Object.keys(item.structured_specs).length > 0 && (
-                <div className="space-y-2">
-                  <div className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-                    <Gauge className="w-3.5 h-3.5 text-emerald-400" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      color: '#475569',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    <Gauge size={14} color="#059669" />
                     Spécifications Numériques Déterministes (Garde-Fou Sans Hallucination) :
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                      gap: '8px',
+                    }}
+                  >
                     {Object.entries(item.structured_specs).map(([k, v]) => (
                       <div
                         key={k}
-                        className="bg-slate-900 p-2 rounded-lg border border-slate-800/80 text-xs"
+                        style={{
+                          background: '#FFFFFF',
+                          border: '1px solid #E2E8F0',
+                          borderRadius: '6px',
+                          padding: '6px 10px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
                       >
-                        <span className="text-slate-400 block text-[10px] uppercase font-mono truncate">
-                          {k.replace(/_/g, ' ')}
+                        <span
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            color: '#64748B',
+                            textTransform: 'uppercase',
+                            fontFamily: 'monospace',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {k.replace(/_/g, ' ')} :
                         </span>
-                        <span className="text-emerald-300 font-mono font-semibold">
-                          {Array.isArray(v) ? v.join(', ') : typeof v === 'boolean' ? (v ? 'OUI' : 'NON') : String(v)}
+                        <span
+                          style={{
+                            fontSize: '12px',
+                            fontWeight: 800,
+                            color: '#047857',
+                            fontFamily: 'monospace',
+                            textAlign: 'right',
+                          }}
+                        >
+                          {Array.isArray(v)
+                            ? v.join(', ')
+                            : typeof v === 'boolean'
+                            ? v
+                              ? 'OUI'
+                              : 'NON'
+                            : String(v)}
                         </span>
                       </div>
                     ))}
