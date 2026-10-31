@@ -223,7 +223,7 @@ export function CusumLegalReportViewer({
                 color: activeLanguage === 'fr' ? '#ffffff' : '#334155',
               }}
             >
-              🇫🇷 Français
+              <span style={{ color: activeLanguage === 'fr' ? '#ffffff' : '#334155', fontWeight: 800 }}>🇫🇷 Français</span>
             </button>
             <button
               onClick={() => setActiveLanguage('ar')}
@@ -238,7 +238,7 @@ export function CusumLegalReportViewer({
                 color: activeLanguage === 'ar' ? '#ffffff' : '#334155',
               }}
             >
-              🇩🇿 العربية
+              <span style={{ color: activeLanguage === 'ar' ? '#ffffff' : '#334155', fontWeight: 800 }}>🇩🇿 العربية</span>
             </button>
           </div>
 
@@ -248,14 +248,14 @@ export function CusumLegalReportViewer({
               padding: '6px 14px',
               borderRadius: '8px',
               fontSize: '11px',
-              fontWeight: 700,
+              fontWeight: 800,
               cursor: 'pointer',
               background: '#F1F5F9',
               color: '#0F172A',
               border: '1px solid #CBD5E1',
             }}
           >
-            🖨️ Imprimer PV
+            <span style={{ color: '#0F172A', fontWeight: 800 }}>🖨️ Imprimer PV</span>
           </button>
 
           {onClose && (
@@ -310,7 +310,9 @@ export function CusumLegalReportViewer({
                 boxShadow: selectedPresetIndex === idx ? '0 1px 3px rgba(37,99,235,0.1)' : 'none',
               }}
             >
-              {idx === 0 ? '🚨 Siphonnage Djelfa (RN1)' : '🏔️ Fausse Alerte Chiffa (Pente 11.5%)'}
+              <span style={{ color: selectedPresetIndex === idx ? '#1D4ED8' : '#0F172A', fontWeight: 800 }}>
+                {idx === 0 ? '🚨 Siphonnage Djelfa (RN1)' : '🏔️ Fausse Alerte Chiffa (Pente 11.5%)'}
+              </span>
             </button>
           ))}
         </div>

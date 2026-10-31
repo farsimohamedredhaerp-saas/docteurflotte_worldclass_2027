@@ -195,19 +195,22 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '6px',
-            padding: '8px 16px',
+            gap: '8px',
+            padding: '9px 18px',
             fontSize: '12px',
             fontWeight: 800,
             borderRadius: '8px',
-            backgroundColor: '#F1F5F9',
-            color: '#0F172A',
-            border: '1px solid #94A3B8',
+            backgroundColor: '#0F172A',
+            color: '#FFFFFF',
+            border: '1px solid #334155',
             cursor: isSeeding ? 'not-allowed' : 'pointer',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           }}
         >
-          <RefreshCw size={14} color="#0F172A" className={isSeeding ? 'animate-spin' : ''} />
-          <span style={{ color: '#0F172A' }}>{isSeeding ? 'Amorçage...' : 'Amorcer Catalogue OEM/ENACTA'}</span>
+          <RefreshCw size={14} color="#FFFFFF" className={isSeeding ? 'animate-spin' : ''} />
+          <span style={{ color: '#FFFFFF', fontWeight: 800 }}>
+            {isSeeding ? 'Amorçage...' : 'Amorcer Catalogue OEM/ENACTA'}
+          </span>
         </button>
       </div>
 
@@ -265,26 +268,27 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '6px',
-              padding: '9px 22px',
-              backgroundColor: '#059669',
+              gap: '8px',
+              padding: '10px 24px',
+              backgroundColor: '#047857',
               color: '#FFFFFF',
-              border: 'none',
+              border: '1px solid #065F46',
               borderRadius: '8px',
               fontSize: '13px',
               fontWeight: 800,
               cursor: isLoading ? 'not-allowed' : 'pointer',
+              boxShadow: '0 2px 6px rgba(4, 120, 87, 0.3)',
             }}
           >
-            {isLoading ? <RefreshCw size={15} color="#FFFFFF" className="animate-spin" /> : <Search size={15} color="#FFFFFF" />}
-            <span style={{ color: '#FFFFFF' }}>Rechercher</span>
+            {isLoading ? <RefreshCw size={16} color="#FFFFFF" className="animate-spin" /> : <Search size={16} color="#FFFFFF" />}
+            <span style={{ color: '#FFFFFF', fontWeight: 800 }}>Rechercher</span>
           </button>
         </div>
 
         {/* Exemples rapides cliquables */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <SlidersHorizontal size={13} color="#475569" /> Exemples Algérie :
+          <span style={{ fontSize: '11px', fontWeight: 800, color: '#334155', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <SlidersHorizontal size={13} color="#334155" /> Exemples Algérie :
           </span>
           {QUICK_PRESETS.map((preset, idx) => (
             <button
@@ -294,18 +298,18 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
                 executeSearch(preset.query);
               }}
               style={{
-                backgroundColor: '#FFFFFF',
+                backgroundColor: '#F1F5F9',
                 color: '#0F172A',
                 border: '1px solid #94A3B8',
                 borderRadius: '6px',
                 padding: '6px 12px',
                 fontSize: '11px',
-                fontWeight: 700,
+                fontWeight: 800,
                 cursor: 'pointer',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
               }}
             >
-              <span style={{ color: '#0F172A' }}>{preset.label}</span>
+              <span style={{ color: '#0F172A', fontWeight: 800 }}>{preset.label}</span>
             </button>
           ))}
         </div>
@@ -383,18 +387,19 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <span
                     style={{
-                      background: '#0F172A',
+                      background: '#1E293B',
                       color: '#FFFFFF',
                       fontSize: '11px',
                       fontWeight: 800,
-                      padding: '3px 8px',
+                      padding: '4px 10px',
                       borderRadius: '6px',
                       letterSpacing: '0.04em',
+                      border: '1px solid #334155',
                     }}
                   >
                     {item.manufacturer}
                   </span>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#1E293B' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A' }}>
                     {item.model_series}
                   </span>
                   <span style={{ color: '#94A3B8' }}>•</span>

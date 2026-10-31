@@ -12,6 +12,7 @@ import {
 import { CusumLegalReportViewer } from '../../../components/fuel/CusumLegalReportViewer';
 import { SovereignRagExplorer } from '../../../components/knowledge/SovereignRagExplorer';
 import { ProactiveAnomaliesWidget } from '../../../components/decisions/ProactiveAnomaliesWidget';
+import { WorkshopVoiceAssistant } from '../../../components/voice/WorkshopVoiceAssistant';
 
 // Exemples prédéfinis de tests opérationnels pour le marché algérien
 const PLAYGROUND_PRESETS = [
@@ -804,7 +805,7 @@ export default function AiObservabilityPage() {
                     }}
                     title={preset.description}
                   >
-                    {preset.name}
+                    <span style={{ color: '#0F172A', fontWeight: 700 }}>{preset.name}</span>
                   </button>
                 ))}
               </div>
@@ -1034,6 +1035,13 @@ export default function AiObservabilityPage() {
       {/* ────────────────────────────────────────────────────────────────────────── */}
       <div style={{ marginTop: '28px' }}>
         <ProactiveAnomaliesWidget />
+      </div>
+
+      {/* ────────────────────────────────────────────────────────────────────────── */}
+      {/* 7. ASSISTANT VOCAL ATELIER & GLOSSAIRE PHONÉTIQUE DARJA (PILIER 5) */}
+      {/* ────────────────────────────────────────────────────────────────────────── */}
+      <div style={{ marginTop: '28px' }}>
+        <WorkshopVoiceAssistant token={token || undefined} />
       </div>
     </div>
   );
