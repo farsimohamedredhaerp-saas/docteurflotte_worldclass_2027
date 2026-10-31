@@ -152,24 +152,24 @@ export function ProactiveAnomaliesWidget() {
         <div
           style={{
             display: 'flex',
-            background: '#F1F5F9',
-            padding: '3px',
+            backgroundColor: '#F1F5F9',
+            padding: '4px',
             borderRadius: '10px',
             border: '1px solid #CBD5E1',
-            gap: '4px',
+            gap: '6px',
           }}
         >
           <button
             onClick={() => setActiveTab('PROACTIVE_DAEMON')}
             style={{
-              padding: '6px 14px',
+              padding: '7px 16px',
               fontSize: '12px',
-              fontWeight: 700,
+              fontWeight: 800,
               borderRadius: '7px',
-              border: 'none',
+              border: activeTab === 'PROACTIVE_DAEMON' ? '1px solid #B45309' : '1px solid transparent',
               cursor: 'pointer',
-              background: activeTab === 'PROACTIVE_DAEMON' ? '#D97706' : 'transparent',
-              color: activeTab === 'PROACTIVE_DAEMON' ? '#FFFFFF' : '#475569',
+              backgroundColor: activeTab === 'PROACTIVE_DAEMON' ? '#D97706' : '#FFFFFF',
+              color: activeTab === 'PROACTIVE_DAEMON' ? '#FFFFFF' : '#0F172A',
             }}
           >
             Veille Proactive 08h00
@@ -177,14 +177,14 @@ export function ProactiveAnomaliesWidget() {
           <button
             onClick={() => setActiveTab('INVOICE_RECONCILER')}
             style={{
-              padding: '6px 14px',
+              padding: '7px 16px',
               fontSize: '12px',
-              fontWeight: 700,
+              fontWeight: 800,
               borderRadius: '7px',
-              border: 'none',
+              border: activeTab === 'INVOICE_RECONCILER' ? '1px solid #B45309' : '1px solid transparent',
               cursor: 'pointer',
-              background: activeTab === 'INVOICE_RECONCILER' ? '#D97706' : 'transparent',
-              color: activeTab === 'INVOICE_RECONCILER' ? '#FFFFFF' : '#475569',
+              backgroundColor: activeTab === 'INVOICE_RECONCILER' ? '#D97706' : '#FFFFFF',
+              color: activeTab === 'INVOICE_RECONCILER' ? '#FFFFFF' : '#0F172A',
             }}
           >
             Matrice Factures (3 Scénarios)
@@ -385,17 +385,17 @@ export function ProactiveAnomaliesWidget() {
                   </span>
 
                   {card.status === 'ACTIVE_CARD' && (
-                    <div style={{ display: 'flex', gap: '6px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
                       <button
                         onClick={() => handleSnooze(card.id)}
                         style={{
-                          padding: '6px 12px',
+                          padding: '7px 14px',
                           fontSize: '11px',
-                          fontWeight: 700,
+                          fontWeight: 800,
                           borderRadius: '6px',
-                          border: '1px solid #CBD5E1',
-                          background: '#FFFFFF',
-                          color: '#334155',
+                          border: '1px solid #94A3B8',
+                          backgroundColor: '#F1F5F9',
+                          color: '#0F172A',
                           cursor: 'pointer',
                         }}
                       >
@@ -404,20 +404,22 @@ export function ProactiveAnomaliesWidget() {
                       <button
                         onClick={() => handleCreateWorkOrder(card.id)}
                         style={{
-                          display: 'flex',
+                          display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '4px',
-                          padding: '6px 14px',
+                          gap: '6px',
+                          padding: '7px 16px',
                           fontSize: '11px',
-                          fontWeight: 700,
+                          fontWeight: 800,
                           borderRadius: '6px',
                           border: 'none',
-                          background: '#059669',
+                          backgroundColor: '#059669',
                           color: '#FFFFFF',
                           cursor: 'pointer',
+                          boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)',
                         }}
                       >
-                        <Wrench size={13} /> Créer OT 1-Clic
+                        <Wrench size={13} color="#FFFFFF" />
+                        <span style={{ color: '#FFFFFF' }}>Créer OT 1-Clic</span>
                       </button>
                     </div>
                   )}

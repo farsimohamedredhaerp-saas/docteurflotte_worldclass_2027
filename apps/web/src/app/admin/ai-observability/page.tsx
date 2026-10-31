@@ -305,11 +305,11 @@ export default function AiObservabilityPage() {
               padding: '8px 14px',
               borderRadius: '8px',
               fontSize: '12px',
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: 'pointer',
-              background: autoRefresh ? 'rgba(16, 185, 129, 0.12)' : 'var(--df-bg-surface-2)',
-              color: autoRefresh ? '#10b981' : 'var(--df-text-muted)',
-              border: `1px solid ${autoRefresh ? 'rgba(16, 185, 129, 0.3)' : 'var(--df-border-subtle)'}`,
+              background: autoRefresh ? '#ECFDF5' : '#F1F5F9',
+              color: autoRefresh ? '#065F46' : '#1E293B',
+              border: `1px solid ${autoRefresh ? '#A7F3D0' : '#CBD5E1'}`,
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
@@ -324,11 +324,11 @@ export default function AiObservabilityPage() {
               padding: '8px 14px',
               borderRadius: '8px',
               fontSize: '12px',
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: 'pointer',
-              background: 'var(--df-bg-surface-2)',
-              color: 'var(--df-text-main)',
-              border: '1px solid var(--df-border-subtle)',
+              background: '#F1F5F9',
+              color: '#0F172A',
+              border: '1px solid #CBD5E1',
             }}
           >
             Actualiser
@@ -340,10 +340,10 @@ export default function AiObservabilityPage() {
               padding: '8px 14px',
               borderRadius: '8px',
               fontSize: '12px',
-              fontWeight: 600,
+              fontWeight: 800,
               cursor: 'pointer',
-              background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-              color: '#ffffff',
+              background: '#2563EB',
+              color: '#FFFFFF',
               border: 'none',
               boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)',
               display: 'flex',
@@ -782,20 +782,20 @@ export default function AiObservabilityPage() {
               <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--df-text-muted)', marginBottom: '6px' }}>
                 MODÈLES DE TESTS RAPIDES :
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
                 {PLAYGROUND_PRESETS.map((preset, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => applyPreset(preset)}
                     style={{
-                      padding: '6px 8px',
-                      borderRadius: '6px',
+                      padding: '8px 10px',
+                      borderRadius: '8px',
                       fontSize: '11px',
-                      fontWeight: 600,
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
+                      fontWeight: 700,
+                      background: '#F1F5F9',
+                      border: '1px solid #CBD5E1',
+                      color: '#0F172A',
                       cursor: 'pointer',
                       textAlign: 'left',
                       whiteSpace: 'nowrap',
@@ -904,21 +904,19 @@ export default function AiObservabilityPage() {
               onClick={handleRunPlayground}
               disabled={isInferringPlayground || !playgroundPrompt.trim()}
               style={{
-                padding: '10px 18px',
+                padding: '11px 18px',
                 borderRadius: '8px',
                 fontSize: '13px',
-                fontWeight: 700,
+                fontWeight: 800,
                 cursor: isInferringPlayground ? 'not-allowed' : 'pointer',
-                background: isInferringPlayground
-                  ? 'var(--df-bg-surface-3)'
-                  : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                background: isInferringPlayground ? '#94A3B8' : '#059669',
                 color: '#ffffff',
                 border: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: isInferringPlayground ? 'none' : '0 2px 8px rgba(16, 185, 129, 0.4)',
+                boxShadow: isInferringPlayground ? 'none' : '0 2px 8px rgba(5, 150, 105, 0.4)',
               }}
             >
               {isInferringPlayground ? (

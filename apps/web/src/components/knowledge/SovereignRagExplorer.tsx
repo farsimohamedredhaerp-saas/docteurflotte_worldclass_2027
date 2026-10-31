@@ -193,21 +193,21 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
           onClick={handleSeedCatalog}
           disabled={isSeeding}
           style={{
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            padding: '8px 14px',
+            padding: '8px 16px',
             fontSize: '12px',
-            fontWeight: 700,
+            fontWeight: 800,
             borderRadius: '8px',
-            background: '#F1F5F9',
-            color: '#1E293B',
-            border: '1px solid #CBD5E1',
+            backgroundColor: '#F1F5F9',
+            color: '#0F172A',
+            border: '1px solid #94A3B8',
             cursor: isSeeding ? 'not-allowed' : 'pointer',
           }}
         >
-          <RefreshCw size={14} className={isSeeding ? 'animate-spin' : ''} />
-          {isSeeding ? 'Amorçage...' : 'Amorcer Catalogue OEM/ENACTA'}
+          <RefreshCw size={14} color="#0F172A" className={isSeeding ? 'animate-spin' : ''} />
+          <span style={{ color: '#0F172A' }}>{isSeeding ? 'Amorçage...' : 'Amorcer Catalogue OEM/ENACTA'}</span>
         </button>
       </div>
 
@@ -262,28 +262,29 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
             onClick={() => executeSearch()}
             disabled={isLoading}
             style={{
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '6px',
-              padding: '9px 20px',
-              background: '#059669',
+              padding: '9px 22px',
+              backgroundColor: '#059669',
               color: '#FFFFFF',
               border: 'none',
               borderRadius: '8px',
               fontSize: '13px',
-              fontWeight: 700,
+              fontWeight: 800,
               cursor: isLoading ? 'not-allowed' : 'pointer',
             }}
           >
-            {isLoading ? <RefreshCw size={15} className="animate-spin" /> : <Search size={15} />}
-            Rechercher
+            {isLoading ? <RefreshCw size={15} color="#FFFFFF" className="animate-spin" /> : <Search size={15} color="#FFFFFF" />}
+            <span style={{ color: '#FFFFFF' }}>Rechercher</span>
           </button>
         </div>
 
         {/* Exemples rapides cliquables */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <SlidersHorizontal size={13} /> Exemples Algérie :
+          <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <SlidersHorizontal size={13} color="#475569" /> Exemples Algérie :
           </span>
           {QUICK_PRESETS.map((preset, idx) => (
             <button
@@ -293,17 +294,18 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
                 executeSearch(preset.query);
               }}
               style={{
-                background: '#F1F5F9',
-                color: '#334155',
-                border: '1px solid #CBD5E1',
+                backgroundColor: '#FFFFFF',
+                color: '#0F172A',
+                border: '1px solid #94A3B8',
                 borderRadius: '6px',
-                padding: '4px 10px',
+                padding: '6px 12px',
                 fontSize: '11px',
-                fontWeight: 600,
+                fontWeight: 700,
                 cursor: 'pointer',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
               }}
             >
-              {preset.label}
+              <span style={{ color: '#0F172A' }}>{preset.label}</span>
             </button>
           ))}
         </div>
