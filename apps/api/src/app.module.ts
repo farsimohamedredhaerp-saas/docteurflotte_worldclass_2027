@@ -13,6 +13,8 @@ import { AdminModule } from './admin/admin.module';
 import { CopilotModule } from './copilot/copilot.module';
 import { FuelScannerModule } from './fuel-scanner/fuel-scanner.module';
 import { DigitalTwinModule } from './digital-twin/digital-twin.module';
+import { AiOrchestratorModule } from './ai-orchestrator/ai-orchestrator.module';
+import { SovereignRagModule } from './sovereign-rag/sovereign-rag.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { DigitalTwinModule } from './digital-twin/digital-twin.module';
     CopilotModule,
     FuelScannerModule,
     DigitalTwinModule,
+    AiOrchestratorModule,
+    SovereignRagModule,
   ],
 })
 export class AppModule {}
