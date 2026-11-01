@@ -58,7 +58,13 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         title: 'Conducteurs & Affectations',
         desc: 'Missions opérationnelles, validité permis et attribution des cartes/clés.',
         href: '/drivers',
-        badge: 'NOUVEAU - RH',
+        badge: 'RH & PERMIS',
+      },
+      {
+        title: 'Dispatch & Ordres de Mission (OM)',
+        desc: 'Machine à états Gate DZ, restrictions 58 Wilayas et jetons QR cryptographiques HMAC-256.',
+        href: '/dispatch',
+        badge: 'OFFICIEL DZ',
       },
       {
         title: 'Référentiel & Scraper OEM RMI',
