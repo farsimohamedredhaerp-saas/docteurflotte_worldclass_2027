@@ -21,6 +21,7 @@ import {
   IconX,
   IconSearch,
 } from '../../components/navigation/TechIcons';
+import { BreakthroughInnovationsPanel } from '../../components/preventive/BreakthroughInnovationsPanel';
 
 export interface OemMaintenanceTemplate {
   id: string;
@@ -672,6 +673,11 @@ export default function PreventivePage() {
                   </strong>
                 </div>
               </div>
+            </section>
+
+            {/* SECTION MONOPOLE : 5 INNOVATIONS TECHNOLOGIQUES DE RUPTURE (0 DA) */}
+            <section style={{ marginBottom: '2rem' }}>
+              <BreakthroughInnovationsPanel />
             </section>
 
             {/* SECTION 1 : ÉCHÉANCES PRÉVENTIVES DE LA FLOTTE */}

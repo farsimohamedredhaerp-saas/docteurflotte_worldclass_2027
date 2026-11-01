@@ -20,6 +20,10 @@ import { ExternalFailoverFirewallService } from './services/external-failover-fi
 import { PhysicalPredictiveModelsService } from './services/physical-predictive-models.service';
 import { FinancialArbitrageService } from './services/financial-arbitrage.service';
 import { RegulatoryMissionOrderService } from './services/regulatory-mission-order.service';
+import { CusumLegalClerkService } from './services/cusum-legal-clerk.service';
+import { FuelTheftAuditController } from './controllers/fuel-theft-audit.controller';
+import { BreakthroughInnovationsService } from './services/breakthrough-innovations.service';
+import { BreakthroughInnovationsController } from './controllers/breakthrough-innovations.controller';
 
 @Module({
   controllers: [
@@ -29,6 +33,8 @@ import { RegulatoryMissionOrderService } from './services/regulatory-mission-ord
     EcoDrivingController,
     DvirController,
     ColdChainController,
+    FuelTheftAuditController,
+    BreakthroughInnovationsController,
   ],
   providers: [
     CanJ1939DecoderService,
@@ -46,6 +52,8 @@ import { RegulatoryMissionOrderService } from './services/regulatory-mission-ord
     PhysicalPredictiveModelsService,
     FinancialArbitrageService,
     RegulatoryMissionOrderService,
+    CusumLegalClerkService,
+    BreakthroughInnovationsService,
   ],
   exports: [
     TelemetryNormalizerService,
@@ -62,6 +70,8 @@ import { RegulatoryMissionOrderService } from './services/regulatory-mission-ord
     PhysicalPredictiveModelsService,
     FinancialArbitrageService,
     RegulatoryMissionOrderService,
+    CusumLegalClerkService,
+    BreakthroughInnovationsService,
   ],
 })
 export class FleetIntelligenceModule {}
