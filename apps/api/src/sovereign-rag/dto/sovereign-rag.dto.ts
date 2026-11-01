@@ -26,6 +26,7 @@ export const QueryKnowledgeSchema = z.object({
   category: z.nativeEnum(KnowledgeCategory).optional(),
   limit: z.number().int().min(1).max(20).optional(),
   include_synthesis: z.boolean().optional(),
+  enable_web_search: z.boolean().optional(),
 });
 
 export type QueryKnowledgeDto = z.infer<typeof QueryKnowledgeSchema>;
@@ -55,6 +56,7 @@ export interface KnowledgeSearchResult {
   lexical_rank: number;
   semantic_rank: number;
   rrf_score: number;
+  is_web_fallback?: boolean;
 }
 
 export interface KnowledgeQueryResponse {
@@ -64,4 +66,5 @@ export interface KnowledgeQueryResponse {
   rrf_fused: boolean;
   synthesis?: string;
   execution_ms: number;
+  web_search_applied?: boolean;
 }

@@ -30,6 +30,7 @@ interface SearchResult {
   lexical_rank: number;
   semantic_rank: number;
   rrf_score: number;
+  is_web_fallback?: boolean;
 }
 
 const QUICK_PRESETS = [
@@ -43,7 +44,9 @@ const QUICK_PRESETS = [
 export function SovereignRagExplorer({ token }: { token?: string | null }) {
   const [query, setQuery] = useState('couple de serrage culasse kerax 440');
   const [selectedSubsystem, setSelectedSubsystem] = useState<string>('ALL');
-  const [includeSynthesis, setIncludeSynthesis] = useState(false);
+  const [includeSynthesis, setIncludeSynthesis] = useState(true);
+  const [enableWebSearch, setEnableWebSearch] = useState(true);
+  const [webSearchApplied, setWebSearchApplied] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [synthesis, setSynthesis] = useState<string | null>(null);
   const [executionMs, setExecutionMs] = useState<number>(0);
@@ -56,6 +59,7 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
     if (!q.trim()) return;
 
     setIsLoading(true);
+    setWebSearchApplied(false);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const headers: Record<string, string> = {
@@ -72,6 +76,7 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
           query: q,
           subsystem: selectedSubsystem === 'ALL' ? undefined : selectedSubsystem,
           include_synthesis: includeSynthesis,
+          enable_web_search: enableWebSearch,
           limit: 4,
         }),
       });
@@ -81,6 +86,7 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
         setResults(data.results || []);
         setSynthesis(data.synthesis || null);
         setExecutionMs(data.execution_ms || 0);
+        setWebSearchApplied(Boolean(data.web_search_applied));
       }
     } catch (err) {
       console.error('Erreur lors de la recherche RAG:', err);
@@ -285,6 +291,29 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
           </button>
         </div>
 
+        {/* Options de recherche */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', fontSize: '12px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 700, color: '#1E40AF' }}>
+            <input
+              type="checkbox"
+              checked={enableWebSearch}
+              onChange={(e) => setEnableWebSearch(e.target.checked)}
+              style={{ width: '16px', height: '16px', accentColor: '#2563EB', cursor: 'pointer' }}
+            />
+            🌐 Recherche Web / Internet Approfondie (Auto-Ingestion en Coffre Souverain)
+          </label>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 600, color: '#475569' }}>
+            <input
+              type="checkbox"
+              checked={includeSynthesis}
+              onChange={(e) => setIncludeSynthesis(e.target.checked)}
+              style={{ width: '16px', height: '16px', accentColor: '#059669', cursor: 'pointer' }}
+            />
+            ✨ Synthèse Technique Qwen 2.5
+          </label>
+        </div>
+
         {/* Exemples rapides cliquables */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '11px', fontWeight: 800, color: '#334155', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -337,6 +366,27 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
 
       {/* ── LISTE DES RÉSULTATS HYBRIDES RRF ── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        {webSearchApplied && (
+          <div
+            style={{
+              padding: '10px 14px',
+              background: '#EFF6FF',
+              border: '1px solid #BFDBFE',
+              borderRadius: '8px',
+              fontSize: '12px',
+              color: '#1E40AF',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <Sparkles size={16} color="#2563EB" />
+            <span>
+              <strong>Recherche Web Souveraine Active :</strong> Les informations techniques ont été recherchées sur Internet, synthétisées par Qwen 2.5 et automatiquement enregistrées dans le coffre local pour vos futures requêtes hors-ligne.
+            </span>
+          </div>
+        )}
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: '#64748B' }}>
           <span style={{ fontWeight: 600 }}>{results.length} fiche(s) technique(s) identifiée(s)</span>
           {executionMs > 0 && <span style={{ fontFamily: 'monospace' }}>Temps d'exécution RRF SQL : {executionMs} ms</span>}
@@ -416,6 +466,25 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
                   >
                     {item.subsystem}
                   </span>
+
+                  {item.is_web_fallback && (
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        background: '#EFF6FF',
+                        color: '#1D4ED8',
+                        border: '1px solid #BFDBFE',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      🌐 Source Web Détectée &amp; Auto-Ingérée
+                    </span>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

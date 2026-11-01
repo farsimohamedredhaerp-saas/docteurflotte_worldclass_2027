@@ -76,3 +76,4 @@ export class SovereignRagController {
     return this.ragService.getVaultStats();
   }
 }
+

@@ -1,6 +1,7 @@
 // Fichier : apps/api/src/workshop-voice/workshop-voice.service.ts
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
+import { SovereignRagService } from '../sovereign-rag/sovereign-rag.service';
 import {
   VoiceQueryDto,
   VoiceRouteResult,
@@ -70,7 +71,10 @@ export const DARJA_MECHANICAL_DICTIONARY: WorkshopDictionaryEntry[] = [
 export class WorkshopVoiceService {
   private readonly logger = new Logger(WorkshopVoiceService.name);
 
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    @Optional() private readonly ragService?: SovereignRagService,
+  ) {}
 
   /**
    * Retourne le glossaire mécanique franco-arabe algérien de référence.
@@ -172,7 +176,51 @@ export class WorkshopVoiceService {
       };
     }
 
-    // Cas 2 : Demande complexe non cataloguée dans les presets rapides
+    // Cas 2 : Demande libre / complexe — Résolution intelligente via le RAG Hybride & Fallback Web
+    if (this.ragService) {
+      try {
+        const ragResult = await this.ragService.searchHybrid(
+          {
+            query: dto.transcribedText,
+            limit: 1,
+            include_synthesis: true,
+            enable_web_search: true,
+          },
+          dto.tenantId,
+        );
+
+        if (ragResult.results.length > 0) {
+          const topDoc = ragResult.results[0];
+          const elapsed = Math.round(performance.now() - startTime);
+
+          const spokenFr =
+            ragResult.synthesis ||
+            `Documentation trouvée pour ${topDoc.manufacturer} (${topDoc.model_series}) : ${topDoc.section_title}. Consultez les spécifications sur votre écran.`;
+          const spokenDarja = `L9ina el ma3loumat ta3 ${topDoc.manufacturer} : ${topDoc.section_title}. Chof l'ecran fiha kolchi.`;
+
+          this.logger.log(
+            `[WorkshopVoice] Requête libre résolue via RAG/Web en ${elapsed} ms : "${dto.transcribedText}" -> ${topDoc.section_title}`,
+          );
+
+          return {
+            originalTranscript: dto.transcribedText,
+            normalizedIntent: topDoc.section_title,
+            isDeterministicShortCircuit: false,
+            vehicleDetected: topDoc.manufacturer,
+            subsystemDetected: topDoc.subsystem,
+            spokenResponseFr: spokenFr,
+            spokenResponseDarja: spokenDarja,
+            structuredData: topDoc.structured_specs,
+            sourceManualReference: `${topDoc.manufacturer} (${topDoc.model_series}) - ${topDoc.section_title}`,
+            executionMs: elapsed,
+          };
+        }
+      } catch (ragErr) {
+        this.logger.warn(`Échec de la résolution RAG d'atelier: ${ragErr}`);
+      }
+    }
+
+    // Cas 3 : Repli si aucun document trouvé
     const elapsed = Math.round(performance.now() - startTime);
     return {
       originalTranscript: dto.transcribedText,
@@ -250,3 +298,4 @@ export class WorkshopVoiceService {
     }
   }
 }
+

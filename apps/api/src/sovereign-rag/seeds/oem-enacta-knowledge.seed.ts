@@ -197,3 +197,4 @@ Si k dépasse le seuil : DÉFAILLANCE MAJEURE, contre-visite après tarage des i
     },
   },
 ];
+

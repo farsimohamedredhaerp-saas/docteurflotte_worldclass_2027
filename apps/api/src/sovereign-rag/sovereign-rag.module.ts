@@ -2,6 +2,7 @@
 import { Module } from '@nestjs/common';
 import { SovereignRagService } from './sovereign-rag.service';
 import { SovereignRagController } from './sovereign-rag.controller';
+import { WebKnowledgeSearchService } from './services/web-knowledge-search.service';
 import { DatabaseModule } from '../database/database.module';
 import { AuthModule } from '../auth/auth.module';
 import { CopilotModule } from '../copilot/copilot.module';
@@ -9,7 +10,8 @@ import { CopilotModule } from '../copilot/copilot.module';
 @Module({
   imports: [DatabaseModule, AuthModule, CopilotModule],
   controllers: [SovereignRagController],
-  providers: [SovereignRagService],
-  exports: [SovereignRagService],
+  providers: [SovereignRagService, WebKnowledgeSearchService],
+  exports: [SovereignRagService, WebKnowledgeSearchService],
 })
 export class SovereignRagModule {}
+

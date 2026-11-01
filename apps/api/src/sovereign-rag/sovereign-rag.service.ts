@@ -2,6 +2,7 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { OllamaSovereignService } from '../copilot/ollama-sovereign.service';
+import { WebKnowledgeSearchService } from './services/web-knowledge-search.service';
 import {
   IngestKnowledgeItemDto,
   KnowledgeCategory,
@@ -10,6 +11,7 @@ import {
   QueryKnowledgeDto,
 } from './dto/sovereign-rag.dto';
 import { OEM_ENACTA_SEEDS } from './seeds/oem-enacta-knowledge.seed';
+import { loadMasterCatalogSeeds } from './seeds/oem-catalog-loader';
 
 @Injectable()
 export class SovereignRagService {
@@ -18,6 +20,7 @@ export class SovereignRagService {
   constructor(
     private readonly databaseService: DatabaseService,
     @Optional() private readonly ollamaService?: OllamaSovereignService,
+    @Optional() private readonly webSearchService?: WebKnowledgeSearchService,
   ) {}
 
   /**
@@ -52,7 +55,7 @@ export class SovereignRagService {
   }
 
   /**
-   * Initialise le catalogue officiel des manuels OEM (Kerax, Shacman, Actros)
+   * Initialise le catalogue officiel des manuels OEM (Kerax, Shacman, Actros, SNVI, MAN, Scania, Toyota...)
    * et de la réglementation ENACTA Algérie.
    */
   async seedKnowledgeVault(): Promise<{ inserted: number; total: number }> {
@@ -62,7 +65,14 @@ export class SovereignRagService {
     }
 
     let inserted = 0;
-    for (const seed of OEM_ENACTA_SEEDS) {
+
+    // 1. Manuels précis et réglementation ENACTA + 54 véhicules du master catalog
+    const allSeeds: IngestKnowledgeItemDto[] = [
+      ...OEM_ENACTA_SEEDS,
+      ...loadMasterCatalogSeeds(),
+    ];
+
+    for (const seed of allSeeds) {
       const checkQuery = `
         SELECT id FROM sovereign_knowledge_vault 
         WHERE manufacturer = $1 AND section_title = $2 AND tenant_id IS NULL;
@@ -84,7 +94,7 @@ export class SovereignRagService {
 
   /**
    * Recherche Hybride RRF (Reciprocal Rank Fusion) combinant BM25 et trigrammes sémantiques.
-   * Exécutée en UNE SEULE requête SQL déterministe sous les 20 ms.
+   * Avec repli Web technique & auto-ingestion souveraine en cas de cache miss.
    */
   async searchHybrid(dto: QueryKnowledgeDto, tenantId?: string): Promise<KnowledgeQueryResponse> {
     const pool = this.databaseService.getPool();
@@ -97,7 +107,7 @@ export class SovereignRagService {
     const cleanedQuery = dto.query.trim();
     const limit = dto.limit || 5;
 
-    // Détection de codes DTC exacts (ex: SPN 3216, P0087) pour surpondération
+    // Détection de codes DTC exacts (ex: SPN 3216, P0087)
     const isDtcQuery = /^(SPN|P\d|DTC|MID)/i.test(cleanedQuery);
 
     const sqlQuery = `
@@ -112,12 +122,13 @@ export class SovereignRagService {
           content,
           structured_specs,
           tsv_content,
-          ts_rank_cd(tsv_content, plainto_tsquery('french', $1)) as lex_score,
+          ts_rank_cd(tsv_content, websearch_to_tsquery('french', $1)) as lex_score,
           similarity(section_title, $1) as trgm_title_score,
           similarity(content, $1) as trgm_content_score,
           CASE 
             WHEN structured_specs->'dtc_codes' ? $1 THEN 1.0
             WHEN section_title ILIKE '%' || $1 || '%' THEN 0.8
+            WHEN content ILIKE '%' || $1 || '%' THEN 0.4
             ELSE 0.0
           END as exact_boost
         FROM sovereign_knowledge_vault
@@ -131,13 +142,13 @@ export class SovereignRagService {
           ($3::text IS NULL OR manufacturer ILIKE $3)
           AND ($4::text IS NULL OR subsystem ILIKE $4)
           AND ($5::text IS NULL OR category = $5)
-          AND (lex_score > 0.001 OR trgm_title_score > 0.05 OR exact_boost > 0)
+          AND (lex_score > 0.0001 OR trgm_title_score > 0.03 OR trgm_content_score > 0.02 OR exact_boost > 0)
       ),
       ranked_docs AS (
         SELECT 
           *,
           RANK() OVER (ORDER BY (lex_score + exact_boost * 2.0) DESC) as rank_lex,
-          RANK() OVER (ORDER BY (trgm_title_score * 2.0 + trgm_content_score) DESC) as rank_sem
+          RANK() OVER (ORDER BY (trgm_title_score * 2.0 + trgm_content_score + exact_boost) DESC) as rank_sem
         FROM filtered_docs
       )
       SELECT 
@@ -166,7 +177,7 @@ export class SovereignRagService {
       limit,
     ]);
 
-    const results: KnowledgeSearchResult[] = res.rows.map((r) => ({
+    let results: KnowledgeSearchResult[] = res.rows.map((r) => ({
       id: r.id,
       category: r.category,
       manufacturer: r.manufacturer,
@@ -179,6 +190,50 @@ export class SovereignRagService {
       semantic_rank: Number(r.rank_sem),
       rrf_score: Number(r.rrf_score),
     }));
+
+    let webSearchApplied = false;
+
+    // ── REPLI WEB TECHNIQUE SOUVERAIN (FALLBACK & AUTO-INGESTION) ──
+    // Déclenché si aucun résultat local n'est satisfaisant ou si explicitement demandé
+    if ((results.length === 0 || dto.enable_web_search) && this.webSearchService) {
+      try {
+        this.logger.log(`[RAG Souverain] Déclenchement de la recherche Web pour "${cleanedQuery}"`);
+        const webSnippets = await this.webSearchService.searchWebSnippets(cleanedQuery);
+        const newKnowledgeItem = await this.webSearchService.synthesizeAndFormatKnowledge(
+          cleanedQuery,
+          webSnippets,
+        );
+
+        if (newKnowledgeItem) {
+          // Auto-ingestion dans le coffre souverain pour que l'info soit désormais locale
+          const newDocId = await this.ingestItem(newKnowledgeItem);
+          webSearchApplied = true;
+
+          const webResult: KnowledgeSearchResult = {
+            id: newDocId,
+            category: newKnowledgeItem.category,
+            manufacturer: newKnowledgeItem.manufacturer,
+            model_series: newKnowledgeItem.model_series,
+            subsystem: newKnowledgeItem.subsystem,
+            section_title: newKnowledgeItem.section_title,
+            content: newKnowledgeItem.content,
+            structured_specs: newKnowledgeItem.structured_specs || {},
+            lexical_rank: 1,
+            semantic_rank: 1,
+            rrf_score: 0.03333,
+            is_web_fallback: true,
+          };
+
+          if (results.length === 0) {
+            results = [webResult];
+          } else {
+            results.unshift(webResult);
+          }
+        }
+      } catch (webErr) {
+        this.logger.warn(`Échec de la recherche Web de secours: ${webErr}`);
+      }
+    }
 
     let synthesis: string | undefined = undefined;
 
@@ -193,13 +248,11 @@ Contenu technique : ${topDoc.content}
 Spécifications chiffrées : ${JSON.stringify(topDoc.structured_specs)}
 Réponds de manière concise, précise et directement applicable.`;
 
-        synthesis = await this.ollamaService.generate(
-          promptSynthesis,
-          {
+        synthesis =
+          (await this.ollamaService.generate(promptSynthesis, {
             system: `Tu es le Conseiller Technique Souverain DocteurFlotte. Réponds en français technique rigoureux.`,
             callerModule: 'OEM_RESOLVER',
-          },
-        ) || undefined;
+          })) || undefined;
       } catch (err) {
         this.logger.warn(`Synthèse LLM non disponible, retour des résultats déterministes: ${err}`);
       }
@@ -212,6 +265,7 @@ Réponds de manière concise, précise et directement applicable.`;
       rrf_fused: true,
       synthesis,
       execution_ms: Date.now() - startTime,
+      web_search_applied: webSearchApplied,
     };
   }
 
