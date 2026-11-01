@@ -110,6 +110,14 @@ export class SovereignRagService {
     // Détection de codes DTC exacts (ex: SPN 3216, P0087)
     const isDtcQuery = /^(SPN|P\d|DTC|MID)/i.test(cleanedQuery);
 
+    // Extraction de tokens significatifs (longueur >= 3) pour recherche flexible en OR
+    const tokens = cleanedQuery
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/gi, ' ')
+      .split(/\s+/)
+      .filter((t) => t.length >= 3);
+    const tokenQuery = tokens.length > 0 ? tokens.join(' | ') : cleanedQuery;
+
     const sqlQuery = `
       WITH scored_docs AS (
         SELECT 
@@ -122,32 +130,35 @@ export class SovereignRagService {
           content,
           structured_specs,
           tsv_content,
-          ts_rank_cd(tsv_content, websearch_to_tsquery('french', $1)) as lex_score,
-          similarity(section_title, $1) as trgm_title_score,
-          similarity(content, $1) as trgm_content_score,
-          CASE 
-            WHEN structured_specs->'dtc_codes' ? $1 THEN 1.0
-            WHEN section_title ILIKE '%' || $1 || '%' THEN 0.8
-            WHEN content ILIKE '%' || $1 || '%' THEN 0.4
-            ELSE 0.0
-          END as exact_boost
+          COALESCE(ts_rank_cd(tsv_content, to_tsquery('french', $1)), 0) as lex_score,
+          GREATEST(
+            similarity(section_title, $2),
+            similarity(manufacturer || ' ' || model_series || ' ' || section_title, $2)
+          ) as trgm_title_score,
+          similarity(content, $2) as trgm_content_score,
+          (
+            CASE WHEN (manufacturer || ' ' || model_series || ' ' || section_title) ILIKE '%' || $2 || '%' THEN 2.0 ELSE 0.0 END +
+            CASE WHEN section_title ILIKE '%' || $2 || '%' THEN 1.0 ELSE 0.0 END +
+            CASE WHEN content ILIKE '%' || $2 || '%' THEN 0.5 ELSE 0.0 END +
+            CASE WHEN structured_specs::text ILIKE '%' || $2 || '%' THEN 0.8 ELSE 0.0 END
+          ) as exact_boost
         FROM sovereign_knowledge_vault
         WHERE 
-          ($2::uuid IS NULL AND tenant_id IS NULL)
-          OR (tenant_id IS NULL OR tenant_id = $2::uuid)
+          ($3::uuid IS NULL AND tenant_id IS NULL)
+          OR (tenant_id IS NULL OR tenant_id = $3::uuid)
       ),
       filtered_docs AS (
         SELECT * FROM scored_docs
         WHERE 
-          ($3::text IS NULL OR manufacturer ILIKE $3)
-          AND ($4::text IS NULL OR subsystem ILIKE $4)
-          AND ($5::text IS NULL OR category = $5)
-          AND (lex_score > 0.0001 OR trgm_title_score > 0.03 OR trgm_content_score > 0.02 OR exact_boost > 0)
+          ($4::text IS NULL OR manufacturer ILIKE $4)
+          AND ($5::text IS NULL OR subsystem ILIKE $5)
+          AND ($6::text IS NULL OR category = $6)
+          AND (lex_score > 0.0001 OR trgm_title_score > 0.04 OR trgm_content_score > 0.02 OR exact_boost > 0)
       ),
       ranked_docs AS (
         SELECT 
           *,
-          RANK() OVER (ORDER BY (lex_score + exact_boost * 2.0) DESC) as rank_lex,
+          RANK() OVER (ORDER BY (lex_score * 3.0 + trgm_title_score * 2.5 + exact_boost * 2.0) DESC) as rank_lex,
           RANK() OVER (ORDER BY (trgm_title_score * 2.0 + trgm_content_score + exact_boost) DESC) as rank_sem
         FROM filtered_docs
       )
@@ -165,10 +176,11 @@ export class SovereignRagService {
         ROUND(( (1.0 / (60.0 + rank_lex)) + (1.0 / (60.0 + rank_sem)) )::numeric, 5) as rrf_score
       FROM ranked_docs
       ORDER BY rrf_score DESC, rank_lex ASC
-      LIMIT $6;
+      LIMIT $7;
     `;
 
     const res = await pool.query(sqlQuery, [
+      tokenQuery || 'moteur',
       cleanedQuery,
       tenantId || null,
       dto.manufacturer ? `%${dto.manufacturer}%` : null,
@@ -194,10 +206,15 @@ export class SovereignRagService {
     let webSearchApplied = false;
 
     // ── REPLI WEB TECHNIQUE SOUVERAIN (FALLBACK & AUTO-INGESTION) ──
-    // Déclenché si aucun résultat local n'est satisfaisant ou si explicitement demandé
-    if ((results.length === 0 || dto.enable_web_search) && this.webSearchService) {
+    // Déclenché si aucun résultat local n'est satisfaisant ou si recherche Web explicitement cochée
+    const isLocalMatchSatisfying =
+      results.length > 0 &&
+      results[0].rrf_score >= 0.0325 &&
+      !dto.enable_web_search;
+
+    if (!isLocalMatchSatisfying && this.webSearchService) {
       try {
-        this.logger.log(`[RAG Souverain] Déclenchement de la recherche Web pour "${cleanedQuery}"`);
+        this.logger.log(`[RAG Souverain] Déclenchement de la recherche Web & Ingestion pour "${cleanedQuery}"`);
         const webSnippets = await this.webSearchService.searchWebSnippets(cleanedQuery);
         const newKnowledgeItem = await this.webSearchService.synthesizeAndFormatKnowledge(
           cleanedQuery,
@@ -224,14 +241,14 @@ export class SovereignRagService {
             is_web_fallback: true,
           };
 
-          if (results.length === 0) {
-            results = [webResult];
-          } else {
+          if (results.length === 0 || dto.enable_web_search) {
             results.unshift(webResult);
+          } else {
+            results.push(webResult);
           }
         }
-      } catch (webErr) {
-        this.logger.warn(`Échec de la recherche Web de secours: ${webErr}`);
+      } catch (webErr: any) {
+        this.logger.warn(`Échec de la recherche Web de secours: ${webErr?.message}`);
       }
     }
 

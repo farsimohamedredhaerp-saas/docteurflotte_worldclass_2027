@@ -41,6 +41,61 @@ const QUICK_PRESETS = [
   { label: 'Disques Actros SN7 & Épaisseurs', query: 'usure plaquettes actros sn7' },
 ];
 
+function getManufacturerBadge(m: string) {
+  const norm = (m || '').toUpperCase();
+  if (norm.includes('RENAULT')) {
+    return { bg: '#D97706', text: '#FFFFFF', border: '#B45309', label: 'RENAULT TRUCKS' };
+  }
+  if (norm.includes('SHACMAN') || norm.includes('WEICHAI')) {
+    return { bg: '#0284C7', text: '#FFFFFF', border: '#0369A1', label: 'SHACMAN' };
+  }
+  if (norm.includes('MERCEDES') || norm.includes('ACTROS')) {
+    return { bg: '#334155', text: '#FFFFFF', border: '#475569', label: 'MERCEDES-BENZ' };
+  }
+  if (norm.includes('TOYOTA')) {
+    return { bg: '#DC2626', text: '#FFFFFF', border: '#B91C1C', label: 'TOYOTA' };
+  }
+  if (norm.includes('ISUZU')) {
+    return { bg: '#B91C1C', text: '#FFFFFF', border: '#991B1B', label: 'ISUZU' };
+  }
+  if (norm.includes('SCANIA')) {
+    return { bg: '#1E40AF', text: '#FFFFFF', border: '#1D4ED8', label: 'SCANIA' };
+  }
+  if (norm.includes('VOLVO')) {
+    return { bg: '#0369A1', text: '#FFFFFF', border: '#0284C7', label: 'VOLVO' };
+  }
+  if (norm.includes('ENACTA')) {
+    return { bg: '#059669', text: '#FFFFFF', border: '#047857', label: 'ENACTA ALGÉRIE' };
+  }
+  if (norm.includes('CIRTA') || norm.includes('DEUTZ')) {
+    return { bg: '#EA580C', text: '#FFFFFF', border: '#C2410C', label: 'CIRTA / DEUTZ' };
+  }
+  if (norm.includes('CATERPILLAR') || norm.includes('CAT')) {
+    return { bg: '#CA8A04', text: '#000000', border: '#A16207', label: 'CATERPILLAR' };
+  }
+  return { bg: '#2563EB', text: '#FFFFFF', border: '#1D4ED8', label: m.replace(/_/g, ' ') };
+}
+
+function formatSpecKey(k: string): string {
+  return k.replace(/_/g, ' ').toUpperCase();
+}
+
+function formatSpecValue(k: string, v: any): string {
+  if (v === null || v === undefined) return 'N/A';
+  if (typeof v === 'boolean') return v ? 'OUI' : 'NON';
+  if (Array.isArray(v)) return v.join(', ');
+  const s = String(v);
+  const keyLower = k.toLowerCase();
+  if (/\b(nm|bar|bars|deg|°|mm|l|litres|km)\b/i.test(s)) return s;
+  if (keyLower.includes('torque') || keyLower.includes('couple')) return `${s} Nm`;
+  if (keyLower.includes('angle')) return `${s}°`;
+  if (keyLower.includes('clearance') || keyLower.includes('jeu') || keyLower.includes('epaisseur') || keyLower.includes('cote')) return `${s} mm`;
+  if (keyLower.includes('pressure') || keyLower.includes('pression')) return `${s} bar`;
+  if (keyLower.includes('capacity') || keyLower.includes('volume') || keyLower.includes('liters')) return `${s} L`;
+  if (keyLower.includes('interval')) return `${s} km`;
+  return s;
+}
+
 export function SovereignRagExplorer({ token }: { token?: string | null }) {
   const [query, setQuery] = useState('couple de serrage culasse kerax 440');
   const [selectedSubsystem, setSelectedSubsystem] = useState<string>('ALL');
@@ -435,20 +490,26 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <span
-                    style={{
-                      background: '#1E293B',
-                      color: '#FFFFFF',
-                      fontSize: '11px',
-                      fontWeight: 800,
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      letterSpacing: '0.04em',
-                      border: '1px solid #334155',
-                    }}
-                  >
-                    {item.manufacturer}
-                  </span>
+                  {(() => {
+                    const badge = getManufacturerBadge(item.manufacturer);
+                    return (
+                      <span
+                        style={{
+                          background: badge.bg,
+                          color: badge.text,
+                          fontSize: '11px',
+                          fontWeight: 800,
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          letterSpacing: '0.04em',
+                          border: `1px solid ${badge.border}`,
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                        }}
+                      >
+                        {badge.label}
+                      </span>
+                    );
+                  })()}
                   <span style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A' }}>
                     {item.model_series}
                   </span>
@@ -534,7 +595,7 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
                     style={{
                       fontSize: '11px',
                       fontWeight: 800,
-                      color: '#475569',
+                      color: '#334155',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '5px',
@@ -548,7 +609,7 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
                   <div
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
                       gap: '8px',
                     }}
                   >
@@ -557,20 +618,21 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
                         key={k}
                         style={{
                           background: '#FFFFFF',
-                          border: '1px solid #E2E8F0',
-                          borderRadius: '6px',
-                          padding: '6px 10px',
+                          border: '1px solid #CBD5E1',
+                          borderRadius: '8px',
+                          padding: '8px 12px',
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          gap: '8px',
+                          gap: '10px',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
                         }}
                       >
                         <span
                           style={{
                             fontSize: '11px',
-                            fontWeight: 600,
-                            color: '#64748B',
+                            fontWeight: 700,
+                            color: '#475569',
                             textTransform: 'uppercase',
                             fontFamily: 'monospace',
                             overflow: 'hidden',
@@ -578,24 +640,22 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
                             whiteSpace: 'nowrap',
                           }}
                         >
-                          {k.replace(/_/g, ' ')} :
+                          {formatSpecKey(k)} :
                         </span>
                         <span
                           style={{
                             fontSize: '12px',
                             fontWeight: 800,
-                            color: '#047857',
+                            color: '#065F46',
                             fontFamily: 'monospace',
                             textAlign: 'right',
+                            background: '#ECFDF5',
+                            padding: '3px 8px',
+                            borderRadius: '5px',
+                            border: '1px solid #A7F3D0',
                           }}
                         >
-                          {Array.isArray(v)
-                            ? v.join(', ')
-                            : typeof v === 'boolean'
-                            ? v
-                              ? 'OUI'
-                              : 'NON'
-                            : String(v)}
+                          {formatSpecValue(k, v)}
                         </span>
                       </div>
                     ))}
