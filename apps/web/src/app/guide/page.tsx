@@ -12,12 +12,12 @@ interface DocSection {
 }
 
 const SECTIONS: DocSection[] = [
-  { id: 'vision', title: '1. Vision & Modèle Économique', badge: 'OEM-FIRST', icon: '🎯' },
+  { id: 'vision', title: '1. Vision & Modèle : L\'Ère de la Maintenance 5.0', badge: 'MONOPOLE 5.0', icon: '🧬' },
   { id: 'modes', title: '2. Les 3 Modes d’Exploitation (0 / 1 / 2)', badge: 'HARDWARE-AGNOSTIC', icon: '🚗' },
   { id: 'decision-engine', title: '3. Le Cœur Décisionnel (SAD → ADS)', badge: 'ARBITRAGE DZD', icon: '🧠' },
   { id: 'physics-algorithms', title: '4. Les 6 Algorithmes Physiques & VHI', badge: 'DÉTERMINISTE', icon: '🔬' },
   { id: 'tech-innovations', title: '5. Innovations Technologiques de Rupture (Monopole 0 $ / 0 DA)', badge: 'BREVETABLE', icon: '💡' },
-  { id: 'ai-sovereign', title: '6. IA Souveraine Locale & Observabilité', badge: 'QWEN 2.5 / OLLAMA', icon: '⚡' },
+  { id: 'ai-sovereign', title: '6. IA Souveraine & Les 7 Piliers d\'Observabilité', badge: '7 PILIERS IA', icon: '⚡' },
   { id: 'digital-twin', title: '7. Jumeau Numérique & Multi-Climats', badge: 'STRESS 58 WILAYAS', icon: '🌐' },
   { id: 'field-modules', title: '8. Télémétrie Terrain : Naftal, Froid, Dispatch', badge: 'OPÉRATIONNEL', icon: '📦' },
   { id: 'tech-architecture', title: '9. Architecture Système & Pipeline', badge: 'FULL-STACK', icon: '🏗️' },
@@ -374,16 +374,63 @@ export default function GuidePage() {
           {/* SECTION 1: VISION & PHILOSOPHIE */}
           <section id="vision" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>🎯</span>
+              <span style={{ fontSize: '24px' }}>🧬</span>
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
-                1. Vision & Philosophie : Rompre avec les Télématiques Classiques
+                1. Vision &amp; Modèle : L&apos;Ère de la Maintenance 5.0 Souveraine
               </h2>
             </div>
             <p style={{ color: 'var(--df-text-secondary)', fontSize: '15px', lineHeight: 1.7, marginBottom: '20px' }}>
               La quasi-totalité des solutions de télématique du marché échouent dans les flottes algériennes pour 3 raisons majeures :
               elles exigent l’installation coûteuse d’un boîtier sur 100% des véhicules dès le premier jour, 
               elles se limitent à du pistage passif ("points sur une carte") et elles bombardent les gestionnaires de fausses alertes sans arbitrage financier.
+              DocteurFlotte opère une rupture paradigmatique complète en inventant la <strong>Maintenance 5.0</strong>.
             </p>
+
+            {/* Matrice d'Évolution 1.0 à 5.0 */}
+            <div
+              style={{
+                background: 'var(--df-bg-surface-1)',
+                border: '2px solid #059669',
+                borderRadius: '12px',
+                padding: '20px',
+                marginBottom: '24px',
+                boxShadow: '0 4px 20px rgba(5, 150, 105, 0.08)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                <span style={{ fontSize: '18px' }}>⚡</span>
+                <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#065F46', margin: 0 }}>
+                  L&apos;Échelle des 5 Générations de Maintenance Industrielle
+                </h3>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '12px', fontSize: '12px' }}>
+                <div style={{ padding: '12px', background: 'var(--df-bg-surface-2)', borderRadius: '8px', borderLeft: '3px solid #94A3B8' }}>
+                  <div style={{ fontWeight: 800, color: '#475569' }}>1.0 Réactive (1970)</div>
+                  <div style={{ color: '#DC2626', fontWeight: 600, marginTop: '2px' }}>« Casse &amp; Dépannage »</div>
+                  <p style={{ margin: '6px 0 0', color: 'var(--df-text-secondary)', lineHeight: 1.45 }}>Réparation d'urgence après avarie sur route. Arrêt d'exploitation brutal.</p>
+                </div>
+                <div style={{ padding: '12px', background: 'var(--df-bg-surface-2)', borderRadius: '8px', borderLeft: '3px solid #D97706' }}>
+                  <div style={{ fontWeight: 800, color: '#475569' }}>2.0 Préventive (1990)</div>
+                  <div style={{ color: '#D97706', fontWeight: 600, marginTop: '2px' }}>« Calendrier Aveugle »</div>
+                  <p style={{ margin: '6px 0 0', color: 'var(--df-text-secondary)', lineHeight: 1.45 }}>Vidange fixe tous les 10 000 km. Remplacement prématuré de lubrifiants encore viables.</p>
+                </div>
+                <div style={{ padding: '12px', background: 'var(--df-bg-surface-2)', borderRadius: '8px', borderLeft: '3px solid #2563EB' }}>
+                  <div style={{ fontWeight: 800, color: '#475569' }}>3.0 Conditionnelle (2010)</div>
+                  <div style={{ color: '#2563EB', fontWeight: 600, marginTop: '2px' }}>« Voyants Tableau »</div>
+                  <p style={{ margin: '6px 0 0', color: 'var(--df-text-secondary)', lineHeight: 1.45 }}>Alerte déclenchée sur seuil de capteur critique (&gt; 95°C). L'usure métallique est déjà amorcée.</p>
+                </div>
+                <div style={{ padding: '12px', background: 'var(--df-bg-surface-2)', borderRadius: '8px', borderLeft: '3px solid #6366F1' }}>
+                  <div style={{ fontWeight: 800, color: '#475569' }}>4.0 Prédictive (2018)</div>
+                  <div style={{ color: '#6366F1', fontWeight: 600, marginTop: '2px' }}>« Samsara / Geotab »</div>
+                  <p style={{ margin: '6px 0 0', color: 'var(--df-text-secondary)', lineHeight: 1.45 }}>Capteurs IoT onéreux ($$$), Machine Learning statistique boîte noire, alertes sans calcul de rentabilité.</p>
+                </div>
+                <div style={{ padding: '12px', background: '#ECFDF5', borderRadius: '8px', border: '1px solid #A7F3D0', borderLeft: '4px solid #059669' }}>
+                  <div style={{ fontWeight: 800, color: '#065F46' }}>5.0 Prescriptive (2026+)</div>
+                  <div style={{ color: '#059669', fontWeight: 700, marginTop: '2px' }}>« DocteurFlotte »</div>
+                  <p style={{ margin: '6px 0 0', color: '#1E293B', lineHeight: 1.45 }}>Physique déterministe à 0 DA (zéro capteur externe), arbitrage DZD (Coût Action vs Inaction) et assistant vocal atelier.</p>
+                </div>
+              </div>
+            </div>
 
             <div
               style={{
@@ -404,7 +451,7 @@ export default function GuidePage() {
                 }}
               >
                 <div style={{ fontSize: '15px', fontWeight: 700, color: '#dc2626', marginBottom: '10px' }}>
-                  ❌ Les Outils Traditionnels (Pistage Passif)
+                  ❌ Les Outils Traditionnels (Pistage Passif 4.0)
                 </div>
                 <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.7 }}>
                   <li>Obligation d'acheter et d'installer des boîtiers GPS sur tout le parc.</li>
@@ -426,14 +473,14 @@ export default function GuidePage() {
                 }}
               >
                 <div style={{ fontSize: '15px', fontWeight: 700, color: '#059669', marginBottom: '10px' }}>
-                  ✨ Le Paradigme DocteurFlotte (OEM-First & Décisionnel)
+                  ✨ Le Paradigme DocteurFlotte (Maintenance 5.0)
                 </div>
                 <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.7 }}>
                   <li><strong>Opérationnel dès le Jour 1 en Mode 0</strong> sans aucun investissement matériel.</li>
-                  <li><strong>Moteur SAD → ADS :</strong> Recommande ou exécute des actions concrètes (Ordres de Travail).</li>
-                  <li><strong>Modélisation de la Physique Réelle :</strong> Équations d'Arrhenius, Archard, thermodynamique culasse.</li>
-                  <li><strong>Arbitrage Financier Strict :</strong> Compare le coût d'intervention au risque de panne en DZD.</li>
-                  <li><strong>Souveraineté Intégrale :</strong> Hébergement local, RLS Fail-Closed et IA Qwen locale zéro-PII.</li>
+                  <li><strong>Moteur SAD → ADS :</strong> Recommande et chiffre des actions en DZD (Coût Action vs Inaction).</li>
+                  <li><strong>Physique Déterministe 0 DA :</strong> Arrhenius, Archard, UEB Enthalpie SCR, CSIS spectro-cranking.</li>
+                  <li><strong>Symbiose Homme-Machine :</strong> Assistant vocal d'atelier en Darja/Français et RAG sans hallucination.</li>
+                  <li><strong>Souveraineté Intégrale :</strong> Hébergement local, RLS Fail-Closed et IA Qwen locale zéro-PII (Loi 18-07).</li>
                 </ul>
               </div>
             </div>
@@ -1325,11 +1372,33 @@ export default function GuidePage() {
                 border: '1px solid var(--df-border-subtle)',
                 borderRadius: '12px',
                 padding: '20px',
+                marginBottom: '20px',
               }}
             >
-              <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--df-text-main)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>🛡️</span> Rappel des Innovations Algérie-First Déjà Opérationnelles en Base
-              </h4>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>🛡️</span> Rappel des Innovations Algérie-First Déjà Opérationnelles en Base
+                </h4>
+                <Link
+                  href="/preventive"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    color: '#059669',
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                  }}
+                >
+                  <span>⚡</span>
+                  <span>Tester les 5 Modèles en Live dans le Cockpit 5.0 ➔</span>
+                </Link>
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', fontSize: '12.5px' }}>
                 <div style={{ padding: '12px', background: 'var(--df-bg-surface-2)', borderRadius: '8px' }}>
                   <strong style={{ color: 'var(--df-accent-blue)' }}>CUSUM Anti-Ballottement & Pente :</strong> Correction géométrique avec déport de sonde x_sonde et fenêtre médiane 60s pour éliminer les faux positifs de vol de carburant dans les dévers.
@@ -1338,7 +1407,7 @@ export default function GuidePage() {
                   <strong style={{ color: 'var(--df-status-ok)' }}>RAG Hybride Souverain & Web :</strong> Indexation double (BM25 + pg_trgm + JSONB structuré) sur 62 manuels constructeurs avec auto-ingestion Web sans fuite PII (Loi 18-07).
                 </div>
                 <div style={{ padding: '12px', background: 'var(--df-bg-surface-2)', borderRadius: '8px' }}>
-                  <strong style={{ color: '#f59e0b)' }}>Daemon Anti-Echo Storm 72h :</strong> Machine à états de dédoublonnage interdisant toute ré-émission d&apos;alerte si un Ordre de Travail est déjà ouvert.
+                  <strong style={{ color: '#f59e0b' }}>Daemon Anti-Echo Storm 72h :</strong> Machine à états de dédoublonnage interdisant toute ré-émission d&apos;alerte si un Ordre de Travail est déjà ouvert.
                 </div>
                 <div style={{ padding: '12px', background: 'var(--df-bg-surface-2)', borderRadius: '8px' }}>
                   <strong style={{ color: '#ec4899' }}>Vocal Atelier Darja Phonétique :</strong> Short-circuit SQL déterministe sous les 50 ms pour les chefs d&apos;atelier et mécaniciens sur le terrain.
@@ -1347,19 +1416,122 @@ export default function GuidePage() {
             </div>
           </section>
 
-          {/* SECTION 6: IA SOUVERAINE & OBSERVABILITÉ */}
+          {/* SECTION 6: IA SOUVERAINE & LES 7 PILIERS */}
           <section id="ai-sovereign" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
               <span style={{ fontSize: '24px' }}>⚡</span>
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
-                6. IA Souveraine Locale & Observabilité en Temps Réel (Qwen 2.5 / Ollama)
+                6. IA Souveraine & Les 7 Piliers Fondateurs d&apos;Observabilité Décisionnelle
               </h2>
             </div>
             <p style={{ color: 'var(--df-text-secondary)', fontSize: '15px', lineHeight: 1.7, marginBottom: '20px' }}>
               DocteurFlotte intègre une rupture technologique majeure : un grand modèle de langage (LLM) <strong>100% auto-hébergé sous Ollama (modèle docteurflotte basé sur Qwen 2.5 1.5B Instruct)</strong>.
               Il fonctionne en local sur le CPU du serveur (3 threads dédiés), sans aucune dépendance vers des API externes américaines ou chinoises (OpenAI, Anthropic).
+              Cette intelligence artificielle collaborative et cognitive s&apos;articule autour de <strong>7 Piliers d&apos;Excellence Industrielle</strong> :
             </p>
 
+            {/* GRILLE DES 7 PILIERS */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '14px', marginBottom: '24px' }}>
+              {/* Pilier 1 */}
+              <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid var(--df-accent-blue)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '18px' }}>⚖️</span>
+                  <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
+                    1. Greffier Juridique & Huissier CUSUM
+                  </h4>
+                </div>
+                <p style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                  Chaque vol de carburant ou surchauffe suspecte est consolidé par l&apos;algorithme CUSUM couplé au dévers routier Valhalla.
+                  L&apos;IA génère un certificat d&apos;infraction infalsifiable avec horodatage, coordonnées GPS et vecteur de preuve opposable devant les prud&apos;hommes ou la direction.
+                </p>
+              </div>
+
+              {/* Pilier 2 */}
+              <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid var(--df-status-ok)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '18px' }}>💰</span>
+                  <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
+                    2. Copilot Décisionnel ADS en Dinar (DZD)
+                  </h4>
+                </div>
+                <p style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                  Transformation instantanée de chaque anomalie physique en arbitrage financier direct : <em>Coût d&apos;Action Préventive vs Risque d&apos;Inaction</em> (casse turbo, remorquage, pénalité de retard contractuel Sonatrach/client).
+                  Génération automatique d&apos;un Ordre de Travail (OT) en 1 clic.
+                </p>
+              </div>
+
+              {/* Pilier 3 */}
+              <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid #f59e0b' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '18px' }}>📚</span>
+                  <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
+                    3. RAG Hybride & Web Multi-Moteurs Auto-Ingéré
+                  </h4>
+                </div>
+                <p style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                  Recherche tokenisée haute performance (TSQUERY OR-combiné + trigrammes <code>pg_trgm</code>) dans 62 manuels constructeurs OEM (Renault Kerax, Shacman, Mercedes Actros, Toyota Hilux).
+                  En cas d&apos;inconnu, bascule transparente sur DuckDuckGo/Wikipédia et auto-enrichissement du coffre sous 15 ms sans fuite PII.
+                </p>
+              </div>
+
+              {/* Pilier 4 */}
+              <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid #8b5cf6' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '18px' }}>🧾</span>
+                  <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
+                    4. Réconciliateur Automatique de Factures DGI
+                  </h4>
+                </div>
+                <p style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                  Rapprochement intelligent des factures d&apos;ateliers et fournisseurs avec les Ordres de Travail à ± 5 DZD près.
+                  Contrôle automatique de validité fiscale algérienne : NIF (15 chiffres), NIS, Registre de Commerce (RC), Article d&apos;Imposition (AI), TVA à 19% et droit de timbre.
+                </p>
+              </div>
+
+              {/* Pilier 5 */}
+              <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid #ec4899' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '18px' }}>🎙️</span>
+                  <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
+                    5. Assistant Vocal Chauffeur & Atelier en Darja
+                  </h4>
+                </div>
+                <p style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                  Interaction vocale mains libres adaptée au terrain algérien (compréhension du dialecte algérien Darja et du français technique atelier).
+                  Short-circuit déterministe SQL sous 50 ms pour les requêtes fréquentes (<em>&quot;wech raho khass fil camion 12 ?&quot;</em>, <em>&quot;niveau zith&quot;</em>, <em>&quot;pression pneus&quot;</em>).
+                </p>
+              </div>
+
+              {/* Pilier 6 */}
+              <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid #06b6d4' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '18px' }}>📊</span>
+                  <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
+                    6. Arbitrage Actuariel DZD & Véhicule Relais
+                  </h4>
+                </div>
+                <p style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                  Modélisation actuarielle des flux de trésorerie de la flotte : calcul précis du coût d&apos;immobilisation journalier par véhicule (25 000 à 180 000 DZD/jour)
+                  et proposition proactive du meilleur véhicule de substitution disponible dans le parc pour sauver la mission de livraison.
+                </p>
+              </div>
+
+              {/* Pilier 7 */}
+              <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid #14b8a6' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '18px' }}>⏰</span>
+                  <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
+                    7. Daemon Proactif 08h00 & Verrou Anti-Echo Storm 72h
+                  </h4>
+                </div>
+                <p style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                  Agent de veille automatique scrutant le parc chaque matin à 08h00.
+                  Machine à états de dédoublonnage interdisant formellement le spam d&apos;alertes si un Ordre de Travail est déjà ouvert sur la même panne dans les 72 dernières heures.
+                </p>
+              </div>
+            </div>
+
+            {/* COUPE-FEU LOI 18-07 */}
             <div
               style={{
                 background: 'var(--df-bg-surface-1)',
@@ -1374,11 +1546,11 @@ export default function GuidePage() {
                 🛡️ Coupe-Feu Loi 18-07 (ANPDP) & Dual-Engine Fail-Safe
               </h3>
               <p style={{ fontSize: '13.5px', lineHeight: 1.6, color: 'var(--df-text-secondary)', marginBottom: '16px' }}>
-                Aucune donnée à caractère personnel ne pénètre dans le modèle. Avant chaque inférence, un filtre d'expression régulière inspecte et purge les données sensibles :
+                Aucune donnée à caractère personnel ne pénètre dans le modèle. Avant chaque inférence, un filtre d&apos;expression régulière inspecte et purge les données sensibles :
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginBottom: '18px' }}>
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid var(--df-accent-blue)' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--df-text-muted)', textTransform: 'uppercase' }}>Plaques d'Immatriculation DZ</div>
+                  <div style={{ fontSize: '11px', color: 'var(--df-text-muted)', textTransform: 'uppercase' }}>Plaques d&apos;Immatriculation DZ</div>
                   <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--df-text-main)', marginTop: '4px' }}>
                     <code>01492-319-16</code> ➔ <code>[MATRICULE_ANONYMISE]</code>
                   </div>
@@ -1390,9 +1562,9 @@ export default function GuidePage() {
                   </div>
                 </div>
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #f59e0b' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--df-text-muted)', textTransform: 'uppercase' }}>Numéro d'Identification National (NIN)</div>
+                  <div style={{ fontSize: '11px', color: 'var(--df-text-muted)', textTransform: 'uppercase' }}>Numéro d&apos;Identification National (NIN)</div>
                   <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--df-text-main)', marginTop: '4px' }}>
-                    <code>18 chiffres d'état-civil</code> ➔ <code>[NIN_ANONYMISE]</code>
+                    <code>18 chiffres d&apos;état-civil</code> ➔ <code>[NIN_ANONYMISE]</code>
                   </div>
                 </div>
               </div>
@@ -1414,10 +1586,31 @@ export default function GuidePage() {
                   }}
                 >
                   <span>⚡</span>
-                  <span>Ouvrir la Console d'Observabilité & d'Audit en Direct</span>
+                  <span>Ouvrir la Console d&apos;Observabilité & d&apos;Audit en Direct</span>
                 </Link>
+
+                <Link
+                  href="/knowledge"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '9px 16px',
+                    borderRadius: '8px',
+                    background: 'var(--df-bg-surface-2)',
+                    color: 'var(--df-text-main)',
+                    border: '1px solid var(--df-border-subtle)',
+                    fontSize: '12.5px',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                  }}
+                >
+                  <span>🔍</span>
+                  <span>Explorer le Coffre RAG & Moteur Web</span>
+                </Link>
+
                 <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)', display: 'flex', alignItems: 'center' }}>
-                  Télémétrie en direct : 8.5 – 11.2 tokens/seconde sur CPU local • Buffer d'audit circulaire de 50 requêtes
+                  Télémétrie en direct : 8.5 – 11.2 tokens/seconde sur CPU local • Buffer d&apos;audit circulaire de 50 requêtes
                 </div>
               </div>
             </div>
@@ -1727,6 +1920,18 @@ export default function GuidePage() {
                 </thead>
                 <tbody>
                   <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
+                    <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>Génération de Maintenance</td>
+                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ Maintenance 5.0 (Prescriptive & Cognitive)</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Maintenance 4.0 (Statistique boîte noire)</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Maintenance 3.0 (Seuils kilométriques)</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
+                    <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>Coût Matériel & Capteurs</td>
+                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ Strictement 0 DA (Bus natif & ADC)</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Capteurs TPMS & sondes payantes</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Accessoires & sondes en sus</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>Démarrage sans boîtier</td>
                     <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ Mode 0 (Zero-Hardware natif)</td>
                     <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Obligation d’acheter un boîtier</td>
@@ -1761,6 +1966,12 @@ export default function GuidePage() {
                     <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ Qwen 2.5 local sous Ollama</td>
                     <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Cloud IA externe payant</td>
                     <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Pas d’IA locale</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
+                    <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>Moteur Décisionnel Financier</td>
+                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ Arbitrage ADS en DZD (Coût Action vs Inaction)</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Graphes informatifs sans chiffrage</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Simple rapport kilométrique</td>
                   </tr>
                 </tbody>
               </table>
