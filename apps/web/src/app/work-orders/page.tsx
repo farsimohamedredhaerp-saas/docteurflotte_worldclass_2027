@@ -20,6 +20,10 @@ import {
 } from '@docteurflotte/contracts';
 import { useDemoMode } from '../../context/DemoModeContext';
 import {
+  OfficialDgiInvoiceModal,
+  DgiInvoiceData,
+} from '../../components/finance/OfficialDgiInvoiceModal';
+import {
   IconWrench,
   IconTruck,
   IconShieldCheck,
@@ -190,6 +194,70 @@ export default function WorkOrdersPage() {
     completionNotes: '',
   });
   const [isCompleting, setIsCompleting] = useState(false);
+
+  // Modale Facture Fiscale DGI
+  const [invoiceModalData, setInvoiceModalData] = useState<DgiInvoiceData | null>(null);
+
+  const handleOpenDgiInvoice = (wo: WorkOrder) => {
+    const hourlyRate = 1500; // Tarif horaire conventionnel DZD
+    const laborHours = wo.actualLaborHours || wo.estimatedLaborHours || 2;
+    const laborTotal = laborHours * hourlyRate;
+    const partsTotal = wo.partsCost || 0;
+
+    const items = [
+      {
+        description: `Main d'œuvre atelier qualifiée : ${wo.title} (${wo.assetName || wo.assetCode})`,
+        oemReference: 'MO-MEC-ATELIER-DZ',
+        quantity: laborHours,
+        unitPriceHtDzd: hourlyRate,
+        totalHtDzd: laborTotal,
+      },
+    ];
+
+    if (partsTotal > 0) {
+      items.push({
+        description: `Lot de pièces détachées d'origine et consommables certifiés OEM`,
+        oemReference: wo.oemPartReference || 'OEM-KIT-PREVENTIF-DZ',
+        quantity: 1,
+        unitPriceHtDzd: partsTotal,
+        totalHtDzd: partsTotal,
+      });
+    }
+
+    const invoiceData: DgiInvoiceData = {
+      invoiceNumber: `FAC-DGI-${new Date().getFullYear()}-${wo.id.slice(-5).toUpperCase()}`,
+      issueDate: wo.completedAt || new Date().toISOString(),
+      dueDate: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
+      paymentMode: 'VIREMENT_BANCAIRE',
+      company: {
+        legalName: 'SOCIÉTÉ ALGÉRIENNE DE MAINTENANCE & SERVICES INDUSTRIELS EURL',
+        tradeName: 'ATELIER MÉCANIQUE CENTRAL DOCTEURFLOTTE',
+        address: 'Zone Industrielle Oued Smar, Voie B N° 14',
+        wilayaName: 'Alger',
+        wilayaCode: 16,
+        nif: '001616098765432',
+        nis: '00161609876',
+        rcNumber: '16/00-9876543B22',
+        aiNumber: '16098765432',
+        bankAccountRib: '002 00016 1600012345 67 (BEA Rouiba)',
+      },
+      client: {
+        legalName: 'ENTREPRISE NATIONALE DE LOGISTIQUE & TRANSPORT ROUTIER SPA',
+        address: 'Zone d’Activité Dar El Beïda, Lot 42',
+        wilayaName: 'Alger (16)',
+        nif: '001616012345678',
+        nis: '00161601234',
+        rcNumber: '16/00-1234567B22',
+        aiNumber: '16012345678',
+      },
+      items,
+      vatRatePercent: 19,
+      applyStampDuty: false,
+      discountDzd: 0,
+    };
+
+    setInvoiceModalData(invoiceData);
+  };
 
   const showNotification = (type: 'success' | 'warning' | 'error', message: string) => {
     setFeedback({ type, message });
@@ -815,6 +883,28 @@ export default function WorkOrdersPage() {
                                 Immobilisation : <strong>{wo.downtimeHours} h</strong>
                               </div>
                             ) : null}
+
+                            <button
+                              type="button"
+                              onClick={() => handleOpenDgiInvoice(wo)}
+                              style={{
+                                marginTop: '0.4rem',
+                                padding: '0.3rem 0.65rem',
+                                borderRadius: 'var(--df-radius-xs)',
+                                background: 'rgba(5, 150, 105, 0.12)',
+                                border: '1px solid rgba(5, 150, 105, 0.35)',
+                                color: '#059669',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                              }}
+                            >
+                              <span>🧾</span>
+                              <span>Facture Fiscale DGI (A4)</span>
+                            </button>
                           </div>
                         ) : (
                           <Button
@@ -1439,6 +1529,14 @@ export default function WorkOrdersPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* MODALE FACTURE FISCALE DGI OFFICIELLE (A4) */}
+      {invoiceModalData && (
+        <OfficialDgiInvoiceModal
+          data={invoiceModalData}
+          onClose={() => setInvoiceModalData(null)}
+        />
       )}
     </div>
   );
