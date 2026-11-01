@@ -71,20 +71,32 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
   {
     id: 'maintenance',
     label: 'Maintenance & Travaux',
-    shortLabel: 'Maintenance',
+    shortLabel: 'Maintenance 5.0',
     iconNode: <IconWrench size={14} strokeWidth={1.75} />,
     subfeatures: [
       {
-        title: 'Maintenance 4.0 & RUL',
-        desc: 'Console industrielle déterministe, J1939, OBD-II, simulation CAN et RUL sous-systèmes.',
+        title: 'Maintenance 5.0 Cognitive & RUL',
+        desc: 'Physique déterministe 0 DA, J1939/OBD, arbitrage financier DZD (SAD -> ADS) et RUL sous-systèmes.',
         href: '/maintenance',
-        badge: 'NOUVEAU - 4.0',
+        badge: 'MONOPOLE 5.0',
+      },
+      {
+        title: 'Cockpit Maintenance 5.0 & Plans OEM',
+        desc: '5 innovations de rupture 0 DA, usure saharienne et arbitrage financier prescriptif.',
+        href: '/preventive',
+        badge: 'MAINTENANCE 5.0',
       },
       {
         title: 'Ask DocteurFlotte (Copilote IA)',
         desc: 'Diagnostic conversationnel de panne, preuves physiques et arbitrage ADS.',
         href: '/copilot',
-        badge: 'NOUVEAU - IA',
+        badge: 'COPILOT IA',
+      },
+      {
+        title: 'Surveillance & Observabilité IA (Ollama / Qwen)',
+        desc: 'Télémétrie en temps réel (tok/s, CPU, RAM), audit Loi 18-07 ANPDP, inspecteur de requêtes et playground.',
+        href: '/admin/ai-observability',
+        badge: 'SURVEILLANCE IA',
       },
       {
         title: 'Tableau Décisionnel',
@@ -96,19 +108,13 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         title: 'DVIR Inspection Numérique Mobile',
         desc: 'Contrôles avant départ et fin de tournée, conformité ENACTA et déclenchement d’OT.',
         href: '/dvir',
-        badge: 'NOUVEAU - SAMSARA',
+        badge: 'OFFLINE-FIRST',
       },
       {
         title: 'Ordres de Travail (OT)',
         desc: 'Gestion des interventions atelier, pièces et main d\'œuvre.',
         href: '/work-orders',
         badge: 'ACTIF',
-      },
-      {
-        title: 'Plans Préventifs',
-        desc: 'Intervalles constructeur, cycles sévères Sahara et préavis d\'échéance.',
-        href: '/preventive',
-        badge: 'OEM RMI',
       },
       {
         title: 'Conformité Réglementaire',
@@ -251,6 +257,12 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         desc: 'Gouvernance des 6 algorithmes physiques déterministes et rollbacks immuables.',
         href: '/admin/decision-engine',
         badge: 'v2.0 REVISED',
+      },
+      {
+        title: 'Surveillance IA Souveraine (Ollama / Qwen)',
+        desc: 'Console d’observabilité en temps réel, télémétrie GPU/CPU, buffer d’audit Loi 18-07 et test d’inférence.',
+        href: '/admin/ai-observability',
+        badge: 'QWEN 2.5 LIVE',
       },
       {
         title: 'Barèmes Fiscaux & Naftal',

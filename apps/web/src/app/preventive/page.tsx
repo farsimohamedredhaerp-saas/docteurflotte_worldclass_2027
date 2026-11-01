@@ -635,9 +635,22 @@ export default function PreventivePage() {
               }}
             >
               <div>
-                <div style={{ display: 'inline-flex', gap: '0.45rem', marginBottom: '0.5rem' }}>
-                  <Badge variant="ok">SOUVERAIN DZ</Badge>
-                  <Badge variant="neutral">Physique Arrhenius &amp; RMI</Badge>
+                <div style={{ display: 'inline-flex', gap: '0.45rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                  <span
+                    style={{
+                      background: '#059669',
+                      color: '#FFFFFF',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      padding: '3px 10px',
+                      borderRadius: '6px',
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    🧬 MAINTENANCE 5.0 PRESCRIPTIVE &amp; COGNITIVE
+                  </span>
+                  <Badge variant="ok">SOUVERAIN ALGÉRIE (LOI 18-07)</Badge>
+                  <Badge variant="neutral">Physique Déterministe 0 DA • DZD</Badge>
                 </div>
                 <h1
                   style={{
@@ -648,10 +661,10 @@ export default function PreventivePage() {
                     marginBottom: '0.35rem',
                   }}
                 >
-                  Plans Préventifs &amp; Intervalles Constructeur OEM
+                  Cockpit de Maintenance 5.0 &amp; Plans Constructeur OEM
                 </h1>
-                <p style={{ fontSize: '0.88rem', color: 'var(--df-text-secondary)', maxWidth: '720px', margin: 0 }}>
-                  Bibliothèque des programmes d&apos;entretien constructeur (Renault Trucks, Scania, CAT, Toyota) calibrés selon la sévérité thermique et la qualité du gasoil Naftal. Évitez les casses moteurs par anticipation déterministe.
+                <p style={{ fontSize: '0.88rem', color: 'var(--df-text-secondary)', maxWidth: '780px', margin: 0 }}>
+                  Le décisionnel prescriptif de classe mondiale : 5 algorithmes physiques déterministes à 0 DA de coût matériel, arbitrage financier direct en Dinars Algériens (SAD $\rightarrow$ ADS), et bibliothèque de programmes d&apos;entretien constructeur (Renault Trucks, Scania, CAT, Toyota, Shacman) calibrés pour le stress saharien.
                 </p>
               </div>
 

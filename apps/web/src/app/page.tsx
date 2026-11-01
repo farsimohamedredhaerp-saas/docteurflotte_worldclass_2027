@@ -192,7 +192,7 @@ export default function HomePage() {
           <div style={{ maxWidth: '780px' }}>
             <div style={{ display: 'inline-flex', marginBottom: '0.75rem' }}>
               <Badge variant="ok">
-                Centre d&apos;Opérations Connectées • Traccar Gateway Synced (Loi 18-07)
+                ✨ Plateforme Souveraine de Maintenance 5.0 • Brevets 0 DA • Arbitrage DZD (Loi 18-07)
               </Badge>
             </div>
 
@@ -206,15 +206,35 @@ export default function HomePage() {
                 color: 'var(--df-text-main)',
               }}
             >
-              Le Décisionnel au Cœur de la Maintenance de Vos Actifs
+              La Maintenance 5.0 au Cœur de la Gouvernance de Vos Actifs
             </h1>
 
             <p style={{ fontSize: '0.95rem', color: 'var(--df-text-secondary)', lineHeight: 1.55, marginBottom: '1.25rem' }}>
-              Supervision de flotte de classe mondiale : fusionnez les flux télématiques en continu, anticipez les dérives d&apos;intervalles mécaniques et orchestrez les interventions au coût réel calculé.
+              Dépassez la maintenance 4.0 statistique. DocteurFlotte fusionne la physique déterministe (coût matériel 0 DA), l&apos;arbitrage financier direct en Dinars Algériens (DZD) et un copilote d&apos;atelier souverain.
             </p>
 
             {/* RACCOURCIS DE DÉMONSTRATION CLIENT & ESSAI 1-CLIC */}
             <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <Link
+                href="/preventive"
+                style={{
+                  textDecoration: 'none',
+                  background: '#059669',
+                  color: '#FFFFFF',
+                  padding: '0.55rem 1.15rem',
+                  borderRadius: 'var(--df-radius-md)',
+                  fontSize: '0.85rem',
+                  fontWeight: 800,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  boxShadow: '0 2px 10px rgba(5, 150, 105, 0.35)',
+                }}
+              >
+                <IconWrench size={15} />
+                <span>⚡ Cockpit Maintenance 5.0</span>
+              </Link>
+
               <Link
                 href="/live-cockpit"
                 style={{
@@ -255,26 +275,6 @@ export default function HomePage() {
               </Link>
 
               <Link
-                href="/maintenance"
-                style={{
-                  textDecoration: 'none',
-                  background: 'var(--df-bg-surface-2)',
-                  color: 'var(--df-text-main)',
-                  border: '1px solid var(--df-border-subtle)',
-                  padding: '0.45rem 0.95rem',
-                  borderRadius: 'var(--df-radius-md)',
-                  fontSize: '0.80rem',
-                  fontWeight: 600,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                }}
-              >
-                <IconWrench size={14} />
-                <span>Maintenance 4.0</span>
-              </Link>
-
-              <Link
                 href="/fuel-scanner"
                 style={{
                   textDecoration: 'none',
@@ -310,6 +310,25 @@ export default function HomePage() {
                 }}
               >
                 <span>🔬 Jumeau Numérique</span>
+              </Link>
+
+              <Link
+                href="/admin/ai-observability"
+                style={{
+                  textDecoration: 'none',
+                  background: 'rgba(147, 51, 234, 0.15)',
+                  color: '#c084fc',
+                  border: '1px solid rgba(168, 85, 247, 0.4)',
+                  padding: '0.45rem 0.95rem',
+                  borderRadius: 'var(--df-radius-md)',
+                  fontSize: '0.80rem',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                }}
+              >
+                <span>⚡ Surveillance IA Ollama</span>
               </Link>
             </div>
           </div>
@@ -442,6 +461,230 @@ export default function HomePage() {
               <div className="df-mono" style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--df-status-ok)' }}>
                 +1 719 000 DA
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── VITRINE COMMERCIALE CLÉ : POURQUOI DOCTEURFLOTTE EST EN MAINTENANCE 5.0 ── */}
+        <section
+          style={{
+            marginBottom: '2.5rem',
+            background: 'var(--df-bg-surface-1)',
+            border: '2px solid #059669',
+            borderRadius: 'var(--df-radius-lg)',
+            padding: '2rem 1.75rem',
+            boxShadow: '0 8px 30px rgba(5, 150, 105, 0.08)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div>
+              <div style={{ display: 'inline-flex', gap: '6px', marginBottom: '0.5rem' }}>
+                <span
+                  style={{
+                    fontSize: '0.70rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    background: '#ECFDF5',
+                    color: '#065F46',
+                    border: '1px solid #A7F3D0',
+                  }}
+                >
+                  ⚡ ÉTENDARD TECHNOLOGIQUE &amp; MONOPOLE INDUSTRIEL
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.70rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    background: '#EFF6FF',
+                    color: '#1D4ED8',
+                    border: '1px solid #BFDBFE',
+                  }}
+                >
+                  COÛT MATÉRIEL STRICTEMENT 0 DA / 0 $
+                </span>
+              </div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--df-text-main)', margin: '0 0 0.4rem 0' }}>
+                Pourquoi DocteurFlotte n&apos;est pas en Maintenance 4.0, mais en Maintenance 5.0
+              </h2>
+              <p style={{ fontSize: '0.88rem', color: 'var(--df-text-secondary)', maxWidth: '880px', margin: 0, lineHeight: 1.6 }}>
+                Alors que les acteurs mondiaux (Samsara, Geotab, Webfleet) s&apos;arrêtent à la <strong>Maintenance 4.0</strong> (statistiques boîte noire, capteurs onéreux, aucune décision financière), DocteurFlotte introduit la <strong>Maintenance 5.0</strong> : physique déterministe, arbitrage économique en Dinars Algériens (DZD) et symbiose homme-machine cognitive sur le terrain.
+              </p>
+            </div>
+
+            <Link
+              href="/preventive"
+              style={{
+                textDecoration: 'none',
+                background: '#059669',
+                color: '#FFFFFF',
+                padding: '0.65rem 1.25rem',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+                fontWeight: 800,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 2px 8px rgba(5, 150, 105, 0.4)',
+              }}
+            >
+              <span>Explorer le Cockpit 5.0</span>
+              <span>→</span>
+            </Link>
+          </div>
+
+          {/* Grille comparative des 5 Générations de Maintenance */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+              gap: '12px',
+            }}
+          >
+            {/* 1.0 */}
+            <div
+              style={{
+                background: 'var(--df-bg-surface-2)',
+                border: '1px solid var(--df-border-subtle)',
+                borderRadius: '10px',
+                padding: '14px',
+                opacity: 0.75,
+              }}
+            >
+              <div style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>
+                Génération 1.0 (1970 - 1990)
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: '#475569', marginTop: '2px' }}>
+                Réactive &amp; Curative
+              </div>
+              <div style={{ fontSize: '11px', color: '#DC2626', fontWeight: 600, marginTop: '6px' }}>
+                « On répare quand ça casse »
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--df-text-secondary)', marginTop: '6px', lineHeight: 1.45 }}>
+                Casse moteur brutale sur route, immobilisation de plusieurs jours, remorquage d&apos;urgence et coûts d&apos;exploitation imprévisibles.
+              </p>
+            </div>
+
+            {/* 2.0 */}
+            <div
+              style={{
+                background: 'var(--df-bg-surface-2)',
+                border: '1px solid var(--df-border-subtle)',
+                borderRadius: '10px',
+                padding: '14px',
+                opacity: 0.8,
+              }}
+            >
+              <div style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>
+                Génération 2.0 (1990 - 2010)
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: '#475569', marginTop: '2px' }}>
+                Préventive Calendaire
+              </div>
+              <div style={{ fontSize: '11px', color: '#D97706', fontWeight: 600, marginTop: '6px' }}>
+                « Vidange fixe tous les 10 000 km »
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--df-text-secondary)', marginTop: '6px', lineHeight: 1.45 }}>
+                Intervalles rigides aveugles. Remplacement prématuré de 35% de lubrifiants encore viables ou casse si le camion opère en milieu saharien sévère.
+              </p>
+            </div>
+
+            {/* 3.0 */}
+            <div
+              style={{
+                background: 'var(--df-bg-surface-2)',
+                border: '1px solid var(--df-border-subtle)',
+                borderRadius: '10px',
+                padding: '14px',
+                opacity: 0.85,
+              }}
+            >
+              <div style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>
+                Génération 3.0 (2010 - 2018)
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: '#475569', marginTop: '2px' }}>
+                Conditionnelle Basique
+              </div>
+              <div style={{ fontSize: '11px', color: '#2563EB', fontWeight: 600, marginTop: '6px' }}>
+                « Voyants et seuils simples »
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--df-text-secondary)', marginTop: '6px', lineHeight: 1.45 }}>
+                Voyant moteur ou capteur de température &gt; 95°C. L&apos;alerte survient souvent trop tard, quand la dégradation métallique est déjà amorcée.
+              </p>
+            </div>
+
+            {/* 4.0 */}
+            <div
+              style={{
+                background: 'var(--df-bg-surface-2)',
+                border: '1px solid #CBD5E1',
+                borderRadius: '10px',
+                padding: '14px',
+              }}
+            >
+              <div style={{ fontSize: '11px', fontWeight: 700, color: '#2563EB', textTransform: 'uppercase' }}>
+                Génération 4.0 (2018 - 2024)
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: '#1E293B', marginTop: '2px' }}>
+                Prédictive (Samsara / Geotab)
+              </div>
+              <div style={{ fontSize: '11px', color: '#6366F1', fontWeight: 600, marginTop: '6px' }}>
+                « Capteurs IoT &amp; Machine Learning »
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--df-text-secondary)', marginTop: '6px', lineHeight: 1.45 }}>
+                Nécessite des boîtiers et capteurs rapportés onéreux ($$$). Algorithmes statistiques en boîte noire, fausses alertes et aucun arbitrage financier opposable.
+              </p>
+            </div>
+
+            {/* 5.0 DOCTEURFLOTTE */}
+            <div
+              style={{
+                background: '#F0FDF4',
+                border: '2px solid #059669',
+                borderRadius: '10px',
+                padding: '14px',
+                position: 'relative',
+                boxShadow: '0 4px 12px rgba(5, 150, 105, 0.15)',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-10px',
+                  right: '12px',
+                  background: '#059669',
+                  color: '#FFFFFF',
+                  fontSize: '9px',
+                  fontWeight: 800,
+                  padding: '2px 8px',
+                  borderRadius: '10px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                DOCTEURFLOTTE EXCLUSIF
+              </div>
+              <div style={{ fontSize: '11px', fontWeight: 800, color: '#047857', textTransform: 'uppercase' }}>
+                Génération 5.0 (2026 - 2030+)
+              </div>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: '#065F46', marginTop: '2px' }}>
+                Prescriptive &amp; Cognitive
+              </div>
+              <div style={{ fontSize: '11px', color: '#059669', fontWeight: 700, marginTop: '6px' }}>
+                « Physique Déterministe &amp; Arbitrage DZD »
+              </div>
+              <ul style={{ margin: '8px 0 0 0', paddingLeft: '14px', fontSize: '11px', color: '#1E293B', lineHeight: 1.5 }}>
+                <li><strong>Coût Matériel = 0 DA :</strong> Signaux natifs J1939 + ADC 24V.</li>
+                <li><strong>Arbitrage DZD (SAD $\rightarrow$ ADS) :</strong> Coût d&apos;action vs Risque d&apos;inaction chiffré.</li>
+                <li><strong>Preuve Physique Explicable :</strong> CUSUM, Enthalpie, Arrhenius, CSIS 24V.</li>
+                <li><strong>Assistant Vocal Atelier :</strong> Diagnostic au micro en Darja &amp; Français.</li>
+                <li><strong>Souveraineté Loi 18-07 :</strong> 100% On-Premise, tolérant au Grand Sud.</li>
+              </ul>
             </div>
           </div>
         </section>
