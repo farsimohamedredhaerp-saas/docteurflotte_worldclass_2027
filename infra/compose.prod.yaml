@@ -16,6 +16,7 @@ services:
       - ../database/migrations/04_telemetry_timescaledb_hypertables.sql:/docker-entrypoint-initdb.d/005-04_telemetry_timescaledb_hypertables.sql:ro
       - ../database/migrations/05_sovereign_knowledge_vault.sql:/docker-entrypoint-initdb.d/006-05_sovereign_knowledge_vault.sql:ro
       - ../database/migrations/06_anomaly_cooldown_ledger.sql:/docker-entrypoint-initdb.d/007-06_anomaly_cooldown_ledger.sql:ro
+      - ../database/migrations/07_saas_subscription_plans.sql:/docker-entrypoint-initdb.d/008-07_saas_subscription_plans.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-docteurflotte_app} -d ${POSTGRES_DB:-docteurflotte_prod}"]
       interval: 10s

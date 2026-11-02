@@ -17,6 +17,7 @@ export * from './physics-engine';
 export * from './algeria-regulatory';
 export * from './country-packs';
 export * from './dispatch';
+export * from './subscriptions';
 
 // Explicit re-exports of runtime constants for bundlers (Turbopack / Webpack / Vite)
 export { ALGERIA_58_WILAYAS_PROFILES } from './digital-twin';

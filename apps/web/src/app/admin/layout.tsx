@@ -112,6 +112,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const navLinks = [
     { href: '/admin', label: "Vue d'Ensemble", icon: '📊' },
     { href: '/admin/tenants', label: 'Tenants & Organisations', icon: '🏢' },
+    { href: '/admin/subscriptions', label: 'Plans & Abonnements DZ', icon: '💳' },
     { href: '/admin/decision-engine', label: 'Moteur Décisionnel (6 Physiques)', icon: '🧠' },
     { href: '/admin/ai-observability', label: 'Observabilité IA Ollama', icon: '⚡' },
     { href: '/admin/fiscal', label: 'Barèmes Fiscaux & Naftal', icon: '⛽' },

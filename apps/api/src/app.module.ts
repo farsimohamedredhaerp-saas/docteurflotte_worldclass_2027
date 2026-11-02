@@ -16,6 +16,7 @@ import { DigitalTwinModule } from './digital-twin/digital-twin.module';
 import { AiOrchestratorModule } from './ai-orchestrator/ai-orchestrator.module';
 import { SovereignRagModule } from './sovereign-rag/sovereign-rag.module';
 import { WorkshopVoiceModule } from './workshop-voice/workshop-voice.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { WorkshopVoiceModule } from './workshop-voice/workshop-voice.module';
     AiOrchestratorModule,
     SovereignRagModule,
     WorkshopVoiceModule,
+    SubscriptionsModule,
   ],
 })
 export class AppModule {}

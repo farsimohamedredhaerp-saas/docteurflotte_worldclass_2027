@@ -164,13 +164,18 @@ export default function SettingsPage() {
         <div style={{ width: '100%', maxWidth: '1020px', margin: '0 auto' }}>
         
         {/* Navigation Supérieure */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
             <Button variant="outline" size="sm">
               ← Retour au Tableau de Bord
             </Button>
           </Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <Link href="/settings/subscription" style={{ textDecoration: 'none' }}>
+              <Button variant="secondary" size="sm" style={{ border: '1px solid rgba(16, 185, 129, 0.4)', color: '#34d399', background: 'rgba(16, 185, 129, 0.08)' }}>
+                💳 Mon Abonnement & Factures DGI
+              </Button>
+            </Link>
             <Badge variant="ok">RLS Isolation Active</Badge>
             <span style={{ fontSize: '13px', color: 'var(--df-text-muted)' }}>
               Tenant : <strong>{tenantName}</strong>

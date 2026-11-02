@@ -219,6 +219,12 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         badge: 'SOUVERAINETÉ',
       },
       {
+        title: 'Abonnement & Facturation DGI',
+        desc: 'Plan actif, décompte des véhicules roulants et factures proformas.',
+        href: '/settings/subscription',
+        badge: 'DZD',
+      },
+      {
         title: 'Assistant d\'Onboarding',
         desc: 'Configuration initiale guidée par étape d\'activation.',
         href: '/setup',
