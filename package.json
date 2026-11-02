@@ -18,6 +18,7 @@
     "sync:telemetry": "node --experimental-strip-types scripts/sync-open-telemetry-data.ts",
     "seed:maintenance": "node --experimental-strip-types prisma/seed-maintenance.ts",
     "seed:prisma": "npx prisma db seed",
+    "simulate:dz": "node --experimental-strip-types scripts/simulate-dz-fleet.ts",
     "postinstall": "node scripts/patch-write-file-atomic.cjs",
     "verify": "node scripts/guardrails/verify-all.cjs"
   },

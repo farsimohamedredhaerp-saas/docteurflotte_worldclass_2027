@@ -185,7 +185,7 @@ export class SaharaFleetSimulator {
       const error = actualLossLiters - expectedConsumptionLiters;
       cusumPos = Math.max(0, cusumPos + error - 0.05); // Seuil de tolérance
 
-      if (cusumPos > 12.0 && !slowBleedDetected) {
+      if (cusumPos >= 10.0 && !slowBleedDetected) {
         slowBleedDetected = true;
       }
     }
