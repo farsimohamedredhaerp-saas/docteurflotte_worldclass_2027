@@ -45,6 +45,13 @@ function runStep(name, cmd) {
 }
 
 function resolvePnpmCommand(nodeExe) {
+  try {
+    execSync('pnpm --version', { stdio: 'pipe' });
+    return 'pnpm';
+  } catch {
+    // pnpm non disponible directement dans le PATH
+  }
+
   const envPathsFile = path.join(__dirname, '..', 'env-paths.json');
   const envPaths = fs.existsSync(envPathsFile)
     ? JSON.parse(fs.readFileSync(envPathsFile, 'utf8'))
@@ -52,17 +59,7 @@ function resolvePnpmCommand(nodeExe) {
 
   const configuredCjs = envPaths?.runtimes?.pnpm?.cjs;
   if (configuredCjs && fs.existsSync(configuredCjs)) {
-    return `${nodeExe} --preserve-symlinks-main "${configuredCjs}"`;
-  }
-
-  try {
-    execSync('pnpm --version', { stdio: 'pipe' });
-    const turboBin = path.join(process.cwd(), 'node_modules', '.bin', 'turbo');
-    if (fs.existsSync(turboBin)) {
-      return 'pnpm';
-    }
-  } catch {
-    // pnpm non installé globalement ou store hors-ligne
+    return `${nodeExe} "${configuredCjs}"`;
   }
 
   return null;

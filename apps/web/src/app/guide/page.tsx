@@ -509,7 +509,7 @@ export default function GuidePage() {
                 return (
                   <button
                     key={tab.key}
-                    onClick={() => setActiveModeTab(tab.key as any)}
+                    onClick={() => setActiveModeTab(tab.key as 'mode0' | 'mode1' | 'mode2')}
                     style={{
                       padding: '10px 18px',
                       borderRadius: '8px',
@@ -1117,7 +1117,7 @@ export default function GuidePage() {
                     <button
                       key={tab.id}
                       type="button"
-                      onClick={() => setSelectedInnovation(tab.id as any)}
+                      onClick={() => setSelectedInnovation(tab.id as 'HWFA' | 'SES_UEB' | 'KMSO' | 'BEP_VCO' | 'CSIS')}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -1640,7 +1640,7 @@ export default function GuidePage() {
                 return (
                   <button
                     key={c.key}
-                    onClick={() => setSelectedClimateZone(c.key as any)}
+                    onClick={() => setSelectedClimateZone(c.key as 'TELL' | 'STEPPE' | 'SAHARA')}
                     style={{
                       padding: '10px 16px',
                       borderRadius: '8px',
@@ -1675,37 +1675,88 @@ export default function GuidePage() {
                 boxShadow: 'var(--df-shadow-sm)',
               }}
             >
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '20px' }}>
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '14px', borderRadius: '10px', border: '1px solid var(--df-border-subtle)' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--df-text-muted)' }}>Composant 1</div>
-                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#d97706', margin: '4px 0' }}>Huile Moteur</div>
+                  <div style={{ fontSize: '12px', color: 'var(--df-text-muted)' }}>Composant 1 (22%)</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#d97706', margin: '4px 0' }}>Huile Moteur (Arrhenius)</div>
                   <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)' }}>
-                    {selectedClimateZone === 'SAHARA' ? 'Vidange à 7 500 km max (au lieu de 15 000 km constructeur) pour éviter le gommage des segments.' : 'Intervalles standards respectés avec surveillance d’acidification.'}
+                    {selectedClimateZone === 'SAHARA' ? 'Vidange à 7 500 km max (au lieu de 15 000 km constructeur) pour éviter le gommage des segments sous 48°C.' : 'Intervalles standards respectés avec surveillance d’acidification et de viscosité cinématique.'}
                   </div>
                 </div>
 
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '14px', borderRadius: '10px', border: '1px solid var(--df-border-subtle)' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--df-text-muted)' }}>Composant 2</div>
-                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#059669', margin: '4px 0' }}>Batterie Démarrage</div>
+                  <div style={{ fontSize: '12px', color: 'var(--df-text-muted)' }}>Composant 2 (18%)</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#059669', margin: '4px 0' }}>Batterie Démarrage (CVHI)</div>
                   <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)' }}>
-                    {selectedClimateZone === 'SAHARA' ? 'Évaporation accélérée de l’électrolyte par chaleur ambiante. SOH alerté dès 65%.' : 'Vérification normale de tension et d’alternateur.'}
+                    {selectedClimateZone === 'SAHARA' ? 'Évaporation accélérée de l’électrolyte par chaleur ambiante. Tension minimale de démarrage &lt; 9.60V alertée.' : 'Vérification continue de la tension au démarreur et du temps de recouvrement alternateur.'}
                   </div>
                 </div>
 
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '14px', borderRadius: '10px', border: '1px solid var(--df-border-subtle)' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--df-text-muted)' }}>Composant 3</div>
-                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#db2777', margin: '4px 0' }}>Garnitures de Freins</div>
+                  <div style={{ fontSize: '12px', color: 'var(--df-text-muted)' }}>Composant 3 (18%)</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#db2777', margin: '4px 0' }}>Garnitures de Freins (Archard)</div>
                   <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)' }}>
-                    {selectedClimateZone === 'STEPPE' ? 'Contraintes fortes sur les descentes de cols (Sétif, Médéa, Constantine). Usure Archard x1.3.' : 'Usure liée aux cycles d’arrêt urbains.'}
+                    {selectedClimateZone === 'STEPPE' ? 'Contraintes fortes sur les descentes de cols (Sétif, Médéa Chiffa, Constantine). Énergie W = 1/2 m Δv² amplifiée.' : 'Usure liée aux cycles d’arrêts urbains et dévers autoroutiers.'}
                   </div>
                 </div>
 
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '14px', borderRadius: '10px', border: '1px solid var(--df-border-subtle)' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--df-text-muted)' }}>Composant 4</div>
-                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#0284c7', margin: '4px 0' }}>Filtres & Dépollution</div>
+                  <div style={{ fontSize: '12px', color: 'var(--df-text-muted)' }}>Composant 4 (18%)</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#0284c7', margin: '4px 0' }}>Refroidissement & Culasse (EWMA)</div>
                   <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)' }}>
-                    {selectedClimateZone === 'SAHARA' ? 'Filtre à air colmaté en moins de 3 000 km en période de vent de sable (Sirocco).' : 'Cycle de régénération FAP autoroutier nominal.'}
+                    {selectedClimateZone === 'SAHARA' ? 'Gradient différentiel ΔT = |T_huile - T_eau| surveillé pour prévenir tout choc thermique et déformation culasse.' : 'Régulation thermostatique optimale et détection précoce d’entartrage radiateur.'}
                   </div>
+                </div>
+
+                <div style={{ background: 'var(--df-bg-surface-2)', padding: '14px', borderRadius: '10px', border: '1px solid var(--df-border-subtle)' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--df-text-muted)' }}>Composant 5 (14%)</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#a855f7', margin: '4px 0' }}>Filtres & Dépollution (FAP)</div>
+                  <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)' }}>
+                    {selectedClimateZone === 'SAHARA' ? 'Filtre à air et FAP colmatés en moins de 3 000 km en période de vent de sable (Sirocco / Silice).' : 'Cycle de régénération FAP autoroutier nominal par bilan massique de suie.'}
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--df-bg-surface-2)', padding: '14px', borderRadius: '10px', border: '1px solid var(--df-border-subtle)' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--df-text-muted)' }}>Composant 6 (10%)</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#06b6d4', margin: '4px 0' }}>Transmission & Pont (SPN 524/191)</div>
+                  <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)' }}>
+                    {selectedClimateZone === 'SAHARA' ? 'Micro-glissement sous couple et cisaillement du fluide de pont 80W90 accéléré par la température du carter.' : 'Glissement boîte/pont nominal sous 0.8% et RUL fluide pont supérieure à 20 000 km.'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Console d'Arbitrage Financier SAD -> ADS dans le Guide */}
+              <div style={{ background: 'var(--df-bg-surface-2)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '10px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '18px' }}>💰</span>
+                    <strong style={{ fontSize: '14px', color: 'var(--df-text-main)' }}>Arbitrage Financier SAD → ADS Déterministe en Dinars Algériens (DZD)</strong>
+                    <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#059669', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700 }}>Conforme DGI & Wilayas</span>
+                  </div>
+                  <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: 'var(--df-text-secondary)', maxWidth: '780px', lineHeight: 1.5 }}>
+                    Chaque dégradation physique est traduite en arbitrage financier opposable : Coût d&apos;Action Préventive vs Risque de Panne Sévère (remorquage désertique de 35 000 à 75 000 DZD selon la Wilaya et perte d&apos;exploitation journalière de 25 000 DZD).
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <Link
+                    href="/digital-twin"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                      color: '#fff',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      fontSize: '12.5px',
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                      boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)',
+                    }}
+                  >
+                    <span>🧬</span>
+                    <span>Ouvrir le Jumeau Numérique 58 Wilayas ➔</span>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -1758,11 +1809,11 @@ export default function GuidePage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                   <span style={{ fontSize: '20px' }}>📜</span>
                   <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
-                    Ordres de Mission & Dispatch
+                    Ordres de Mission, Dispatch & TOPSIS
                   </h3>
                 </div>
                 <p style={{ fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.6, marginBottom: '12px' }}>
-                  Édition d'ordres de mission réglementaires conformes au Code de la Route algérien. Jetons cryptographiques hors-ligne (HMAC-SHA256) vérifiables par QR code lors des contrôles routiers sans 4G.
+                  Édition d'ordres de mission réglementaires conformes au Code de la Route algérien (ENACTA, contrôle de Wilaya, taxes). Jetons cryptographiques hors-ligne (HMAC-SHA256) vérifiables par QR code lors des contrôles routiers sans 4G. <strong>Algorithme TOPSIS multicritères</strong> avec substitution autonome d'actif en cas d'invalidation réglementaire ou échec DVIR.
                 </p>
                 <Link href="/dispatch" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
                   Accéder au Dispatch ➔
@@ -1773,11 +1824,11 @@ export default function GuidePage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                   <span style={{ fontSize: '20px' }}>📋</span>
                   <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
-                    Inspections Mobiles DVIR
+                    Inspections Mobiles DVIR (PWA Offline-First & Store-and-Forward)
                   </h3>
                 </div>
                 <p style={{ fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.6, marginBottom: '12px' }}>
-                  Fiches d'inspection pré/post-tournée remplies en 60 secondes sur smartphone par les chauffeurs. Mode hors-ligne natif avec synchronisation automatique et remontée directe des anomalies à l'atelier.
+                  Fiches d'inspection pré/post-tournée remplies en 60 secondes sur smartphone par les chauffeurs. <strong>Résilience Offline-First intégrale</strong> (zones blanches du Sud saharien) avec file locale <code>df_dvir_offline_queue</code> et réconciliation chronologique stricte par <code>device_timestamp</code>. Tout échec critique verrouille immédiatement le véhicule (<code>DVIR_CRITICAL_FAILURE_BLOCK</code>) et génère un Ordre de Travail atelier.
                 </p>
                 <Link href="/dvir" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
                   Ouvrir le Module DVIR ➔
@@ -1875,13 +1926,14 @@ export default function GuidePage() {
               }}
             >
               <div style={{ fontSize: '14px', fontWeight: 700, color: '#059669', marginBottom: '8px' }}>
-                🔒 Les 4 Piliers de Protection DocteurFlotte :
+                🔒 Les 5 Piliers d'Étanchéité Multi-Tenant & de Souveraineté DocteurFlotte :
               </div>
               <ol style={{ margin: 0, paddingLeft: '20px', fontSize: '13.5px', color: 'var(--df-text-secondary)', lineHeight: 1.7 }}>
                 <li><strong>Hébergement Souverain Local :</strong> Les bases de données sont conçues pour être déployées sur des serveurs physiques en Algérie ou chez des hébergeurs locaux agréés.</li>
                 <li><strong>Zéro PII vers les Services Tiers :</strong> Si une passerelle de secours externe (ex: Flespi) est activée, elle ne reçoit <em>que l’IMEI matériel</em>. Zéro nom, zéro matricule, zéro numéro de permis.</li>
                 <li><strong>PostgreSQL Row-Level Security (RLS) Fail-Closed :</strong> Tout accès SQL est verrouillé par <code>df_tenant_role</code>. Un tenant ne peut jamais, même en cas de bug applicatif, lire les lignes d'un autre tenant.</li>
-                <li><strong>Piste d’Audit Immuable Anti-Tampering :</strong> Table <code>admin_audit_logs</code> protégée par déclencheur SQL interdisant toute modification ou suppression, avec chaînage SHA-256.</li>
+                <li><strong>Zéro Hardcoding Métier & Tarification Dynamique Administrée :</strong> Les prix officiels Naftal (Gasoil, Sans Plomb, GPL), les taux TVA (19%/9%), les barèmes de timbre fiscal et les taux horaires d'atelier sont chargés dynamiquement depuis les tables d'administration (<code>platform_fiscal_fuel_prices</code>, <code>tenant_settings</code>) via l'endpoint <code>/api/v1/config/reference-tariffs</code>. Aucune constante métier n'est figée dans le code.</li>
+                <li><strong>Étanchéité Absolue Démo vs Production :</strong> Les données synthétiques de démonstration (<code>dataOrigin = 'DEMO'</code>) sont strictement isolées par contexte utilisateur. En mode réel, les vues de dispatch, tickets carburant et ordres de travail n'affichent que les actifs réels du tenant certifiés en base de données.</li>
               </ol>
             </div>
           </section>
@@ -2153,7 +2205,7 @@ export default function GuidePage() {
                   Que se passe-t-il si un chauffeur perd la connexion réseau 4G dans le Sahara ?
                 </summary>
                 <p style={{ marginTop: '10px', fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
-                  L'application mobile DocteurFlotte est <strong>Offline-First</strong>. Toutes les fiches DVIR, ordres de mission cryptographiques et reçus sont stockés en local (IndexedDB) et synchronisés automatiquement dès que le terminal retrouve une couverture réseau.
+                  L'application mobile DocteurFlotte est <strong>Offline-First</strong>. Toutes les fiches DVIR, ordres de mission cryptographiques et reçus sont stockés en local (<code>localStorage</code> / IndexedDB) dans une file d'attente résiliente. Dès que le terminal retrouve une couverture réseau, les paquets sont téléversés par lot et <strong>rejoués dans l'ordre chronologique strict du terminal (<code>device_timestamp</code>)</strong> pour éliminer tout effet de décalage temporel. Si une défaillance critique a été constatée en zone blanche, le véhicule est immédiatement consigné dans le module de dispatching TOPSIS pour empêcher tout départ dangereux.
                 </p>
               </details>
             </div>

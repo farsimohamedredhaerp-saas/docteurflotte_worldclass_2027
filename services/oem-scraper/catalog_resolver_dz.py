@@ -180,6 +180,22 @@ class CatalogMatcherDZ:
                     if alias_key in clean_model:
                         return signature
 
+        # 2b. Repli IA Souveraine Ollama/Qwen2.5 sur désignation libre bruitée
+        try:
+            from ollama_oem_extractor import resolve_fuzzy_vehicle_query
+            candidate_map: Dict[str, Tuple[str, str, str]] = {}
+            for make_models in cls.COMMON_PARK_ALIASES.values():
+                for sig in make_models.values():
+                    label = f"{sig[0]} {sig[1]}"
+                    candidate_map[label] = sig
+            matched_label = resolve_fuzzy_vehicle_query(
+                f"{query.make} {query.model}", list(candidate_map.keys())
+            )
+            if matched_label in candidate_map:
+                return candidate_map[matched_label]
+        except Exception:
+            pass
+
         # 3. Repli générique normalisé si l'alias exact n'est pas trouvé
         resolved_make = query.make.title()
         resolved_model = query.model.title()
@@ -212,4 +228,3 @@ class CatalogMatcherDZ:
         except Exception:
             pass
         return None
-

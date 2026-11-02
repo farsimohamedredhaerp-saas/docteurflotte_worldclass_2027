@@ -397,3 +397,4 @@ export function OfficialDgiInvoiceModal({ data, onClose }: OfficialDgiInvoiceMod
     </div>
   );
 }
+

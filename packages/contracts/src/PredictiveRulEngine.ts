@@ -20,7 +20,7 @@ export interface DtcFaultInput {
 export interface PredictiveRulEngineParams {
   vehicleId: string;
   subsystem: 'ENGINE' | 'HYDRAULICS' | 'TRANSMISSION' | 'BRAKES_APS' | 'COOLING' | 'FILTRATION' | 'ELECTRICAL' | 'TIRES_TRACKS';
-  
+
   // Intervalles Constructeur (OEM)
   intervalOemKm: number;
   intervalOemHours: number;
@@ -48,7 +48,7 @@ export interface PredictiveRulEngineParams {
 export interface PredictiveRulResult {
   vehicleId: string;
   subsystem: string;
-  
+
   // Intervalles effectifs corrigés
   effectiveIntervalKm: number;
   effectiveIntervalHours: number;
@@ -346,12 +346,12 @@ export function calculateRul(input: RulCalculationInput): RulCalculationResult {
         const spn = s.parameterName.includes('110')
           ? 110
           : s.parameterName.includes('100')
-          ? 100
-          : s.parameterName.includes('1087')
-          ? 1087
-          : s.parameterName.includes('1638')
-          ? 1638
-          : 168;
+            ? 100
+            : s.parameterName.includes('1087')
+              ? 1087
+              : s.parameterName.includes('1638')
+                ? 1638
+                : 168;
         readings.push({ spn, value: s.value });
       }
     }
@@ -392,7 +392,7 @@ export function calculateRul(input: RulCalculationInput): RulCalculationResult {
     rulRemainingHours: res.rulRemainingHours,
     rulRemainingDays: res.rulRemainingDays,
     failureProbability30d: res.failureProbability30d,
-    status: res.healthStatus as any,
+    status: res.healthStatus,
     requiresWorkOrder: res.autoWorkOrderTriggered,
   };
 }

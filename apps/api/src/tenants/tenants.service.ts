@@ -3,6 +3,7 @@ import { DatabaseService } from '../database/database.service';
 import { TenantSetupDto } from './dto/tenant-setup.dto';
 import { UpdateTenantSettingsDto } from './dto/update-tenant-settings.dto';
 import {
+  ActivityPack,
   DataOrigin,
   PurgeDemoDataResponse,
   Tenant,
@@ -11,6 +12,34 @@ import {
   TenantStatus,
   resolveCountryPack,
 } from '@docteurflotte/contracts';
+
+export interface TenantDatabaseRow {
+  id: string;
+  name: string;
+  slug: string;
+  activity_pack: ActivityPack;
+  country_code: string;
+  currency: string;
+  data_origin: DataOrigin;
+  status: TenantStatus;
+  created_at?: string | Date;
+  updated_at?: string | Date;
+}
+
+export interface TenantSettingsDatabaseRow {
+  id: string;
+  tenant_id: string;
+  activity_pack: ActivityPack;
+  measurement_system?: 'METRIC' | 'IMPERIAL';
+  currency?: string;
+  branding?: TenantSettings['branding'];
+  alert_thresholds?: TenantSettings['alertThresholds'];
+  economic_rates?: TenantSettings['economicRates'];
+  notification_preferences?: TenantSettings['notificationPreferences'];
+  is_setup_completed?: boolean;
+  created_at?: string | Date;
+  updated_at?: string | Date;
+}
 
 @Injectable()
 export class TenantsService {
@@ -200,7 +229,7 @@ export class TenantsService {
     });
   }
 
-  private mapTenant(tRow: any): Tenant {
+  private mapTenant(tRow: TenantDatabaseRow): Tenant {
     return {
       id: tRow.id,
       name: tRow.name,
@@ -215,7 +244,7 @@ export class TenantsService {
     };
   }
 
-  private mapSettings(sRow: any, countryCode?: string): TenantSettings {
+  private mapSettings(sRow: TenantSettingsDatabaseRow, countryCode?: string): TenantSettings {
     const currency = sRow.currency || 'DZD';
     const pack = resolveCountryPack(countryCode, currency);
     return {

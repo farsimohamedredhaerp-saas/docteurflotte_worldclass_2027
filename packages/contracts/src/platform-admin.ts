@@ -144,8 +144,8 @@ export interface PlatformAuditLog {
   action: string;
   target_entity: string;
   target_id?: string;
-  before_state?: any;
-  after_state?: any;
+  before_state?: Record<string, unknown> | null;
+  after_state?: Record<string, unknown> | null;
   legal_reference?: string;
   notes?: string;
   row_hash?: string;

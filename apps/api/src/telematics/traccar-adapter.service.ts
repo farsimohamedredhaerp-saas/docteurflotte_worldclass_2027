@@ -56,7 +56,7 @@ export class TraccarAdapterService implements ITelematicsProvider {
   async sendCommand(
     uniqueId: string,
     commandType: string,
-    attributes?: Record<string, any>,
+    attributes?: Record<string, unknown>,
   ): Promise<{ success: boolean; message: string }> {
     this.logger.log(`Dispatching telematics command [${commandType}] to device ${uniqueId}`);
     return {

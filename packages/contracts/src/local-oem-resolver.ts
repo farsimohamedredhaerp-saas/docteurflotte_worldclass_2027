@@ -17,7 +17,7 @@ export type OperatingZone =
   | 'URBAN_DELIVERY'
   | 'BTP_QUARRY_SAHARA';
 
-export type ClimateZoneDZ = 'TELL_COASTAL' | 'HAUTS_PLATEAUX_STEPPE' | 'SAHARA_DEEP_SOUTH';
+export type OemClimateZoneDZ = 'TELL_COASTAL' | 'HAUTS_PLATEAUX_STEPPE' | 'SAHARA_DEEP_SOUTH';
 
 export type DustSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'EXTREME_SILICA';
 
@@ -48,7 +48,7 @@ export interface WilayaSeverityInfo {
   nameFr: string;
   nameAr: string;
   chefLieu: string;
-  zone: ClimateZoneDZ;
+  zone: OemClimateZoneDZ;
   alphaDzOil: number;
   alphaDzFilter: number;
   alphaDz: number; // Composite

@@ -82,13 +82,7 @@ export class TelemetryIngestionController {
     }
 
     if (normalizedEvents.length > 0) {
-      if (typeof (this.storage as any).persistCanonicalEventBatch === 'function') {
-        await this.storage.persistCanonicalEventBatch(normalizedEvents);
-      } else {
-        for (const evt of normalizedEvents) {
-          await this.storage.persistCanonicalEvent(evt);
-        }
-      }
+      await this.storage.persistCanonicalEventBatch(normalizedEvents);
     }
 
     return normalizedEvents;

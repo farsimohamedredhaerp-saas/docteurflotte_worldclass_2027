@@ -1,5 +1,5 @@
-import { IsString, IsNotEmpty, IsOptional, IsObject } from 'class-validator';
-import { CopilotQueryDto } from '@docteurflotte/contracts';
+import { IsString, IsNotEmpty, IsOptional, IsObject, IsBoolean, IsNumber } from 'class-validator';
+import { CopilotQueryDto, OllamaPlaygroundRequestDto } from '@docteurflotte/contracts';
 
 export class AskCopilotDto implements CopilotQueryDto {
   @IsString()
@@ -27,4 +27,40 @@ export class ExecuteCopilotActionDto {
   @IsOptional()
   @IsString()
   justification?: string;
+}
+
+export class RejectCopilotActionDto {
+  @IsString()
+  @IsNotEmpty()
+  actionId!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  reason!: string;
+}
+
+export class TestInferenceDto implements OllamaPlaygroundRequestDto {
+  @IsString()
+  @IsNotEmpty()
+  prompt!: string;
+
+  @IsOptional()
+  @IsString()
+  systemPrompt?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  jsonFormat?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  temperature?: number;
+
+  @IsOptional()
+  @IsNumber()
+  maxTokens?: number;
+
+  @IsOptional()
+  @IsString()
+  callerModule?: 'COPILOT_QUERY' | 'FUEL_SCANNER' | 'PLAYGROUND' | 'DTC_INTERPRETER' | 'OEM_RESOLVER';
 }

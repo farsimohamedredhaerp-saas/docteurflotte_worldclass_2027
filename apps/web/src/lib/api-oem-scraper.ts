@@ -18,7 +18,7 @@ export interface ScraperTraceStep {
   timestamp: string;
   level: 'INFO' | 'MATCH' | 'WARNING' | 'REJECT' | 'FALLBACK';
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export interface NormalizedOEMTemplate {
@@ -47,6 +47,59 @@ export interface OEMIngestRequest {
   pdf_manual_notes?: string;
 }
 
+export interface OEMTemplateTaskItem {
+  taskCode: string;
+  taskName: string;
+  subsystem: string;
+  normalIntervalKm: number;
+  normalIntervalMonths: number;
+  normalIntervalEngineHours: number;
+  severeIntervalKm: number;
+  severeIntervalMonths: number;
+  severeIntervalEngineHours: number;
+  standardLaborMinutes: number;
+  criticalityWeight: number;
+}
+
+export interface OEMTemplateResult {
+  wmiPrefix: string;
+  make: string;
+  model: string;
+  engineCode: string;
+  assetCategory: string;
+  fuelType: string;
+  refConsumptionL100Km: number;
+  refConsumptionLHour: number;
+  oilCapacityLiters: number;
+  oilNormSpec: string;
+  tasks: OEMTemplateTaskItem[];
+}
+
+export interface BulkCrawlResult {
+  status: string;
+  message: string;
+  totalIndexed?: number;
+  imported_count?: number;
+  importedCount?: number;
+  source: string;
+  sample_templates?: NormalizedOEMTemplate[];
+  sampleTemplates?: NormalizedOEMTemplate[];
+  items?: Array<{
+    make: string;
+    model: string;
+    engine: string;
+    category: string;
+    tasksCount: number;
+    tasksSample: string[];
+    wmiPrefix: string;
+    fuelType: string;
+    refConsumptionL100Km: number;
+    refConsumptionLHour: number;
+    oilCapacityLiters: number;
+    oilNormSpec: string;
+  }>;
+}
+
 export class OEMScraperClient {
   static async resolveAndScrape(req: OEMIngestRequest): Promise<NormalizedOEMTemplate> {
     const res = await fetch('/api/oem-scraper', {
@@ -65,7 +118,7 @@ export class OEMScraperClient {
     return res.json();
   }
 
-  static async resolveAndIngestViaNest(req: OEMIngestRequest): Promise<any> {
+  static async resolveAndIngestViaNest(req: OEMIngestRequest): Promise<OEMTemplateResult> {
     const apiBase = process.env.NEXT_PUBLIC_NEST_API_URL || 'http://localhost:3001';
     const res = await fetch(`${apiBase}/api/v1/oem-scraper/resolve-and-ingest`, {
       method: 'POST',
@@ -95,7 +148,7 @@ export class OEMScraperClient {
     category_url?: string;
     target_make?: string;
     asset_category?: string;
-  }): Promise<any> {
+  }): Promise<BulkCrawlResult> {
     const apiBase = process.env.NEXT_PUBLIC_NEST_API_URL || 'http://localhost:3001';
     try {
       const res = await fetch(`${apiBase}/api/v1/oem-scraper/bulk-crawl-catalog`, {

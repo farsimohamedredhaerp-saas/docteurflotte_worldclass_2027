@@ -322,9 +322,9 @@ describe('EPIC 4 : Financial Arbitrage (SAD -> ADS), ENACTA & Multicriteria Subs
     });
 
     it('devrait utiliser les prix réels des carburants Naftal officiels JORADP sans constante inventée', () => {
-      expect(NAFTAL_FUEL_PRICES_DZD.GASOIL).toBe(29.01);
-      expect(NAFTAL_FUEL_PRICES_DZD.ESSENCE_SANS_PLOMB).toBe(45.97);
-      expect(NAFTAL_FUEL_PRICES_DZD.SIRGHAZ_GPL).toBe(9.00);
+      expect(NAFTAL_FUEL_PRICES_DZD.GASOIL).toBe(31.00);
+      expect(NAFTAL_FUEL_PRICES_DZD.ESSENCE_SANS_PLOMB).toBe(47.00);
+      expect(NAFTAL_FUEL_PRICES_DZD.SIRGHAZ_GPL).toBe(12.00);
     });
   });
 

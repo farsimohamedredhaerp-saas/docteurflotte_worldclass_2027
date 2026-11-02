@@ -17,6 +17,7 @@ import {
   DataOrigin,
   TenantStatus,
   UserRole,
+  UserProfileResponse,
   resolveCountryPack,
 } from '@docteurflotte/contracts';
 import * as crypto from 'crypto';
@@ -162,7 +163,7 @@ export class AuthService {
       LEFT JOIN tenant_settings s ON s.tenant_id = t.id
       WHERE u.email = $1
     `;
-    const params: any[] = [email];
+    const params: string[] = [email];
 
     if (dto.tenantSlug) {
       queryText += ' AND t.slug = $2';
@@ -172,8 +173,8 @@ export class AuthService {
     queryText += ' ORDER BY u.created_at DESC';
 
     const res =
-      typeof (this.databaseService as any).withSystemContext === 'function'
-        ? await (this.databaseService as any).withSystemContext((client: any) =>
+      typeof this.databaseService.withSystemContext === 'function'
+        ? await this.databaseService.withSystemContext((client) =>
             client.query(queryText, params),
           )
         : await this.databaseService.query(queryText, params);
@@ -227,7 +228,7 @@ export class AuthService {
   /**
    * Retourne le profil utilisateur et son organisation dans le contexte tenant validé.
    */
-  async getProfile(userId: string, tenantId: string): Promise<{ user: AuthUser; tenant: any }> {
+  async getProfile(userId: string, tenantId: string): Promise<UserProfileResponse> {
     return this.databaseService.withTenantContext(tenantId, async (client) => {
       const userRes = await client.query(
         `SELECT id, tenant_id, email, first_name, last_name, role, is_active, created_at

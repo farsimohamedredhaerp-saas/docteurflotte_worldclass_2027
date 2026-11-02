@@ -17,34 +17,78 @@ import {
 } from '@docteurflotte/contracts';
 import * as crypto from 'crypto';
 
+interface PlatformDecisionEngineConfigRow extends Record<string, unknown> {
+  id: string;
+  version: string;
+  scope_key?: string;
+  status: 'DRAFT' | 'APPROVED' | 'REJECTED' | 'SUPERSEDED';
+  author_email: string;
+  approved_by_email?: string;
+  approved_at?: string;
+  effective_from?: string;
+  effective_to?: string;
+  change_justification?: string;
+  scientific_validation_ref?: string;
+  config_hash?: string;
+  canonical_content_hash?: string;
+  arrhenius_activation_energy: number | string;
+  arrhenius_ref_temp_c: number | string;
+  arrhenius_idle_degradation_factor: number | string;
+  battery_crit_voltage_mv_12v: number | string;
+  battery_crit_voltage_mv_24v: number | string;
+  battery_temp_comp_factor: number | string;
+  cooling_ewma_alpha: number | string;
+  cooling_overheat_threshold_c: number | string;
+  cooling_clogging_threshold_c: number | string;
+  cooling_thermostat_stuck_threshold_c: number | string;
+  brake_wear_energy_per_mm_mj: number | string;
+  brake_min_thickness_mm: number | string;
+  dpf_soot_limit_grams: number | string;
+  dpf_backpressure_limit_mbar: number | string;
+  fuel_siphon_stop_liters: number | string;
+  fuel_cusum_slack_liters: number | string;
+  fuel_cusum_alarm_ratio: number | string;
+  vhi_weights?: Record<string, number>;
+  vhi_threshold_green?: number;
+  vhi_threshold_orange?: number;
+  inaction_risk_multiplier: number | string;
+  downtime_daily_costs_dzd?: Record<string, number>;
+  climate_severity_factors?: Record<string, number>;
+  created_at: string;
+  updated_at: string;
+}
+
 @Injectable()
 export class AdminDecisionEngineService {
   private readonly logger = new Logger(AdminDecisionEngineService.name);
 
   constructor(private readonly databaseService: DatabaseService) {}
 
-  computeCanonicalHash(params: Partial<PlatformDecisionEngineConfig>): string {
+  computeCanonicalHash(
+    params: Partial<PlatformDecisionEngineConfig> & Partial<DecisionEngineSimulationParams>,
+  ): string {
+    const p = params as Partial<PlatformDecisionEngineConfig>;
     const canonicalPayload = {
-      arrhenius_activation_energy: Number(params.arrhenius_activation_energy),
-      arrhenius_idle_degradation_factor: Number(params.arrhenius_idle_degradation_factor),
-      arrhenius_ref_temp_c: Number(params.arrhenius_ref_temp_c),
-      battery_crit_voltage_mv_12v: Number(params.battery_crit_voltage_mv_12v),
-      battery_crit_voltage_mv_24v: Number(params.battery_crit_voltage_mv_24v),
-      battery_temp_comp_factor: Number(params.battery_temp_comp_factor),
-      brake_min_thickness_mm: Number(params.brake_min_thickness_mm),
-      brake_wear_energy_per_mm_mj: Number(params.brake_wear_energy_per_mm_mj),
-      cooling_clogging_threshold_c: Number(params.cooling_clogging_threshold_c),
-      cooling_ewma_alpha: Number(params.cooling_ewma_alpha),
-      cooling_overheat_threshold_c: Number(params.cooling_overheat_threshold_c),
-      cooling_thermostat_stuck_threshold_c: Number(params.cooling_thermostat_stuck_threshold_c),
-      dpf_backpressure_limit_mbar: Number(params.dpf_backpressure_limit_mbar),
-      dpf_soot_limit_grams: Number(params.dpf_soot_limit_grams),
-      fuel_cusum_alarm_ratio: Number(params.fuel_cusum_alarm_ratio),
-      fuel_cusum_slack_liters: Number(params.fuel_cusum_slack_liters),
-      fuel_siphon_stop_liters: Number(params.fuel_siphon_stop_liters),
-      inaction_risk_multiplier: Number(params.inaction_risk_multiplier),
-      scope_key: params.scope_key || 'ALGERIA_CORE_DECISION',
-      version: params.version,
+      arrhenius_activation_energy: Number(p.arrhenius_activation_energy),
+      arrhenius_idle_degradation_factor: Number(p.arrhenius_idle_degradation_factor),
+      arrhenius_ref_temp_c: Number(p.arrhenius_ref_temp_c),
+      battery_crit_voltage_mv_12v: Number(p.battery_crit_voltage_mv_12v),
+      battery_crit_voltage_mv_24v: Number(p.battery_crit_voltage_mv_24v),
+      battery_temp_comp_factor: Number(p.battery_temp_comp_factor),
+      brake_min_thickness_mm: Number(p.brake_min_thickness_mm),
+      brake_wear_energy_per_mm_mj: Number(p.brake_wear_energy_per_mm_mj),
+      cooling_clogging_threshold_c: Number(p.cooling_clogging_threshold_c),
+      cooling_ewma_alpha: Number(p.cooling_ewma_alpha),
+      cooling_overheat_threshold_c: Number(p.cooling_overheat_threshold_c),
+      cooling_thermostat_stuck_threshold_c: Number(p.cooling_thermostat_stuck_threshold_c || 0),
+      dpf_backpressure_limit_mbar: Number(p.dpf_backpressure_limit_mbar || 0),
+      dpf_soot_limit_grams: Number(p.dpf_soot_limit_grams),
+      fuel_cusum_alarm_ratio: Number(p.fuel_cusum_alarm_ratio || 0),
+      fuel_cusum_slack_liters: Number(p.fuel_cusum_slack_liters),
+      fuel_siphon_stop_liters: Number(p.fuel_siphon_stop_liters),
+      inaction_risk_multiplier: Number(p.inaction_risk_multiplier),
+      scope_key: p.scope_key || 'ALGERIA_CORE_DECISION',
+      version: p.version,
     };
 
     return crypto
@@ -388,7 +432,7 @@ export class AdminDecisionEngineService {
   }
 
   simulateConfig(params: DecisionEngineSimulationParams): DecisionEngineSimulationResult {
-    const canonicalHash = this.computeCanonicalHash(params as any);
+    const canonicalHash = this.computeCanonicalHash(params);
 
     const T_kelvin = 110 + 273.15;
     const T_ref_kelvin = (params.arrhenius_ref_temp_c || 90) + 273.15;
@@ -518,9 +562,21 @@ export class AdminDecisionEngineService {
     };
   }
 
-  private mapConfigRow(r: any): PlatformDecisionEngineConfig {
+  private mapConfigRow(r: PlatformDecisionEngineConfigRow): PlatformDecisionEngineConfig {
     return {
-      ...r,
+      id: r.id,
+      version: r.version,
+      scope_key: r.scope_key || 'ALGERIA_CORE_DECISION',
+      status: r.status,
+      author_email: r.author_email || 'admin@docteurflotte.dz',
+      approved_by_email: r.approved_by_email,
+      approved_at: r.approved_at,
+      effective_from: r.effective_from,
+      effective_to: r.effective_to,
+      change_justification: r.change_justification,
+      scientific_validation_ref: r.scientific_validation_ref,
+      config_hash: r.config_hash,
+      canonical_content_hash: r.canonical_content_hash,
       arrhenius_activation_energy: Number(r.arrhenius_activation_energy),
       arrhenius_ref_temp_c: Number(r.arrhenius_ref_temp_c),
       arrhenius_idle_degradation_factor: Number(r.arrhenius_idle_degradation_factor),
@@ -530,15 +586,37 @@ export class AdminDecisionEngineService {
       cooling_ewma_alpha: Number(r.cooling_ewma_alpha),
       cooling_overheat_threshold_c: Number(r.cooling_overheat_threshold_c),
       cooling_clogging_threshold_c: Number(r.cooling_clogging_threshold_c),
-      cooling_thermostat_stuck_threshold_c: Number(r.cooling_thermostat_stuck_threshold_c),
+      cooling_thermostat_stuck_threshold_c: Number(r.cooling_thermostat_stuck_threshold_c || 0),
       brake_wear_energy_per_mm_mj: Number(r.brake_wear_energy_per_mm_mj),
       brake_min_thickness_mm: Number(r.brake_min_thickness_mm),
       dpf_soot_limit_grams: Number(r.dpf_soot_limit_grams),
-      dpf_backpressure_limit_mbar: Number(r.dpf_backpressure_limit_mbar),
+      dpf_backpressure_limit_mbar: Number(r.dpf_backpressure_limit_mbar || 0),
       fuel_siphon_stop_liters: Number(r.fuel_siphon_stop_liters),
       fuel_cusum_slack_liters: Number(r.fuel_cusum_slack_liters),
-      fuel_cusum_alarm_ratio: Number(r.fuel_cusum_alarm_ratio),
+      fuel_cusum_alarm_ratio: Number(r.fuel_cusum_alarm_ratio || 0),
+      vhi_weights: r.vhi_weights || {
+        engineOil: 0.25,
+        batteryCranking: 0.2,
+        coolingSystem: 0.2,
+        brakePads: 0.15,
+        dpfFilter: 0.1,
+        transmissionDrivetrain: 0.1,
+      },
+      vhi_threshold_green: Number(r.vhi_threshold_green ?? 75),
+      vhi_threshold_orange: Number(r.vhi_threshold_orange ?? 50),
       inaction_risk_multiplier: Number(r.inaction_risk_multiplier),
+      downtime_daily_costs_dzd: r.downtime_daily_costs_dzd || {
+        HEAVY_TRUCK: 25000,
+        CONSTRUCTION_EQUIPMENT: 35000,
+        ROAD_VEHICLE: 15000,
+      },
+      climate_severity_factors: r.climate_severity_factors || {
+        TELL: 1.0,
+        STEPPE: 1.15,
+        SAHARA: 1.35,
+      },
+      created_at: r.created_at,
+      updated_at: r.updated_at,
     };
   }
 }

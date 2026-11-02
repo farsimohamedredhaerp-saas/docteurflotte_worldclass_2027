@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsOptional, IsObject } from 'class-validator';
-import { FuelReceiptScanRequestDto } from '@docteurflotte/contracts';
+import { FuelReceiptScanRequestDto, StandardFuelType } from '@docteurflotte/contracts';
 
 export class ScanFuelReceiptDto implements FuelReceiptScanRequestDto {
   @IsOptional()
@@ -23,7 +23,8 @@ export class ScanFuelReceiptDto implements FuelReceiptScanRequestDto {
   manualOverrides?: {
     liters?: number;
     totalAmountDzd?: number;
+    unitPriceDzd?: number;
     stationName?: string;
-    fuelType?: string;
+    fuelType?: StandardFuelType;
   };
 }

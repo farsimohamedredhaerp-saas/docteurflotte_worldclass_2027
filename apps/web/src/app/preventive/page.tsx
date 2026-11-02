@@ -598,7 +598,7 @@ export default function PreventivePage() {
             </div>
             <select
               value={climateZone}
-              onChange={(e) => setClimateZone(e.target.value as any)}
+              onChange={(e) => setClimateZone(e.target.value as 'TELL' | 'PLATEAUS' | 'SAHARA')}
               style={{
                 width: '100%',
                 padding: '0.45rem',
@@ -1048,7 +1048,7 @@ export default function PreventivePage() {
                 </label>
                 <select
                   value={templateForm.category}
-                  onChange={(e) => setTemplateForm({ ...templateForm, category: e.target.value as any })}
+                  onChange={(e) => setTemplateForm({ ...templateForm, category: e.target.value as 'POIDS_LOURDS' | 'ENGINS_BTP' | 'UTILITAIRES' })}
                   style={{
                     width: '100%',
                     padding: '0.5rem',
@@ -1362,7 +1362,7 @@ export default function PreventivePage() {
                   </label>
                   <select
                     value={dueForm.unit}
-                    onChange={(e) => setDueForm({ ...dueForm, unit: e.target.value as any })}
+                    onChange={(e) => setDueForm({ ...dueForm, unit: e.target.value as 'km' | 'h' })}
                     style={{
                       width: '100%',
                       padding: '0.5rem',

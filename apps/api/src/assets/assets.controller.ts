@@ -14,7 +14,7 @@ import {
 import { AssetsService } from './assets.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { RecordMeterReadingDto } from './dto/record-meter-reading.dto';
-import { JwtAuthGuard } from '../auth/auth.guard';
+import { JwtAuthGuard, AuthenticatedRequest } from '../auth/auth.guard';
 import { Asset, AssetCategory, MeterReading, MeterReadingResponse } from '@docteurflotte/contracts';
 
 @Controller('assets')
@@ -24,7 +24,7 @@ export class AssetsController {
 
   @Post()
   async createAsset(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
     dto: CreateAssetDto,
   ): Promise<Asset> {
@@ -33,20 +33,20 @@ export class AssetsController {
 
   @Get()
   async listAssets(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Query('category') category?: AssetCategory,
   ): Promise<Asset[]> {
     return this.assetsService.listAssets(req.tenantId, category);
   }
 
   @Get(':id')
-  async getAssetById(@Req() req: any, @Param('id') id: string): Promise<Asset> {
+  async getAssetById(@Req() req: AuthenticatedRequest, @Param('id') id: string): Promise<Asset> {
     return this.assetsService.getAssetById(req.tenantId, id);
   }
 
   @Put(':id')
   async updateAsset(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() dto: Partial<CreateAssetDto>,
   ): Promise<Asset> {
@@ -55,7 +55,7 @@ export class AssetsController {
 
   @Delete(':id')
   async deleteAsset(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
   ): Promise<{ success: boolean }> {
     return this.assetsService.deleteAsset(req.tenantId, id);
@@ -63,7 +63,7 @@ export class AssetsController {
 
   @Post(':id/readings')
   async recordMeterReading(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('id') assetId: string,
     @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
     dto: RecordMeterReadingDto,
@@ -73,7 +73,7 @@ export class AssetsController {
 
   @Get(':id/readings')
   async listMeterReadings(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('id') assetId: string,
   ): Promise<MeterReading[]> {
     return this.assetsService.listMeterReadings(req.tenantId, assetId);

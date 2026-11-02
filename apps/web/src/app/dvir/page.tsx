@@ -19,6 +19,7 @@ import {
 } from '../../lib/api-fleet-intelligence';
 import { Asset } from '@docteurflotte/contracts';
 import { useDemoMode } from '../../context/DemoModeContext';
+import { SignaturePad, PhotoProofCapture } from '../../components/dvir';
 
 interface VehicleProfile {
   id: string;
@@ -276,6 +277,8 @@ export default function DvirPage() {
   const { isDemoMode, isGuest, toggleDemoMode } = useDemoMode();
   const [language, setLanguage] = useState<'fr' | 'ar'>('fr');
   const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [offlineQueue, setOfflineQueue] = useState<DVIRSubmissionDto[]>([]);
+  const [isSyncingOffline, setIsSyncingOffline] = useState<boolean>(false);
   const [vehicles, setVehicles] = useState<VehicleProfile[]>(DEFAULT_FLEET_VEHICLES);
   const [reports, setReports] = useState<DVIRInspectionReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -290,19 +293,86 @@ export default function DvirPage() {
   const [odometerKm, setOdometerKm] = useState<number>(DEFAULT_FLEET_VEHICLES[0].odometerKm);
   const [checklist, setChecklist] = useState<DVIRChecklistItem[]>(INITIAL_CHECKLIST);
   const [generalNotes, setGeneralNotes] = useState<string>('');
+  const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
+
+  // Initialisation de la file hors-ligne locale
+  useEffect(() => {
+    try {
+      const savedQueue = localStorage.getItem('df_dvir_offline_queue');
+      if (savedQueue) {
+        const parsed = JSON.parse(savedQueue);
+        if (Array.isArray(parsed)) {
+          setOfflineQueue(parsed);
+        }
+      }
+    } catch {
+      // Ignoré
+    }
+  }, []);
 
   useEffect(() => {
     loadReportsAndAssets();
-    setIsOnline(typeof navigator !== 'undefined' ? navigator.onLine : true);
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const onlineStatus = typeof navigator !== 'undefined' ? navigator.onLine : true;
+    setIsOnline(onlineStatus);
+
+    const handleOnline = () => {
+      setIsOnline(true);
+      // Tentative de synchronisation différée automatique dès retour du réseau
+      triggerOfflineSync();
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
   }, [isDemoMode]);
+
+  /**
+   * Déclenche la synchronisation différée des fiches en attente (Store-and-Forward)
+   */
+  const triggerOfflineSync = async (forcedQueue?: DVIRSubmissionDto[]) => {
+    const queueToProcess = forcedQueue || offlineQueue;
+    if (queueToProcess.length === 0) return;
+
+    setIsSyncingOffline(true);
+    try {
+      const session = AuthClient.getSession();
+      const res = await FleetIntelligenceClient.syncDvirOfflineBatch(
+        {
+          reports: queueToProcess,
+          syncDeviceId: 'PWA-DRIVER-OFFLINE-DZ',
+        },
+        session.token || undefined,
+      );
+
+      // Vidage de la file locale après confirmation du serveur
+      setOfflineQueue([]);
+      localStorage.removeItem('df_dvir_offline_queue');
+
+      setFeedbackMessage({
+        type: 'ok',
+        text: `✓ Synchronisation différée réussie : ${res.syncedCount} fiche(s) transmise(s) à l'atelier (${res.criticalFailuresCount} anomalie(s) critique(s)).`,
+      });
+
+      setSignatureDataUrl(null);
+      await loadReportsAndAssets();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setFeedbackMessage({
+        type: 'danger',
+        text: `Échec de synchronisation différée : ${msg || 'Serveur indisponible, nouvelle tentative ultérieure.'}`,
+      });
+    } finally {
+      setIsSyncingOffline(false);
+    }
+  };
 
   const loadReportsAndAssets = async () => {
     setIsLoading(true);
@@ -399,13 +469,20 @@ export default function DvirPage() {
     );
   };
 
+  const handlePhotoChange = (code: string, photoUrl: string | undefined) => {
+    setChecklist((prev) =>
+      prev.map((item) => (item.code === code ? { ...item, photoUrl } : item))
+    );
+  };
+
   const handleMarkAllPass = () => {
     setChecklist((prev) =>
-      prev.map((item) => ({ ...item, status: DVIRItemStatus.PASS, comment: undefined }))
+      prev.map((item) => ({ ...item, status: DVIRItemStatus.PASS, comment: undefined, photoUrl: undefined }))
     );
   };
 
   const handleResetChecklist = () => {
+    setSignatureDataUrl(null);
     if (selectedVehicle) {
       handleAssetChange(selectedVehicle.id);
     }
@@ -416,18 +493,44 @@ export default function DvirPage() {
     setIsSubmitting(true);
     setFeedbackMessage(null);
 
-    try {
-      const submissionDto: DVIRSubmissionDto = {
-        assetId: selectedAssetId,
-        driverId: selectedVehicle?.driverId || 'drv-01',
-        driverName,
-        inspectionType,
-        odometerKm,
-        items: checklist,
-        generalNotes,
-      };
+    const submissionDto: DVIRSubmissionDto = {
+      assetId: selectedAssetId,
+      driverId: selectedVehicle?.driverId || 'drv-01',
+      driverName,
+      inspectionType,
+      odometerKm,
+      items: checklist,
+      generalNotes,
+      signatureDataUrl: signatureDataUrl || undefined,
+      submittedAt: new Date().toISOString(),
+    };
 
-      const result = await FleetIntelligenceClient.submitDvirReport(submissionDto);
+    // Cas 1 : Mode hors-ligne détecté ou forcé (Zone blanche saharienne)
+    if (!isOnline) {
+      const updatedQueue = [...offlineQueue, submissionDto];
+      setOfflineQueue(updatedQueue);
+      try {
+        localStorage.setItem('df_dvir_offline_queue', JSON.stringify(updatedQueue));
+      } catch {
+        // Ignoré
+      }
+
+      const hasCritical = checklist.some((i) => i.status === DVIRItemStatus.FAIL_CRITICAL);
+      setFeedbackMessage({
+        type: hasCritical ? 'danger' : 'ok',
+        text: hasCritical
+          ? `🚨 Mode Hors-Ligne (Zone Blanche) : Anomalie critique enregistrée localement pour ${selectedVehicle?.name}. Véhicule consigné à l'arrêt. Fiche stockée en attente de réseau.`
+          : `📱 Mode Hors-Ligne (Zone Blanche) : Fiche d'inspection enregistrée localement avec succès sur l'appareil. Elle sera transmise automatiquement à l'atelier dès le retour de la connectivité.`,
+      });
+
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Cas 2 : Connexion en ligne normale
+    try {
+      const session = AuthClient.getSession();
+      const result = await FleetIntelligenceClient.submitDvirReport(submissionDto, session.token || undefined);
 
       if (result.hasCriticalFailures) {
         setFeedbackMessage({
@@ -441,12 +544,21 @@ export default function DvirPage() {
         });
       }
 
+      setSignatureDataUrl(null);
       await loadReportsAndAssets();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Échec de transmission du rapport';
+      // Fallback résilient en cas de rupture subite de réseau
+      const updatedQueue = [...offlineQueue, submissionDto];
+      setOfflineQueue(updatedQueue);
+      try {
+        localStorage.setItem('df_dvir_offline_queue', JSON.stringify(updatedQueue));
+      } catch {
+        // Ignoré
+      }
+
       setFeedbackMessage({
         type: 'danger',
-        text: `Erreur soumission : ${msg}`,
+        text: `Réseau interrompu : Fiche DVIR sauvegardée dans la file d'attente hors-ligne de l'appareil. Elle sera synchronisée au rétablissement du signal.`,
       });
     } finally {
       setIsSubmitting(false);
@@ -526,8 +638,8 @@ export default function DvirPage() {
                 gap: '6px',
                 fontSize: '0.8rem',
                 fontWeight: 600,
-                padding: '4px 8px',
-                borderRadius: '4px',
+                padding: '4px 10px',
+                borderRadius: '6px',
                 backgroundColor: isOnline ? 'var(--df-status-ok-bg)' : 'var(--df-status-warning-bg)',
                 color: isOnline ? 'var(--df-status-ok-text)' : 'var(--df-status-warning-text)',
                 border: `1px solid ${isOnline ? 'var(--df-status-ok-border)' : 'var(--df-status-warning-border)'}`,
@@ -542,9 +654,38 @@ export default function DvirPage() {
                 }}
               />
               {isOnline
-                ? language === 'ar' ? 'متصل (مزامنة فورية)' : 'En Ligne (Synchro Directe)'
-                : language === 'ar' ? 'غير متصل (حفظ محلي مؤمن)' : 'Hors-Ligne (Stockage Local)'}
+                ? language === 'ar' ? 'متصل (مزامنة فورية)' : 'En Ligne (Réseau Actif)'
+                : language === 'ar' ? 'غير متصل (منطقة بيضاء / حفظ محلي)' : 'Hors-Ligne (Zone Blanche / Local)'}
             </span>
+
+            {/* BOUTON SYNCHRONISATION DIFFÉRÉE (STORE-AND-FORWARD) */}
+            {offlineQueue.length > 0 && (
+              <button
+                onClick={() => triggerOfflineSync()}
+                disabled={isSyncingOffline || !isOnline}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  border: '1px solid #f59e0b',
+                  background: 'rgba(245, 158, 11, 0.15)',
+                  color: '#f59e0b',
+                  fontWeight: 700,
+                  cursor: isOnline ? 'pointer' : 'not-allowed',
+                  fontSize: '0.82rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  opacity: isOnline ? 1 : 0.6,
+                }}
+              >
+                <span>🔄</span>
+                <span>
+                  {isSyncingOffline
+                    ? 'Synchronisation en cours...'
+                    : `Synchroniser (${offlineQueue.length} en attente)`}
+                </span>
+              </button>
+            )}
 
             {/* COMMUTATEUR BILINGUE FR / AR (RTL) */}
             <button
@@ -1257,7 +1398,7 @@ export default function DvirPage() {
                       </div>
 
                       {item.status !== DVIRItemStatus.PASS && (
-                        <div style={{ paddingTop: '0.35rem' }}>
+                        <div style={{ paddingTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                           <input
                             type="text"
                             placeholder="Détaillez le défaut constaté (ex: fuite raccord flexible, usure prononcée pneu gauche)..."
@@ -1278,6 +1419,15 @@ export default function DvirPage() {
                               outline: 'none',
                             }}
                             required
+                          />
+
+                          {/* CAPTURE PHOTO DE PREUVE COMPRESSÉE POUR CHAUFFEUR MOBILE */}
+                          <PhotoProofCapture
+                            itemCode={item.code}
+                            itemLabel={item.label}
+                            photoUrl={item.photoUrl}
+                            onChange={(url) => handlePhotoChange(item.code, url)}
+                            language={language}
                           />
                         </div>
                       )}
@@ -1318,6 +1468,14 @@ export default function DvirPage() {
                   }}
                 />
               </div>
+
+              {/* PAD DE SIGNATURE TACTILE CONDUCTEUR (CANVAS HTML5 SOUVERAIN) */}
+              <SignaturePad
+                value={signatureDataUrl}
+                onChange={setSignatureDataUrl}
+                driverName={driverName || selectedVehicle?.driverName}
+                language={language}
+              />
 
               <div
                 style={{
@@ -1438,6 +1596,75 @@ export default function DvirPage() {
                         Relevé odomètre : <strong className="df-mono" style={{ color: 'var(--df-text-secondary)' }}>{report.odometerKm?.toLocaleString('fr-DZ')} km</strong>
                       </div>
 
+                      {/* SIGNATURE TACTILE HORODATÉE DU RAPPORT */}
+                      {report.signatureDataUrl && (
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.35rem 0.5rem',
+                            background: 'var(--df-bg-surface-1)',
+                            borderRadius: 'var(--df-radius-xs)',
+                            border: '1px solid var(--df-border-subtle)',
+                          }}
+                        >
+                          <span style={{ fontSize: '0.72rem', color: 'var(--df-accent-cyan)', fontWeight: 700 }}>
+                            ✍️ Signature certifiée :
+                          </span>
+                          <img
+                            src={report.signatureDataUrl}
+                            alt="Signature conducteur"
+                            style={{
+                              height: '24px',
+                              maxWidth: '90px',
+                              objectFit: 'contain',
+                              filter: 'contrast(120%)',
+                            }}
+                          />
+                        </div>
+                      )}
+
+                      {/* PHOTOS DE PREUVE RATTACHÉES AUX ANOMALIES */}
+                      {report.items?.some((i) => i.photoUrl) && (
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            flexWrap: 'wrap',
+                            padding: '0.35rem 0.5rem',
+                            background: 'var(--df-bg-surface-1)',
+                            borderRadius: 'var(--df-radius-xs)',
+                            border: '1px solid var(--df-border-subtle)',
+                          }}
+                        >
+                          <span style={{ fontSize: '0.72rem', color: 'var(--df-text-secondary)', fontWeight: 700 }}>
+                            📸 Preuves photos ({report.items.filter((i) => i.photoUrl).length}) :
+                          </span>
+                          <div style={{ display: 'flex', gap: '4px' }}>
+                            {report.items
+                              .filter((i) => i.photoUrl)
+                              .map((item, idx) => (
+                                <img
+                                  key={idx}
+                                  src={item.photoUrl}
+                                  alt={item.label}
+                                  title={`${item.label} : ${item.comment || ''}`}
+                                  style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '3px',
+                                    objectFit: 'cover',
+                                    border: '1px solid var(--df-border-medium)',
+                                  }}
+                                />
+                              ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* BLOCAGE CRITIQUE OU DÉCONSIGNATION ATELIER */}
                       {report.hasCriticalFailures && (
                         <div
                           style={{
@@ -1457,6 +1684,29 @@ export default function DvirPage() {
                               <span className="df-mono" style={{ color: 'var(--df-accent-cyan)', fontWeight: 700 }}>
                                 {report.generatedWorkOrderId}
                               </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* ÉTAT DE RÉSOLUTION ATELIER SI DÉCONSIGNÉ */}
+                      {report.resolvedAt && (
+                        <div
+                          style={{
+                            background: 'var(--df-bg-surface-1)',
+                            padding: '0.5rem 0.75rem',
+                            borderRadius: 'var(--df-radius-sm)',
+                            border: '1px solid var(--df-status-ok)',
+                            fontSize: '0.75rem',
+                            color: 'var(--df-status-ok)',
+                          }}
+                        >
+                          <div style={{ fontWeight: 700 }}>
+                            ✓ Consignation levée par l&apos;atelier ({report.resolvedByWorkOrderId || 'OT clôturé'})
+                          </div>
+                          {report.resolutionNotes && (
+                            <div style={{ color: 'var(--df-text-muted)', fontSize: '0.7rem', marginTop: '0.15rem' }}>
+                              Note : {report.resolutionNotes}
                             </div>
                           )}
                         </div>

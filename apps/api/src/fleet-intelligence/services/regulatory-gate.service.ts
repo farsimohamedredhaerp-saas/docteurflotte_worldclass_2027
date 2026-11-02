@@ -18,7 +18,7 @@ interface WilayaRestrictionRule {
   maxAllowedGvwrTons: number;
   restrictedWindowsMinutes: [number, number][]; // [startMinFromMidnight, endMinFromMidnight]
   bypassRingRoadName: string;
-  bypassPolygonGeoJson: Record<string, any>;
+  bypassPolygonGeoJson: Record<string, unknown>;
 }
 
 @Injectable()
@@ -297,12 +297,12 @@ export class AlgerianRegulatoryGateService {
     mission: MissionRequestDto,
   ): {
     recommendedEtdUtc: string;
-    avoidPolygons: Record<string, any>[];
+    avoidPolygons: Record<string, unknown>[];
     advisoryNotes: string[];
   } {
     const depDate = new Date(mission.plannedDepartureUtc);
     let recommendedEtd = new Date(depDate.getTime());
-    const avoidPolygons: Record<string, any>[] = [];
+    const avoidPolygons: Record<string, unknown>[] = [];
     const advisoryNotes: string[] = [];
 
     const originRule = this.WILAYA_RESTRICTIONS_DB[mission.originWilayaCode];
@@ -428,6 +428,16 @@ export class AlgerianRegulatoryGateService {
         gate: 'PREDICTIVE_VHI_RUL',
         severity: 'HARD_BLOCK',
         messageFr: `Santé batterie au démarrage (Cranking SOH) critique sur ${vehicle.registrationPlate} (${vehicle.batterySohPct}%).`,
+        blockingEntityId: vehicle.vehicleId,
+      });
+    }
+
+    if (vehicle.hasCriticalDvirFailure) {
+      violations.push({
+        code: 'DVIR_CRITICAL_FAILURE_BLOCK',
+        gate: 'PREDICTIVE_VHI_RUL',
+        severity: 'HARD_BLOCK',
+        messageFr: `Inspection DVIR pré-trajet non conforme sur ${vehicle.registrationPlate} : anomalie critique constatée interdisant tout départ avant intervention d'atelier.`,
         blockingEntityId: vehicle.vehicleId,
       });
     }

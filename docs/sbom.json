@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX-lite",
   "specVersion": "1.4",
-  "serialNumber": "urn:uuid:docteurflotte-sbom-1793294732319",
+  "serialNumber": "urn:uuid:docteurflotte-sbom-1793642835259",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-10-29T17:25:32.319Z",
+    "timestamp": "2026-11-02T18:07:15.259Z",
     "component": {
       "type": "application",
       "name": "docteurflotte-monorepo",
@@ -60,6 +60,10 @@
         {
           "name": "rxjs",
           "version": "^7.8.1"
+        },
+        {
+          "name": "zod",
+          "version": "^4.6.7"
         }
       ],
       "devDependencies": [

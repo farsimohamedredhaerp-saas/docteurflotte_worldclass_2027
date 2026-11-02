@@ -129,7 +129,7 @@ export class ActuarialArbitrageService {
     let summaryFr = '';
     let summaryDarja = '';
 
-    if (failureProbF >= 0.55 || netExpectedBenefit >= 100000 || costBenefitRatio >= 3.0) {
+    if (failureProbF >= 0.55 || netExpectedBenefit >= 100000 /* seuil decisionnel */ || costBenefitRatio >= 3.0) {
       urgencyLevel = 'CRITIQUE_IMMEDIAT';
       summaryFr = `Intervention d'urgence requise : Risque d'inaction de ${weightedInactionRisk.toLocaleString('fr-DZ')} DZD pour un coût préventif de ${preventiveCost.toLocaleString('fr-DZ')} DZD (Économie nette espérée : ${netExpectedBenefit.toLocaleString('fr-DZ')} DZD).`;
       summaryDarja = `Lazem dkhoul l'atelier fawran : Khsara ta3 ${weightedInactionRisk.toLocaleString('fr-DZ')} DZD ida ma t'slahch, m9abel ${preventiveCost.toLocaleString('fr-DZ')} DZD (Fayda ta3 ${netExpectedBenefit.toLocaleString('fr-DZ')} DZD).`;
@@ -195,3 +195,4 @@ export class ActuarialArbitrageService {
     };
   }
 }
+

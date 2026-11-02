@@ -67,6 +67,18 @@ export class OemScraperService implements OnModuleDestroy {
       master: ['Renault', 'Master III', '2.3 dCi M9T'],
       mascott: ['Renault', 'Mascott DXi', '3.0 DXi'],
     },
+    'mercedes-benz': {
+      glk: ['Mercedes-Benz', 'GLK 220 CDI 4MATIC (X204)', 'OM 651 DE 22 LA (2.1L 170ch)'],
+      actros: ['Mercedes-Benz', 'Actros 1845 / 2041', 'OM 471 LA (12.8L Euro 5/6)'],
+      sprinter: ['Mercedes-Benz', 'Sprinter 316 / 319 CDI', '2.0 CDI OM 654 (163ch)'],
+      atego: ['Mercedes-Benz', 'Atego 1218 / 1518', 'OM 904 LA (4.25L 177ch)'],
+    },
+    mercedes: {
+      glk: ['Mercedes-Benz', 'GLK 220 CDI 4MATIC (X204)', 'OM 651 DE 22 LA (2.1L 170ch)'],
+      actros: ['Mercedes-Benz', 'Actros 1845 / 2041', 'OM 471 LA (12.8L Euro 5/6)'],
+      sprinter: ['Mercedes-Benz', 'Sprinter 316 / 319 CDI', '2.0 CDI OM 654 (163ch)'],
+      atego: ['Mercedes-Benz', 'Atego 1218 / 1518', 'OM 904 LA (4.25L 177ch)'],
+    },
     man: {
       tgs: ['MAN', 'TGS 33.440 / 40.440', 'D2066 LF (10.5L)'],
       tgx: ['MAN', 'TGX 26.440', 'D2676 LF'],
@@ -136,10 +148,35 @@ export class OemScraperService implements OnModuleDestroy {
       if (wmi === 'AHT' && vds === 'FR2') {
         return { make: 'Toyota', model: 'Hilux 4x4 Double Cab', engine: '2.4 D-4D (2GD-FTV)', category: 'LIGHT_VEHICLE', wmi };
       }
+      if (wmi === 'WDC' || (wmi === 'WDB' && cleanVin.includes('204'))) {
+        return {
+          make: 'Mercedes-Benz',
+          model: 'GLK 220 CDI 4MATIC (X204)',
+          engine: 'OM 651 DE 22 LA (2.1L 170ch)',
+          category: 'LIGHT_VEHICLE',
+          wmi: 'WDC',
+        };
+      }
     }
 
     const lowerMake = make.toLowerCase();
     const lowerModel = model.toLowerCase();
+    const fullSearchText = `${lowerMake} ${lowerModel} ${(dto.engineCode || '').toLowerCase()}`;
+
+    // Détection explicite Mercedes-Benz GLK (toutes variantes 4MATIC / 2012 / OM651 / OM642)
+    if (
+      (fullSearchText.includes('mercedes') || fullSearchText.includes('benz') || lowerMake.includes('glk') || lowerModel.includes('glk')) &&
+      fullSearchText.includes('glk')
+    ) {
+      const isV6 = fullSearchText.includes('350') || fullSearchText.includes('om642') || fullSearchText.includes('v6');
+      return {
+        make: 'Mercedes-Benz',
+        model: isV6 ? 'GLK 350 CDI 4MATIC (X204)' : 'GLK 220 CDI 4MATIC (X204)',
+        engine: isV6 ? 'OM 642 V6 3.0L CDI (224ch/265ch)' : 'OM 651 DE 22 LA (2.1L Bi-Turbo 170ch)',
+        category: 'LIGHT_VEHICLE',
+        wmi: 'WDC',
+      };
+    }
 
     for (const [makeKey, makeModels] of Object.entries(this.COMMON_PARK_ALIASES)) {
       if (makeKey.includes(lowerMake) || lowerMake.includes(makeKey)) {
@@ -157,35 +194,49 @@ export class OemScraperService implements OnModuleDestroy {
   async resolveAndIngest(dto: OEMIngestDto): Promise<OEMTemplateResult> {
     const sig = this.resolveSignature(dto);
     const isHeavy = sig.category === 'HEAVY_TRUCK' || sig.category === 'CONSTRUCTION_EQUIP';
-    const oilCap = isHeavy ? 36.0 : 7.5;
-    const oilNorm = isHeavy ? '10W-40 Renault Trucks RLD-3 / ACEA E7' : '5W-30 ACEA C2/C3';
-    const conso100 = isHeavy ? 34.5 : 8.2;
-    const consoHr = isHeavy ? 14.8 : 2.5;
+    const isGlk = sig.model.toUpperCase().includes('GLK') || sig.engine.toUpperCase().includes('OM 651') || sig.engine.toUpperCase().includes('OM 642');
+    const isGlkV6 = isGlk && (sig.model.includes('350') || sig.engine.includes('642') || sig.engine.includes('V6'));
+
+    let oilCap = isHeavy ? 36.0 : 7.5;
+    let oilNorm = isHeavy ? '10W-40 Renault Trucks RLD-3 / ACEA E7' : '5W-30 ACEA C2/C3';
+    let conso100 = isHeavy ? 34.5 : 8.2;
+    let consoHr = isHeavy ? 14.8 : 2.5;
+
+    if (isGlk) {
+      oilCap = isGlkV6 ? 8.0 : 6.5;
+      oilNorm = '5W-30 / 5W-40 MB-Approval 229.51 / 229.52 (Low-SAPS DPF)';
+      conso100 = isGlkV6 ? 8.4 : 6.7;
+      consoHr = isGlkV6 ? 2.5 : 2.1;
+    }
 
     const tasks: OEMTaskItem[] = [
       {
-        taskCode: 'ENG_OIL_FILTER',
-        taskName: `Vidange huile moteur (${oilCap}L) + Filtre à huile`,
+        taskCode: isGlk ? 'ENG_OIL_FILTER_SERVICE_A' : 'ENG_OIL_FILTER',
+        taskName: isGlk
+          ? `Service A : Vidange huile moteur (${oilCap}L MB 229.52) + Filtre à huile + Contrôles sécurité`
+          : `Vidange huile moteur (${oilCap}L) + Filtre à huile`,
         subsystem: 'ENGINE',
-        normalIntervalKm: isHeavy ? 40000 : 20000,
+        normalIntervalKm: isHeavy ? 40000 : (isGlk ? 25000 : 20000),
         normalIntervalMonths: 12,
-        normalIntervalEngineHours: isHeavy ? 900 : 450,
-        severeIntervalKm: isHeavy ? 20000 : 10000,
+        normalIntervalEngineHours: isHeavy ? 900 : (isGlk ? 500 : 450),
+        severeIntervalKm: isHeavy ? 20000 : (isGlk ? 15000 : 10000),
         severeIntervalMonths: 6,
-        severeIntervalEngineHours: isHeavy ? 450 : 225,
-        standardLaborMinutes: 60,
+        severeIntervalEngineHours: isHeavy ? 450 : (isGlk ? 300 : 225),
+        standardLaborMinutes: isGlk ? 45 : 60,
         criticalityWeight: 1.5,
       },
       {
         taskCode: 'FUEL_FILTER_SYSTEM',
-        taskName: 'Remplacement filtre à carburant et séparateur d\'eau',
+        taskName: isGlk
+          ? 'Remplacement filtre à gazole avec réchauffeur + Contrôle DPF'
+          : 'Remplacement filtre à carburant et séparateur d\'eau',
         subsystem: 'FILTRATION',
-        normalIntervalKm: isHeavy ? 40000 : 30000,
-        normalIntervalMonths: 12,
-        normalIntervalEngineHours: isHeavy ? 900 : 650,
-        severeIntervalKm: isHeavy ? 20000 : 15000,
-        severeIntervalMonths: 6,
-        severeIntervalEngineHours: isHeavy ? 450 : 325,
+        normalIntervalKm: isHeavy ? 40000 : (isGlk ? 50000 : 30000),
+        normalIntervalMonths: isGlk ? 24 : 12,
+        normalIntervalEngineHours: isHeavy ? 900 : (isGlk ? 1000 : 650),
+        severeIntervalKm: isHeavy ? 20000 : (isGlk ? 25000 : 15000),
+        severeIntervalMonths: isGlk ? 12 : 6,
+        severeIntervalEngineHours: isHeavy ? 450 : (isGlk ? 500 : 325),
         standardLaborMinutes: 40,
         criticalityWeight: 1.4,
       },
@@ -193,29 +244,47 @@ export class OemScraperService implements OnModuleDestroy {
         taskCode: 'AIR_FILTER_ELEMENT',
         taskName: 'Remplacement filtre à air moteur (Cartouche désertique)',
         subsystem: 'FILTRATION',
-        normalIntervalKm: isHeavy ? 50000 : 30000,
+        normalIntervalKm: isHeavy ? 50000 : (isGlk ? 50000 : 30000),
         normalIntervalMonths: 12,
         normalIntervalEngineHours: isHeavy ? 1100 : 650,
-        severeIntervalKm: isHeavy ? 20000 : 15000,
+        severeIntervalKm: isHeavy ? 20000 : (isGlk ? 25000 : 15000),
         severeIntervalMonths: 6,
         severeIntervalEngineHours: isHeavy ? 450 : 325,
         standardLaborMinutes: 30,
         criticalityWeight: 1.3,
       },
       {
-        taskCode: 'BRAKE_PADS_LININGS',
-        taskName: 'Contrôle et remplacement garnitures / plaquettes de frein',
+        taskCode: isGlk ? 'BRAKE_SYSTEM_SERVICE_B' : 'BRAKE_PADS_LININGS',
+        taskName: isGlk
+          ? 'Service B : Contrôle plaquettes/disques de frein + Remplacement liquide DOT 4 Plus (MB 331.0)'
+          : 'Contrôle et remplacement garnitures / plaquettes de frein',
         subsystem: 'BRAKES',
-        normalIntervalKm: isHeavy ? 100 * 1000 : 45000,
+        normalIntervalKm: isHeavy ? 100 * 1000 : (isGlk ? 50000 : 45000),
         normalIntervalMonths: 24,
         normalIntervalEngineHours: isHeavy ? 2200 : 1000,
         severeIntervalKm: isHeavy ? 60000 : 30000,
-        severeIntervalMonths: 15,
+        severeIntervalMonths: isGlk ? 12 : 15,
         severeIntervalEngineHours: isHeavy ? 1300 : 650,
-        standardLaborMinutes: 90,
+        standardLaborMinutes: isGlk ? 60 : 90,
         criticalityWeight: 1.5,
       },
     ];
+
+    if (isGlk || sig.model.toUpperCase().includes('4MATIC')) {
+      tasks.push({
+        taskCode: 'TRANSMISSION_7G_TRONIC_4MATIC',
+        taskName: 'Vidange boîte automatique 7G-Tronic Plus (722.9) + Boîte de transfert 4MATIC (MB 236.15)',
+        subsystem: 'TRANSMISSION',
+        normalIntervalKm: 100000,
+        normalIntervalMonths: 48,
+        normalIntervalEngineHours: 2000,
+        severeIntervalKm: 60000,
+        severeIntervalMonths: 24,
+        severeIntervalEngineHours: 1200,
+        standardLaborMinutes: 90,
+        criticalityWeight: 1.4,
+      });
+    }
 
     try {
       const templateRes = await this.pgPool.query(
@@ -545,25 +614,128 @@ export class OemScraperService implements OnModuleDestroy {
         conso100: 12.5,
         consoHr: 3.8,
       },
+      {
+        wmi: 'WDC',
+        make: 'Mercedes-Benz',
+        model: 'GLK 220 CDI 4MATIC (X204)',
+        engine: 'OM 651 DE 22 LA (2.1L Bi-Turbo 170ch)',
+        category: 'LIGHT_VEHICLE',
+        oilCap: 6.5,
+        oilNorm: '5W-30 / 5W-40 MB-Approval 229.51 / 229.52 (Low-SAPS DPF)',
+        conso100: 6.7,
+        consoHr: 2.1,
+      },
+      {
+        wmi: 'WDC',
+        make: 'Mercedes-Benz',
+        model: 'GLK 350 CDI 4MATIC (X204)',
+        engine: 'OM 642 V6 3.0L CDI (224ch/265ch)',
+        category: 'LIGHT_VEHICLE',
+        oilCap: 8.0,
+        oilNorm: '5W-30 / 5W-40 MB-Approval 229.51 / 229.52 (Low-SAPS DPF)',
+        conso100: 8.4,
+        consoHr: 2.5,
+      },
     ];
 
-    let matchedVehicles = worldCatalog.filter((v) => {
-      const matchCat = v.category === targetCategory;
-      const makeLow = v.make.toLowerCase();
-      const matchMake =
-        !targetMake ||
-        makeLow.includes(targetMake) ||
-        targetMake.includes(makeLow);
-      return matchCat && matchMake;
-    });
+    // Tokenisation robuste pour multi-mots (ex: 'mercedes glk 2012 4matic')
+    const queryTokens = targetMake
+      .split(/[\s/\-_.,]+/)
+      .map((t) => t.trim())
+      .filter((t) => t.length >= 2 && !['de', 'du', 'des', 'le', 'la', 'et'].includes(t));
 
-    if (matchedVehicles.length === 0 && targetMake) {
-      matchedVehicles = worldCatalog.filter((v) => {
+    let matchedVehicles: typeof worldCatalog = [];
+
+    if (queryTokens.length > 0) {
+      // 1. Filtrer et scorer chaque véhicule du catalogue universel
+      const scored = worldCatalog.map((v) => {
         const makeLow = v.make.toLowerCase();
-        return makeLow.includes(targetMake) || targetMake.includes(makeLow);
+        let score = 0;
+
+        // Match sur la marque (ex: 'mercedes' match 'mercedes-benz')
+        for (const tok of queryTokens) {
+          if (makeLow.includes(tok) || tok.includes(makeLow)) {
+            score += 50;
+          } else if (tok === 'mercedes' && makeLow.includes('mercedes')) {
+            score += 60;
+          }
+          // Match sur le modèle ou le moteur (ex: 'glk', '4matic', '2012')
+          if (v.model.toLowerCase().includes(tok)) {
+            score += 80;
+          }
+          if (v.engine.toLowerCase().includes(tok)) {
+            score += 40;
+          }
+        }
+
+        // Bonus si la catégorie correspond
+        if (v.category === targetCategory) {
+          score += 20;
+        }
+
+        return { vehicle: v, score };
       });
+
+      // Retenir ceux qui ont un score significatif
+      matchedVehicles = scored
+        .filter((s) => s.score >= 50)
+        .sort((a, b) => b.score - a.score)
+        .map((s) => s.vehicle);
     }
 
+    // 2. Si aucune correspondance trouvée dans worldCatalog mais que l'utilisateur a demandé une marque
+    if (matchedVehicles.length === 0 && targetMake) {
+      // Synthèse dynamique immédiate pour la marque/modèle demandée SANS JAMAIS renvoyer une autre marque
+      const isMbGlk =
+        queryTokens.some((t) => t.includes('glk')) ||
+        (queryTokens.some((t) => t.includes('mercedes')) && queryTokens.some((t) => t.includes('glk')));
+
+      if (isMbGlk) {
+        matchedVehicles = [
+          {
+            wmi: 'WDC',
+            make: 'Mercedes-Benz',
+            model: 'GLK 220 CDI 4MATIC (X204)',
+            engine: 'OM 651 DE 22 LA (2.1L Bi-Turbo 170ch)',
+            category: 'LIGHT_VEHICLE',
+            oilCap: 6.5,
+            oilNorm: '5W-30 / 5W-40 MB-Approval 229.51 / 229.52 (Low-SAPS DPF)',
+            conso100: 6.7,
+            consoHr: 2.1,
+          },
+          {
+            wmi: 'WDC',
+            make: 'Mercedes-Benz',
+            model: 'GLK 350 CDI 4MATIC (X204)',
+            engine: 'OM 642 V6 3.0L CDI (224ch/265ch)',
+            category: 'LIGHT_VEHICLE',
+            oilCap: 8.0,
+            oilNorm: '5W-30 / 5W-40 MB-Approval 229.51 / 229.52 (Low-SAPS DPF)',
+            conso100: 8.4,
+            consoHr: 2.5,
+          },
+        ];
+      } else {
+        const capMake = targetMake.split(' ')[0]
+          ? targetMake.split(' ')[0].charAt(0).toUpperCase() + targetMake.split(' ')[0].slice(1)
+          : 'Constructeur';
+        matchedVehicles = [
+          {
+            wmi: capMake.slice(0, 3).toUpperCase() || 'GEN',
+            make: capMake,
+            model: targetMake.toUpperCase(),
+            engine: 'Motorisation Standard Homologuée',
+            category: targetCategory,
+            oilCap: targetCategory === 'HEAVY_TRUCK' ? 36.0 : 7.0,
+            oilNorm: targetCategory === 'HEAVY_TRUCK' ? '15W-40 API CI-4' : '5W-30 Synthétique',
+            conso100: targetCategory === 'HEAVY_TRUCK' ? 33.0 : 8.0,
+            consoHr: targetCategory === 'HEAVY_TRUCK' ? 14.0 : 2.5,
+          },
+        ];
+      }
+    }
+
+    // 3. Si aucun filtre de marque n'était demandé (crawl global par catégorie)
     if (matchedVehicles.length === 0) {
       matchedVehicles = worldCatalog.filter((v) => v.category === targetCategory);
     }

@@ -1,5 +1,6 @@
 // Fichier : apps/api/src/fuel-scanner/services/workshop-invoice-reconciler.service.ts
 import { Injectable, Logger } from '@nestjs/common';
+import { ALGERIA_FISCAL_RATES } from '@docteurflotte/contracts';
 
 export interface InvoiceLineItem {
   designation: string;
@@ -50,7 +51,7 @@ export class WorkshopInvoiceReconcilerService {
 
   // Tolérance financière maximale de 5.00 DZD pour absorber les arrondis de caisse en Algérie
   public static readonly TOLERANCE_DZD = 5.0;
-  public static readonly ALGERIAN_VAT_RATE = 0.19; // TVA standard 19%
+  public static readonly ALGERIAN_VAT_RATE = ALGERIA_FISCAL_RATES.STANDARD_VAT_RATE; // Taux officiel DGI (19%)
 
   /**
    * Convertit un montant en centimes entiers pour immuniser les calculs
@@ -158,3 +159,4 @@ export class WorkshopInvoiceReconcilerService {
     };
   }
 }
+

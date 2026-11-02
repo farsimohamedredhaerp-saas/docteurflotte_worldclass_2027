@@ -65,8 +65,8 @@ export default function AdminTenantsPage() {
       setSuccessMsg(`Organisation « ${selectedTenant.name} » mise à jour avec succès.`);
       loadTenants();
       setTimeout(() => setSelectedTenant(null), 1200);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsUpdating(false);
     }
@@ -339,7 +339,7 @@ export default function AdminTenantsPage() {
                 </label>
                 <select
                   value={selectedTenant.status}
-                  onChange={(e) => setSelectedTenant({ ...selectedTenant, status: e.target.value as any })}
+                  onChange={(e) => setSelectedTenant({ ...selectedTenant, status: e.target.value as PlatformTenant['status'] })}
                   style={{ width: '100%', padding: '10px', borderRadius: '8px', backgroundColor: 'var(--df-bg-surface-2)', border: '1px solid var(--df-border-subtle)', color: 'var(--df-text-main)', fontSize: '13px' }}
                 >
                   <option value="ACTIVE">ACTIVE (Autorisé)</option>

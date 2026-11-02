@@ -127,22 +127,19 @@ export class AssetClient {
   }
 
   static async updateAsset(id: string, dto: Partial<CreateAssetDto>, token: string): Promise<Asset> {
-    try {
-      const res = await fetch(`${API_BASE_URL}/assets/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(dto),
-      });
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch {
-      // mode autonome / local
+    const res = await fetch(`${API_BASE_URL}/assets/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(dto),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Échec de la mise à jour de l’actif.');
     }
-    return { id, ...dto } as any;
+    return res.json();
   }
 
   static async deleteAsset(id: string, token: string): Promise<{ success: boolean }> {
@@ -161,22 +158,19 @@ export class AssetClient {
   }
 
   static async updateWorkOrder(id: string, dto: Partial<CreateWorkOrderDto>, token: string): Promise<WorkOrder> {
-    try {
-      const res = await fetch(`${API_BASE_URL}/work-orders/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(dto),
-      });
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch {
-      // mode autonome / local
+    const res = await fetch(`${API_BASE_URL}/work-orders/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(dto),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Échec de la mise à jour de l’ordre de travail.');
     }
-    return { id, ...dto } as any;
+    return res.json();
   }
 
   static async deleteWorkOrder(id: string, token: string): Promise<{ success: boolean }> {

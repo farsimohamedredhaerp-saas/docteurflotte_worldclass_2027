@@ -1,7 +1,68 @@
 from datetime import date, datetime, time
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
-from pydantic import BaseModel, Field
+import json
+from typing import Any, Dict, List, Optional, Tuple
+
+try:
+    from pydantic import BaseModel as PydanticBaseModel, Field
+
+    class BaseModel(PydanticBaseModel):  # type: ignore[misc]
+        def model_dump(self, *args, **kwargs):
+            if hasattr(super(), "model_dump"):
+                return super().model_dump(*args, **kwargs)
+            return self.dict(*args, **kwargs)
+
+        def json(self, *args, **kwargs) -> str:
+            if hasattr(super(), "model_dump_json"):
+                return super().model_dump_json(*args, **kwargs)
+            return json.dumps(self.model_dump(), default=str, ensure_ascii=False)
+except ImportError:
+    # Stand-in résilient si pydantic n'est pas installé dans l'environnement global
+    def Field(default: Any = None, **kwargs: Any) -> Any:  # type: ignore[misc]
+        if "default_factory" in kwargs and callable(kwargs["default_factory"]):
+            return kwargs["default_factory"]()
+        return default
+
+    def _serialize_value(val: Any) -> Any:
+        if isinstance(val, BaseModel):
+            return val.model_dump()
+        if isinstance(val, Enum):
+            return val.value
+        if isinstance(val, (datetime, date, time)):
+            return val.isoformat()
+        if isinstance(val, (list, tuple)):
+            return [_serialize_value(item) for item in val]
+        if isinstance(val, dict):
+            return {k: _serialize_value(v) for k, v in val.items()}
+        return val
+
+    class BaseModel:  # type: ignore[no-redef]
+        def __init__(self, **data: Any):
+            for cls in reversed(self.__class__.__mro__):
+                if cls is object or cls is BaseModel:
+                    continue
+                annotations = getattr(cls, "__annotations__", {})
+                for attr_name in annotations:
+                    if hasattr(cls, attr_name):
+                        default_val = getattr(cls, attr_name)
+                        if default_val is not Ellipsis:
+                            if isinstance(default_val, list):
+                                setattr(self, attr_name, list(default_val))
+                            elif isinstance(default_val, dict):
+                                setattr(self, attr_name, dict(default_val))
+                            else:
+                                setattr(self, attr_name, default_val)
+            for k, v in data.items():
+                setattr(self, k, v)
+
+        def model_dump(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+            return {k: _serialize_value(v) for k, v in self.__dict__.items()}
+
+        def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+            return self.model_dump(*args, **kwargs)
+
+        def json(self, *args: Any, **kwargs: Any) -> str:
+            return json.dumps(self.model_dump(), default=str, ensure_ascii=False)
 
 
 class IndustrySector(str, Enum):

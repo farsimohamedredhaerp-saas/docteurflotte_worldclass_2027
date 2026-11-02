@@ -113,6 +113,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { href: '/admin', label: "Vue d'Ensemble", icon: '📊' },
     { href: '/admin/tenants', label: 'Tenants & Organisations', icon: '🏢' },
     { href: '/admin/decision-engine', label: 'Moteur Décisionnel (6 Physiques)', icon: '🧠' },
+    { href: '/admin/ai-observability', label: 'Observabilité IA Ollama', icon: '⚡' },
     { href: '/admin/fiscal', label: 'Barèmes Fiscaux & Naftal', icon: '⛽' },
     { href: '/admin/gateways', label: 'Passerelles IoT & Traccar', icon: '📡' },
     { href: '/admin/audit', label: 'Piste d’Audit Immuable', icon: '🛡️' },

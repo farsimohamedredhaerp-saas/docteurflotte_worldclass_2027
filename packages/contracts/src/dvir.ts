@@ -50,6 +50,38 @@ export interface DVIRInspectionReport {
   hasCriticalFailures: boolean;
   odometerKm?: number;
   items: DVIRChecklistItem[];
+  signatureDataUrl?: string;
   generatedWorkOrderId?: string;
   submittedAt: string;
+  resolvedAt?: string;
+  resolvedByWorkOrderId?: string;
+  resolutionNotes?: string;
+}
+
+export interface DVIRResolveBlockDto {
+  assetId: string;
+  workOrderId?: string;
+  resolutionNotes?: string;
+}
+
+export interface DVIRResolveBlockResult {
+  resolved: boolean;
+  assetId: string;
+  unblockedAt: string;
+  resolvedWorkOrderId?: string;
+  activeBlockRemaining: boolean;
+}
+
+export interface DVIRSyncBatchDto {
+  reports: DVIRSubmissionDto[];
+  syncDeviceId?: string;
+  syncTimestampUtc?: string;
+}
+
+export interface DVIRSyncBatchResult {
+  totalReceived: number;
+  syncedCount: number;
+  criticalFailuresCount: number;
+  generatedWorkOrderIds: string[];
+  processedReports: DVIRInspectionReport[];
 }

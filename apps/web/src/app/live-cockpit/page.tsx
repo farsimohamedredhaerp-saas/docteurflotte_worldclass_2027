@@ -23,6 +23,7 @@ export default function LiveCockpitPage() {
     togglePlayPause,
     injectCriticalDtc,
     triggerFuelTheftAnomaly,
+    toggleDvirBlock,
     geofences,
   } = useTelemetryStream({ isDemoMode });
 
@@ -82,6 +83,7 @@ export default function LiveCockpitPage() {
         selectedVehicleId={selectedVehicleId}
         onInjectCriticalDtc={() => injectCriticalDtc(selectedVehicleId)}
         onTriggerFuelDrop={() => triggerFuelTheftAnomaly(selectedVehicleId)}
+        onToggleDvirBlock={() => toggleDvirBlock(selectedVehicleId)}
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
         isCockpitOpen={isCockpitOpen}

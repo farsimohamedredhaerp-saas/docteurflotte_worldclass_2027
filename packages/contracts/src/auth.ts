@@ -1,4 +1,4 @@
-import { ActivityPack, TenantStatus } from './tenant';
+import { ActivityPack, Tenant, TenantStatus } from './tenant';
 
 export enum UserRole {
   PLATFORM_ADMIN = 'PLATFORM_ADMIN',
@@ -48,6 +48,14 @@ export interface AuthResponse {
     status: TenantStatus;
     activityPack: ActivityPack;
     isSetupCompleted: boolean;
+  };
+}
+
+export interface UserProfileResponse {
+  user: AuthUser;
+  tenant: Tenant & {
+    is_setup_completed?: boolean;
+    measurement_system?: string;
   };
 }
 

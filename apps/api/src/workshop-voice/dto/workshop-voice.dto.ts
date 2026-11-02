@@ -18,7 +18,7 @@ export interface VoiceRouteResult {
   subsystemDetected?: string;
   spokenResponseFr: string;
   spokenResponseDarja: string;
-  structuredData?: Record<string, any>;
+  structuredData?: Record<string, unknown>;
   sourceManualReference?: string;
   executionMs: number;
 }

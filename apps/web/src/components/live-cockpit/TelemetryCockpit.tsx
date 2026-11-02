@@ -523,6 +523,113 @@ export function TelemetryCockpit({
               )}
             </div>
 
+            {/* Sécurité & Consignation Terrain DVIR */}
+            <div
+              className="p-3 rounded-sm"
+              style={{
+                backgroundColor: vehicle.dvirStatus?.isBlocked ? 'rgba(239, 68, 68, 0.08)' : 'var(--df-cockpit-card-bg)',
+                border: vehicle.dvirStatus?.isBlocked ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid var(--df-cockpit-border)',
+              }}
+            >
+              <div
+                className="flex items-center justify-between pb-2 mb-2"
+                style={{ borderBottom: '1px solid var(--df-cockpit-border)' }}
+              >
+                <span
+                  className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
+                  style={{ color: vehicle.dvirStatus?.isBlocked ? '#EF4444' : 'var(--df-cockpit-text-title)' }}
+                >
+                  <span>{vehicle.dvirStatus?.isBlocked ? '🛑' : '📋'}</span>
+                  Inspection DVIR & Consignation Sécurité
+                </span>
+                <span
+                  className="text-[9px] font-mono px-1.5 py-0.2 rounded-xs font-bold"
+                  style={{
+                    backgroundColor: vehicle.dvirStatus?.isBlocked ? 'rgba(239, 68, 68, 0.2)' : 'var(--df-status-ok-bg)',
+                    color: vehicle.dvirStatus?.isBlocked ? '#EF4444' : 'var(--df-status-ok-text)',
+                    border: vehicle.dvirStatus?.isBlocked ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid var(--df-status-ok-border)',
+                  }}
+                >
+                  {vehicle.dvirStatus?.isBlocked ? 'CONSIGNÉ / HARD BLOCK' : 'CONFORME'}
+                </span>
+              </div>
+
+              {vehicle.dvirStatus?.isBlocked ? (
+                <div className="flex flex-col gap-2 text-[11px]">
+                  <div
+                    className="p-2 rounded-xs flex flex-col gap-1 font-mono"
+                    style={{
+                      backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                    }}
+                  >
+                    <div className="flex items-center justify-between text-[10px] text-rose-700 dark:text-rose-300 font-bold">
+                      <span>INTERDICTION FORMELLE DE DÉPART</span>
+                      {vehicle.dvirStatus.latestReportId && (
+                        <span>Fiche #{vehicle.dvirStatus.latestReportId}</span>
+                      )}
+                    </div>
+                    <div className="text-[10.5px] text-rose-900 dark:text-rose-200">
+                      {vehicle.dvirStatus.criticalFailureReason || 'Anomalie critique freinage / pneumatiques signalée sur mobile.'}
+                    </div>
+                    {vehicle.dvirStatus.generatedWorkOrderId && (
+                      <div className="text-[9.5px] pt-1 border-t border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300 flex items-center justify-between">
+                        <span>Ordre de Travail généré :</span>
+                        <span className="font-bold">{vehicle.dvirStatus.generatedWorkOrderId}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <Link
+                      href="/work-orders"
+                      className="flex-1 py-1 px-2 rounded-xs text-[10px] font-bold text-center transition-colors"
+                      style={{
+                        backgroundColor: 'var(--df-accent-blue)',
+                        color: '#FFFFFF',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      🔧 Traiter l&apos;Ordre de Travail
+                    </Link>
+                    <Link
+                      href="/dvir"
+                      className="flex-1 py-1 px-2 rounded-xs text-[10px] font-bold text-center transition-colors"
+                      style={{
+                        backgroundColor: 'var(--df-cockpit-card-bg)',
+                        border: '1px solid var(--df-cockpit-border)',
+                        color: 'var(--df-cockpit-text-title)',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      📋 Fiches DVIR
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="p-2 rounded-xs text-[10.5px] font-mono flex items-center justify-between"
+                  style={{
+                    backgroundColor: 'var(--df-status-ok-bg)',
+                    border: '1px solid var(--df-status-ok-border)',
+                    color: 'var(--df-status-ok-text)',
+                  }}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <IconShield size={13} />
+                    <span>Dernière inspection valide. Véhicule autorisé au dispatch.</span>
+                  </span>
+                  <Link
+                    href="/dvir"
+                    className="text-[9.5px] font-bold underline"
+                    style={{ color: 'var(--df-accent-blue)' }}
+                  >
+                    Nouvelle fiche
+                  </Link>
+                </div>
+              )}
+            </div>
+
             {/* Moteur Décisionnel Financier & Arbitrage SAD -> ADS (DZD) */}
             <div
               className="p-3 rounded-sm"

@@ -21,6 +21,38 @@ import {
   WorkOrderStatus,
 } from '@docteurflotte/contracts';
 
+interface TelematicsDeviceDatabaseRow {
+  id: string;
+  tenant_id: string;
+  unique_id: string;
+  name: string;
+  model?: string;
+  status: DeviceStatus;
+  traccar_id?: number;
+  last_update?: string;
+  attributes?: Record<string, unknown>;
+  created_at: string;
+}
+
+interface CanonicalPositionDatabaseRow {
+  id: string;
+  tenant_id: string;
+  traccar_position_id?: number | string | null;
+  device_id: string;
+  asset_id?: string;
+  latitude: number | string;
+  longitude: number | string;
+  speed: number | string;
+  altitude?: number | string | null;
+  course?: number | string | null;
+  ignition?: boolean | null;
+  odometer_km?: number | string | null;
+  engine_hours?: number | string | null;
+  recorded_at: string;
+  created_at: string;
+  attributes?: Record<string, unknown>;
+}
+
 @Injectable()
 export class TelematicsService {
   private readonly logger = new Logger(TelematicsService.name);
@@ -28,7 +60,7 @@ export class TelematicsService {
   constructor(
     private readonly db: DatabaseService,
     private readonly traccarAdapter: TraccarAdapterService,
-  ) {}
+  ) { }
 
   /**
    * Enregistrer un nouveau terminal GPS
@@ -440,7 +472,7 @@ export class TelematicsService {
     });
   }
 
-  private mapDevice(row: any): TelematicsDevice {
+  private mapDevice(row: TelematicsDeviceDatabaseRow): TelematicsDevice {
     return {
       id: row.id,
       tenantId: row.tenant_id,
@@ -455,11 +487,11 @@ export class TelematicsService {
     };
   }
 
-  private mapPosition(row: any): CanonicalPosition {
+  private mapPosition(row: CanonicalPositionDatabaseRow): CanonicalPosition {
     return {
       id: row.id,
       tenantId: row.tenant_id,
-      traccarPositionId: row.traccar_position_id,
+      traccarPositionId: String(row.traccar_position_id ?? ''),
       deviceId: row.device_id,
       assetId: row.asset_id,
       latitude: Number(row.latitude),

@@ -4,9 +4,11 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { AuthClient } from '../../lib/api-auth';
 import { AssetClient } from '../../lib/api-assets';
 import { TelematicsClient } from '../../lib/api-telematics';
-import { FleetLiveAsset } from '@docteurflotte/contracts';
+import { FleetIntelligenceClient } from '../../lib/api-fleet-intelligence';
+import { FleetLiveAsset, DVIRInspectionReport } from '@docteurflotte/contracts';
 import {
   VehicleTelemetryState,
+  VehicleCategory,
   FleetAggregateStats,
   CanRawFrame,
   DtcAlert,
@@ -140,6 +142,11 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
       parkingBrakeEngaged: false,
     },
     activeDtcs: [],
+    dvirStatus: {
+      isBlocked: false,
+      latestReportId: 'dvir-demo-01',
+      submittedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    },
     breadcrumbs: [
       { latitude: 33.15, longitude: 3.38, altitudeMeters: 490, headingDegrees: 165, speedKmh: 78, timestamp: '12:00:15' },
       { latitude: 33.02, longitude: 3.44, altitudeMeters: 482, headingDegrees: 167, speedKmh: 76, timestamp: '12:02:40' },
@@ -224,6 +231,13 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
         recommendedWorkshopAction: 'Vérifier débit visco-coupleur ventilateur et niveau vase d’expansion.',
       },
     ],
+    dvirStatus: {
+      isBlocked: true,
+      latestReportId: 'dvir-demo-02',
+      criticalFailureReason: 'Hernie pneu avant gauche & chute pression pneumatique freinage',
+      generatedWorkOrderId: 'ot-dvir-99104',
+      submittedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    },
     breadcrumbs: [
       { latitude: 36.720, longitude: 3.250, altitudeMeters: 42, headingDegrees: 48, speedKmh: 64, timestamp: '12:00:30' },
       { latitude: 36.735, longitude: 3.280, altitudeMeters: 38, headingDegrees: 45, speedKmh: 58, timestamp: '12:04:45' },
@@ -284,6 +298,11 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
       parkingBrakeEngaged: true,
     },
     activeDtcs: [],
+    dvirStatus: {
+      isBlocked: false,
+      latestReportId: 'dvir-demo-01',
+      submittedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    },
     breadcrumbs: [
       { latitude: 31.692, longitude: 6.075, altitudeMeters: 148, headingDegrees: 0, speedKmh: 0, timestamp: '11:55:00' },
       { latitude: 31.692, longitude: 6.075, altitudeMeters: 148, headingDegrees: 0, speedKmh: 0, timestamp: '12:05:00' },
@@ -344,6 +363,11 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
       parkingBrakeEngaged: false,
     },
     activeDtcs: [],
+    dvirStatus: {
+      isBlocked: false,
+      latestReportId: 'dvir-demo-01',
+      submittedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    },
     breadcrumbs: [
       { latitude: 36.24, longitude: 1.58, altitudeMeters: 138, headingDegrees: 245, speedKmh: 105, timestamp: '12:01:20' },
       { latitude: 36.18, longitude: 1.35, altitudeMeters: 124, headingDegrees: 245, speedKmh: 104, timestamp: '12:05:00' },
@@ -404,6 +428,11 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
       parkingBrakeEngaged: false,
     },
     activeDtcs: [],
+    dvirStatus: {
+      isBlocked: false,
+      latestReportId: 'dvir-demo-01',
+      submittedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    },
     breadcrumbs: [
       { latitude: 35.25, longitude: -0.61, altitudeMeters: 470, headingDegrees: 182, speedKmh: 70, timestamp: '12:02:10' },
       { latitude: 35.21, longitude: -0.62, altitudeMeters: 485, headingDegrees: 185, speedKmh: 68, timestamp: '12:05:00' },
@@ -464,6 +493,11 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
       parkingBrakeEngaged: true,
     },
     activeDtcs: [],
+    dvirStatus: {
+      isBlocked: false,
+      latestReportId: 'dvir-demo-01',
+      submittedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    },
     breadcrumbs: [],
   },
   {
@@ -521,6 +555,11 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
       parkingBrakeEngaged: true,
     },
     activeDtcs: [],
+    dvirStatus: {
+      isBlocked: false,
+      latestReportId: 'dvir-demo-01',
+      submittedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    },
     breadcrumbs: [],
   },
 ];
@@ -562,9 +601,10 @@ export function useTelemetryStream(options?: { isDemoMode?: boolean }) {
       }
 
       try {
-        const [assets, fleetLive] = await Promise.all([
+        const [assets, fleetLive, dvirReports] = await Promise.all([
           AssetClient.listAssets(token),
           TelematicsClient.getFleetLive(token).catch(() => []),
+          FleetIntelligenceClient.getDvirReports(token).catch(() => []),
         ]);
         if (!assets || assets.length === 0) {
           setFleet([]);
@@ -577,8 +617,16 @@ export function useTelemetryStream(options?: { isDemoMode?: boolean }) {
           if (item.assetId) liveMap.set(item.assetId, item);
         });
 
+        const dvirMap = new Map<string, DVIRInspectionReport>();
+        (dvirReports || []).forEach((r) => {
+          if (r.assetId && !dvirMap.has(r.assetId)) {
+            dvirMap.set(r.assetId, r);
+          }
+        });
+
         const realFleet: VehicleTelemetryState[] = assets.map((a, index) => {
           const live = liveMap.get(a.id);
+          const dvir = dvirMap.get(a.id);
           const isTruck = a.category === 'HEAVY_TRUCK';
           const isMachinery = a.category === 'CONSTRUCTION_EQUIPMENT';
           const hasGps = live?.latitude != null && live?.longitude != null;
@@ -587,15 +635,23 @@ export function useTelemetryStream(options?: { isDemoMode?: boolean }) {
           const spd = live?.speed != null ? Number(live.speed) : (a.status === 'OPERATIONAL' ? 35 : 0);
           const ign = live?.ignition ?? (a.status === 'OPERATIONAL');
 
+          const isBlockedByDvir = dvir?.hasCriticalFailures ?? false;
+
+          const resolvedCategory: VehicleCategory = isMachinery
+            ? 'CONSTRUCTION_BTP'
+            : isTruck
+              ? 'HEAVY_TRUCK'
+              : 'LIGHT_COMMERCIAL';
+
           return {
             id: a.id,
             registrationNumber: a.code || `DZ-${a.id.slice(0, 8)}`,
             vin: a.code || 'NON DÉTECTÉ',
             make: a.brand || 'Constructeur',
             model: a.model || a.name,
-            category: (a.category as any) || 'HEAVY_TRUCK',
+            category: resolvedCategory,
             categoryLabel: isTruck ? 'Poids Lourd' : (isMachinery ? 'Engin Chantier' : 'Véhicule de Flotte'),
-            status: ign && spd > 0 ? 'MOTION' : (ign ? 'IDLE_WARNING' : 'PARKED_OFF'),
+            status: isBlockedByDvir ? 'DTC_CRITICAL' : (ign && spd > 0 ? 'MOTION' : (ign ? 'IDLE_WARNING' : 'PARKED_OFF')),
             driverName: 'Conducteur Assigné',
             driverPhone: '+213 550 00 00 00',
             currentSite: 'Base Entreprise Réelle',
@@ -603,12 +659,25 @@ export function useTelemetryStream(options?: { isDemoMode?: boolean }) {
             telemetryMode: live?.deviceId ? 'MODE_1_GPS_ONLY' : 'MODE_0_ZERO_HARDWARE',
             odometerKm: a.currentMeterValue || 0,
             engineHours: isMachinery ? a.currentMeterValue || 0 : 0,
-            vhiHealthScore: 100,
+            vhiHealthScore: isBlockedByDvir ? 45 : 100,
             rulKilometersRemaining: a.maintenanceIntervalValue || 15000,
-            financialRiskDzd: 0,
-            preventiveCostDzd: 0,
-            arbitrageRecommendationFr: 'Actif réel de production — Télémétrie Traccar / Mode Souverain synchronisée.',
-            arbitrageRecommendationAr: 'مركبة إنتاجية حقيقية — اتصال التتبع المباشر متزامن.',
+            financialRiskDzd: isBlockedByDvir ? 150000 : 0,
+            preventiveCostDzd: isBlockedByDvir ? 25000 : 0,
+            arbitrageRecommendationFr: isBlockedByDvir
+              ? 'CONSIGNATION SÉCURITÉ : Défaillance critique DVIR active. Réparation atelier requise avant affectation.'
+              : 'Actif réel de production — Télémétrie Traccar / Mode Souverain synchronisée.',
+            arbitrageRecommendationAr: isBlockedByDvir
+              ? 'حجز أمني: فشل حرج في الفحص التقني. يلزم تصليح فوري قبل الانطلاق.'
+              : 'مركبة إنتاجية حقيقية — اتصال التتبع المباشر متزامن.',
+            dvirStatus: dvir
+              ? {
+                  isBlocked: isBlockedByDvir,
+                  latestReportId: dvir.id,
+                  criticalFailureReason: isBlockedByDvir ? 'Défaillance critique constatée lors du contrôle DVIR' : undefined,
+                  generatedWorkOrderId: dvir.generatedWorkOrderId,
+                  submittedAt: dvir.submittedAt,
+                }
+              : { isBlocked: false },
             gps: {
               latitude: lat,
               longitude: lng,
@@ -883,6 +952,7 @@ export function useTelemetryStream(options?: { isDemoMode?: boolean }) {
     inMotion: fleet.filter((v) => v.status === 'MOTION').length,
     idling: fleet.filter((v) => v.status === 'IDLE_WARNING').length,
     dtcCritical: fleet.filter((v) => v.status === 'DTC_CRITICAL').length,
+    dvirBlockedCount: fleet.filter((v) => v.dvirStatus?.isBlocked).length,
     offline: fleet.filter((v) => v.status === 'OFFLINE').length,
     wsLatencyMs: wsStats.latencyMs,
     msgPerSecond: wsStats.msgPerSec,
@@ -947,6 +1017,29 @@ export function useTelemetryStream(options?: { isDemoMode?: boolean }) {
     );
   }, []);
 
+  const toggleDvirBlock = useCallback((vehicleId: string) => {
+    setFleet((prev) =>
+      prev.map((v) => {
+        if (v.id === vehicleId) {
+          const currentlyBlocked = v.dvirStatus?.isBlocked ?? false;
+          return {
+            ...v,
+            dvirStatus: {
+              isBlocked: !currentlyBlocked,
+              latestReportId: currentlyBlocked ? v.dvirStatus?.latestReportId : `dvir-sim-${Date.now().toString().slice(-4)}`,
+              criticalFailureReason: currentlyBlocked
+                ? undefined
+                : 'Inspection terrain non conforme : anomalie critique signalée (freinage/pneumatique)',
+              generatedWorkOrderId: currentlyBlocked ? undefined : `ot-dvir-${vehicleId}-${Date.now().toString().slice(-4)}`,
+              submittedAt: new Date().toISOString(),
+            },
+          };
+        }
+        return v;
+      })
+    );
+  }, []);
+
   return {
     fleet,
     selectedVehicle,
@@ -958,6 +1051,7 @@ export function useTelemetryStream(options?: { isDemoMode?: boolean }) {
     togglePlayPause,
     injectCriticalDtc,
     triggerFuelTheftAnomaly,
+    toggleDvirBlock,
     geofences: SOVEREIGN_GEOFENCES,
   };
 }

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import rawMasterCatalog from '../../../lib/oem_catalog_master.json';
 import type { ScraperTraceStep } from '../../../lib/api-oem-scraper';
+import type { RawOEMCatalogEntry, RawOEMTask } from '../../../lib/api-oem-catalog';
+
+const masterCatalogTyped = rawMasterCatalog as RawOEMCatalogEntry[];
 
 interface OEMTask {
   task_code: string;
@@ -717,6 +720,72 @@ const GLOBAL_CATALOG: Record<string, OEMTemplate> = {
       },
     ],
   },
+  'WDC-GLK': {
+    wmi_prefix: 'WDC',
+    make: 'Mercedes-Benz',
+    model: 'GLK 220 CDI 4MATIC (X204)',
+    engine_code: 'OM 651 DE 22 LA (2.1L Bi-Turbo 170ch)',
+    asset_category: 'LIGHT_VEHICLE',
+    fuel_type: 'DIESEL',
+    ref_consumption_l_100km: 6.7,
+    ref_consumption_l_hour: 2.1,
+    oil_capacity_liters: 6.5,
+    oil_norm_spec: '5W-30 / 5W-40 MB-Approval 229.51 / 229.52 (Low-SAPS DPF)',
+    tasks: [
+      {
+        task_code: 'ENG_OIL_FILTER_SERVICE_A',
+        task_name: 'Service A : Vidange huile moteur (6.5L MB 229.52) + Filtre à huile + Contrôles sécurité',
+        subsystem: 'ENGINE',
+        normal_interval_km: 25000,
+        normal_interval_months: 12,
+        normal_interval_engine_hours: 500,
+        severe_interval_km: 15000,
+        severe_interval_months: 6,
+        severe_interval_engine_hours: 300,
+        standard_labor_minutes: 45,
+        criticality_weight: 1.5,
+      },
+      {
+        task_code: 'TRANSMISSION_7G_TRONIC_4MATIC',
+        task_name: 'Vidange transmission automatique 7G-Tronic Plus (722.9) + Boîte de transfert 4MATIC (MB 236.15)',
+        subsystem: 'TRANSMISSION',
+        normal_interval_km: 100000,
+        normal_interval_months: 48,
+        normal_interval_engine_hours: 2000,
+        severe_interval_km: 60000,
+        severe_interval_months: 24,
+        severe_interval_engine_hours: 1200,
+        standard_labor_minutes: 90,
+        criticality_weight: 1.4,
+      },
+      {
+        task_code: 'FUEL_FILTER_DPF_CHECK',
+        task_name: 'Remplacement filtre à gazole avec réchauffeur + Contrôle saturation suie FAP (DPF)',
+        subsystem: 'FILTRATION',
+        normal_interval_km: 50000,
+        normal_interval_months: 24,
+        normal_interval_engine_hours: 1000,
+        severe_interval_km: 25000,
+        severe_interval_months: 12,
+        severe_interval_engine_hours: 500,
+        standard_labor_minutes: 45,
+        criticality_weight: 1.4,
+      },
+      {
+        task_code: 'BRAKE_SYSTEM_SERVICE_B',
+        task_name: 'Service B : Contrôle plaquettes/disques de frein + Remplacement liquide DOT 4 Plus (MB 331.0)',
+        subsystem: 'BRAKES',
+        normal_interval_km: 50000,
+        normal_interval_months: 24,
+        normal_interval_engine_hours: 1000,
+        severe_interval_km: 30000,
+        severe_interval_months: 12,
+        severe_interval_engine_hours: 600,
+        standard_labor_minutes: 60,
+        criticality_weight: 1.5,
+      },
+    ],
+  },
 };
 
 // Normalisation des identifiants de catégories
@@ -735,7 +804,7 @@ function makeTraceRecorder() {
   const steps: ScraperTraceStep[] = [];
   let stepCounter = 1;
   return {
-    add(phase: string, level: 'INFO' | 'MATCH' | 'WARNING' | 'REJECT' | 'FALLBACK', message: string, details?: Record<string, any>) {
+    add(phase: string, level: 'INFO' | 'MATCH' | 'WARNING' | 'REJECT' | 'FALLBACK', message: string, details?: Record<string, unknown>) {
       steps.push({
         step: stepCounter++,
         phase,
@@ -751,8 +820,8 @@ function makeTraceRecorder() {
   };
 }
 
-function convertMasterItemToTemplate(item: any, customEngine?: string): OEMTemplate {
-  const tasks: OEMTask[] = (item.tasks || []).map((t: any) => ({
+function convertMasterItemToTemplate(item: RawOEMCatalogEntry, customEngine?: string): OEMTemplate {
+  const tasks: OEMTask[] = (item.tasks || []).map((t: RawOEMTask) => ({
     task_code: t.task_code || 'TASK_MAINT',
     task_name: t.task_name,
     subsystem: t.subsystem || 'ENGINE',
@@ -770,7 +839,7 @@ function convertMasterItemToTemplate(item: any, customEngine?: string): OEMTempl
     wmi_prefix: item.variant.wmi || 'GEN',
     make: item.brand.name,
     model: item.model.name,
-    engine_code: customEngine || item.variant.engine_name || item.variant.engine_code,
+    engine_code: customEngine || item.variant.engine_name || item.variant.engine_code || 'STD',
     asset_category: item.model.category || 'LIGHT_VEHICLE',
     fuel_type: item.variant.fuel_type || 'DIESEL',
     ref_consumption_l_100km: item.variant.consumption_mixed_l_100km || 8.0,
@@ -811,22 +880,66 @@ export async function POST(req: Request) {
       trace.add('BULK_CRAWL', 'INFO', `Démarrage du crawler mondial. Filtre catégorie: ${targetCategory}, Marque cible: ${targetMake || 'Toutes'}`);
 
       // Combiner le catalogue maître et les templates existants
-      const masterTemplates = (rawMasterCatalog as any[]).map((item) => convertMasterItemToTemplate(item));
+      const masterTemplates = masterCatalogTyped.map((item) => convertMasterItemToTemplate(item));
       const allTemplates = [...Object.values(GLOBAL_CATALOG), ...masterTemplates];
 
-      let matched = allTemplates.filter((t) => {
-        const catMatch = t.asset_category === targetCategory;
-        const makeMatch = !targetMake || t.make.toLowerCase().includes(targetMake);
-        return catMatch && makeMatch;
-      });
+      const queryTokens: string[] = targetMake
+        .split(/[\s/\-_.,]+/)
+        .map((t: string) => t.trim())
+        .filter((t: string) => t.length >= 2 && !['de', 'du', 'des', 'le', 'la', 'et'].includes(t));
 
-      if (matched.length === 0 && targetMake) {
-        matched = allTemplates.filter((t) => t.make.toLowerCase().includes(targetMake));
+      let matched: OEMTemplate[] = [];
+
+      if (queryTokens.length > 0) {
+        // Scorer chaque template selon la marque et le modèle
+        const scored = allTemplates.map((t: OEMTemplate) => {
+          const makeLow = t.make.toLowerCase();
+          const modelLow = t.model.toLowerCase();
+          let score = 0;
+
+          for (const tok of queryTokens) {
+            if (makeLow.includes(tok) || tok.includes(makeLow)) {
+              score += 50;
+            } else if (tok === 'mercedes' && makeLow.includes('mercedes')) {
+              score += 60;
+            }
+            if (modelLow.includes(tok)) {
+              score += 80;
+            }
+            if (t.engine_code.toLowerCase().includes(tok)) {
+              score += 40;
+            }
+          }
+
+          if (t.asset_category === targetCategory) {
+            score += 20;
+          }
+
+          return { template: t, score };
+        });
+
+        matched = scored
+          .filter((s) => s.score >= 50)
+          .sort((a, b) => b.score - a.score)
+          .map((s) => s.template);
       }
-      if (matched.length === 0) {
+
+      // Si une marque était ciblée mais n'a pas matché dans le catalogue statique, ne JAMAIS substituer par Toyota !
+      if (matched.length === 0 && targetMake) {
+        const isMbGlk =
+          queryTokens.some((t: string) => t.includes('glk')) ||
+          (queryTokens.some((t: string) => t.includes('mercedes')) && queryTokens.some((t: string) => t.includes('glk')));
+
+        if (isMbGlk && GLOBAL_CATALOG['WDC-GLK']) {
+          matched = [GLOBAL_CATALOG['WDC-GLK']];
+        }
+      }
+
+      // Si aucun filtre de marque n'était actif (crawl catégorie pur)
+      if (matched.length === 0 && !targetMake) {
         matched = allTemplates.filter((t) => t.asset_category === targetCategory);
       }
-      if (matched.length === 0) {
+      if (matched.length === 0 && !targetMake) {
         matched = allTemplates.slice(0, 5);
       }
 
@@ -886,7 +999,7 @@ export async function POST(req: Request) {
       }
 
       // Recherche dans le catalogue maître par WMI
-      const masterVinMatch = (rawMasterCatalog as any[]).find(
+      const masterVinMatch = masterCatalogTyped.find(
         (entry) => entry.variant.wmi && entry.variant.wmi.toUpperCase() === wmi
       );
       if (masterVinMatch) {
@@ -911,7 +1024,7 @@ export async function POST(req: Request) {
     trace.add(
       'EXPLORATION_CATALOGUE',
       'INFO',
-      `Recherche lexicale stricte dans le catalogue maître (${(rawMasterCatalog as any[]).length} fiches) et les préconfigurations locales (${Object.keys(GLOBAL_CATALOG).length} fiches)...`
+      `Recherche lexicale stricte dans le catalogue maître (${masterCatalogTyped.length} fiches) et les préconfigurations locales (${Object.keys(GLOBAL_CATALOG).length} fiches)...`
     );
 
     const normMake = rawMake.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -936,9 +1049,9 @@ export async function POST(req: Request) {
       brandSlug: string,
       modelName: string,
       modelSlug: string,
-      engineName: string,
-      engineCode: string,
-      templateBuilder: () => OEMTemplate
+      engineName?: string,
+      engineCode?: string,
+      templateBuilder: () => OEMTemplate = () => ({} as OEMTemplate)
     ) {
       const bNameLow = brandName.toLowerCase();
       const bSlugLow = (brandSlug || '').toLowerCase();
@@ -1049,7 +1162,7 @@ export async function POST(req: Request) {
     }
 
     // Évaluer le catalogue maître (oem_catalog_master.json)
-    for (const item of rawMasterCatalog as any[]) {
+    for (const item of masterCatalogTyped) {
       scoreEntry(
         item.brand.name,
         item.brand.slug,
@@ -1287,6 +1400,49 @@ export async function POST(req: Request) {
       } else if (dispL <= 1.4) {
         oilCapacity = 3.8;
       }
+    }
+
+    // Tentative d'enrichissement via Ollama / Qwen2.5 local (format: "json") si disponible
+    const ollamaUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+    const ollamaModel = process.env.OLLAMA_MODEL_NAME || 'docteurflotte';
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 2500);
+      const llmRes = await fetch(`${ollamaUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: ollamaModel,
+          prompt: `Extrais les périodicités de maintenance constructeur pour "${rawMake} ${rawModel} ${rawEngine}" au format JSON strict : {"oil_change_km": number, "oil_change_months": number, "recommended_grade": string}`,
+          format: 'json',
+          stream: false,
+          options: { temperature: 0.1 },
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (llmRes.ok) {
+        const llmData = await llmRes.json();
+        const parsedPlan = JSON.parse(llmData.response || '{}');
+        if (parsedPlan.oil_change_km && Number(parsedPlan.oil_change_km) > 1000) {
+          normalKm = Number(parsedPlan.oil_change_km);
+          severeKm = Math.round(normalKm * 0.65);
+        }
+        if (parsedPlan.recommended_grade) {
+          oilNorm = `${parsedPlan.recommended_grade} (${oilNorm})`;
+        }
+        trace.add(
+          'OLLAMA_QWEN_RMI',
+          'MATCH',
+          `Périodicités constructeur affinées via Ollama / Qwen2.5 local (${ollamaModel}).`
+        );
+      }
+    } catch {
+      trace.add(
+        'OLLAMA_QWEN_RMI',
+        'INFO',
+        `Ollama local hors-ligne sur ${ollamaUrl} — utilisation des abaques physiques déterministes.`
+      );
     }
 
     const adaptiveTasks: OEMTask[] = [

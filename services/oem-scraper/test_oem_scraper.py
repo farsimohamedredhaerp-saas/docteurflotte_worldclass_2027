@@ -1,4 +1,6 @@
 import unittest
+from unittest.mock import MagicMock, patch
+import json
 from pathlib import Path
 import sys
 
@@ -10,7 +12,13 @@ from catalog_resolver_dz import CatalogMatcherDZ, CatalogSearchQuery
 from vin_resolver_dz import AlgerianVINResolver
 from scrapers.lubematch_olyslager import OlyslagerLubricantPortalScraper
 from scrapers.autodoc_schedule import MechanicalReplacementScheduleScraper
+from scrapers.pdf_manual_ingestor import OEMManualPDFIngestor
 from pipeline_orchestrator import OEMScraperOrchestrator
+from ollama_oem_extractor import (
+    extract_oem_maintenance_plan_local,
+    resolve_fuzzy_vehicle_query,
+    extract_tasks_from_raw_manual_text,
+)
 
 
 class TestOEMScraperService(unittest.TestCase):
@@ -257,8 +265,53 @@ class TestOEMScraperService(unittest.TestCase):
         self.assertIn("Kangoo", model_k)
         self.assertIn("1.5 dCi", eng_k)
 
+    def test_ollama_oem_extractor_fallback_and_mock(self):
+        """Vérifie l'extraction OEM via Ollama/Qwen2.5 et son repli déterministe hors-ligne."""
+        # 1. Test repli déterministe si Ollama est éteint
+        plan = extract_oem_maintenance_plan_local("Vidange tous les 15000 km avec huile 5W30")
+        self.assertIn("oil_change_km", plan)
+        self.assertIn("recommended_grade", plan)
+
+        # 2. Test extraction avec mock Ollama actif
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = json.dumps({
+            "response": json.dumps({
+                "oil_change_km": 15000,
+                "oil_change_months": 12,
+                "timing_belt_km": 120000,
+                "spark_plugs_km": 40000,
+                "recommended_grade": "5W30",
+            })
+        }).encode("utf-8")
+        mock_resp.__enter__ = MagicMock(return_value=mock_resp)
+        mock_resp.__exit__ = MagicMock(return_value=False)
+
+        with patch("urllib.request.urlopen", return_value=mock_resp):
+            plan_live = extract_oem_maintenance_plan_local("Carnet entretien Renault 1.5 dCi")
+            self.assertEqual(plan_live["oil_change_km"], 15000)
+            self.assertEqual(plan_live["recommended_grade"], "5W30")
+
+        # 3. Test resolve_fuzzy_vehicle_query avec mock Ollama
+        mock_fuzzy_resp = MagicMock()
+        mock_fuzzy_resp.read.return_value = json.dumps({
+            "response": "Renault Clio IV / Clio Campus"
+        }).encode("utf-8")
+        mock_fuzzy_resp.__enter__ = MagicMock(return_value=mock_fuzzy_resp)
+        mock_fuzzy_resp.__exit__ = MagicMock(return_value=False)
+
+        with patch("urllib.request.urlopen", return_value=mock_fuzzy_resp):
+            matched = resolve_fuzzy_vehicle_query(
+                "clio 4 dci", ["Renault Clio IV / Clio Campus", "Peugeot Partner / Doblo"]
+            )
+            self.assertEqual(matched, "Renault Clio IV / Clio Campus")
+
+        # 4. Test OEMManualPDFIngestor.extract_tasks_from_raw_text_with_ollama
+        tasks = OEMManualPDFIngestor.extract_tasks_from_raw_text_with_ollama(
+            "Extrait non tabulaire : révision générale moteur désert"
+        )
+        self.assertGreaterEqual(len(tasks), 2)
+        self.assertEqual(tasks[0].task_code, "ENG_OIL_FILTER")
+
 
 if __name__ == "__main__":
     unittest.main()
-
-

@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { DecisionsService } from './decisions.service';
-import { JwtAuthGuard } from '../auth/auth.guard';
+import { JwtAuthGuard, AuthenticatedRequest } from '../auth/auth.guard';
 import {
   ApproveDecisionDto,
   BudgetVarianceReport,
@@ -26,20 +26,20 @@ export class DecisionsController {
 
   @Get()
   async listDecisions(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Query('status') status?: DecisionStatus,
   ): Promise<DecisionRecommendation[]> {
     return this.decisionsService.listDecisions(req.tenantId, status);
   }
 
   @Post('evaluate')
-  async evaluateDecisions(@Req() req: any): Promise<DecisionRecommendation[]> {
+  async evaluateDecisions(@Req() req: AuthenticatedRequest): Promise<DecisionRecommendation[]> {
     return this.decisionsService.evaluateTenantDecisions(req.tenantId);
   }
 
   @Post(':id/approve')
   async approveDecision(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() dto: ApproveDecisionDto,
   ): Promise<{ decision: DecisionRecommendation; workOrderId: string }> {
@@ -48,7 +48,7 @@ export class DecisionsController {
 
   @Post(':id/dismiss')
   async dismissDecision(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() dto: DismissDecisionDto,
   ): Promise<DecisionRecommendation> {
@@ -57,7 +57,7 @@ export class DecisionsController {
 
   @Post('budgets')
   async setBudget(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Body() dto: CreateBudgetDto,
   ): Promise<{ success: boolean; message: string }> {
     await this.decisionsService.setBudget(req.tenantId, dto);
@@ -66,7 +66,7 @@ export class DecisionsController {
 
   @Get('budget-variance')
   async getBudgetVariance(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Query('year') year?: string,
     @Query('period') period?: string,
   ): Promise<BudgetVarianceReport> {

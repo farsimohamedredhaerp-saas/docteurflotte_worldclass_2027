@@ -14,17 +14,17 @@ import {
 import { WorkOrdersService } from './work-orders.service';
 import { CreateWorkOrderDto } from './dto/create-work-order.dto';
 import { CompleteWorkOrderDto } from './dto/complete-work-order.dto';
-import { JwtAuthGuard } from '../auth/auth.guard';
+import { JwtAuthGuard, AuthenticatedRequest } from '../auth/auth.guard';
 import { WorkOrder, WorkOrderStatus } from '@docteurflotte/contracts';
 
 @Controller('work-orders')
 @UseGuards(JwtAuthGuard)
 export class WorkOrdersController {
-  constructor(private readonly workOrdersService: WorkOrdersService) {}
+  constructor(private readonly workOrdersService: WorkOrdersService) { }
 
   @Post()
   async createWorkOrder(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
     dto: CreateWorkOrderDto,
   ): Promise<WorkOrder> {
@@ -33,7 +33,7 @@ export class WorkOrdersController {
 
   @Get()
   async listWorkOrders(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Query('status') status?: WorkOrderStatus,
   ): Promise<WorkOrder[]> {
     return this.workOrdersService.listWorkOrders(req.tenantId, status);
@@ -41,7 +41,7 @@ export class WorkOrdersController {
 
   @Put(':id')
   async updateWorkOrder(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() dto: Partial<CreateWorkOrderDto>,
   ): Promise<WorkOrder> {
@@ -50,7 +50,7 @@ export class WorkOrdersController {
 
   @Delete(':id')
   async deleteWorkOrder(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
   ): Promise<{ success: boolean }> {
     return this.workOrdersService.deleteWorkOrder(req.tenantId, id);
@@ -58,7 +58,7 @@ export class WorkOrdersController {
 
   @Post(':id/complete')
   async completeWorkOrder(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
     dto: CompleteWorkOrderDto,

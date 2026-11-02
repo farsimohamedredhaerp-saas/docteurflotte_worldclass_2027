@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { ThemeProvider } from '../context/ThemeContext';
 import { DemoModeProvider } from '../context/DemoModeContext';
+import { SystemConfigProvider } from '../context/SystemConfigContext';
 import { DemoModeBanner } from '../components/navigation/DemoModeBanner';
 
 export const metadata: Metadata = {
@@ -27,12 +28,6 @@ export default function RootLayout({
   return (
     <html lang="fr" dir="ltr" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -46,11 +41,13 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body suppressHydrationWarning>
+      <body className="font-sans antialiased bg-[#080b11] text-slate-100" suppressHydrationWarning>
         <ThemeProvider>
           <DemoModeProvider>
-            <DemoModeBanner />
-            {children}
+            <SystemConfigProvider>
+              <DemoModeBanner />
+              {children}
+            </SystemConfigProvider>
           </DemoModeProvider>
         </ThemeProvider>
       </body>

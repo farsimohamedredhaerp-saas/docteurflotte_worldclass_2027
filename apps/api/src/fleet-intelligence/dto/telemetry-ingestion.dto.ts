@@ -64,7 +64,7 @@ export interface CanonicalTelemetryEvent {
   ptoEngaged: boolean;
   harshEvent: string | null; // HARSH_BRAKE | HARSH_ACCEL | HARSH_TURN | CRASH
   dtcCodes: string[];
-  extraIotSensors: Record<string, any>;
+  extraIotSensors: Record<string, unknown>;
   needsFlespiFailover: boolean;
 }
 
@@ -86,7 +86,7 @@ export class TraccarPositionDto {
   @IsOptional() @IsNumber() altitude?: number = 0;
   @IsOptional() @IsNumber() speed?: number = 0; // En noeuds (Knots) dans Traccar
   @IsOptional() @IsNumber() course?: number = 0;
-  @IsObject() attributes: Record<string, any> = {};
+  @IsObject() attributes: Record<string, unknown> = {};
 }
 
 export class TraccarWebhookRequestDto {
@@ -96,7 +96,7 @@ export class TraccarWebhookRequestDto {
 
 // --- Payload Entrant Flespi (Failover Stateless) ---
 export class FlespiStreamRequestDto {
-  @IsArray() messages: Record<string, any>[];
+  @IsArray() messages: Record<string, unknown>[];
 }
 
 // --- Payload Entrant Mode 0 (Sans Boîtier) ---

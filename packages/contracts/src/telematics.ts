@@ -13,7 +13,7 @@ export interface TelematicsDevice {
   model?: string;
   status: DeviceStatus;
   lastUpdate?: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
   createdAt: string;
 }
 
@@ -49,7 +49,7 @@ export interface CanonicalPosition {
   engineHours?: number;
   recordedAt: string;
   createdAt: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 export interface RegisterDeviceDto {
@@ -57,7 +57,7 @@ export interface RegisterDeviceDto {
   name: string;
   model?: string;
   traccarId?: number;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 export interface BindDeviceDto {
@@ -77,7 +77,7 @@ export interface IngestPositionDto {
   odometerKm?: number;
   engineHours?: number;
   recordedAt: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 export interface FleetLiveAsset {

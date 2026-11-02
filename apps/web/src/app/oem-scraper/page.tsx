@@ -43,6 +43,11 @@ const PRESET_VINS = [
     vin: 'AHTFR200000123456',
     badge: 'Pick-up / Flotte',
   },
+  {
+    label: 'Mercedes-Benz GLK 220 CDI 4MATIC (2012)',
+    vin: 'WDC2049841F123456',
+    badge: 'SUV 4MATIC Flotte',
+  },
 ];
 
 export default function OEMScraperPage() {
@@ -119,12 +124,12 @@ export default function OEMScraperPage() {
           cat === 'TRUCKS_BUSES'
             ? 'HEAVY_TRUCK'
             : cat === 'CONSTRUCTION'
-            ? 'CONSTRUCTION_EQUIP'
-            : cat === 'AGRICULTURAL'
-            ? 'AGRI_TRACTOR'
-            : cat === 'LIGHT_COMMERCIAL'
-            ? 'VAN'
-            : 'LIGHT_VEHICLE',
+              ? 'CONSTRUCTION_EQUIP'
+              : cat === 'AGRICULTURAL'
+                ? 'AGRI_TRACTOR'
+                : cat === 'LIGHT_COMMERCIAL'
+                  ? 'VAN'
+                  : 'LIGHT_VEHICLE',
       });
 
       const count = res.imported_count || res.importedCount || 0;
@@ -133,28 +138,28 @@ export default function OEMScraperPage() {
       const firstSample = res.sample_templates?.[0] || res.sampleTemplates?.[0];
       if (firstSample) {
         setTemplate({
-          wmi_prefix: firstSample.wmi_prefix || firstSample.wmiPrefix || 'GEN',
+          wmi_prefix: firstSample.wmi_prefix || 'GEN',
           make: firstSample.make,
           model: firstSample.model,
-          engine_code: firstSample.engine_code || firstSample.engineCode || 'Moteur Standard',
-          asset_category: firstSample.asset_category || firstSample.assetCategory || 'HEAVY_TRUCK',
-          fuel_type: firstSample.fuel_type || firstSample.fuelType || 'DIESEL',
-          ref_consumption_l_100km: firstSample.ref_consumption_l_100km ?? firstSample.refConsumptionL100Km ?? 0,
-          ref_consumption_l_hour: firstSample.ref_consumption_l_hour ?? firstSample.refConsumptionLHour ?? 0,
-          oil_capacity_liters: firstSample.oil_capacity_liters ?? firstSample.oilCapacityLiters ?? 0,
-          oil_norm_spec: firstSample.oil_norm_spec || firstSample.oilNormSpec || '',
-          tasks: (firstSample.tasks || []).map((t: any) => ({
-            task_code: t.task_code || t.taskCode,
-            task_name: t.task_name || t.taskName,
+          engine_code: firstSample.engine_code || 'Moteur Standard',
+          asset_category: firstSample.asset_category || 'HEAVY_TRUCK',
+          fuel_type: firstSample.fuel_type || 'DIESEL',
+          ref_consumption_l_100km: firstSample.ref_consumption_l_100km ?? 0,
+          ref_consumption_l_hour: firstSample.ref_consumption_l_hour ?? 0,
+          oil_capacity_liters: firstSample.oil_capacity_liters ?? 0,
+          oil_norm_spec: firstSample.oil_norm_spec || '',
+          tasks: (firstSample.tasks || []).map((t: NormalizedOEMTask) => ({
+            task_code: t.task_code,
+            task_name: t.task_name,
             subsystem: t.subsystem,
-            normal_interval_km: t.normal_interval_km ?? t.normalIntervalKm ?? 0,
-            normal_interval_months: t.normal_interval_months ?? t.normalIntervalMonths ?? 0,
-            normal_interval_engine_hours: t.normal_interval_engine_hours ?? t.normalIntervalEngineHours ?? 0,
-            severe_interval_km: t.severe_interval_km ?? t.severeIntervalKm ?? 0,
-            severe_interval_months: t.severe_interval_months ?? t.severeIntervalMonths ?? 0,
-            severe_interval_engine_hours: t.severe_interval_engine_hours ?? t.severeIntervalEngineHours ?? 0,
-            standard_labor_minutes: t.standard_labor_minutes ?? t.standardLaborMinutes ?? 60,
-            criticality_weight: t.criticality_weight ?? t.criticalityWeight ?? 1.0,
+            normal_interval_km: t.normal_interval_km ?? 0,
+            normal_interval_months: t.normal_interval_months ?? 0,
+            normal_interval_engine_hours: t.normal_interval_engine_hours ?? 0,
+            severe_interval_km: t.severe_interval_km ?? 0,
+            severe_interval_months: t.severe_interval_months ?? 0,
+            severe_interval_engine_hours: t.severe_interval_engine_hours ?? 0,
+            standard_labor_minutes: t.standard_labor_minutes ?? 60,
+            criticality_weight: t.criticality_weight ?? 1.0,
           })),
         });
       }
@@ -234,21 +239,20 @@ export default function OEMScraperPage() {
                 feedback.type === 'success'
                   ? 'rgba(16, 185, 129, 0.12)'
                   : feedback.type === 'warning'
-                  ? 'rgba(245, 158, 11, 0.12)'
-                  : 'rgba(239, 68, 68, 0.12)',
-              border: `1px solid ${
-                feedback.type === 'success'
-                  ? 'rgba(16, 185, 129, 0.3)'
-                  : feedback.type === 'warning'
+                    ? 'rgba(245, 158, 11, 0.12)'
+                    : 'rgba(239, 68, 68, 0.12)',
+              border: `1px solid ${feedback.type === 'success'
+                ? 'rgba(16, 185, 129, 0.3)'
+                : feedback.type === 'warning'
                   ? 'rgba(245, 158, 11, 0.3)'
                   : 'rgba(239, 68, 68, 0.3)'
-              }`,
+                }`,
               color:
                 feedback.type === 'success'
                   ? 'var(--df-status-ok)'
                   : feedback.type === 'warning'
-                  ? 'var(--df-status-warning)'
-                  : 'var(--df-status-danger)',
+                    ? 'var(--df-status-warning)'
+                    : 'var(--df-status-danger)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -282,8 +286,8 @@ export default function OEMScraperPage() {
                 {searchMode === 'VIN'
                   ? 'Décodage par Châssis VIN'
                   : searchMode === 'CATALOG'
-                  ? 'Exploration par Catalogue (Sans VIN)'
-                  : 'Crawler Universel Mondial (Multi-Niveaux)'}
+                    ? 'Exploration par Catalogue (Sans VIN)'
+                    : 'Crawler Universel Mondial (Multi-Niveaux)'}
               </h2>
 
               <div style={{ display: 'flex', background: 'var(--df-bg-surface-2)', padding: '0.2rem', borderRadius: 'var(--df-radius-sm)', border: '1px solid var(--df-border-subtle)' }}>
@@ -513,38 +517,38 @@ export default function OEMScraperPage() {
                 {searchMode === 'VIN'
                   ? 'Échantillons VIN de référence :'
                   : searchMode === 'CATALOG'
-                  ? 'Modèles fréquents sans VIN :'
-                  : 'Crawl ciblé 1-clic par constructeur mondial :'}
+                    ? 'Modèles fréquents sans VIN :'
+                    : 'Crawl ciblé 1-clic par constructeur mondial :'}
               </span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                 {searchMode === 'VIN'
                   ? PRESET_VINS.map((preset) => (
-                      <button
-                        key={preset.vin}
-                        type="button"
-                        onClick={() => {
-                          setVinInput(preset.vin);
-                          handleResolve(preset.vin);
-                        }}
-                        style={{
-                          background: 'var(--df-bg-surface-2)',
-                          border: '1px solid var(--df-border-subtle)',
-                          borderRadius: 'var(--df-radius-sm)',
-                          padding: '0.35rem 0.6rem',
-                          fontSize: '0.75rem',
-                          color: 'var(--df-text-secondary)',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.35rem',
-                        }}
-                      >
-                        <span>{preset.label}</span>
-                        <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>({preset.badge})</span>
-                      </button>
-                    ))
+                    <button
+                      key={preset.vin}
+                      type="button"
+                      onClick={() => {
+                        setVinInput(preset.vin);
+                        handleResolve(preset.vin);
+                      }}
+                      style={{
+                        background: 'var(--df-bg-surface-2)',
+                        border: '1px solid var(--df-border-subtle)',
+                        borderRadius: 'var(--df-radius-sm)',
+                        padding: '0.35rem 0.6rem',
+                        fontSize: '0.75rem',
+                        color: 'var(--df-text-secondary)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                      }}
+                    >
+                      <span>{preset.label}</span>
+                      <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>({preset.badge})</span>
+                    </button>
+                  ))
                   : searchMode === 'CATALOG'
-                  ? [
+                    ? [
                       { make: 'Renault Trucks', model: 'T480', engine: 'DTI 13 (12.8L)', label: 'Renault T480 (DTI 13)' },
                       { make: 'Shacman', model: 'X3000', engine: 'Weichai WP12.430', label: 'Shacman X3000 (Weichai)' },
                       { make: 'SNVI', model: 'K66', engine: 'Deutz F6L912', label: 'SNVI K66 (Deutz F6L)' },
@@ -552,6 +556,7 @@ export default function OEMScraperPage() {
                       { make: 'Renault', model: 'Master', engine: '2.3 dCi 135 (M9T)', label: 'Master III 2.3 dCi' },
                       { make: 'Renault', model: 'Kangoo', engine: '1.5 dCi 90 (K9K)', label: 'Kangoo II 1.5 dCi' },
                       { make: 'Toyota', model: 'Hilux', engine: '2.4 D-4D (2GD-FTV)', label: 'Toyota Hilux 4x4' },
+                      { make: 'Mercedes-Benz', model: 'GLK 220 CDI 4MATIC', engine: 'OM 651 (2.1L 170ch)', label: 'Mercedes GLK 2012 4MATIC' },
                       { make: 'Peugeot', model: 'Partner', engine: '1.6 HDi 92 (DV6)', label: 'Partner 1.6 HDi' },
                       { make: 'Volkswagen', model: 'Caddy', engine: '2.0 TDI 102ch', label: 'VW Caddy 2.0 TDI' },
                     ].map((item) => (
@@ -577,11 +582,12 @@ export default function OEMScraperPage() {
                         {item.label}
                       </button>
                     ))
-                  : [
+                    : [
                       { make: 'Scania', cat: 'TRUCKS_BUSES', label: '🦁 Scania (Poids Lourds)' },
                       { make: 'Volvo Trucks', cat: 'TRUCKS_BUSES', label: '🇸🇪 Volvo Trucks (FH/FMX)' },
                       { make: 'Caterpillar', cat: 'CONSTRUCTION', label: '🚜 Caterpillar (Pelleteuses BTP)' },
                       { make: 'John Deere', cat: 'AGRICULTURAL', label: '🌾 John Deere (Tracteurs)' },
+                      { make: 'Mercedes-Benz GLK 2012 4MATIC', cat: 'CARS_SUVS', label: '⭐ Mercedes GLK 4MATIC' },
                       { make: 'Mercedes-Benz', cat: 'TRUCKS_BUSES', label: '⭐ Mercedes (Actros / Sprinter)' },
                       { make: 'Toyota', cat: 'CARS_SUVS', label: '🇯🇵 Toyota (Land Cruiser / Hilux)' },
                     ].map((item) => (
@@ -798,18 +804,18 @@ export default function OEMScraperPage() {
                 const badgeBg = isMatch
                   ? 'rgba(16, 185, 129, 0.12)'
                   : isWarning || isFallback
-                  ? 'rgba(245, 158, 11, 0.12)'
-                  : isReject
-                  ? 'rgba(239, 68, 68, 0.12)'
-                  : 'rgba(37, 99, 235, 0.12)';
+                    ? 'rgba(245, 158, 11, 0.12)'
+                    : isReject
+                      ? 'rgba(239, 68, 68, 0.12)'
+                      : 'rgba(37, 99, 235, 0.12)';
 
                 const badgeBorder = isMatch
                   ? '#10B981'
                   : isWarning || isFallback
-                  ? '#F59E0B'
-                  : isReject
-                  ? '#EF4444'
-                  : '#2563EB';
+                    ? '#F59E0B'
+                    : isReject
+                      ? '#EF4444'
+                      : '#2563EB';
 
                 return (
                   <div

@@ -17,8 +17,8 @@ import { AlgerianRegulatoryGateService } from './regulatory-gate.service';
 
 export interface MissionOrderIssuanceRequest {
   mission: MissionRequestDto;
-  vehicle: VehicleStateDto;
-  driver: DriverStateDto;
+  vehicle: VehicleStateDto & { vin?: string };
+  driver: DriverStateDto & { nationalIdNumber?: string };
   companyInfo?: {
     legalName: string;
     tradeName?: string;
@@ -180,7 +180,7 @@ export class RegulatoryMissionOrderService {
     const qrPayload = buildMissionOrderQrString({
       orderNumber,
       registrationPlate: vehicle.registrationPlate,
-      driverNin: (driver as any).nationalIdNumber || '198516012345678901',
+      driverNin: driver.nationalIdNumber || '198516012345678901',
       originWilaya: mission.originWilayaCode,
       destWilaya: mission.destinationWilayaCode,
       validUntil: validUntilIso.slice(0, 10),
@@ -198,7 +198,7 @@ export class RegulatoryMissionOrderService {
         vehicleId: vehicle.vehicleId,
         registrationPlate: vehicle.registrationPlate,
         makeModel: vehicle.makeModel,
-        chassisVin: (vehicle as any).vin || 'DZ-SNVI-ROUIBA-2026-X1',
+        chassisVin: vehicle.vin || 'DZ-SNVI-ROUIBA-2026-X1',
         category: this.mapAssetToEnactaCategory(vehicle.category),
         enactaExpiryDate: enactaDoc?.expiresAt || '2026-12-31',
         insurancePolicyNumber: insuranceDoc?.docNumber || 'SAA-POL-2026-001',
@@ -207,7 +207,7 @@ export class RegulatoryMissionOrderService {
       driver: {
         driverId: driver.driverId,
         fullName: driver.fullName,
-        nationalIdNumber: (driver as any).nationalIdNumber || '198516012345678901',
+        nationalIdNumber: driver.nationalIdNumber || '198516012345678901',
         licenseCategory: driver.licenseCategories.join(', '),
         brevetProfessionnelNumber: driver.hasBrevetProfessionnel
           ? `BPC-DZ-${driver.driverId.slice(0, 6).toUpperCase()}`

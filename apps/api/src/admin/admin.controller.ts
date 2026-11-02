@@ -11,7 +11,15 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/auth.guard';
+import {
+  CreateDecisionConfigDto,
+  DecisionEngineSimulationParams,
+  PlatformFiscalFuelPrice,
+  PlatformTelematicsGateway,
+  PlatformTenant,
+  UpdateDecisionConfigDto,
+} from '@docteurflotte/contracts';
+import { JwtAuthGuard, AuthenticatedRequest } from '../auth/auth.guard';
 import { PlatformAdminGuard } from './guards/platform-admin.guard';
 import { AdminTenantsService } from './services/admin-tenants.service';
 import { AdminDecisionEngineService } from './services/admin-decision-engine.service';
@@ -49,10 +57,10 @@ export class AdminController {
   @Patch('tenants/:id')
   async updateTenant(
     @Param('id') id: string,
-    @Body() body: any,
-    @Req() req: any,
+    @Body() body: Partial<PlatformTenant>,
+    @Req() req: AuthenticatedRequest,
   ) {
-    return this.tenantsService.updateTenant(id, body, req.user.email);
+    return this.tenantsService.updateTenant(id, body, req.user?.email || 'admin@docteurflotte.dz');
   }
 
   // Decision Engine
@@ -77,46 +85,46 @@ export class AdminController {
   }
 
   @Post('decision-engine/drafts')
-  async createDraftConfig(@Body() body: any, @Req() req: any) {
-    return this.decisionEngineService.createDraftConfig(body, req.user.email);
+  async createDraftConfig(@Body() body: CreateDecisionConfigDto, @Req() req: AuthenticatedRequest) {
+    return this.decisionEngineService.createDraftConfig(body, req.user?.email || 'admin@docteurflotte.dz');
   }
 
   @Put('decision-engine/drafts/:id')
   async updateDraftConfig(
     @Param('id') id: string,
-    @Body() body: any,
-    @Req() req: any,
+    @Body() body: UpdateDecisionConfigDto,
+    @Req() req: AuthenticatedRequest,
   ) {
-    return this.decisionEngineService.updateDraftConfig(id, body, req.user.email);
+    return this.decisionEngineService.updateDraftConfig(id, body, req.user?.email || 'admin@docteurflotte.dz');
   }
 
   @Post('decision-engine/drafts/:id/approve')
   @HttpCode(HttpStatus.OK)
-  async approveConfig(@Param('id') id: string, @Req() req: any) {
-    return this.decisionEngineService.approveConfig(id, req.user.email);
+  async approveConfig(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    return this.decisionEngineService.approveConfig(id, req.user?.email || 'admin@docteurflotte.dz');
   }
 
   @Post('decision-engine/simulate')
   @HttpCode(HttpStatus.OK)
-  async simulateConfig(@Body() body: any) {
+  async simulateConfig(@Body() body: DecisionEngineSimulationParams) {
     return this.decisionEngineService.simulateConfig(body);
   }
 
   @Post('decision-engine/activate')
   @HttpCode(HttpStatus.OK)
-  async activateConfig(@Body() body: { configId: string; justification?: string }, @Req() req: any) {
+  async activateConfig(@Body() body: { configId: string; justification?: string }, @Req() req: AuthenticatedRequest) {
     return this.decisionEngineService.activateConfig(
       body.configId,
-      req.user.email,
+      req.user?.email || 'admin@docteurflotte.dz',
       body.justification || 'Activation SuperAdmin'
     );
   }
 
   @Post('decision-engine/rollback')
   @HttpCode(HttpStatus.OK)
-  async rollbackConfig(@Body() body: { justification?: string }, @Req() req: any) {
+  async rollbackConfig(@Body() body: { justification?: string }, @Req() req: AuthenticatedRequest) {
     return this.decisionEngineService.rollbackConfig(
-      req.user.email,
+      req.user?.email || 'admin@docteurflotte.dz',
       body.justification || 'Rollback SuperAdmin'
     );
   }
@@ -130,10 +138,10 @@ export class AdminController {
   @Patch('fiscal/fuel-prices/:id')
   async updateFuelPrice(
     @Param('id') id: string,
-    @Body() body: any,
-    @Req() req: any,
+    @Body() body: Partial<PlatformFiscalFuelPrice>,
+    @Req() req: AuthenticatedRequest,
   ) {
-    return this.fiscalService.updateFuelPrice(id, body, req.user.email);
+    return this.fiscalService.updateFuelPrice(id, body, req.user?.email || 'admin@docteurflotte.dz');
   }
 
   @Get('fiscal/vignettes')
@@ -155,10 +163,10 @@ export class AdminController {
   @Patch('gateways/:id')
   async updateGateway(
     @Param('id') id: string,
-    @Body() body: any,
-    @Req() req: any,
+    @Body() body: Partial<PlatformTelematicsGateway>,
+    @Req() req: AuthenticatedRequest,
   ) {
-    return this.gatewaysService.updateGateway(id, body, req.user.email);
+    return this.gatewaysService.updateGateway(id, body, req.user?.email || 'admin@docteurflotte.dz');
   }
 
   // Audit Logs

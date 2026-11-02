@@ -1,17 +1,21 @@
-# Directives Locales — Application Web (`apps/web`)
+# Directives Locales — Application Web Next.js 15 (`apps/web`)
 
-**Rôle :** Interface utilisateur Next.js 15 (App Router), React 19, responsive et accessible.
+**Rôle :** Cockpits d'exploitation haute densité, interfaces de maintenance 5.0, cartographie souveraine MapLibre et applications mobiles PWA Offline-First.
 
-## Règles d'Implémentation
-1. **App Router & Server/Client Components :**
-   - Privilégier les Server Components par défaut pour le chargement des données.
-   - Utiliser `'use client'` uniquement pour les composants interactifs nécessitant des hooks d'état ou d'effets (ex: formulaires, panneaux dynamiques).
-2. **Tokens de Design & Ergonomie :**
-   - Utiliser les variables CSS définies dans `globals.css` (thème sombre soigné, contrastes WCAG conformes).
-   - Pas de styles ad-hoc désordonnés ; respecter la hiérarchie visuelle et la clarté opérationnelle.
-3. **Zéro Donnée Masquée ou Fictive Fausse :**
-   - Tout affichage de données synthétiques doit porter l'étiquette visible `DEMO`.
-   - Ne jamais présenter un résultat simulé comme une économie réelle validée.
-4. **Gestion des États Réseau :**
-   - Gérer systématiquement les 3 états : chargement (`loading`), erreur lisible (`error`), et succès (`content`).
-   - Tolérance aux indisponibilités temporaires de l'API avec bouton de réessai explicite.
+## Périmètre des Écrans Opérationnels
+- `/digital-twin` : Jumeau Numérique 6 organes, sélecteur des 58 Wilayas algériennes, blueprint SVG interactif et console d'arbitrage financier SAD $\rightarrow$ ADS (DZD).
+- `/live-cockpit` : Cartographie vectorielle souveraine MapLibre sans Google Maps, suivi temps réel des corridors algériens et clustering par Wilaya.
+- `/fuel-scanner` : Scanner OCR de reçus Naftal avec upload d'images et réconciliation télématique automatique.
+- `/work-orders` : Gestion des ordres d'intervention atelier avec réservation de pièces OEM et génération de factures conformes DGI.
+- `/preventive` : Démonstrateur interactif des 5 innovations de rupture physique déterministe.
+- `/copilot` : Assistant d'aide à la décision propulsé par l'IA souveraine locale Ollama Qwen 2.5.
+- `/dispatch` : Ordres de mission officiels algériens avec QR Code cryptographique vérifiable hors-ligne.
+- `/cold-chain` : Surveillance thermique bi-zone pour transport frigorifique et agroalimentaire.
+- `/dvir` : Fiches d'inspection pré/post-tournée mobiles PWA avec tolérance totale aux coupures réseau (Offline-First).
+- `/guide` : Manuel de référence technique et fonctionnel interactif du SaaS DocteurFlotte.
+
+## Règles d'Implémentation UI
+1. **Bilinguisme Natif FR / AR (RTL) :** Support du français et de l'arabe avec typographie adaptée et propriétés CSS logiques (`margin-inline-start`, `text-align: start`).
+2. **Tokens de Design DocteurFlotte :** Utilisation stricte des variables CSS du thème de bordure et de surface (`var(--df-bg-base)`, `var(--df-border-subtle)`).
+3. **Explicabilité Immédiate (XAI) :** Tout indicateur ou arbitrage financier dispose d'un bouton de preuve de calcul (`CalculationProofButton`) ouvrant le détail de la formule déterministe.
+4. **Zéro Hardcode :** Les devises (`DZD`), unités et constantes proviennent du contexte de configuration ou de l'API.

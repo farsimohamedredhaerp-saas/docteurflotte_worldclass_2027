@@ -29,5 +29,5 @@ export interface ITelematicsProvider {
   /**
    * Envoie ou synchronise une commande vers un terminal (ex: blocage moteur si autorisé)
    */
-  sendCommand?(uniqueId: string, commandType: string, attributes?: Record<string, any>): Promise<{ success: boolean; message: string }>;
+  sendCommand?(uniqueId: string, commandType: string, attributes?: Record<string, unknown>): Promise<{ success: boolean; message: string }>;
 }

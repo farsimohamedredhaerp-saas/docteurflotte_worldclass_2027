@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { WorkshopVoiceService } from './workshop-voice.service';
-import { JwtAuthGuard } from '../auth/auth.guard';
+import { JwtAuthGuard, AuthenticatedRequest } from '../auth/auth.guard';
 import { VoiceQueryDto, VoiceRouteResult, WorkshopDictionaryEntry } from './dto/workshop-voice.dto';
 
 @Controller('api/v1/workshop-voice')
@@ -22,7 +22,7 @@ export class WorkshopVoiceController {
    */
   @Post('transcribe-and-route')
   async routeVoice(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Body() dto: VoiceQueryDto,
     @Headers('x-tenant-id') headerTenantId?: string,
   ): Promise<VoiceRouteResult> {
@@ -34,7 +34,7 @@ export class WorkshopVoiceController {
 
   @Post('query')
   async queryVoice(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Body() dto: VoiceQueryDto,
     @Headers('x-tenant-id') headerTenantId?: string,
   ): Promise<VoiceRouteResult> {

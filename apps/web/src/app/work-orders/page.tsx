@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthClient } from '../../lib/api-auth';
 import { AssetClient } from '../../lib/api-assets';
+import { FleetIntelligenceClient } from '../../lib/api-fleet-intelligence';
 import { Navbar } from '../../components/navigation/Navbar';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
@@ -19,6 +20,7 @@ import {
   WorkOrderStatus,
 } from '@docteurflotte/contracts';
 import { useDemoMode } from '../../context/DemoModeContext';
+import { useSystemConfig } from '../../context/SystemConfigContext';
 import {
   OfficialDgiInvoiceModal,
   DgiInvoiceData,
@@ -144,17 +146,37 @@ const DEMO_WORK_ORDERS: WorkOrder[] = [
     createdAt: '2026-10-28T11:00:00Z',
     updatedAt: '2026-10-28T11:00:00Z',
   },
+  {
+    id: 'ot-dvir-99104',
+    tenantId: 'tenant-demo',
+    assetId: 'unit-002',
+    assetName: 'Mercedes-Benz Actros 3340 6x4',
+    assetCode: '00812-109-09',
+    title: '🛑 CONSIGNATION DVIR : Hernie Pneu AVG & Chute Pression Air',
+    description: 'Ordre de travail automatique généré suite échec critique inspection DVIR mobile (#dvir-demo-02). Véhicule sous interdiction formelle de départ (HARD BLOCK dispatch). Remplacement pneu 315/80R22.5 et cartouche déshydratante sécheur requis.',
+    priority: WorkOrderPriority.CRITICAL,
+    status: WorkOrderStatus.SCHEDULED,
+    triggerMeterValue: 342900,
+    estimatedLaborHours: 3.5,
+    assignedTo: 'Équipe Pneumatique & Freinage Rouiba',
+    resetAlgorithmKey: 'BRAKE_ARCHARD',
+    oemPartReference: 'MICHELIN-315-80-X-WORKS',
+    createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+  },
 ];
 
 export default function WorkOrdersPage() {
   const router = useRouter();
-  const { isDemoMode, isGuest } = useDemoMode();
+  const { isDemoMode, isGuest, session } = useDemoMode();
+  const { tariffs } = useSystemConfig();
   const [token, setToken] = useState<string | null>(null);
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [selectedPriority, setSelectedPriority] = useState<string>('ALL');
+  const [selectedSource, setSelectedSource] = useState<'ALL' | 'DVIR' | 'PREDICTIVE'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [feedback, setFeedback] = useState<{ type: 'success' | 'warning' | 'error'; message: string } | null>(null);
 
@@ -199,7 +221,8 @@ export default function WorkOrdersPage() {
   const [invoiceModalData, setInvoiceModalData] = useState<DgiInvoiceData | null>(null);
 
   const handleOpenDgiInvoice = (wo: WorkOrder) => {
-    const hourlyRate = 1500; // Tarif horaire conventionnel DZD
+    // Taux horaire dynamique issu de la configuration admin / tenant
+    const hourlyRate = tariffs.economicRates?.hourlyLaborRateDzd || 1500;
     const laborHours = wo.actualLaborHours || wo.estimatedLaborHours || 2;
     const laborTotal = laborHours * hourlyRate;
     const partsTotal = wo.partsCost || 0;
@@ -224,13 +247,16 @@ export default function WorkOrdersPage() {
       });
     }
 
+    const tenantCompanyName = session.tenant?.name || 'SOCIÉTÉ ALGÉRIENNE DE MAINTENANCE & SERVICES INDUSTRIELS EURL';
+    const vatRate = tariffs.fiscal?.tvaStandardRate ? Math.round(tariffs.fiscal.tvaStandardRate * 100) : 19;
+
     const invoiceData: DgiInvoiceData = {
       invoiceNumber: `FAC-DGI-${new Date().getFullYear()}-${wo.id.slice(-5).toUpperCase()}`,
       issueDate: wo.completedAt || new Date().toISOString(),
       dueDate: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
       paymentMode: 'VIREMENT_BANCAIRE',
       company: {
-        legalName: 'SOCIÉTÉ ALGÉRIENNE DE MAINTENANCE & SERVICES INDUSTRIELS EURL',
+        legalName: tenantCompanyName,
         tradeName: 'ATELIER MÉCANIQUE CENTRAL DOCTEURFLOTTE',
         address: 'Zone Industrielle Oued Smar, Voie B N° 14',
         wilayaName: 'Alger',
@@ -251,7 +277,7 @@ export default function WorkOrdersPage() {
         aiNumber: '16012345678',
       },
       items,
-      vatRatePercent: 19,
+      vatRatePercent: vatRate,
       applyStampDuty: false,
       discountDzd: 0,
     };
@@ -383,23 +409,73 @@ export default function WorkOrdersPage() {
 
   const handleCompleteWo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token || !activeWoForComplete) return;
+    if (!activeWoForComplete) return;
     setIsCompleting(true);
     setFeedback(null);
 
-    try {
-      const updated = await AssetClient.completeWorkOrder(
-        activeWoForComplete.id,
-        completeForm,
-        token
-      );
+    const isDvirOrder =
+      activeWoForComplete.id.startsWith('ot-dvir') ||
+      activeWoForComplete.title.includes('DVIR');
 
-      showNotification(
-        'success',
-        `✓ Ordre de travail clôturé. Coût total : ${updated.totalCost?.toLocaleString()} DA (MO: ${updated.laborCost} DA, Pièces: ${updated.partsCost} DA) • Immobilisation: ${updated.downtimeHours}h.`
-      );
-      setActiveWoForComplete(null);
-      loadData(token);
+    try {
+      if (isDemoMode || !token) {
+        // Mode Démo : Clôture locale certifiée avec simulation des coûts DZD
+        const hourlyRate = tariffs?.economicRates?.hourlyLaborRateDzd ?? 1500;
+        const laborCost = Number(completeForm.actualLaborHours) * hourlyRate;
+        const partsCost = Number(completeForm.partsCost || 0);
+        const totalCost = laborCost + partsCost;
+
+        setWorkOrders((prev) =>
+          prev.map((w) =>
+            w.id === activeWoForComplete.id
+              ? {
+                  ...w,
+                  status: WorkOrderStatus.COMPLETED,
+                  actualLaborHours: Number(completeForm.actualLaborHours),
+                  partsCost,
+                  totalCost,
+                  downtimeHours: Number(completeForm.downtimeHours || 0),
+                  completedAt: new Date().toISOString(),
+                }
+              : w
+          )
+        );
+
+        const successMsg = isDvirOrder
+          ? `✓ Ordre de travail clôturé (${totalCost.toLocaleString()} DA). 🛑 Verrou de sécurité DVIR levé avec succès : le véhicule ${activeWoForComplete.assetName || activeWoForComplete.assetCode} est requalifié pour le dispatching TOPSIS.`
+          : `✓ Ordre de travail clôturé. Coût total : ${totalCost.toLocaleString()} DA (MO: ${laborCost.toLocaleString()} DA, Pièces: ${partsCost.toLocaleString()} DA) • Immobilisation: ${completeForm.downtimeHours || 0}h.`;
+
+        showNotification('success', successMsg);
+        setActiveWoForComplete(null);
+      } else {
+        const updated = await AssetClient.completeWorkOrder(
+          activeWoForComplete.id,
+          completeForm,
+          token
+        );
+
+        // Réconciliation de sécurité DVIR si applicable
+        if (isDvirOrder) {
+          try {
+            await FleetIntelligenceClient.resolveDvirBlock(
+              activeWoForComplete.assetId,
+              activeWoForComplete.id,
+              token,
+              completeForm.completionNotes
+            );
+          } catch {
+            // Ignorer si déjà géré côté API
+          }
+        }
+
+        const successMsg = isDvirOrder
+          ? `✓ Ordre de travail clôturé (${updated.totalCost?.toLocaleString()} DA). 🛑 Verrou de sécurité DVIR levé avec succès : le véhicule ${activeWoForComplete.assetName || activeWoForComplete.assetCode} est requalifié pour le dispatching TOPSIS.`
+          : `✓ Ordre de travail clôturé. Coût total : ${updated.totalCost?.toLocaleString()} DA (MO: ${updated.laborCost} DA, Pièces: ${updated.partsCost} DA) • Immobilisation: ${updated.downtimeHours}h.`;
+
+        showNotification('success', successMsg);
+        setActiveWoForComplete(null);
+        loadData(token);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Échec de la clôture.';
       showNotification('error', msg);
@@ -439,13 +515,18 @@ export default function WorkOrdersPage() {
   const filteredOrders = workOrders.filter((wo) => {
     const matchesStatus = selectedStatus === 'ALL' || wo.status === selectedStatus;
     const matchesPriority = selectedPriority === 'ALL' || wo.priority === selectedPriority;
+    const isDvirOrder = wo.id.startsWith('ot-dvir') || wo.title.includes('DVIR');
+    const matchesSource =
+      selectedSource === 'ALL' ||
+      (selectedSource === 'DVIR' && isDvirOrder) ||
+      (selectedSource === 'PREDICTIVE' && Boolean(wo.resetAlgorithmKey) && !isDvirOrder);
     const matchesSearch =
       searchQuery.trim() === '' ||
       wo.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       wo.assetCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       wo.assetName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (wo.assignedTo && wo.assignedTo.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesStatus && matchesPriority && matchesSearch;
+    return matchesStatus && matchesPriority && matchesSource && matchesSearch;
   });
 
   const scheduledCount = workOrders.filter((w) => w.status === WorkOrderStatus.SCHEDULED).length;
@@ -614,6 +695,57 @@ export default function WorkOrdersPage() {
                   <span>{p.label}</span>
                   <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)' }}>
                     {p.id === 'ALL' ? workOrders.length : workOrders.filter((w) => w.priority === p.id).length}
+                  </span>
+                </button>
+              ))}
+            </nav>
+
+            {/* FILTRE SOURCE / ORIGINE */}
+            <h3
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                color: 'var(--df-text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                marginBottom: '0.65rem',
+                marginTop: '1.25rem',
+                paddingLeft: '0.5rem',
+              }}
+            >
+              Origine de Déclenchement
+            </h3>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              {[
+                { id: 'ALL', label: 'Toutes Origines' },
+                { id: 'DVIR', label: '🛑 DVIR Sécurité' },
+                { id: 'PREDICTIVE', label: '🧠 Jumeau Numérique' },
+              ].map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => setSelectedSource(s.id as 'ALL' | 'DVIR' | 'PREDICTIVE')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.45rem 0.65rem',
+                    borderRadius: 'var(--df-radius-md)',
+                    border: 'none',
+                    background: selectedSource === s.id ? 'var(--df-bg-surface-2)' : 'transparent',
+                    color: selectedSource === s.id ? 'var(--df-accent-blue)' : 'var(--df-text-secondary)',
+                    fontWeight: selectedSource === s.id ? 700 : 500,
+                    fontSize: '0.76rem',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <span>{s.label}</span>
+                  <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)' }}>
+                    {s.id === 'ALL'
+                      ? workOrders.length
+                      : s.id === 'DVIR'
+                      ? workOrders.filter((w) => w.id.startsWith('ot-dvir') || w.title.includes('DVIR')).length
+                      : workOrders.filter((w) => Boolean(w.resetAlgorithmKey) && !w.id.startsWith('ot-dvir') && !w.title.includes('DVIR')).length}
                   </span>
                 </button>
               ))}
@@ -842,6 +974,46 @@ export default function WorkOrdersPage() {
                           </span>
                           {getPriorityBadge(wo.priority)}
                           {getStatusBadge(wo.status)}
+                          {(wo.id.startsWith('ot-dvir') || wo.title.includes('DVIR')) && (
+                            <Link
+                              href="/dvir"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: 'var(--df-radius-xs)',
+                                background: 'rgba(239, 68, 68, 0.15)',
+                                border: '1px solid rgba(239, 68, 68, 0.4)',
+                                color: '#EF4444',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                textDecoration: 'none',
+                              }}
+                              title="Déclenché par une anomalie critique DVIR. Cliquer pour voir la fiche d'inspection."
+                            >
+                              <span>🛑 Origine DVIR Sécurité</span>
+                              <span>➔</span>
+                            </Link>
+                          )}
+                          {wo.resetAlgorithmKey && !wo.id.startsWith('ot-dvir') && !wo.title.includes('DVIR') && (
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: 'var(--df-radius-xs)',
+                                background: 'rgba(59, 130, 246, 0.12)',
+                                border: '1px solid rgba(59, 130, 246, 0.35)',
+                                color: 'var(--df-accent-blue)',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                              }}
+                            >
+                              <span>🧠 Jumeau Numérique ({wo.resetAlgorithmKey})</span>
+                            </span>
+                          )}
                         </div>
 
                         <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-text-main)', marginBottom: '0.3rem', margin: '0.2rem 0' }}>

@@ -11,6 +11,13 @@ export enum DecisionStatus {
   APPLIED = 'APPLIED',
 }
 
+export interface DecisionExplanationDossier {
+  inputMetrics: Record<string, unknown>;
+  economicHypotheses: Record<string, unknown>;
+  potentialFailureModes: string[];
+  mitigationAction: string;
+}
+
 export interface DecisionRecommendation {
   id: string;
   tenantId: string;
@@ -27,12 +34,7 @@ export interface DecisionRecommendation {
   costInactionRisk: number;
   netExpectedSavings: number;
   confidenceScore: number;
-  explanationDossier: {
-    inputMetrics: Record<string, any>;
-    economicHypotheses: Record<string, any>;
-    potentialFailureModes: string[];
-    mitigationAction: string;
-  };
+  explanationDossier: DecisionExplanationDossier;
   status: DecisionStatus;
   resolvedWorkOrderId?: string;
   dataOrigin: string;

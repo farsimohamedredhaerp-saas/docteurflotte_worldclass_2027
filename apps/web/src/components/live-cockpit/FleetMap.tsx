@@ -654,7 +654,7 @@ export function FleetMap({
           let colorHex = '#64748B'; // slate
           if (v.status === 'MOTION') colorHex = '#10B981'; // emerald
           if (v.status === 'IDLE_WARNING') colorHex = '#F59E0B'; // amber
-          if (v.status === 'DTC_CRITICAL') colorHex = '#EF4444'; // rose
+          if (v.status === 'DTC_CRITICAL' || v.dvirStatus?.isBlocked) colorHex = '#EF4444'; // rose/rouge
 
           return (
             <div
@@ -816,6 +816,22 @@ export function FleetMap({
                 <span style={{ color: colorHex, fontWeight: 700 }}>
                   {Math.round(v.gps.speedKmh)} km/h
                 </span>
+                {v.dvirStatus?.isBlocked && (
+                  <span
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.25)',
+                      color: '#EF4444',
+                      border: '1px solid #EF4444',
+                      fontSize: '9px',
+                      padding: '1px 4px',
+                      borderRadius: '2px',
+                      fontWeight: 700,
+                    }}
+                    title="Véhicule consigné suite échec critique inspection DVIR"
+                  >
+                    🛑 DVIR
+                  </span>
+                )}
                 {v.can.fuelDropAnomalyDetected && (
                   <span
                     style={{

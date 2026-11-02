@@ -100,7 +100,7 @@ export class ExternalFailoverFirewallService {
   /**
    * Valide la réponse reçue de l'externe pour réinjection locale
    */
-  sanitizeExternalDecodedResponse(decodedMetrics: Record<string, any>): Record<string, number> {
+  sanitizeExternalDecodedResponse(decodedMetrics: Record<string, unknown>): Record<string, number> {
     const safeMetrics: Record<string, number> = {};
 
     for (const [key, val] of Object.entries(decodedMetrics)) {

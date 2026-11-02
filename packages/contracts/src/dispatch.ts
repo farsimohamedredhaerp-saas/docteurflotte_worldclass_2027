@@ -100,6 +100,8 @@ export interface VehicleStateDto {
   documents: RegulatoryDocument[];
   subsystemRuls: SubsystemRUL[];
   activeDtcs: ActiveDTC[];
+  hasCriticalDvirFailure?: boolean;
+  latestDvirInspectionId?: string;
 }
 
 export interface DriverStateDto {
@@ -190,7 +192,7 @@ export interface DispatchDecisionResult {
   assignedDriverName: string | null;
   originalEtdUtc: string;
   recommendedEtdUtc: string;
-  valhallaAvoidPolygons: Record<string, any>[];
+  valhallaAvoidPolygons: Record<string, unknown>[];
   routeAdvisoryNotes: string[];
   violationsDetected: ViolationDetail[];
   generatedWorkOrders: WorkOrderGenerated[];

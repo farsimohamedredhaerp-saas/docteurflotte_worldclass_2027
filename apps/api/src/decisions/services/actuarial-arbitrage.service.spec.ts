@@ -95,3 +95,4 @@ describe('ActuarialArbitrageService (Pilier 6 — Arbitrage Financier Actuariel 
     expect(res.substitutionAsset).toBeUndefined(); // Aucun véhicule nécessaire
   });
 });
+

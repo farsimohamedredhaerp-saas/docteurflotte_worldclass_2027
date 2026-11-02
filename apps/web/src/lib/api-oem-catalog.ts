@@ -46,6 +46,52 @@ export interface OEMCatalogItem {
   tasksCount: number;
 }
 
+export interface RawOEMTask {
+  task_code?: string;
+  task_name: string;
+  subsystem?: string;
+  normal_km?: number;
+  normal_hours?: number;
+  severe_km?: number;
+  severe_hours?: number;
+}
+
+export interface RawOEMCatalogEntry {
+  brand: {
+    slug: string;
+    name: string;
+    country: string;
+    is_common_dz?: boolean;
+  };
+  model: {
+    slug: string;
+    name: string;
+    category: string;
+    body_type: string;
+    year_start?: number | null;
+    year_end?: number | null;
+    popularity_dz_rank?: number;
+  };
+  variant: {
+    engine_code?: string;
+    engine_name?: string;
+    wmi?: string;
+    displacement_cc?: number;
+    power_hp?: number;
+    fuel_type?: string;
+    tank_liters?: number;
+    ptac_kg?: number;
+    curb_weight_kg?: number;
+    consumption_mixed_l_100km?: number;
+    consumption_idle_l_hour?: number;
+    oil_capacity_liters?: number;
+    oil_norm_spec?: string;
+    coolant_liters?: number;
+  };
+  tasks?: RawOEMTask[];
+  tasks_count?: number;
+}
+
 export class OEMCatalogClient {
   private static cachedCatalog: OEMCatalogItem[] | null = null;
 
@@ -54,7 +100,8 @@ export class OEMCatalogClient {
       return this.cachedCatalog;
     }
 
-    const items: OEMCatalogItem[] = (rawMasterCatalog as any[]).map((entry) => ({
+    const rawEntries = rawMasterCatalog as unknown as RawOEMCatalogEntry[];
+    const items: OEMCatalogItem[] = rawEntries.map((entry) => ({
       brand: {
         slug: entry.brand.slug,
         name: entry.brand.name,
@@ -71,19 +118,19 @@ export class OEMCatalogClient {
         popularityDzRank: entry.model.popularity_dz_rank ?? 999,
       },
       variant: {
-        engineCode: entry.variant.engine_code,
-        engineName: entry.variant.engine_name,
+        engineCode: entry.variant.engine_code || 'STD',
+        engineName: entry.variant.engine_name || 'Standard',
         wmi: entry.variant.wmi ?? undefined,
-        displacementCc: entry.variant.displacement_cc,
-        powerHp: entry.variant.power_hp,
-        fuelType: entry.variant.fuel_type,
-        tankLiters: entry.variant.tank_liters,
-        ptacKg: entry.variant.ptac_kg,
-        curbWeightKg: entry.variant.curb_weight_kg,
-        consumptionMixedL100km: entry.variant.consumption_mixed_l_100km,
-        consumptionIdleLHour: entry.variant.consumption_idle_l_hour,
-        oilCapacityLiters: entry.variant.oil_capacity_liters,
-        oilNormSpec: entry.variant.oil_norm_spec,
+        displacementCc: entry.variant.displacement_cc || 2000,
+        powerHp: entry.variant.power_hp || 130,
+        fuelType: entry.variant.fuel_type || 'DIESEL',
+        tankLiters: entry.variant.tank_liters || 80,
+        ptacKg: entry.variant.ptac_kg || 3500,
+        curbWeightKg: entry.variant.curb_weight_kg || 2200,
+        consumptionMixedL100km: entry.variant.consumption_mixed_l_100km || 8.0,
+        consumptionIdleLHour: entry.variant.consumption_idle_l_hour || 1.5,
+        oilCapacityLiters: entry.variant.oil_capacity_liters || 6.0,
+        oilNormSpec: entry.variant.oil_norm_spec || '5W-30',
         coolantLiters: entry.variant.coolant_liters ?? 6.0,
       },
       tasksCount: entry.tasks_count ?? (entry.tasks ? entry.tasks.length : 6),

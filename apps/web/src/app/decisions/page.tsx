@@ -38,8 +38,8 @@ interface DecisionItem {
   status: 'PENDING' | 'APPROVED' | 'DISMISSED';
   dataOrigin: string;
   explanationDossier: {
-    inputMetrics: Record<string, any>;
-    economicHypotheses: Record<string, any>;
+    inputMetrics: Record<string, unknown>;
+    economicHypotheses: Record<string, unknown>;
     potentialFailureModes: string[];
     mitigationAction: string;
   };
@@ -939,7 +939,7 @@ export default function DecisionsPage() {
               <div
                 key={sc.id}
                 onClick={() => {
-                  setSimScenario(sc.id as any);
+                  setSimScenario(sc.id as 'ENACTA_EXPIRED' | 'WILAYA_RESTRICTION' | 'CRITICAL_VHI' | 'ALL_CLEAN');
                   handleEvaluateDispatch(sc.id);
                 }}
                 style={{

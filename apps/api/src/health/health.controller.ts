@@ -1,7 +1,7 @@
 import { Controller, Get, Res, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { HealthService } from './health.service';
-import { HealthResponse, ReadinessResponse } from '@docteurflotte/contracts';
+import { HealthResponse, ReadinessResponse, PlatformHealthSummary } from '@docteurflotte/contracts';
 
 @Controller()
 export class HealthController {
@@ -10,6 +10,11 @@ export class HealthController {
   @Get('health')
   getHealth(): HealthResponse {
     return this.healthService.getHealth();
+  }
+
+  @Get('platform/health-summary')
+  async getPlatformHealthSummary(): Promise<PlatformHealthSummary> {
+    return this.healthService.getPlatformHealthSummary();
   }
 
   @Get('ready')

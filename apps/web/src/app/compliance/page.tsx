@@ -21,6 +21,8 @@ import {
   IconX,
 } from '../../components/navigation/TechIcons';
 
+export type ComplianceTab = 'ENACTA' | 'INSURANCE' | 'WILAYAS' | 'TAXES';
+
 export interface EnactaRecord {
   id: string;
   registrationNumber: string;
@@ -284,13 +286,13 @@ export default function CompliancePage() {
         id: `EN-${Date.now().toString().slice(-4)}`,
         registrationNumber: enactaForm.registrationNumber || '',
         makeModel: enactaForm.makeModel || 'Véhicule',
-        category: (enactaForm.category as any) || 'PL',
+        category: (enactaForm.category as EnactaRecord['category']) || 'PL',
         lastInspectionDate: enactaForm.lastInspectionDate || '',
         expiryDate: enactaForm.expiryDate || '',
         daysRemaining: 180,
         centerName: enactaForm.centerName || 'Centre Agréé',
         wilaya: enactaForm.wilaya || 'Alger (16)',
-        status: (enactaForm.status as any) || 'VALID',
+        status: (enactaForm.status as EnactaRecord['status']) || 'VALID',
         defectCount: 0,
       };
       setEnactaList((prev) => [newRec, ...prev]);
@@ -349,12 +351,12 @@ export default function CompliancePage() {
         id: `INS-${Date.now().toString().slice(-4)}`,
         registrationNumber: insuranceForm.registrationNumber || '',
         makeModel: insuranceForm.makeModel || 'Véhicule',
-        insurer: (insuranceForm.insurer as any) || 'CAAT',
+        insurer: (insuranceForm.insurer as InsuranceRecord['insurer']) || 'CAAT',
         policyNumber: insuranceForm.policyNumber || '',
         expiryDate: insuranceForm.expiryDate || '',
         daysRemaining: 365,
-        coverageType: (insuranceForm.coverageType as any) || 'TOUS_RISQUES',
-        status: (insuranceForm.status as any) || 'VALID',
+        coverageType: (insuranceForm.coverageType as InsuranceRecord['coverageType']) || 'TOUS_RISQUES',
+        status: (insuranceForm.status as InsuranceRecord['status']) || 'VALID',
       };
       setInsuranceList((prev) => [newIns, ...prev]);
       setNotification(`✓ Nouvelle police d'assurance consignée pour ${newIns.registrationNumber}`);
@@ -431,7 +433,7 @@ export default function CompliancePage() {
               ].map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id as any)}
+                  onClick={() => setActiveTab(item.id as ComplianceTab)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -862,7 +864,7 @@ export default function CompliancePage() {
                   </label>
                   <select
                     value={enactaForm.category || 'PL'}
-                    onChange={(e) => setEnactaForm({ ...enactaForm, category: e.target.value as any })}
+                    onChange={(e) => setEnactaForm({ ...enactaForm, category: e.target.value as EnactaRecord['category'] })}
                     style={{
                       width: '100%',
                       padding: '0.5rem 0.75rem',
@@ -997,7 +999,7 @@ export default function CompliancePage() {
                   </label>
                   <select
                     value={insuranceForm.insurer || 'CAAT'}
-                    onChange={(e) => setInsuranceForm({ ...insuranceForm, insurer: e.target.value as any })}
+                    onChange={(e) => setInsuranceForm({ ...insuranceForm, insurer: e.target.value as InsuranceRecord['insurer'] })}
                     style={{
                       width: '100%',
                       padding: '0.5rem 0.75rem',
@@ -1044,7 +1046,7 @@ export default function CompliancePage() {
                   </label>
                   <select
                     value={insuranceForm.coverageType || 'TOUS_RISQUES'}
-                    onChange={(e) => setInsuranceForm({ ...insuranceForm, coverageType: e.target.value as any })}
+                    onChange={(e) => setInsuranceForm({ ...insuranceForm, coverageType: e.target.value as InsuranceRecord['coverageType'] })}
                     style={{
                       width: '100%',
                       padding: '0.5rem 0.75rem',

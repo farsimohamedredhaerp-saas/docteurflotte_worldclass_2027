@@ -247,8 +247,9 @@ export class SovereignRagService {
             results.push(webResult);
           }
         }
-      } catch (webErr: any) {
-        this.logger.warn(`Échec de la recherche Web de secours: ${webErr?.message}`);
+      } catch (webErr: unknown) {
+        const msg = webErr instanceof Error ? webErr.message : String(webErr);
+        this.logger.warn(`Échec de la recherche Web de secours: ${msg}`);
       }
     }
 
@@ -294,7 +295,7 @@ Réponds de manière concise, précise et directement applicable.`;
     manufacturer: string,
     subsystem: string,
     modelSeries?: string,
-  ): Promise<Array<{ section_title: string; structured_specs: Record<string, any> }>> {
+  ): Promise<Array<{ section_title: string; structured_specs: Record<string, unknown> }>> {
     const pool = this.databaseService.getPool();
     if (!pool) {
       throw new Error('Base de données PostgreSQL indisponible.');
@@ -325,7 +326,7 @@ Réponds de manière concise, précise et directement applicable.`;
   /**
    * Statistiques globales du coffre-fort de connaissances souveraines.
    */
-  async getVaultStats(): Promise<Record<string, any>> {
+  async getVaultStats(): Promise<Record<string, unknown>> {
     const pool = this.databaseService.getPool();
     if (!pool) {
       throw new Error('Base de données PostgreSQL indisponible.');

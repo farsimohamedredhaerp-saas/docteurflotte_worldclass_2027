@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 interface StructuredSpecs {
-  [key: string]: any;
+  [key: string]: string | number | boolean | Array<string | number> | Record<string, unknown> | null | undefined;
 }
 
 interface SearchResult {
@@ -80,7 +80,7 @@ function formatSpecKey(k: string): string {
   return k.replace(/_/g, ' ').toUpperCase();
 }
 
-function formatSpecValue(k: string, v: any): string {
+function formatSpecValue(k: string, v: unknown): string {
   if (v === null || v === undefined) return 'N/A';
   if (typeof v === 'boolean') return v ? 'OUI' : 'NON';
   if (Array.isArray(v)) return v.join(', ');

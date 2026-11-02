@@ -291,24 +291,24 @@ const SEED_FLEET_UNITS: FleetUnitRecord[] = [
     const category = isBtp
       ? ('CONSTRUCTION_BTP' as const)
       : isVul
-      ? ('LIGHT_COMMERCIAL' as const)
-      : ('HEAVY_TRUCK' as const);
+        ? ('LIGHT_COMMERCIAL' as const)
+        : ('HEAVY_TRUCK' as const);
 
     const make = isBtp
       ? unitIndex % 2 === 0
         ? 'Caterpillar'
         : 'Komatsu'
       : isVul
-      ? 'Toyota'
-      : unitIndex % 2 === 0
-      ? 'Renault Trucks'
-      : 'Scania';
+        ? 'Toyota'
+        : unitIndex % 2 === 0
+          ? 'Renault Trucks'
+          : 'Scania';
 
     const model = isBtp
       ? 'Pelle Hydraulique BTP'
       : isVul
-      ? 'Hilux 2.4 D-4D'
-      : 'Tracteur 6x4 Routier';
+        ? 'Hilux 2.4 D-4D'
+        : 'Tracteur 6x4 Routier';
 
     return {
       id: `unit-${String(unitIndex).padStart(3, '0')}`,
@@ -323,10 +323,10 @@ const SEED_FLEET_UNITS: FleetUnitRecord[] = [
       status: isCritical
         ? ('DTC_CRITICAL' as const)
         : isIdle
-        ? ('IDLE_WARNING' as const)
-        : isMotion
-        ? ('MOTION' as const)
-        : ('PARKED_OFF' as const),
+          ? ('IDLE_WARNING' as const)
+          : isMotion
+            ? ('MOTION' as const)
+            : ('PARKED_OFF' as const),
       speedKmh: isMotion ? 65 + (unitIndex % 25) : 0,
       engineRpm: isMotion ? 1350 + (unitIndex % 300) : isIdle ? 850 : 0,
       engineHours: 1200 + unitIndex * 95,
@@ -530,18 +530,18 @@ export function FleetHighDensityTable({
     const colorClass = isGood
       ? 'bg-emerald-500'
       : isWarn
-      ? 'bg-amber-500'
-      : 'bg-rose-500';
+        ? 'bg-amber-500'
+        : 'bg-rose-500';
     const textClass = isGood
       ? 'text-emerald-700 dark:text-emerald-400'
       : isWarn
-      ? 'text-amber-700 dark:text-amber-400'
-      : 'text-rose-700 dark:text-rose-400';
+        ? 'text-amber-700 dark:text-amber-400'
+        : 'text-rose-700 dark:text-rose-400';
     const gaugeColor = isGood
       ? 'var(--df-status-ok)'
       : isWarn
-      ? 'var(--df-status-warning)'
-      : 'var(--df-status-danger)';
+        ? 'var(--df-status-warning)'
+        : 'var(--df-status-danger)';
 
     return (
       <div
@@ -579,8 +579,8 @@ export function FleetHighDensityTable({
     const barColor = isLow
       ? 'var(--df-status-danger)'
       : percent < 40
-      ? 'var(--df-status-warning)'
-      : 'var(--df-accent-blue)';
+        ? 'var(--df-status-warning)'
+        : 'var(--df-accent-blue)';
 
     return (
       <div
@@ -654,7 +654,7 @@ export function FleetHighDensityTable({
           {/* SÉLECTEUR CATÉGORIE TECHNIQUE */}
           <select
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value as any)}
+            onChange={(e) => setCategoryFilter(e.target.value as 'ALL' | FleetUnitRecord['category'])}
             className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/80 rounded-md px-2.5 py-1 text-[11.5px] text-slate-700 dark:text-slate-200 font-medium outline-none cursor-pointer focus:border-blue-600"
           >
             <option value="ALL">Toutes Catégories (52)</option>
@@ -666,7 +666,7 @@ export function FleetHighDensityTable({
           {/* SÉLECTEUR STATUT OPÉRATIONNEL */}
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
+            onChange={(e) => setStatusFilter(e.target.value as 'ALL' | FleetUnitRecord['status'])}
             className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700/80 rounded-md px-2.5 py-1 text-[11.5px] text-slate-700 dark:text-slate-200 font-medium outline-none cursor-pointer focus:border-blue-600"
           >
             <option value="ALL">Tous les Statuts</option>
@@ -756,9 +756,8 @@ export function FleetHighDensityTable({
                   <tr
                     key={u.id}
                     onClick={() => onSelectUnit && onSelectUnit(u)}
-                    className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors cursor-pointer ${
-                      isSelected ? 'bg-blue-50/40 dark:bg-blue-950/20' : ''
-                    }`}
+                    className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors cursor-pointer ${isSelected ? 'bg-blue-50/40 dark:bg-blue-950/20' : ''
+                      }`}
                   >
                     {/* CHECKBOX */}
                     <td
@@ -771,7 +770,7 @@ export function FleetHighDensityTable({
                       <input
                         type="checkbox"
                         checked={isSelected}
-                        onChange={() => {}}
+                        onChange={() => { }}
                         className="rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer"
                       />
                     </td>
@@ -844,11 +843,10 @@ export function FleetHighDensityTable({
                     {/* PROCHAINE ÉCHÉANCE */}
                     <td className="py-2 px-3 whitespace-nowrap">
                       <span
-                        className={`font-mono text-[11px] px-1.5 py-0.5 rounded ${
-                          u.preventiveIsUrgent
-                            ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 font-semibold border border-rose-200 dark:border-rose-900'
-                            : 'text-slate-600 dark:text-slate-400'
-                        }`}
+                        className={`font-mono text-[11px] px-1.5 py-0.5 rounded ${u.preventiveIsUrgent
+                          ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 font-semibold border border-rose-200 dark:border-rose-900'
+                          : 'text-slate-600 dark:text-slate-400'
+                          }`}
                       >
                         {u.preventiveDueText}
                       </span>

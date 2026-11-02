@@ -71,8 +71,9 @@ export class WebKnowledgeSearchService {
           }
         }
       }
-    } catch (err: any) {
-      this.logger.debug(`DuckDuckGo HTML non joignable: ${err?.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.debug(`DuckDuckGo HTML non joignable: ${msg}`);
     }
 
     // 2. Source 2 : Wikipedia API Officielle (Définitions moteurs, technologies et normes antipollution)
@@ -101,8 +102,9 @@ export class WebKnowledgeSearchService {
           }
         }
       }
-    } catch (err: any) {
-      this.logger.debug(`Wikipedia API non disponible: ${err?.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.debug(`Wikipedia API non disponible: ${msg}`);
     }
 
     // 3. Source 3 : Fallback DuckDuckGo Lite si aucune réponse précédente
@@ -135,8 +137,9 @@ export class WebKnowledgeSearchService {
             }
           }
         }
-      } catch (err: any) {
-        this.logger.debug(`DuckDuckGo Lite non joignable: ${err?.message}`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.logger.debug(`DuckDuckGo Lite non joignable: ${msg}`);
       }
     }
 
@@ -202,7 +205,7 @@ export class WebKnowledgeSearchService {
     }
 
     // Spécifications structurées initiales
-    let structuredSpecs: Record<string, any> = {
+    let structuredSpecs: Record<string, unknown> = {
       source: 'RECHERCHE_WEB_SOUVERAINE',
       query_resolved: cleanQuery,
     };
@@ -244,8 +247,9 @@ Pas de texte avant ni après le JSON.`;
             ...(parsed.specs || {}),
           };
         }
-      } catch (err: any) {
-        this.logger.warn(`Erreur structuration Ollama Web: ${err?.message}`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.logger.warn(`Erreur structuration Ollama Web: ${msg}`);
       }
     }
 

@@ -56,45 +56,45 @@ export function HybridCommandLayout({
     badgeCount?: number;
     icon: React.ReactNode;
   }[] = [
-    {
-      id: 'rul_matrix',
-      label: 'Santé Prédictive & RUL',
-      tag: 'WEIBULL',
-      icon: <IconGauge size={15} strokeWidth={1.75} />,
-    },
-    {
-      id: 'telemetry_can',
-      label: 'Diagnostic Télématique CAN',
-      tag: 'J1939',
-      badgeCount: criticalAlertsCount,
-      icon: <IconActivity size={15} strokeWidth={1.75} />,
-    },
-    {
-      id: 'oem_plans',
-      label: 'Planning Préventif OEM',
-      tag: 'OEM',
-      icon: <IconLayers size={15} strokeWidth={1.75} />,
-    },
-    {
-      id: 'parts_cross_ref',
-      label: 'Catalogue Pièces & Équivalences',
-      tag: 'CROSS-REF',
-      icon: <IconSearch size={15} strokeWidth={1.75} />,
-    },
-    {
-      id: 'inventory_stock',
-      label: 'Stocks Magasins & Achats',
-      tag: 'STOCK',
-      icon: <IconShieldCheck size={15} strokeWidth={1.75} />,
-    },
-    {
-      id: 'work_orders',
-      label: 'Atelier & Ordres de Travail',
-      tag: 'OT',
-      badgeCount: 7,
-      icon: <IconWrench size={15} strokeWidth={1.75} />,
-    },
-  ];
+      {
+        id: 'rul_matrix',
+        label: 'Santé Prédictive & RUL',
+        tag: 'WEIBULL',
+        icon: <IconGauge size={15} strokeWidth={1.75} />,
+      },
+      {
+        id: 'telemetry_can',
+        label: 'Diagnostic Télématique CAN',
+        tag: 'J1939',
+        badgeCount: criticalAlertsCount,
+        icon: <IconActivity size={15} strokeWidth={1.75} />,
+      },
+      {
+        id: 'oem_plans',
+        label: 'Planning Préventif OEM',
+        tag: 'OEM',
+        icon: <IconLayers size={15} strokeWidth={1.75} />,
+      },
+      {
+        id: 'parts_cross_ref',
+        label: 'Catalogue Pièces & Équivalences',
+        tag: 'CROSS-REF',
+        icon: <IconSearch size={15} strokeWidth={1.75} />,
+      },
+      {
+        id: 'inventory_stock',
+        label: 'Stocks Magasins & Achats',
+        tag: 'STOCK',
+        icon: <IconShieldCheck size={15} strokeWidth={1.75} />,
+      },
+      {
+        id: 'work_orders',
+        label: 'Atelier & Ordres de Travail',
+        tag: 'OT',
+        badgeCount: 7,
+        icon: <IconWrench size={15} strokeWidth={1.75} />,
+      },
+    ];
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--df-bg-base)', color: 'var(--df-text-main)' }}>
@@ -250,7 +250,12 @@ export function HybridCommandLayout({
               <span style={{ fontSize: '0.75rem', color: 'var(--df-text-muted)' }}>Parc :</span>
               <select
                 value={filters.category}
-                onChange={(e) => onFilterChange({ ...filters, category: e.target.value as any })}
+                onChange={(e) =>
+                  onFilterChange({
+                    ...filters,
+                    category: e.target.value as TechnicalFilters['category'],
+                  })
+                }
                 style={{
                   background: 'var(--df-bg-surface-2)',
                   border: '1px solid var(--df-border-subtle)',
@@ -275,7 +280,12 @@ export function HybridCommandLayout({
               <span style={{ fontSize: '0.75rem', color: 'var(--df-text-muted)' }}>Échéance :</span>
               <select
                 value={filters.severity}
-                onChange={(e) => onFilterChange({ ...filters, severity: e.target.value as any })}
+                onChange={(e) =>
+                  onFilterChange({
+                    ...filters,
+                    severity: e.target.value as TechnicalFilters['severity'],
+                  })
+                }
                 style={{
                   background: 'var(--df-bg-surface-2)',
                   border: '1px solid var(--df-border-subtle)',
@@ -300,7 +310,12 @@ export function HybridCommandLayout({
               <span style={{ fontSize: '0.75rem', color: 'var(--df-text-muted)' }}>Organe :</span>
               <select
                 value={filters.subsystem}
-                onChange={(e) => onFilterChange({ ...filters, subsystem: e.target.value as any })}
+                onChange={(e) =>
+                  onFilterChange({
+                    ...filters,
+                    subsystem: e.target.value as TechnicalFilters['subsystem'],
+                  })
+                }
                 style={{
                   background: 'var(--df-bg-surface-2)',
                   border: '1px solid var(--df-border-subtle)',

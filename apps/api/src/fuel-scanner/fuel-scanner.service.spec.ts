@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FuelScannerService } from './fuel-scanner.service';
 import { DatabaseService } from '../database/database.service';
+import { OllamaSovereignService } from '../copilot/ollama-sovereign.service';
 
 describe('FuelScannerService', () => {
   let service: FuelScannerService;
+  let ollamaService: OllamaSovereignService;
   let dbMock: any;
 
   beforeEach(async () => {
@@ -24,6 +26,7 @@ describe('FuelScannerService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FuelScannerService,
+        OllamaSovereignService,
         {
           provide: DatabaseService,
           useValue: dbMock,
@@ -32,6 +35,7 @@ describe('FuelScannerService', () => {
     }).compile();
 
     service = module.get<FuelScannerService>(FuelScannerService);
+    ollamaService = module.get<OllamaSovereignService>(OllamaSovereignService);
   });
 
   it('should be defined', () => {
@@ -51,6 +55,29 @@ describe('FuelScannerService', () => {
     expect(res.reconciliation.reconciliationStatus).toBe('VERIFIED');
     expect(res.reconciliation.isLocationVerified).toBe(true);
     expect(res.status).toBe('APPROVED');
+  });
+
+  it('should fallback to Qwen JSON extraction when OCR text has non-standard formatting', async () => {
+    jest.spyOn(ollamaService, 'extractNaftalReceiptJson').mockResolvedValue({
+      liters: 49.0,
+      fuelType: 'Gasoil',
+      stationName: 'Station Naftal Rouiba Est',
+      stationWilaya: '16 - Alger',
+      totalAmountDzd: 1421,
+    });
+
+    const res = await service.scanAndReconcile(
+      {
+        assetId: 'ast-01',
+        receiptTextRaw: 'TICKET TPE ILLISIBLE VOL=49,00 CARBURANT GO MONTANT 1421 DZD',
+      },
+      'tenant-test',
+    );
+
+    expect(res.liters).toBe(49.0);
+    expect(res.stationName).toBe('Station Naftal Rouiba Est');
+    expect(res.totalAmountDzd).toBe(1421);
+    expect(res.reconciliation.reconciliationStatus).toBe('VERIFIED');
   });
 
   it('should flag suspicious volume if variance exceeds threshold', async () => {

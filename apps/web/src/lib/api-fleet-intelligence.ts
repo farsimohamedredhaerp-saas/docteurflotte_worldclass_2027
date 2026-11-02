@@ -7,6 +7,8 @@ import {
   IndustrySector,
   ClimateZoneDZ,
   DispatchAssetCategory as AssetCategory,
+  DispatchAssetCategory,
+  EnactaVehicleCategory,
   LicenseCategoryDZ,
   DocumentTypeDZ,
   DispatchStatus,
@@ -26,6 +28,7 @@ import {
   ReeferCargoType,
   ReeferPowerMode,
   RegulatoryMissionOrderData,
+  MissionOrderCompanyInfo,
   buildMissionOrderQrString,
 } from '@docteurflotte/contracts';
 
@@ -66,6 +69,24 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   'http://localhost:3001';
 
+function mapDispatchToEnactaCategory(cat: DispatchAssetCategory): EnactaVehicleCategory {
+  switch (cat) {
+    case DispatchAssetCategory.HEAVY_TRUCK_RIGID:
+      return EnactaVehicleCategory.HEAVY_TRUCK_RIGID;
+    case DispatchAssetCategory.TRACTOR_TRAILER:
+      return EnactaVehicleCategory.TRACTOR_TRAILER;
+    case DispatchAssetCategory.HAZMAT_TANKER:
+      return EnactaVehicleCategory.HAZMAT_TANKER;
+    case DispatchAssetCategory.REEFER_TRUCK:
+      return EnactaVehicleCategory.REEFER_TRUCK;
+    case DispatchAssetCategory.VAN:
+      return EnactaVehicleCategory.COMMERCIAL_VAN_VUL;
+    case DispatchAssetCategory.LIGHT_VEHICLE:
+    default:
+      return EnactaVehicleCategory.LIGHT_PASSENGER;
+  }
+}
+
 export class FleetIntelligenceClient {
   /**
    * Évalue une mission de transport sous les 4 portes de validation
@@ -102,7 +123,7 @@ export class FleetIntelligenceClient {
   /**
    * Ingestion télématique Mode 0 (Zero-Hardware / Feuilles de route / Pleins Naftal)
    */
-  static async ingestMode0(payload: any, token?: string): Promise<any> {
+  static async ingestMode0(payload: Record<string, unknown>, token?: string): Promise<Record<string, unknown>> {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -122,7 +143,7 @@ export class FleetIntelligenceClient {
   /**
    * Ingestion Webhook Traccar GPS
    */
-  static async ingestTraccarWebhook(payload: any, token?: string): Promise<any> {
+  static async ingestTraccarWebhook(payload: Record<string, unknown>, token?: string): Promise<Record<string, unknown>> {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -361,6 +382,107 @@ export class FleetIntelligenceClient {
   }
 
   /**
+   * Synchronisation en lot (batch) des fiches DVIR différées depuis la file d'attente hors-ligne
+   */
+  static async syncDvirOfflineBatch(
+    batch: { reports: DVIRSubmissionDto[]; syncDeviceId?: string },
+    token?: string,
+  ): Promise<{
+    totalReceived: number;
+    syncedCount: number;
+    criticalFailuresCount: number;
+    generatedWorkOrderIds: string[];
+    processedReports: DVIRInspectionReport[];
+  }> {
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${API_BASE_URL}/api/v1/dvir/sync-batch`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(batch),
+      });
+
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {
+      // repli local
+    }
+
+    const processedReports: DVIRInspectionReport[] = [];
+    const generatedWorkOrderIds: string[] = [];
+
+    for (const r of batch.reports) {
+      const res = await this.submitDvirReport(r, token);
+      processedReports.push(res);
+      if (res.generatedWorkOrderId) {
+        generatedWorkOrderIds.push(res.generatedWorkOrderId);
+      }
+    }
+
+    return {
+      totalReceived: batch.reports.length,
+      syncedCount: processedReports.length,
+      criticalFailuresCount: processedReports.filter((r) => r.hasCriticalFailures).length,
+      generatedWorkOrderIds,
+      processedReports,
+    };
+  }
+
+  /**
+   * Statut d'interdiction de départ DVIR pour un véhicule
+   */
+  static async getAssetDvirStatus(
+    assetId: string,
+    token?: string,
+  ): Promise<{
+    assetId: string;
+    isBlockedByDvir: boolean;
+    latestReport?: DVIRInspectionReport;
+  }> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/dvir/status/${encodeURIComponent(assetId)}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {
+      // Repli gracieux hors-ligne
+    }
+    return { assetId, isBlockedByDvir: false };
+  }
+
+  /**
+   * Levée de consignation sécurité DVIR suite à clôture d'Ordre de Travail
+   */
+  static async resolveDvirBlock(
+    assetId: string,
+    workOrderId?: string,
+    token?: string,
+    notes?: string,
+  ): Promise<{ resolved: boolean; assetId: string; activeBlockRemaining: boolean }> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/dvir/resolve-block`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ assetId, workOrderId, resolutionNotes: notes }),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {
+      // Repli gracieux
+    }
+    return { resolved: false, assetId, activeBlockRemaining: false };
+  }
+
+  /**
    * Étape 3 : Chaîne du Froid & Groupes Frigo
    */
   static async getColdChainLive(token?: string): Promise<ReeferLiveStatus[]> {
@@ -586,8 +708,8 @@ export class FleetIntelligenceClient {
     payload: {
       mission: MissionRequestDto;
       vehicle: VehicleStateDto;
-      driver: DriverStateDto;
-      companyInfo?: any;
+      driver: DriverStateDto & { nationalIdNumber?: string };
+      companyInfo?: MissionOrderCompanyInfo;
     },
     token?: string,
   ): Promise<RegulatoryMissionOrderData> {
@@ -617,13 +739,13 @@ export class FleetIntelligenceClient {
     const cargoNature = payload.mission.requiresHazmatAdr
       ? 'HYDROCARBURES / MATIÈRES DANGEREUSES (ADR)'
       : payload.mission.requiresReeferColdChain
-      ? 'PRODUITS PHARMACEUTIQUES / FRAIS (ATP)'
-      : 'MARCHANDISES GÉNÉRALES & FRET INDUSTRIEL';
+        ? 'PRODUITS PHARMACEUTIQUES / FRAIS (ATP)'
+        : 'MARCHANDISES GÉNÉRALES & FRET INDUSTRIEL';
 
     const qrPayload = buildMissionOrderQrString({
       orderNumber,
       registrationPlate: payload.vehicle.registrationPlate,
-      driverNin: (payload.driver as any).nationalIdNumber || '198516012345678901',
+      driverNin: payload.driver.nationalIdNumber || payload.driver.driverId || '198516012345678901',
       originWilaya: payload.mission.originWilayaCode,
       destWilaya: payload.mission.destinationWilayaCode,
       validUntil: validUntilIso.slice(0, 10),
@@ -649,7 +771,7 @@ export class FleetIntelligenceClient {
         registrationPlate: payload.vehicle.registrationPlate,
         makeModel: payload.vehicle.makeModel,
         chassisVin: 'DZ-SNVI-ROUIBA-2026-X1',
-        category: payload.vehicle.category as any,
+        category: mapDispatchToEnactaCategory(payload.vehicle.category),
         enactaExpiryDate: '2026-12-31',
         insurancePolicyNumber: 'SAA-POL-2026-001',
         insuranceCompany: 'Société Nationale d’Assurance (SAA)',
@@ -689,7 +811,15 @@ export class FleetIntelligenceClient {
     isValid: boolean;
     status: 'VALID' | 'EXPIRED' | 'TAMPERED';
     reason?: string;
-    decodedOrder?: any;
+    decodedOrder?: {
+      orderNumber: string;
+      registrationPlate: string;
+      driverNin: string;
+      originWilaya: number;
+      destWilaya: number;
+      validUntil: string;
+      cargoNature: string;
+    };
   }> {
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };

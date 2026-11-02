@@ -1,9 +1,12 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
+import { DvirService } from '../fleet-intelligence/services/dvir.service';
 import { CreateWorkOrderDto } from './dto/create-work-order.dto';
 import { CompleteWorkOrderDto } from './dto/complete-work-order.dto';
 import {
@@ -13,9 +16,38 @@ import {
   WorkOrderStatus,
 } from '@docteurflotte/contracts';
 
+export interface WorkOrderDatabaseRow {
+  id: string;
+  tenant_id: string;
+  asset_id: string;
+  title: string;
+  description?: string | null;
+  priority: WorkOrder['priority'];
+  status: WorkOrderStatus;
+  trigger_meter_value?: string | number | null;
+  estimated_labor_hours?: string | number | null;
+  actual_labor_hours?: string | number | null;
+  hourly_rate_applied?: string | number | null;
+  labor_cost?: string | number | null;
+  parts_cost?: string | number | null;
+  total_cost?: string | number | null;
+  downtime_hours?: string | number | null;
+  assigned_to?: string | null;
+  completed_at?: string | Date | null;
+  created_at: string | Date;
+  updated_at: string | Date;
+  asset_name?: string;
+  asset_code?: string;
+}
+
 @Injectable()
 export class WorkOrdersService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  private readonly logger = new Logger(WorkOrdersService.name);
+
+  constructor(
+    private readonly databaseService: DatabaseService,
+    @Optional() private readonly dvirService?: DvirService,
+  ) {}
 
   async createWorkOrder(tenantId: string, dto: CreateWorkOrderDto): Promise<WorkOrder> {
     return this.databaseService.withTenantContext(tenantId, async (client) => {
@@ -59,7 +91,7 @@ export class WorkOrdersService {
         JOIN assets a ON a.id = wo.asset_id
         WHERE wo.tenant_id = $1
       `;
-      const params: any[] = [tenantId];
+      const params: (string | WorkOrderStatus)[] = [tenantId];
 
       if (status) {
         query += ' AND wo.status = $2';
@@ -67,7 +99,7 @@ export class WorkOrdersService {
       }
 
       query += ' ORDER BY wo.created_at DESC';
-      const res = await client.query(query, params);
+      const res = await client.query<WorkOrderDatabaseRow>(query, params);
       return res.rows.map((row) =>
         this.mapWorkOrder(row, row.asset_name, row.asset_code),
       );
@@ -232,6 +264,27 @@ export class WorkOrdersService {
         // Table optionnelle selon contexte tenant
       }
 
+      // Réconciliation automatique avec les blocages de sécurité DVIR
+      if (this.dvirService) {
+        try {
+          const res = this.dvirService.resolveDvirBlock(
+            wo.asset_id,
+            id,
+            tenantId,
+            dto.completionNotes || 'Clôture de l\'ordre de travail en atelier — anomalie réparée et certifiée conforme.',
+          );
+          if (res.resolved) {
+            this.logger.log(
+              `[RÉCONCILIATION ATELIER DVIR] Verrou de sécurité levé pour l'actif ${wo.asset_id} suite à la clôture de l'OT ${id}.`,
+            );
+          }
+        } catch (dvirErr) {
+          this.logger.warn(
+            `[RÉCONCILIATION ATELIER DVIR] Impossible de lever le verrou DVIR pour ${wo.asset_id}: ${dvirErr}`,
+          );
+        }
+      }
+
       const calculatedNewVhi =
         dto.recalculatedVhi ?? (wo.status === WorkOrderStatus.SCHEDULED ? 95 : 100);
 
@@ -245,7 +298,7 @@ export class WorkOrdersService {
     });
   }
 
-  private mapWorkOrder(row: any, assetName?: string, assetCode?: string): WorkOrder {
+  private mapWorkOrder(row: WorkOrderDatabaseRow, assetName?: string, assetCode?: string): WorkOrder {
     return {
       id: row.id,
       tenantId: row.tenant_id,

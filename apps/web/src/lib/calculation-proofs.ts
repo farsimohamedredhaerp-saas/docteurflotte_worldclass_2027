@@ -2,6 +2,17 @@ import { CalculationProofData } from '../components/decisions/CalculationProofMo
 import { DigitalTwinOrganStatus, DigitalTwinAsset } from '@docteurflotte/contracts';
 import { DispatchDecisionResult } from './api-fleet-intelligence';
 
+export interface EconomicExplanationDossier {
+  economicHypotheses?: {
+    estimatedLaborHours?: number;
+    hourlyLaborRateApplied?: number;
+    estimatedPartsCost?: number;
+    inactionMultiplier?: number;
+    towingCost?: number;
+  };
+  inputMetrics?: Record<string, unknown>;
+}
+
 export class CalculationProofBuilder {
   /**
    * Preuve de calcul pour un arbitrage de maintenance économique
@@ -13,7 +24,7 @@ export class CalculationProofBuilder {
     estimatedActionCost: number;
     costInactionRisk: number;
     netExpectedSavings: number;
-    explanationDossier?: any;
+    explanationDossier?: EconomicExplanationDossier;
     ruleId: string;
   }): CalculationProofData {
     const actionCost = Number(dec.estimatedActionCost);
@@ -183,7 +194,7 @@ export class CalculationProofBuilder {
   }
 
   /**
-   * Preuve de calcul pour le Score VHI Global (Jumeau Numérique)
+   * Preuve de calcul pour le Score VHI Global (Jumeau Numérique 6 Organes)
    */
   static buildVhiScoreProof(twin: DigitalTwinAsset): CalculationProofData {
     const oil = twin.organs.find((o) => o.organ === 'ENGINE_OIL')?.healthPercent || 70;
@@ -191,51 +202,53 @@ export class CalculationProofBuilder {
     const brakes = twin.organs.find((o) => o.organ === 'BRAKE_PADS')?.healthPercent || 60;
     const cooling = twin.organs.find((o) => o.organ === 'COOLING_SYSTEM')?.healthPercent || 85;
     const fap = twin.organs.find((o) => o.organ === 'DPF_FILTER')?.healthPercent || 75;
+    const transmission = twin.organs.find((o) => o.organ === 'TRANSMISSION_DRIVETRAIN')?.healthPercent || 92;
 
     return {
       title: 'Preuve de Calcul du Score de Santé Globale VHI (0-100)',
-      decisionOrMetricName: `${twin.assetName} (${twin.assetCode}) — VHI Global`,
+      decisionOrMetricName: `${twin.assetName} (${twin.assetCode}) — VHI Global 6 Organes`,
       category: 'VHI',
       ruleId: 'ALGO-PHYS-VHI-01',
-      legalOrOemReference: 'MASTER_SPEC v2.0 §4.1 (Modèle Physique Intégré VHI)',
-      deterministicFormula: 'VHI = (0.25 × Huile) + (0.20 × Batterie) + (0.20 × Freins) + (0.20 × Refroidissement) + (0.15 × FAP)',
+      legalOrOemReference: 'MASTER_SPEC v2.0 §4.1 (Modèle Physique Intégré VHI 6 Organes)',
+      deterministicFormula: 'VHI = (0.22 × Huile) + (0.18 × Batterie) + (0.18 × Freins) + (0.18 × Refroidissement) + (0.14 × FAP) + (0.10 × Transmission)',
       formulaExplanation:
-        'Le Vehicle Health Index (VHI) ne fait aucune moyenne naïve : chaque organe d\'usure est modélisé par son équation physique dédiée puis agrégé selon sa criticité opérationnelle.',
+        'Le Vehicle Health Index (VHI) ne fait aucune moyenne naïve : chacun des 6 organes d\'usure est modélisé par son équation physique dédiée puis agrégé selon sa criticité opérationnelle.',
       variables: [
         { name: 'Santé Huile (Arrhenius)', symbol: 'S_huile', value: oil, unit: '%', source: 'Loi cinétique d\'Arrhenius (Ea/R=6500K)' },
         { name: 'Santé Batterie (CVHI)', symbol: 'S_bat', value: battery, unit: '%', source: 'Tension résiduelle au pic démarreur' },
         { name: 'Santé Freins (Archard)', symbol: 'S_freins', value: brakes, unit: '%', source: 'Épaisseur garniture mm / Loi d\'Archard' },
         { name: 'Santé Refroidissement', symbol: 'S_refroid', value: cooling, unit: '%', source: 'Gradient thermique différentiel EWMA' },
-        { name: 'Santé FAP (Suie)', symbol: 'S_fap', value: fap, unit: '%', source: 'Bilan massique & contre-pression mbar' },
+        { name: 'Santé FAP (Suie/Silice)', symbol: 'S_fap', value: fap, unit: '%', source: 'Bilan massique & contre-pression mbar' },
+        { name: 'Santé Transmission / Pont', symbol: 'S_trans', value: transmission, unit: '%', source: 'Micro-glissement cinématique J1939' },
       ],
       steps: [
         {
           stepNumber: 1,
-          description: 'Pondération Huile Moteur & Viscosité (Poids 25%)',
-          formula: '0.25 × S_huile',
-          calculation: `0.25 × ${oil}%`,
-          intermediateResult: `${(0.25 * oil).toFixed(1)} pts`,
+          description: 'Pondération Huile Moteur & Viscosité (Poids 22%)',
+          formula: '0.22 × S_huile',
+          calculation: `0.22 × ${oil}%`,
+          intermediateResult: `${(0.22 * oil).toFixed(1)} pts`,
         },
         {
           stepNumber: 2,
-          description: 'Pondération Batterie & Démarreur (Poids 20%)',
-          formula: '0.20 × S_bat',
-          calculation: `0.20 × ${battery}%`,
-          intermediateResult: `${(0.2 * battery).toFixed(1)} pts`,
+          description: 'Pondération Batterie & Démarreur (Poids 18%)',
+          formula: '0.18 × S_bat',
+          calculation: `0.18 × ${battery}%`,
+          intermediateResult: `${(0.18 * battery).toFixed(1)} pts`,
         },
         {
           stepNumber: 3,
-          description: 'Pondération Freinage & Refroidissement (Poids 20% + 20%)',
-          formula: '(0.20 × S_freins) + (0.20 × S_refroid)',
-          calculation: `(0.20 × ${brakes}%) + (0.20 × ${cooling}%)`,
-          intermediateResult: `${(0.2 * brakes + 0.2 * cooling).toFixed(1)} pts`,
+          description: 'Pondération Freinage & Refroidissement (Poids 18% + 18%)',
+          formula: '(0.18 × S_freins) + (0.18 × S_refroid)',
+          calculation: `(0.18 × ${brakes}%) + (0.18 × ${cooling}%)`,
+          intermediateResult: `${(0.18 * brakes + 0.18 * cooling).toFixed(1)} pts`,
         },
         {
           stepNumber: 4,
-          description: 'Pondération Filtre à Particules (Poids 15%)',
-          formula: '0.15 × S_fap',
-          calculation: `0.15 × ${fap}%`,
-          intermediateResult: `${(0.15 * fap).toFixed(1)} pts`,
+          description: 'Pondération FAP & Transmission (Poids 14% + 10%)',
+          formula: '(0.14 × S_fap) + (0.10 × S_trans)',
+          calculation: `(0.14 × ${fap}%) + (0.10 × ${transmission}%)`,
+          intermediateResult: `${(0.14 * fap + 0.1 * transmission).toFixed(1)} pts`,
         },
       ],
       finalResult: {
@@ -339,6 +352,44 @@ export class CalculationProofBuilder {
             value: `${organ.remainingUsefulLifeValue.toLocaleString()}`,
             unit: 'km',
             conclusion: `Remplacement impératif avant les ${organ.remainingUsefulLifeValue.toLocaleString()} prochains km pour préserver les disques et la conformité au contrôle technique.`,
+          },
+        };
+
+      case 'TRANSMISSION_DRIVETRAIN':
+        return {
+          title: 'Preuve du Modèle de Transmission & Pont Arrière (Micro-Glissement)',
+          decisionOrMetricName: `Transmission / Pont — RUL : ${organ.remainingUsefulLifeValue.toLocaleString()} ${organ.remainingUsefulLifeUnit}`,
+          category: 'PHYSICS_RUL',
+          ruleId: 'ALGO-DRIVETRAIN-SLIP-01',
+          legalOrOemReference: 'MASTER_SPEC v2.0 §4.5 (Micro-Glissement J1939 SPN 524 / SPN 191)',
+          deterministicFormula: 'Glissement(%) = (1 - (Vitesse_Arbre / (Vitesse_Moteur × Rapport_Boîte))) × 100',
+          formulaExplanation: 'Mesure continue du rendement de la chaîne cinématique et du couple de friction différentiel.',
+          variables: organ.observedMetrics.map((m) => ({
+            name: m.label,
+            value: m.value,
+            source: `Télémétrique CAN J1939 (Seuil: ${m.threshold})`,
+          })),
+          steps: [
+            {
+              stepNumber: 1,
+              description: 'Analyse du micro-glissement sous couple',
+              formula: 'Glissement_Mesuré vs Tolérance',
+              calculation: `Donnée observée : ${organ.observedMetrics[0]?.value || '0.65%'}`,
+              intermediateResult: 'Nominal',
+            },
+            {
+              stepNumber: 2,
+              description: 'Projection RUL lubrifiant pont 80W90',
+              formula: 'RUL_km = (80 000 - (Odo mod 80 000)) / K_stress',
+              calculation: `RUL = ${organ.remainingUsefulLifeValue.toLocaleString()} km`,
+              intermediateResult: `${organ.status}`,
+            },
+          ],
+          finalResult: {
+            label: 'RUL Transmission / Pont',
+            value: `${organ.remainingUsefulLifeValue.toLocaleString()}`,
+            unit: 'km',
+            conclusion: organ.explanation,
           },
         };
 

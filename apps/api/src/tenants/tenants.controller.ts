@@ -13,7 +13,7 @@ import {
 import { TenantsService } from './tenants.service';
 import { TenantSetupDto } from './dto/tenant-setup.dto';
 import { UpdateTenantSettingsDto } from './dto/update-tenant-settings.dto';
-import { JwtAuthGuard } from '../auth/auth.guard';
+import { JwtAuthGuard, AuthenticatedRequest } from '../auth/auth.guard';
 import {
   PurgeDemoDataResponse,
   TenantSettings,
@@ -23,12 +23,12 @@ import {
 @Controller('tenants')
 @UseGuards(JwtAuthGuard)
 export class TenantsController {
-  constructor(private readonly tenantsService: TenantsService) {}
+  constructor(private readonly tenantsService: TenantsService) { }
 
   @Post('setup')
   @HttpCode(HttpStatus.OK)
   async completeSetup(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     dto: TenantSetupDto,
   ): Promise<TenantSetupResponse> {
@@ -36,19 +36,19 @@ export class TenantsController {
   }
 
   @Get('current')
-  async getCurrent(@Req() req: any) {
+  async getCurrent(@Req() req: AuthenticatedRequest) {
     return this.tenantsService.getCurrentTenant(req.tenantId);
   }
 
   @Get('settings')
-  async getSettings(@Req() req: any): Promise<TenantSettings> {
+  async getSettings(@Req() req: AuthenticatedRequest): Promise<TenantSettings> {
     const data = await this.tenantsService.getCurrentTenant(req.tenantId);
     return data.settings;
   }
 
   @Put('settings')
   async updateSettings(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     dto: UpdateTenantSettingsDto,
   ): Promise<TenantSettings> {
@@ -57,7 +57,7 @@ export class TenantsController {
 
   @Post('purge-demo')
   @HttpCode(HttpStatus.OK)
-  async purgeDemo(@Req() req: any): Promise<PurgeDemoDataResponse> {
+  async purgeDemo(@Req() req: AuthenticatedRequest): Promise<PurgeDemoDataResponse> {
     return this.tenantsService.purgeDemoData(req.tenantId);
   }
 }

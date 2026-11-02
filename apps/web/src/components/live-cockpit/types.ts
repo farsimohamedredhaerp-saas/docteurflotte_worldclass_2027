@@ -121,6 +121,15 @@ export interface VehicleTelemetryState {
   arbitrageRecommendationAr?: string;
   rulKilometersRemaining?: number;
   
+  // Statut DVIR & Verrouillage de Sécurité Terrain (EPIC 5)
+  dvirStatus?: {
+    isBlocked: boolean;
+    latestReportId?: string;
+    criticalFailureReason?: string;
+    generatedWorkOrderId?: string;
+    submittedAt?: string;
+  };
+
   // Historique cinématique récent (Trace Breadcrumb 15 min)
   breadcrumbs: GpsBreadcrumbPoint[];
 }
@@ -130,6 +139,7 @@ export interface FleetAggregateStats {
   inMotion: number;
   idling: number;
   dtcCritical: number;
+  dvirBlockedCount?: number;
   offline: number;
   wsLatencyMs: number;
   msgPerSecond: number;

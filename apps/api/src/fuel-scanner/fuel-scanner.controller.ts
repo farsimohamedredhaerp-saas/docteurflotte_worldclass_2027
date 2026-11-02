@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { FuelScannerService } from './fuel-scanner.service';
-import { JwtAuthGuard } from '../auth/auth.guard';
+import { JwtAuthGuard, AuthenticatedRequest } from '../auth/auth.guard';
 import { ScanFuelReceiptDto } from './dto/fuel-scanner.dto';
 import { FuelReceiptScanResult } from '@docteurflotte/contracts';
 
@@ -11,14 +11,14 @@ export class FuelScannerController {
 
   @Post('scan')
   async scanReceipt(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Body() dto: ScanFuelReceiptDto,
   ): Promise<FuelReceiptScanResult> {
     return this.fuelScannerService.scanAndReconcile(dto, req.tenantId);
   }
 
   @Get('receipts')
-  async listRecentReceipts(@Req() req: any): Promise<FuelReceiptScanResult[]> {
+  async listRecentReceipts(@Req() req: AuthenticatedRequest): Promise<FuelReceiptScanResult[]> {
     return this.fuelScannerService.listRecentReceipts(req.tenantId);
   }
 }

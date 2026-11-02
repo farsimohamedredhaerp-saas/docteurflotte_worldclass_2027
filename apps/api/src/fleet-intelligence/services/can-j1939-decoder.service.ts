@@ -21,7 +21,7 @@ export class CanJ1939DecoderService {
     io26: ['bleTemp2C', 0.01], // Sonde BLE Frigo 2
   };
 
-  enrichFromTeltonikaIo(attributes: Record<string, any>): Record<string, number> {
+  enrichFromTeltonikaIo(attributes: Record<string, unknown>): Record<string, number> {
     const decoded: Record<string, number> = {};
     for (const [ioKey, [metricName, scale]] of Object.entries(this.TELTONIKA_AVL_IO_MAP)) {
       if (attributes[ioKey] !== undefined && attributes[ioKey] !== null) {

@@ -10,12 +10,15 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:api": "pnpm --filter @docteurflotte/api dev",
+    "dev:web": "pnpm --filter @docteurflotte/web dev",
     "lint": "turbo run lint --concurrency=1",
     "typecheck": "turbo run typecheck --concurrency=1",
     "test": "turbo run test --concurrency=1",
     "sync:telemetry": "node --experimental-strip-types scripts/sync-open-telemetry-data.ts",
     "seed:maintenance": "node --experimental-strip-types prisma/seed-maintenance.ts",
     "seed:prisma": "npx prisma db seed",
+    "postinstall": "node scripts/patch-write-file-atomic.cjs",
     "verify": "node scripts/guardrails/verify-all.cjs"
   },
   "prisma": {

@@ -3,19 +3,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { AuthUser, AuthResponse } from '@docteurflotte/contracts';
 import { AuthClient } from '../../lib/api-auth';
 
 interface UserMenuDropdownProps {
-  user: {
-    id: string;
-    email: string;
-    firstName?: string;
-    lastName?: string;
-    role?: string;
-  } | null;
-  tenant: {
-    name: string;
-  } | null;
+  user: AuthUser | null;
+  tenant: AuthResponse['tenant'] | null;
   onLogout?: () => void;
 }
 
@@ -254,6 +247,29 @@ export function UserMenuDropdown({ user, tenant, onLogout }: UserMenuDropdownPro
                 <span>Console SuperAdmin SaaS</span>
               </Link>
             )}
+            <Link
+              href="/admin/ai-observability"
+              onClick={() => setIsOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 0.65rem',
+                borderRadius: 'var(--df-radius-sm)',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: 'var(--df-accent-blue)',
+                textDecoration: 'none',
+                background: 'rgba(99, 102, 241, 0.08)',
+                border: '1px solid rgba(99, 102, 241, 0.25)',
+                transition: 'background var(--df-transition-fast)',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(99, 102, 241, 0.16)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(99, 102, 241, 0.08)')}
+            >
+              <span>⚡</span>
+              <span>Surveillance IA Ollama (Qwen)</span>
+            </Link>
             <Link
               href="/settings"
               onClick={() => setIsOpen(false)}

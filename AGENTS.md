@@ -1,155 +1,203 @@
-# AGENTS.md — Contrat Maître d'Exploitation & Ingénierie (v3.0 - World-Class DZ-First)
+# AGENTS.md — Contrat Maître d'Exploitation & Ingénierie (v3.1 - World-Class DZ-First & Maintenance 5.0)
 
-**Produit :** Plateforme Souveraine de Télémétrie, IoT Multi-Métiers, Maintenance Prédictive (OEM-First) & Décision Réglementaire — Leader Marché Algérien  
-**Version du contrat :** 3.0 (2026-10-28)  
+**Produit :** Plateforme Souveraine de Télémétrie, IoT Multi-Métiers, Maintenance 5.0 (OEM-First) & Décision Réglementaire — Leader Marché Algérien  
+**Version du contrat :** 3.1 (2026-11-01 — Synchronisation Fonctionnelle Intégrale)  
 **Document Directeur :** [`MASTER_SPEC.md`](file:///e:/docteurflotte_2027/MASTER_SPEC.md) (Master Spec v2.0+)  
 **Plan d'Exécution :** [`docs/development-plan-master-spec.md`](file:///e:/docteurflotte_2027/docs/development-plan-master-spec.md)  
 **Cible d'exécution :** Google Antigravity IDE / Agents de développement autonomes  
-**Dépôt de référence :** Monorepo TypeScript & Python (Next.js 15, NestJS / FastAPI, PostgreSQL 16 / TimescaleDB, Redis, Traccar 6.x / Flespi)  
+**Dépôt de référence :** Monorepo TypeScript & Python (Next.js 15, NestJS, PostgreSQL 16 / TimescaleDB, Redis, Traccar 6.x / Flespi, Ollama Qwen 2.5)  
 **Archives :** [`docs/archive/AGENTS.v1.1.md`](file:///e:/docteurflotte_2027/docs/archive/AGENTS.v1.1.md)
 
 ---
 
-## 1. Mission & Avantage Compétitif (« Algeria-First, World-Class »)
+## 1. Mission, Avantage Compétitif & Paradigme « Maintenance 5.0 »
 
-1. **Domination Locale & Standard Mondial :** Construire la plateforme SaaS multi-tenant souveraine de référence en Algérie (Logistique, BTP/Mines, Hydrocarbures, Agriculture, Ateliers), surpassant Samsara/Geotab par une adaptation native aux réalités algériennes.
-2. **Modèle « OEM-First & Hardware-Agnostic » à 3 Modes :**
-   - *Mode 0 (Zéro Boîtier)* : Réconciliation tickets/cartes Naftal, routage Valhalla, inspections DVIR mobiles Offline-First.
-   - *Mode 1 (GPS Standard)* : Ingestion haute fréquence Traccar, géo-clôtures par Wilaya, éco-conduite.
-   - *Mode 2 (Full CAN / J1939 / IoT)* : Télémétrie moteur profonde, prise de force (PTO), chaînes du froid et engins lourds.
-3. **Moteur Décisionnel Financier (SAD $\rightarrow$ ADS) :** Transformer chaque donnée brute en arbitrage financier en **Dinars Algériens (DZD)** : Coût d'Action Préventive vs Risque d'Inaction (immobilisation, casse moteur, pénalités contractuelles), avec suggestion automatique de véhicule de substitution.
-4. **Physique Prédictive Déterministe & Explicable :** Exécuter 6 modèles physiques (Arrhenius huile, Cranking SOH batterie, thermique radiateur/culasse, Archard freins, colmatage FAP, CUSUM anti-fraude carburant) couplés au score VHI (0-100) avec **preuve explicable** pour le chef de parc.
-5. **Souveraineté Absolue & Conformité Algérienne :** Conformité intégrale à la **Loi 18-07 (ANPDP)** (hébergement local DZ, anonymisation matérielle stricte), au barème **ENACTA**, au Code de la Route algérien (58 Wilayas) et aux règles de facturation **DGI**.
+1. **Domination Locale & Standard Mondial :** Construire la plateforme SaaS multi-tenant souveraine de référence en Algérie (Logistique, BTP/Mines, Hydrocarbures, Agriculture, Ateliers), surpassant Samsara et Geotab par une adaptation native aux contraintes réelles du terrain algérien.
+2. **Le Paradigme de la « Maintenance 5.0 » (Prescriptive & Déterministe) :**
+   - *Rupture avec le pistage passif 4.0* : Contrairement aux solutions traditionnelles qui se contentent de géolocaliser des véhicules ("points sur une carte") ou d'émettre des alertes kilométriques boîte noire, DocteurFlotte transforme chaque signal en **arbitrage économique prescriptif en Dinars Algériens (DZD)**.
+   - *Matrice des 5 Générations* :
+     * **1.0 Réactive** : Casse sur route, dépannage d'urgence, immobilisation lourde.
+     * **2.0 Préventive aveugle** : Intervalles calendaires fixes (vidange tous les 10 000 km jetant des lubrifiants encore viables).
+     * **3.0 Conditionnelle** : Voyants tableau de bord (alerte tardive à >95°C où l'usure mécanique est déjà amorcée).
+     * **4.0 Prédictive statistique** : Modèles ML probabilistes boîte noire, faux positifs fréquents, sans chiffrage de rentabilité.
+     * **5.0 Prescriptive souveraine (DocteurFlotte)** : Physique déterministe à 0 DA (zéro capteur externe requis), arbitrage financier autonome SAD $\rightarrow$ ADS, et assistant d'atelier en langage naturel (Français / Darja phonétique).
+3. **Architecture « OEM-First & Hardware-Agnostic » à 3 Modes :**
+   - *Mode 0 (Zéro Boîtier)* : Exploitation instantanée dès le Jour 1. Réconciliation des tickets/cartes Naftal, routage topographique Valhalla, inspections DVIR mobiles PWA Offline-First.
+   - *Mode 1 (GPS Standard)* : Ingestion haute fréquence Traccar, éco-conduite, détection des dévers et corridors des 58 Wilayas.
+   - *Mode 2 (Full CAN / J1939 / IoT)* : Télémétrie moteur profonde (couple J1939, régime, températures d'huile et d'eau, contre-pression FAP, micro-glissement boîte/pont, sondes de chaîne du froid).
+4. **Physique Déterministe du Jumeau Numérique (6 Organes & 58 Wilayas) :**
+   - Modélisation physique explicable (XAI) sans boîte noire des 6 organes d'usure :
+     1. `ENGINE_OIL` : Cinétique d'oxydation d'Arrhenius ($E_a/R = 6\,500\text{ K}$, sévérité thermique et viscosité cSt).
+     2. `BATTERY_CRANKING` : SOH dynamique CVHI par chute de tension minimale de démarrage ($V_{\text{min}} > 9.60\text{ V}$) et impédance interne.
+     3. `BRAKE_PADS` : Loi tribologique d'Archard basée sur l'énergie dissipée cumulée ($W = \frac{1}{2}m\Delta v^2$) et le dévers routier.
+     4. `COOLING_SYSTEM` : Modèle différentiel thermique EWMA ($\Delta T = |T_{\text{huile}} - T_{\text{eau}}|$) pour prévenir le voilage culasse.
+     5. `DPF_FILTER` : Bilan massique d'accumulation de suie et contre-pression d'échappement (mbar).
+     6. `TRANSMISSION_DRIVETRAIN` : Micro-glissement sous couple J1939 (SPN 524 / SPN 191) et cisaillement du fluide de pont $80\text{W}90$.
+   - **Calibrage bioclimatique sur les 58 Wilayas d'Algérie** (`ALGERIA_58_WILAYAS_PROFILES`) : Tell côtier (humidité, ralenti urbain), Steppes et Hauts-Plateaux (cols montagneux, amplitude thermique $-5^\circ\text{C}$ à $40^\circ\text{C}$), Sahara profond (canicule jusqu'à $49^\circ\text{C}$, vents de sable, silice abrasive, pistes isolées).
+5. **Moteur Décisionnel Financier (SAD $\rightarrow$ ADS en Dinars Algériens DZD) :**
+   - Arbitrage systématique : Coût d'Action Préventive Immédiate vs Risque Financier d'Inaction (casse mécanique, pénalités contractuelles de retard, immobilisation).
+   - Majoration réaliste de l'assistance routière : Forfait de remorquage désertique de **$75\,000\text{ DZD}$** (Ouargla, Tamanrasset, In Salah, Adrar, etc.) vs **$35\,000\text{ DZD}$** dans le Nord/Tell.
+   - Coût d'immobilisation journalière d'exploitation : **$25\,000\text{ DZD/jour}$**.
+   - Calcul opposable de l'Économie Nette (DZD) et du ratio de ROI, avec suggestion d'actifs de substitution de la flotte.
+6. **Souveraineté Absolue & Conformité Algérienne (Loi 18-07 ANPDP) :**
+   - Hébergement local des bases de données sur le territoire national.
+   - Anonymisation matérielle stricte : Zéro PII sortante vers des tiers (Flespi, cartographie externe, LLMs cloud).
+   - Conformité fiscale DGI (NIF, NIS, RC, AI, Timbre fiscal) et barèmes ENACTA.
 
 ---
 
-## 2. Piliers d'Ingénierie « World-Class » (Exigences Non-Fonctionnelles)
+## 2. Piliers d'Ingénierie & Innovations de Rupture Déployées
 
-Tout code produit par un agent doit respecter ces 4 standards de compétitivité :
+L'ensemble des développements du monorepo s'appuie sur les 7 innovations de rupture suivantes :
 
-- **Résilience « Zones Blanches & Grand Sud » (Offline-First) :**
-  - Côté Mobile/Web (DVIR, Ateliers) : Tolérance native aux coupures réseau (synchronisation différée avec résolution de conflits horodatée).
-  - Côté IoT/Télématique : Capacité d'absorber sans perte ni faux positif des rafales de rattrapage (*Store-and-Forward* Teltonika/Traccar après traversée de zone sans réseau 2G/4G) en triant systématiquement par `device_timestamp` et non par `server_ingestion_timestamp`.
-- **Bilinguisme Natif & Ergonomie Terrain (FR / AR - RTL) :**
-  - Zéro chaîne de texte codée en dur dans l'UI. Tout texte passe par les dictionnaires i18n (`fr-DZ`, `ar-DZ`) avec support CSS Logique (compatible **RTL** pour l'arabe).
-  - Les interfaces destinées aux chauffeurs et mécaniciens privilégient le visuel, les codes couleurs universels et les flux rapides (3 clics maximum).
-- **Performance & FinOps (Optimisation Coût/Véhicule) :**
-  - Requêtes TimescaleDB bornées obligatoirement par `tenant_id` ET `time_bucket` (interdiction des `SELECT *` sans filtre temporel sur les hypertables).
-  - Temps de réponse API P95 < 200ms sur les tableaux de bord grâce aux *Continuous Aggregates* TimescaleDB et au cache Redis.
-- **Explicabilité Algorithmique (XAI) :**
-  - Une alerte prédictive ou de fraude carburant (CUSUM) ne renvoie jamais un simple booléen : elle retourne le vecteur de preuve (ex: delta litre, localisation GPS, pente topographique Valhalla, régime moteur) pour éviter tout conflit social injustifié avec les chauffeurs.
+### 2.1 Huissier & Greffier Juridique CUSUM Anti-Fraude
+- Algorithme CUSUM (Cumulative Sum Control Chart) à sensibilité dynamique pour détecter les siphonnages de carburant.
+- **Compensation topographique Valhalla** : Prise en compte du dévers routier et du déport longitudinal de la jauge ($x_{\text{sonde}}$) pour éliminer les faux positifs lors des montées/descentes (ex: Gorges de la Chiffa, col des Caravanes).
+- Génération automatique de procès-verbaux d'infraction infalsifiables (`PV-CUSUM-*`), opposables juridiquement et utilisables en commission de discipline.
+
+### 2.2 IA Souveraine Embarquée (Ollama Qwen 2.5 1.5B Instruct)
+- Modèle LLM 100% auto-hébergé sous Ollama, exécuté localement sur le CPU du serveur (3 threads dédiés).
+- **Zéro dépendance cloud externe** : Aucune donnée ne quitte le réseau de l'entreprise vers des serveurs étrangers.
+- Orchestration cognitive multi-rôles : audit légal, diagnostic physique d'atelier, extraction d'entités télématiques et propositions d'arbitrage.
+
+### 2.3 Coffre de Connaissances RAG Hybride Atelier & RMI
+- Indexation multi-constructeurs de **62 manuels de réparation et fiches techniques officielles** (Renault Trucks, MAN TGX, Mercedes Actros, Shacman, Hino, Isuzu, Caterpillar).
+- Moteur de recherche hybride sans hallucination combinant :
+  * Recherche lexicale plein texte PostgreSQL (`tsvector` / BM25).
+  * Similarité trigrammes (`pg_trgm`) sur les désignations de pièces et codes défauts DTC / J1939.
+  * Ingestion documentaire souveraine (parseur PDF local et extracteur structuré).
+
+### 2.4 Assistant Vocal d'Atelier en Darja Phonétique & Français
+- Interface audio conçue pour les mécaniciens et chefs d'atelier en combinaison de travail :
+  * Commandes vocales en arabe dialectal algérien (Darja phonétique : *« choufli zit el moteur »*, *« aatini l'batterie »*) et français technique.
+  * Short-circuit SQL déterministe sous les **$50\text{ ms}$** pour interroger instantanément la santé d'un véhicule sans passer par un LLM.
+
+### 2.5 Machine à États Anti-Echo Storm (Cooldown 72h)
+- Registre persistant (`anomaly_cooldown_ledger`) évitant la saturation cognitive des chefs de parc.
+- Interdiction stricte de ré-émettre une alerte ou une notification redondante si un Ordre de Travail (OT) est déjà ouvert ou si l'organe fait l'objet d'un suivi actif dans sa fenêtre de stabilisation.
+
+### 2.6 Scanner OCR Naftal & Réconciliation Télématique
+- Capture et traitement d'images de reçus carburant Naftal froissés ou dégradés.
+- Extraction des litres, du type de carburant, de la station, de la Wilaya et du montant DZD.
+- Réconciliation croisée immédiate avec les données de flotte pour certifier les notes de frais et détecter les anomalies de litrage.
+
+### 2.7 Cockpit Haute Densité MapLibre & DVIR Mobile PWA Offline-First
+- Cartographie vectorielle souveraine MapLibre sans dépendance Google Maps.
+- Visualisation temps réel des actifs avec télémétrie par Wilaya et corridors logistiques.
+- Fiches d'inspection pré/post-trajet DVIR utilisables hors-ligne dans les zones blanches du Sud, avec synchronisation horodatée dès retour du réseau.
 
 ---
 
-## 3. Interdictions Absolues (Garde-Fous)
+## 3. Interdictions Absolues (Garde-Fous Non Négociables)
 
-- **Zéro Réécriture Brutale :** Ne jamais réécrire le dépôt, changer la stack ou modifier l'architecture sans ADR formel validé.
-- **Zéro Invention Réglementaire ou Physique :** Ne jamais inventer une loi, un décret JORADP, un barème ENACTA, un taux de TVA/timbre fiscal algérien, un PGN J1939 ou un prix de carburant Naftal.
-- **Zéro Secret Exposé :** Aucun mot de passe, clé API, jeton Traccar/Flespi ou certificat dans le code, Git ou les logs.
-- **Zéro Constante Métier ou Texte en Dur :** Tarifs (Sirghaz, Gasoil, Sans Plomb), seuils thermiques (climat saharien vs côtier), fiscalité (NIF, NIS, RC, AI) et textes UI doivent provenir des tables de configuration (`country_pack_dz`) ou des fichiers i18n.
-- **Zéro Fuite Multi-Tenant :** Tout accès SQL doit être protégé par PostgreSQL RLS en mode Fail-Closed (`df_tenant_role`). Aucun contournement par clé service dans les routes publiques/métier.
-- **Zéro Violation Loi 18-07 (ANPDP) :** Aucune donnée à caractère personnel (nom du chauffeur, NIN, téléphone, plaque d'immatriculation, raison sociale client) ne doit sortir vers un service tiers (Flespi, tuiles cartographiques externes, LLM externe). Seul l'identifiant matériel pseudonymisé (`IMEI` / `device_uuid`) est autorisé.
-- **Zéro Donnée Démo en Production :** Séparation stricte des données synthétiques (`data_origin = 'DEMO'`) vis-à-vis des données réelles et de la facturation.
-- **Zéro Déclaration Sans Preuve :** Aucun statut `PASS` sans exécution réelle des tests et inspection des logs.
-- **Préservation de l'Hôte :** Ne jamais altérer ou stopper un conteneur, port ou volume extérieur au projet.
+- **Zéro Constante Métier ou Tarif en Dur :** Les prix du carburant (Gasoil, Sirghaz, Sans Plomb), forfaits de dépannage, forfaits de remorquage saharien, taux de TVA et paramètres régionaux doivent obligatoirement provenir des tables de configuration administrables (`SystemConfig`, `country_pack_dz`) et jamais de valeurs codées en dur dans le code source.
+- **Zéro Fuite Multi-Tenant (PostgreSQL RLS Fail-Closed) :** Tout accès SQL aux données d'exploitation doit transiter par le contexte tenant validé avec isolation RLS stricte (`df_tenant_role`). Tout contournement par clé superuser dans une route métier est proscrit.
+- **Zéro Violation Loi 18-07 (ANPDP) :** Aucune donnée personnelle (nom de chauffeur, numéro de téléphone, NIN, plaque, raison sociale) ne doit sortir vers un tiers (Flespi, cartographie externe, API LLM cloud). Seul l'identifiant matériel pseudonymisé (`device_uuid`) est toléré vers les passerelles matérielles.
+- **Zéro Donnée Démo en Environnement Réel :** Séparation étanche des données de simulation (`data_origin = 'DEMO'`) vis-à-vis des données réelles de flotte et de facturation.
+- **Zéro Déclaration Sans Preuve :** Aucun statut `PASS` ne peut être affirmé sans exécution effective des tests automatisés, vérification du code retour et inspection des logs.
+- **Préservation de l'Hôte :** Ne jamais stopper ou altérer un conteneur, un port ou un processus hôte extérieur au projet DocteurFlotte.
 
 ---
 
 ## 4. Ordre de Priorité en Cas de Conflit
 
 1. Sécurité, souveraineté des données (Loi 18-07 ANPDP) et isolation multi-tenant (PostgreSQL RLS).
-2. Exactitude physique, financière (DGI) et réglementaire algérienne (JORADP / ENACTA).
+2. Exactitude physique, financière (DGI) et réglementaire algérienne (JORADP / ENACTA / 58 Wilayas).
 3. Le Document de Référence Directeur [`MASTER_SPEC.md`](file:///e:/docteurflotte_2027/MASTER_SPEC.md).
 4. Ce contrat maître [`AGENTS.md`](file:///e:/docteurflotte_2027/AGENTS.md).
 5. Le Plan Directeur d'Exécution [`docs/development-plan-master-spec.md`](file:///e:/docteurflotte_2027/docs/development-plan-master-spec.md).
-6. Décisions d'architecture acceptées ([`docs/decisions/`](file:///e:/docteurflotte_2027/docs/decisions/)).
-7. Comportement observé dans le dépôt et tests automatisés existants.
+6. Décisions d'architecture validées ([`docs/decisions/`](file:///e:/docteurflotte_2027/docs/decisions/)).
+7. Code existant testé et vérifié dans le dépôt.
 
 ---
 
-## 5. Périmètre d'Autonomie & Rôles des Agents
+## 5. Rôles et Organisation des Spécialités
 
 ### 5.1 Rôles Spécialisés ([`docs/agent-roles/`](file:///e:/docteurflotte_2027/docs/agent-roles/))
-- **Architecte Principal ([`architect.md`](file:///e:/docteurflotte_2027/docs/agent-roles/architect.md)) :** Garant de `MASTER_SPEC`, performance TimescaleDB, isolation RLS, résilience Offline-First et maîtrise des coûts d'infrastructure.
-- **Ingénieur Télématique & IoT ([`telematics-engineer.md`](file:///e:/docteurflotte_2027/docs/agent-roles/telematics-engineer.md)) :** Responsable Traccar self-hosted, protocoles Teltonika/Ruptela/Queclink, décodage CAN/J1939, gestion des rafales *Store-and-Forward* et failover Flespi zéro-PII.
-- **Ingénieur Maintenance Prédictive & Data ([`predictive-maintenance-engineer.md`](file:///e:/docteurflotte_2027/docs/agent-roles/predictive-maintenance-engineer.md)) :** Implémentation des 6 algorithmes physiques (calibrés pour les contraintes climatiques algériennes : stress thermique saharien, poussière), RUL, VHI, anti-fraude CUSUM et arbitrage financier SAD $\rightarrow$ ADS.
-- **Officier Réglementaire, Fiscalité & Conformité DZ ([`compliance-officer.md`](file:///e:/docteurflotte_2027/docs/agent-roles/compliance-officer.md)) :** Encodage des textes JORADP (ENACTA, assurances, restrictions de tonnage/horaires par Wilaya), conformité facturation algérienne (NIF, NIS, RC, AI, Timbre, CIB/Edahabia) et audit Loi 18-07.
-- **Ingénieur Produit & UX Terrain ([`ux-field-engineer.md`](file:///e:/docteurflotte_2027/docs/agent-roles/ux-field-engineer.md)) :** Garant de l'expérience bilingue (FR/AR RTL), de la simplicité des écrans DVIR/Atelier, et de la lisibilité des rapports exécutifs.
-- **Relecteur Indépendant ([`reviewer.md`](file:///e:/docteurflotte_2027/docs/agent-roles/reviewer.md)) :** Audit critique, sécurité, performance et validation avant clôture de chaque tranche.
+- **Architecte Principal ([`architect.md`](file:///e:/docteurflotte_2027/docs/agent-roles/architect.md)) :** Garant de l'intégrité globale, performance TimescaleDB, isolation multi-tenant RLS, résilience Offline-First et maîtrise des coûts d'infrastructure.
+- **Ingénieur Télématique & IoT ([`telematics-engineer.md`](file:///e:/docteurflotte_2027/docs/agent-roles/telematics-engineer.md)) :** Ingestion Traccar self-hosted, protocoles Teltonika/Ruptela/Queclink, PGNs J1939, gestion des rafales *Store-and-Forward* et failover Flespi zéro-PII.
+- **Ingénieur Maintenance Prédictive & Data ([`predictive-maintenance-engineer.md`](file:///e:/docteurflotte_2027/docs/agent-roles/predictive-maintenance-engineer.md)) :** Physique déterministe (6 organes), jumeau numérique calibré 58 Wilayas, algorithme CUSUM anti-ballottement, calculs RUL/VHI et arbitrage SAD $\rightarrow$ ADS en DZD.
+- **Officier Réglementaire, Fiscalité & Conformité DZ ([`compliance-officer.md`](file:///e:/docteurflotte_2027/docs/agent-roles/compliance-officer.md)) :** Conformité Loi 18-07 ANPDP, règles fiscales DGI algériennes, nomenclature des 58 Wilayas, barèmes ENACTA et Code de la Route algérien.
+- **Ingénieur Produit & UX Terrain ([`ux-field-engineer.md`](file:///e:/docteurflotte_2027/docs/agent-roles/ux-field-engineer.md)) :** Interfaces bilingues (FR / AR avec support CSS logique RTL), cockpit haute densité MapLibre, simplicité des écrans DVIR et assistant vocal d'atelier.
+- **Relecteur Indépendant ([`reviewer.md`](file:///e:/docteurflotte_2027/docs/agent-roles/reviewer.md)) :** Contrôle qualité, audit de sécurité RLS, détection de régressions et validation formelle de chaque livraison.
 
-### 5.2 Actions Réalisables en Autonomie Complète
-- Exploration du code, profilage de requêtes SQL/TimescaleDB et audits non destructifs.
-- Développement TDD des fonctionnalités, algorithmes physiques, règles métier et traductions FR/AR.
-- Exécution des suites de tests automatisés, linters et scanners de sécurité.
-- Rédaction de la documentation technique, des ADR proposés et des rapports d'exécution.
-
-### 5.3 Actions Exigeant une Validation Humaine Explicite
-- Migrations DDL destructives ou altérant des hypertables/tables de production existantes.
-- Modification des politiques de sécurité PostgreSQL RLS ou du schéma d'anonymisation Loi 18-07.
-- Ajout de dépendances externes lourdes ou payantes.
-- Suppression de fichiers sources majeurs, volumes Docker ou jeux de données de référence.
-
----
-
-## 6. Protocole de Travail Obligatoire (Cycle en 7 Étapes)
-
-1. **Reconnaissance Rapide :** Inspecter `git status`, `package.json` et l'état des services via `. .\scripts\load-env.ps1`.
-2. **Activation des Skills :** Charger les compétences pertinentes dans `.agents/skills/` avant toute implémentation.
-3. **Cadrage Métier & Algérie-First :** Lier la tâche à une Épopée du [`docs/development-plan-master-spec.md`](file:///e:/docteurflotte_2027/docs/development-plan-master-spec.md) et vérifier ses impacts réglementaires/locaux (Loi 18-07, DZD, FR/AR, hors-ligne).
-4. **Développement TDD & Robuste :** Écrire les tests (incluant les cas limites : perte GPS, données hors-séquence, tentatives d'accès cross-tenant) avant ou pendant le code.
-5. **Chaîne de Vérification Locale :** Exécuter systématiquement `pnpm verify` (Typecheck, Lint, Tests unitaires/intégration, Scan RLS, Scan Secrets & PII).
-6. **Audit Indépendant :** Passer la revue stricte de [`docs/agent-roles/reviewer.md`](file:///e:/docteurflotte_2027/docs/agent-roles/reviewer.md).
-7. **Traçabilité & Commit Atomique :** Générer le rapport factuel dans `docs/agent-reports/` avec le hash du commit Git.
+### 5.2 Répertoire des Modules Applicatifs Clés
+- `apps/api/src/digital-twin/` : Moteur de simulation physique 6 organes, référentiel 58 Wilayas et arbitrage financier DZD.
+- `apps/api/src/fleet-intelligence/` : Algorithmes CUSUM, modèles physiques déterministes, innovations de rupture et PV d'infraction.
+- `apps/api/src/fuel-scanner/` : Scanner OCR Naftal et réconciliation des factures atelier / carburant.
+- `apps/api/src/workshop-voice/` : Assistant vocal d'atelier, dictionnaire phonétique Darja/Français et short-circuit SQL.
+- `apps/api/src/sovereign-rag/` : Coffre de connaissances RMI 62 manuels, indexation BM25 + pg_trgm.
+- `apps/api/src/copilot/` : Intégration du LLM local Ollama Qwen 2.5 et orchestration des outils métier.
+- `apps/api/src/decisions/` : Moteur actuarial d'arbitrage SAD $\rightarrow$ ADS et daemon anti-echo storm 72h.
+- `apps/api/src/admin/` : Administration des paramètres de référence, prix Naftal dynamiques et isolation des tenants.
+- `apps/web/src/app/` : Cockpits Next.js 15 (`/digital-twin`, `/live-cockpit`, `/fuel-scanner`, `/guide`, `/work-orders`, `/dispatch`, `/cold-chain`, `/dvir`, `/preventive`, `/copilot`, `/admin`).
 
 ---
 
-## 7. Commandes et Environnement
+## 6. Protocole d'Exécution & Cycle en 7 Étapes
 
-Exécution locale sous **Windows / PowerShell** avec **Docker Compose** :
+1. **Reconnaissance Initiale :** Vérifier l'état Git (`git status`) et charger les variables d'environnement via `. .\scripts\load-env.ps1`.
+2. **Cadrage Métier & Algérie-First :** Relier la tâche aux spécifications de `MASTER_SPEC.md` et vérifier les impacts réglementaires (Loi 18-07, monnaie DZD, FR/AR RTL, mode hors-ligne).
+3. **Activation des Compétences :** Consulter les guides et compétences applicables avant toute implémentation.
+4. **Développement TDD :** Écrire et exécuter les tests automatisés (incluant les cas d'erreur réseau, données décalées et tentatives cross-tenant).
+5. **Chaîne de Validation Locale :**
+   * Compilation des contrats : `pnpm --filter @docteurflotte/contracts build`
+   * Typecheck web : `pnpm --filter @docteurflotte/web typecheck`
+   * Tests unitaires et d'intégration API : `pnpm --filter @docteurflotte/api test` (maintien impératif de 100% de suites vertes).
+6. **Contrôle Souveraineté & Zero Hardcode :** Vérifier l'absence de chaînes en dur, d'IPs externes non autorisées et de données nominatives dans les flux.
+7. **Compte Rendu & Traçabilité :** Rédiger le rapport factuel selon le format strict du §9.
+
+---
+
+## 7. Commandes d'Environnement Local
+
+Sous **Windows / PowerShell** avec **Docker Compose** :
 
 ```powershell
-# 1. Chargement instantané des variables et détection des ports
+# 1. Chargement instantané des variables et détection des runtimes locaux
 . .\scripts\load-env.ps1
 
-# 2. Démarrage de l'infrastructure locale isolée (Postgres/Timescale 5434, Redis 6380, Traccar 8085)
+# 2. Démarrage de l'infrastructure locale isolée (Postgres 5434, Redis 6380, Traccar 8085)
 docker compose -f infra/compose.yaml up -d
 
-# 3. Chaîne de validation complète obligatoire (Quality Gate)
-pnpm verify
+# 3. Lancement du serveur NestJS API (Port 3001)
+cd apps/api; node --max-old-space-size=2048 dist/main.js
 
-# 4. Lancement du serveur de développement
-pnpm dev
-```
+# 4. Lancement du serveur Next.js Frontend (Port 3000)
+cd apps/web; pnpm dev
 
-Déploiement souverain en production (VPS / Cloud Local Algérie sous Linux) :
-```bash
-docker compose -f infra/compose.prod.yaml up -d --build
+# 5. Exécution complète des suites de tests automatisés (27 suites)
+pnpm --filter @docteurflotte/api test
+
+# 6. Vérification TypeScript stricte du frontend
+pnpm --filter @docteurflotte/web typecheck
 ```
 
 ---
 
 ## 8. Definition of Done (DoD — Standard Classe Mondiale)
 
-Une tâche n'est déclarée `PASS` que si **100 %** des critères suivants sont validés :
-- [ ] **Alignement Spec :** Exigence traçable dans `MASTER_SPEC.md` sans simulation ni mock de façade en production.
-- [ ] **Sécurité Multi-Tenant :** Contexte tenant validé côté serveur et test d'isolation RLS (tentative d'accès croisé échouant comme prévu) exécuté.
-- [ ] **Souveraineté Loi 18-07 :** Zéro PII dans les payloads réseau sortants, les logs applicatifs ou les télémétries tierces.
-- [ ] **Résilience & Performance :** Gestion des données hors-séquence IoT vérifiée ; requêtes TimescaleDB indexées et bornées temporellement.
-- [ ] **Adaptation Algérie :** Unités, devises (`DZD`), règles fiscales/réglementaires chargées dynamiquement et clés de traduction `fr-DZ` / `ar-DZ` (RTL) présentes si l'UI est touchée.
-- [ ] **Qualité & Preuve :** `pnpm verify` passe à 100 % (0 erreur TypeScript, 0 erreur Lint, tests verts) avec sortie exacte consignée dans `docs/agent-reports/`.
+Une tâche n'est déclarée `PASS` que si **100 %** des critères suivants sont remplis :
+- [ ] **Alignement Fonctionnel :** Conforme à `MASTER_SPEC.md` et au paradigme Maintenance 5.0 sans bouchon ni simulation de façade.
+- [ ] **Isolation Multi-Tenant :** Requêtes SQL filtrées par tenant avec contexte RLS PostgreSQL Fail-Closed.
+- [ ] **Souveraineté Loi 18-07 (ANPDP) :** Zéro donnée à caractère personnel (PII) émise vers l'extérieur ; coupe-feu actif.
+- [ ] **Zéro Hardcode :** Constantes métier (tarifs carburant, forfaits dépannage, barèmes) injectées depuis les tables de configuration.
+- [ ] **Résilience & Données IoT :** Tolérance aux rafales Store-and-Forward triées par `device_timestamp` ; gestion du hors-ligne.
+- [ ] **Adaptation Algérie :** Monnaie `DZD`, forfaits sahariens, profils des 58 Wilayas et support bilingue FR/AR (RTL).
+- [ ] **Qualité Validée :** `pnpm typecheck` à 0 erreur TypeScript et 100% des suites de tests Jest API au statut vert.
 
 ---
 
-## 9. Format de Compte Rendu Final
+## 9. Format de Compte Rendu Final Obligatoire
 
-À l'issue de chaque session ou tranche livrée, produire ce bloc exact :
+À l'issue de chaque session de travail ou livraison, produire ce bloc exact :
 
 ```text
 STATUT : PASS | PARTIAL | BLOCKED | NOT VERIFIED
 GATE / EPIC : [Numéro et nom de l'EPIC dans docs/development-plan-master-spec.md]
 OBJECTIF : [Description concise de la valeur livrée]
 CHANGEMENTS : [Fichiers majeurs créés ou modifiés]
-COMMIT : [Hash court du commit Git]
+COMMIT : [Hash court du commit Git ou mention "Non commité"]
 DURÉE : [Durée constatée]
 TESTS EXÉCUTÉS : [Commande exacte + résumé chiffré des résultats]
 TESTS NON EXÉCUTÉS : [Justification factuelle ou "Aucun"]
@@ -164,7 +212,7 @@ PROCHAINE ACTION : [Une seule action immédiate et concrète]
 
 ---
 
-## 10. Référentiel Documentaire & Architecture
+## 10. Référentiel Documentaire du Projet
 
 | Niveau | Document Clé | Description |
 | :---: | :--- | :--- |

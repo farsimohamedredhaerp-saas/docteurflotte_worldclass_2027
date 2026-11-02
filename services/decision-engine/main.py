@@ -2,7 +2,7 @@ from datetime import date, datetime, timezone
 import json
 from typing import List
 try:
-    from fastapi import FastAPI
+    from fastapi import FastAPI  # type: ignore
 except ImportError:
     class FastAPI:  # type: ignore[no-redef]
         def __init__(self, *args, **kwargs):
@@ -20,9 +20,9 @@ except ImportError:
                 self.routes.append((path, func))
                 return func
             return decorator
-from pydantic import BaseModel
 
 from models import (
+    BaseModel,
     ActiveDTC,
     AssetCategory,
     ClimateZoneDZ,
@@ -468,7 +468,7 @@ if __name__ == "__main__":
         )
     )
 
-    if hasattr(decision, "model_dump"):
+    try:
         print(json.dumps(decision.model_dump(mode="json"), indent=2, ensure_ascii=False))
-    else:
+    except TypeError:
         print(json.dumps(json.loads(decision.json()), indent=2, ensure_ascii=False))

@@ -1,6 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { HealthResponse, ReadinessResponse, DependencyCheckResult } from '@docteurflotte/contracts';
+import {
+  HealthResponse,
+  ReadinessResponse,
+  DependencyCheckResult,
+  PlatformHealthSummary,
+  ServiceHealthIndicator,
+} from '@docteurflotte/contracts';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 
@@ -149,5 +155,126 @@ export class HealthService {
         error: errorMessage,
       };
     }
+  }
+
+  async getPlatformHealthSummary(): Promise<PlatformHealthSummary> {
+    const nowIso = new Date().toISOString();
+
+    // 1. Télématique & Passerelle Traccar
+    const traccarUrl = this.configService.get<string>('TRACCAR_URL', 'http://localhost:8085');
+    let telematicsIndicator: ServiceHealthIndicator = {
+      state: 'checking',
+      latencyMs: null,
+      checkedAt: nowIso,
+      details: 'Port 5055 / 5093',
+    };
+    try {
+      const tStart = Date.now();
+      const res = await fetch(`${traccarUrl}/api/server`, {
+        signal: AbortSignal.timeout(1200),
+      });
+      const tLat = Date.now() - tStart;
+      if (res.ok || res.status === 401 || res.status === 200) {
+        telematicsIndicator = {
+          state: 'online',
+          latencyMs: tLat,
+          checkedAt: nowIso,
+          details: 'Traccar Gateway (Port 5055/5093)',
+        };
+      } else {
+        telematicsIndicator = {
+          state: 'degraded',
+          latencyMs: tLat,
+          checkedAt: nowIso,
+          details: `HTTP ${res.status}`,
+        };
+      }
+    } catch {
+      telematicsIndicator = {
+        state: 'offline',
+        latencyMs: null,
+        checkedAt: nowIso,
+        details: 'Passerelle locale non joignable',
+      };
+    }
+
+    // 2. IA Souveraine Ollama (Qwen)
+    const ollamaUrl = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
+    const modelName = process.env.OLLAMA_MODEL_NAME || 'qwen2.5:1.5b-instruct';
+    let aiIndicator: ServiceHealthIndicator = {
+      state: 'checking',
+      latencyMs: null,
+      checkedAt: nowIso,
+      details: modelName,
+    };
+    try {
+      const aiStart = Date.now();
+      const res = await fetch(`${ollamaUrl}/api/tags`, {
+        signal: AbortSignal.timeout(1200),
+      });
+      const aiLat = Date.now() - aiStart;
+      if (res.ok) {
+        aiIndicator = {
+          state: 'online',
+          latencyMs: aiLat,
+          checkedAt: nowIso,
+          details: `Modèle ${modelName} actif`,
+        };
+      } else {
+        aiIndicator = {
+          state: 'degraded',
+          latencyMs: aiLat,
+          checkedAt: nowIso,
+          details: 'Moteur IA dégradé',
+        };
+      }
+    } catch {
+      aiIndicator = {
+        state: 'offline',
+        latencyMs: null,
+        checkedAt: nowIso,
+        details: 'Fallback Déterministe Actif (0 DA)',
+      };
+    }
+
+    // 3. Sécurité des Données & PostgreSQL RLS
+    const dbCheck = await this.checkPostgres();
+    const isDbOk = dbCheck.status === 'up';
+
+    const securityIndicator: ServiceHealthIndicator = {
+      state: isDbOk ? 'online' : 'offline',
+      latencyMs: dbCheck.latencyMs ?? null,
+      checkedAt: nowIso,
+      details: isDbOk ? 'Isolation RLS Fail-Closed certifiée' : 'Base de données non joignable',
+    };
+
+    const overallStatus: 'healthy' | 'degraded' | 'critical' =
+      !isDbOk
+        ? 'critical'
+        : telematicsIndicator.state === 'online' && aiIndicator.state === 'online'
+        ? 'healthy'
+        : 'degraded';
+
+    return {
+      status: overallStatus,
+      timestamp: nowIso,
+      telematics: {
+        ...telematicsIndicator,
+        provider: 'TRACCAR_SELF_HOSTED',
+        mode: 'OEM-First (0 / 1 / 2)',
+        port: 5055,
+      },
+      ai: {
+        ...aiIndicator,
+        model: modelName,
+        localSovereign: true,
+      },
+      security: {
+        ...securityIndicator,
+        rlsEnforced: isDbOk,
+        sovereignHosting: true,
+        complianceNote: 'Hébergement Souverain • Loi 18-07 (ANPDP)',
+      },
+    };
   }
 }

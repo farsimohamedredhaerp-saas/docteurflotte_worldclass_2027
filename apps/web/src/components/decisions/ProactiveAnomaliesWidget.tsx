@@ -37,7 +37,7 @@ const INITIAL_PROACTIVE_CARDS: MockDriftCard[] = [
     drift: '+4.5°C sur 10 jours à charge égale (88.0°C -> 92.5°C)',
     physicalLaw: 'Dérive transfert convectif radiateur (poussières / sable Tell-Atlas)',
     estimatedCostDzd: 18000,
-    inactionRiskDzd: 350000,
+    inactionRiskDzd: 350000, // mock fallback
     cooldownHoursRemaining: 71,
     status: 'ACTIVE_CARD',
   },
@@ -51,7 +51,7 @@ const INITIAL_PROACTIVE_CARDS: MockDriftCard[] = [
     drift: '3.8 mm (Cote critique ENACTA: 3.0 mm, RUL estimée: 12 jours)',
     physicalLaw: 'Loi d Archard W = k·F·d/H (Traversée descendante Gorges de la Chiffa)',
     estimatedCostDzd: 44000,
-    inactionRiskDzd: 220000,
+    inactionRiskDzd: 220000, // mock fallback
     cooldownHoursRemaining: 68,
     status: 'ACTIVE_CARD',
   },

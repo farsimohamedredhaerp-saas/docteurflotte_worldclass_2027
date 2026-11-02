@@ -112,12 +112,33 @@ export const ENACTA_REGULATORY_MATRIX: Record<EnactaVehicleCategory, RegulatoryR
 
 /**
  * Barème des Carburants Officiels Naftal Algérie (DZD / Litre)
+ * Aligné sur la table administrable platform_fiscal_fuel_prices (Loi de Finances en vigueur)
  */
 export const NAFTAL_FUEL_PRICES_DZD = {
-  GASOIL: 29.01,
-  ESSENCE_SANS_PLOMB: 45.97,
-  SIRGHAZ_GPL: 9.00,
+  GASOIL: 31.00,
+  ESSENCE_SANS_PLOMB: 47.00,
+  SIRGHAZ_GPL: 12.00,
 } as const;
+
+/**
+ * Résout le tarif officiel de carburant en priorisant la configuration dynamique de l'organisation
+ */
+export function resolveFuelPrice(
+  fuelType: string,
+  dynamicTariffs?: Record<string, number> | null,
+): number {
+  const norm = fuelType.toUpperCase();
+  if (dynamicTariffs && dynamicTariffs[norm] !== undefined) {
+    return dynamicTariffs[norm];
+  }
+  if (norm.includes('SANS_PLOMB') || norm.includes('ESSENCE')) {
+    return dynamicTariffs?.['ESSENCE_SANS_PLOMB'] ?? NAFTAL_FUEL_PRICES_DZD.ESSENCE_SANS_PLOMB;
+  }
+  if (norm.includes('GPL') || norm.includes('SIRGHAZ')) {
+    return dynamicTariffs?.['SIRGHAZ_GPL'] ?? NAFTAL_FUEL_PRICES_DZD.SIRGHAZ_GPL;
+  }
+  return dynamicTariffs?.['GASOIL'] ?? NAFTAL_FUEL_PRICES_DZD.GASOIL;
+}
 
 /**
  * Coûts moyens de remorquage lourd par zone géographique en DZD
@@ -395,20 +416,22 @@ export function evaluateFinancialArbitrageDzd(
 /**
  * Ordre de Mission (OM) Réglementaire Algérien avec empreinte cryptographique hors-ligne
  */
+export type MissionOrderCompanyInfo = {
+  legalName: string;
+  tradeName?: string;
+  nif: string;
+  nis: string;
+  rcNumber: string;
+  aiNumber: string;
+  headquartersWilayaCode: number;
+  headquartersWilayaName: string;
+};
+
 export interface RegulatoryMissionOrderData {
   orderNumber: string; // Ex: OM-2026-160012
   issueDateIso: string;
   validUntilIso: string;
-  companyInfo: {
-    legalName: string;
-    tradeName?: string;
-    nif: string;
-    nis: string;
-    rcNumber: string;
-    aiNumber: string;
-    headquartersWilayaCode: number;
-    headquartersWilayaName: string;
-  };
+  companyInfo: MissionOrderCompanyInfo;
   vehicle: {
     vehicleId: string;
     registrationPlate: string;
@@ -510,4 +533,15 @@ export const DEFAULT_SUBSTITUTION_WEIGHTS: SubstitutionScoringWeights = {
   weightApproachDist: 0.25,
   weightFleetBalance: 0.15,
 };
+
+/**
+ * Taux de TVA et Barèmes Fiscaux Officiels Algériens (DGI / Code des Impôts Directs)
+ */
+export const ALGERIA_FISCAL_RATES = {
+  STANDARD_VAT_RATE: 0.19, // TVA standard 19%
+  REDUCED_VAT_RATE: 0.09, // TVA réduite 9%
+  CORPORATE_TAX_RATE: 0.19, // IBS taux standard
+  PASSENGER_VEHICLE_AMORTIZATION_CEILING_DZD: 3_000_000, // Plafond amortissement VL Art. 141 CIDTA
+} as const;
+
 

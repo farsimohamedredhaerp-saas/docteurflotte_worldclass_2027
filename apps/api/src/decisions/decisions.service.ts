@@ -12,6 +12,7 @@ import {
   CategoryVariance,
   CreateBudgetDto,
   DataOrigin,
+  DecisionExplanationDossier,
   DecisionRecommendation,
   DecisionStatus,
   DismissDecisionDto,
@@ -19,6 +20,30 @@ import {
   WorkOrderStatus,
   resolveCountryPack,
 } from '@docteurflotte/contracts';
+
+interface DecisionDatabaseRow {
+  id: string;
+  tenant_id: string;
+  asset_id: string;
+  asset_name?: string;
+  asset_code?: string;
+  asset_category?: string;
+  rule_id: string;
+  rule_version: string;
+  urgency: DecisionRecommendation['urgency'];
+  title: string;
+  description: string;
+  estimated_action_cost: number | string;
+  cost_inaction_risk: number | string;
+  net_expected_savings: number | string;
+  confidence_score: number | string;
+  explanation_dossier?: DecisionExplanationDossier;
+  status: string;
+  resolved_work_order_id?: string;
+  data_origin?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 @Injectable()
 export class DecisionsService {
@@ -124,7 +149,7 @@ export class DecisionsService {
         JOIN assets a ON a.id = d.asset_id
         WHERE d.tenant_id = $1
       `;
-      const params: any[] = [tenantId];
+      const params: (string | DecisionStatus)[] = [tenantId];
 
       if (status) {
         query += ` AND d.status = $2`;
@@ -348,14 +373,14 @@ export class DecisionsService {
     });
   }
 
-  private mapDecision(row: any): DecisionRecommendation {
+  private mapDecision(row: DecisionDatabaseRow): DecisionRecommendation {
     return {
       id: row.id,
       tenantId: row.tenant_id,
       assetId: row.asset_id,
-      assetName: row.asset_name,
-      assetCode: row.asset_code,
-      assetCategory: row.asset_category,
+      assetName: row.asset_name || 'Véhicule Flotte',
+      assetCode: row.asset_code || 'VEH-01',
+      assetCategory: row.asset_category || 'HEAVY_TRUCK',
       ruleId: row.rule_id,
       ruleVersion: row.rule_version,
       urgency: row.urgency,
@@ -365,10 +390,15 @@ export class DecisionsService {
       costInactionRisk: Number(row.cost_inaction_risk),
       netExpectedSavings: Number(row.net_expected_savings),
       confidenceScore: Number(row.confidence_score),
-      explanationDossier: row.explanation_dossier,
+      explanationDossier: row.explanation_dossier || {
+        inputMetrics: {},
+        economicHypotheses: {},
+        potentialFailureModes: [],
+        mitigationAction: '',
+      },
       status: row.status as DecisionStatus,
       resolvedWorkOrderId: row.resolved_work_order_id,
-      dataOrigin: row.data_origin,
+      dataOrigin: row.data_origin || 'PRODUCTION',
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };

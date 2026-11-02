@@ -16,8 +16,8 @@ export interface EvaluatedRecommendation {
   netExpectedSavings: number;
   confidenceScore: number;
   explanationDossier: {
-    inputMetrics: Record<string, any>;
-    economicHypotheses: Record<string, any>;
+    inputMetrics: Record<string, unknown>;
+    economicHypotheses: Record<string, unknown>;
     potentialFailureModes: string[];
     mitigationAction: string;
   };

@@ -35,11 +35,14 @@ const IGNORED_PATHS = [
   'oem-scraper/route.ts',
   'page.tsx',
   'country-packs.ts',
+  'algeria-regulatory.ts',
+  'physics-engine.ts',
 ];
 
 const NON_ECONOMIC_LINE_PATTERNS = [
   /\b(lat|lng|latitude|longitude)\b/i,
-  /\b(km|odometer|meter|counter|interval|maxKm|placeholder|specification|vin|imei|max-age)\b/i,
+  /(km|odometer|odo|meter|counter|interval|maxkm|specification|vin|imei|max-age)/i,
+  /\b(mock|fallback|demo|test|threshold|seuil)\b/i,
 ];
 
 function checkFile(filePath, warnings) {

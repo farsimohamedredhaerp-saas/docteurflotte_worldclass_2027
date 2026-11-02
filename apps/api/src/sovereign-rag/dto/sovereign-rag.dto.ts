@@ -52,7 +52,7 @@ export interface KnowledgeSearchResult {
   subsystem: string;
   section_title: string;
   content: string;
-  structured_specs: Record<string, any>;
+  structured_specs: Record<string, unknown>;
   lexical_rank: number;
   semantic_rank: number;
   rrf_score: number;

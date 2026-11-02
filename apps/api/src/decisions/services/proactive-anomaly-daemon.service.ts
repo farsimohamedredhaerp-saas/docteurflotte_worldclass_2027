@@ -28,7 +28,7 @@ export interface ProactiveCard {
   subsystem: string;
   anomalyType: string;
   severity: string;
-  evidence: Record<string, any>;
+  evidence: Record<string, unknown>;
   recommendedAction: string;
   estimatedActionCostDzd: number;
   inactionRiskCostDzd: number;
@@ -226,3 +226,4 @@ export class ProactiveAnomalyDaemonService {
     return (res.rowCount ?? 0) > 0;
   }
 }
+

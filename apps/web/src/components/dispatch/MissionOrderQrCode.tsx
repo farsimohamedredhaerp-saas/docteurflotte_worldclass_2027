@@ -128,3 +128,4 @@ export function MissionOrderQrCode({ value, size = 160, className = '' }: Missio
     </div>
   );
 }
+

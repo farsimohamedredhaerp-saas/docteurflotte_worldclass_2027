@@ -98,7 +98,7 @@ Circuit de lubrification : Capacité d'huile ${variant.oil_capacity_liters || 0}
 Intervalles de révision recommandés :
 ${tasksSummary || 'Programme de maintenance selon carnet constructeur.'}`;
 
-      const structuredSpecs: Record<string, any> = {
+      const structuredSpecs: Record<string, unknown> = {
         oil_capacity_liters: variant.oil_capacity_liters || 0,
         oil_norm_spec: variant.oil_norm_spec || 'N/A',
         power_hp: variant.power_hp || 0,

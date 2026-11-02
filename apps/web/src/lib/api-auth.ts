@@ -1,5 +1,6 @@
 import {
   AuthResponse,
+  AuthUser,
   LoginDto,
   RegisterTenantDto,
   TenantSettings,
@@ -7,7 +8,14 @@ import {
   TenantSetupResponse,
   UpdateTenantSettingsDto,
   PurgeDemoDataResponse,
+  UserProfileResponse,
 } from '@docteurflotte/contracts';
+
+export interface NavbarSession {
+  token: string | null;
+  user: AuthUser | null;
+  tenant: AuthResponse['tenant'] | null;
+}
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -62,7 +70,7 @@ export class AuthClient {
     return data;
   }
 
-  static async getProfile(token: string): Promise<any> {
+  static async getProfile(token: string): Promise<UserProfileResponse> {
     const res = await fetch(`${API_BASE_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -116,28 +124,44 @@ export class AuthClient {
     return data;
   }
 
-  // Stockage local de session sécurisé
+  // Stockage local de session sécurisé avec notification inter-composants
   static saveSession(auth: AuthResponse): void {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('df_auth_token', auth.accessToken);
-      localStorage.setItem('df_auth_user', JSON.stringify(auth.user));
-      localStorage.setItem('df_auth_tenant', JSON.stringify(auth.tenant));
+      try {
+        localStorage.setItem('df_auth_token', auth.accessToken);
+        localStorage.setItem('df_auth_user', JSON.stringify(auth.user));
+        localStorage.setItem('df_auth_tenant', JSON.stringify(auth.tenant));
+        window.dispatchEvent(new CustomEvent('auth:session-changed', { detail: auth }));
+      } catch (err) {
+        console.error('[AuthClient] Erreur lors de la sauvegarde de session:', err);
+      }
     }
   }
 
-  static getSession(): { token: string | null; user: any | null; tenant: any | null } {
+  static getSession(): NavbarSession {
     if (typeof window === 'undefined') {
       return { token: null, user: null, tenant: null };
     }
-    const token = localStorage.getItem('df_auth_token');
-    const userStr = localStorage.getItem('df_auth_user');
-    const tenantStr = localStorage.getItem('df_auth_tenant');
+    try {
+      const token = localStorage.getItem('df_auth_token');
+      const userStr = localStorage.getItem('df_auth_user');
+      const tenantStr = localStorage.getItem('df_auth_tenant');
 
-    return {
-      token,
-      user: userStr ? JSON.parse(userStr) : null,
-      tenant: tenantStr ? JSON.parse(tenantStr) : null,
-    };
+      let user: AuthUser | null = null;
+      let tenant: AuthResponse['tenant'] | null = null;
+
+      if (userStr) {
+        user = JSON.parse(userStr);
+      }
+      if (tenantStr) {
+        tenant = JSON.parse(tenantStr);
+      }
+
+      return { token, user, tenant };
+    } catch (err) {
+      console.error('[AuthClient] Erreur lors de la lecture de session:', err);
+      return { token: null, user: null, tenant: null };
+    }
   }
 
   static getToken(): string | null {
@@ -146,9 +170,14 @@ export class AuthClient {
 
   static clearSession(): void {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('df_auth_token');
-      localStorage.removeItem('df_auth_user');
-      localStorage.removeItem('df_auth_tenant');
+      try {
+        localStorage.removeItem('df_auth_token');
+        localStorage.removeItem('df_auth_user');
+        localStorage.removeItem('df_auth_tenant');
+        window.dispatchEvent(new CustomEvent('auth:session-changed', { detail: null }));
+      } catch (err) {
+        console.error('[AuthClient] Erreur lors du nettoyage de session:', err);
+      }
     }
   }
 }

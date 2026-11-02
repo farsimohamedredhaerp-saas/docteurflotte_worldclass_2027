@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Navbar } from '../../components/navigation/Navbar';
 import { AuthClient } from '../../lib/api-auth';
 import { FuelScannerClient } from '../../lib/api-fuel-scanner';
 import { AssetClient } from '../../lib/api-assets';
-import { FuelReceiptScanResult, Asset, AssetCategory, AssetStatus, DataOrigin, MeterType } from '@docteurflotte/contracts';
+import { FuelReceiptScanResult, Asset, AssetCategory, AssetStatus, DataOrigin, MeterType, StandardFuelType } from '@docteurflotte/contracts';
 import { useDemoMode } from '../../context/DemoModeContext';
+import { useSystemConfig } from '../../context/SystemConfigContext';
 import {
   CalculationProofModal,
   CalculationProofButton,
@@ -15,6 +16,7 @@ import {
 } from '../../components/decisions';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
+import { CusumLegalReportViewer } from '../../components/fuel/CusumLegalReportViewer';
 import {
   IconSearch,
   IconPlus,
@@ -84,8 +86,8 @@ const DEMO_RECEIPTS: FuelReceiptScanResult[] = [
     stationWilaya: '16 - Alger',
     fuelType: 'Gasoil',
     liters: 140.0,
-    unitPriceDzd: 29.01,
-    totalAmountDzd: 4061.4,
+    unitPriceDzd: 31.00,
+    totalAmountDzd: 4340.0,
     dateTime: '28/10/2026 11:45',
     receiptConfidence: 99,
     status: 'APPROVED',
@@ -112,8 +114,8 @@ const DEMO_RECEIPTS: FuelReceiptScanResult[] = [
     stationWilaya: '16 - Alger',
     fuelType: 'Gasoil',
     liters: 220.0,
-    unitPriceDzd: 29.01,
-    totalAmountDzd: 6382.2,
+    unitPriceDzd: 31.00,
+    totalAmountDzd: 6820.0,
     dateTime: '27/10/2026 16:30',
     receiptConfidence: 98,
     status: 'APPROVED',
@@ -140,8 +142,8 @@ const DEMO_RECEIPTS: FuelReceiptScanResult[] = [
     stationWilaya: '47 - Ghardaïa',
     fuelType: 'Gasoil',
     liters: 250.0,
-    unitPriceDzd: 29.01,
-    totalAmountDzd: 7252.5,
+    unitPriceDzd: 31.00,
+    totalAmountDzd: 7750.0,
     dateTime: '28/10/2026 08:15',
     receiptConfidence: 96,
     status: 'PENDING_APPROVAL',
@@ -163,13 +165,25 @@ const DEMO_RECEIPTS: FuelReceiptScanResult[] = [
 
 export default function FuelScannerPage() {
   const { isDemoMode, isGuest } = useDemoMode();
+  const { tariffs, getFuelPrice } = useSystemConfig();
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [selectedAssetId, setSelectedAssetId] = useState<string>('');
   const [rawText, setRawText] = useState<string>('');
   const [litersOverride, setLitersOverride] = useState<number>(45);
   const [stationOverride, setStationOverride] = useState<string>('Station Naftal Chéraga (RN41)');
-  const [fuelTypeOverride, setFuelTypeOverride] = useState<string>('Gasoil');
+  const [fuelTypeOverride, setFuelTypeOverride] = useState<StandardFuelType>('Gasoil');
+
+  const resolvePrice = useCallback(
+    (typeStr: string): number => {
+      const lower = (typeStr || '').toLowerCase();
+      if (lower.includes('sans plomb')) return getFuelPrice('sansPlomb');
+      if (lower.includes('super')) return getFuelPrice('super');
+      if (lower.includes('gpl') || lower.includes('sirghaz')) return getFuelPrice('gpl');
+      return getFuelPrice('gasoil');
+    },
+    [getFuelPrice],
+  );
 
   const [isScanning, setIsScanning] = useState(false);
   const [currentResult, setCurrentResult] = useState<FuelReceiptScanResult | null>(null);
@@ -208,6 +222,7 @@ export default function FuelScannerPage() {
   // État de la modal Preuve de Calcul
   const [proofModalData, setProofModalData] = useState<CalculationProofData | null>(null);
   const [isProofModalOpen, setIsProofModalOpen] = useState(false);
+  const [isLegalReportOpen, setIsLegalReportOpen] = useState(false);
 
   const showNotification = (msg: string) => {
     setNotification(msg);
@@ -223,7 +238,7 @@ export default function FuelScannerPage() {
     setProofModalData({
       title: 'Preuve de Réconciliation Télématique Naftal & Détection CUSUM',
       decisionOrMetricName: `Plein Carburant — ${item.stationName}`,
-      category: 'TELEMATICS' as any,
+      category: 'TELEMATICS',
       ruleId: 'ALGO-CUSUM-FUEL-04',
       legalOrOemReference: 'MASTER_SPEC v2.0 §4.5 (Réconciliation Déterministe ΔV & CUSUM Anti-Fraude)',
       deterministicFormula: 'Écart_ΔV = |Volume_Ticket - (Niveau_Après - Niveau_Avant)| ≤ 5.0 Litres',
@@ -289,7 +304,7 @@ export default function FuelScannerPage() {
     try {
       const [assetsList, receiptsList] = await Promise.all([
         AssetClient.listAssets(token).catch(() => []),
-        FuelScannerClient.listRecentReceipts(token).catch(() => []),
+        FuelScannerClient.listRecentReceipts(token).catch(() => [] as FuelReceiptScanResult[]),
       ]);
       setAssets(assetsList);
       if (assetsList.length > 0) {
@@ -306,26 +321,27 @@ export default function FuelScannerPage() {
   };
 
   const handleApplyPreset = (type: 'valid' | 'sahara' | 'fraud') => {
+    const pGasoil = tariffs.fuelPrices.gasoil || 31.00;
     if (type === 'valid') {
       setStationOverride('Station Naftal Chéraga (RN41)');
       setFuelTypeOverride('Gasoil');
       setLitersOverride(45.0);
       setRawText(
-        'SOCIETE NATIONALE DE COMMERCIALISATION ET DE DISTRIBUTION DE PRODUITS PETROLIERS\nNAFTAL SPA - STATION CHERAGA RN41\nDATE: 26/10/2026 14:22\nPRODUIT: GASOIL\nQUANTITE: 45.00 L\nPRIX UNITAIRE: 29.01 DZD\nTOTAL A PAYER: 1305.45 DZD\nPAIEMENT CARTE NAFTAL'
+        `SOCIETE NATIONALE DE COMMERCIALISATION ET DE DISTRIBUTION DE PRODUITS PETROLIERS\nNAFTAL SPA - STATION CHERAGA RN41\nDATE: 26/10/2026 14:22\nPRODUIT: GASOIL\nQUANTITE: 45.00 L\nPRIX UNITAIRE: ${pGasoil.toFixed(2)} DZD\nTOTAL A PAYER: ${(45.0 * pGasoil).toFixed(2)} DZD\nPAIEMENT CARTE NAFTAL`
       );
     } else if (type === 'sahara') {
       setStationOverride('Station Naftal Hassi Messaoud Piste 18');
       setFuelTypeOverride('Gasoil');
       setLitersOverride(380.0);
       setRawText(
-        'NAFTAL DISTRICT HASSI MESSAOUD\nSTATION SERVICE PISTE 18\nDATE: 26/10/2026 08:45\nPRODUIT: GASOIL LOURD\nQUANTITE: 380.00 L\nPRIX UNITAIRE: 29.01 DZD\nTOTAL A PAYER: 11023.80 DZD\nVEHICULE: PL-030-HMD'
+        `NAFTAL DISTRICT HASSI MESSAOUD\nSTATION SERVICE PISTE 18\nDATE: 26/10/2026 08:45\nPRODUIT: GASOIL LOURD\nQUANTITE: 380.00 L\nPRIX UNITAIRE: ${pGasoil.toFixed(2)} DZD\nTOTAL A PAYER: ${(380.0 * pGasoil).toFixed(2)} DZD\nVEHICULE: PL-030-HMD`
       );
     } else {
       setStationOverride('Station Naftal Blida Centre');
       setFuelTypeOverride('Gasoil');
       setLitersOverride(65.0);
       setRawText(
-        'STATION SERVICE NAFTAL BLIDA\nDATE: 26/10/2026 21:10\nPRODUIT: GASOIL\nQUANTITE: 65.00 L\nTOTAL: 1885.65 DZD\nPAIEMENT ESPECES'
+        `STATION SERVICE NAFTAL BLIDA\nDATE: 26/10/2026 21:10\nPRODUIT: GASOIL\nQUANTITE: 65.00 L\nTOTAL: ${(65.0 * pGasoil).toFixed(2)} DZD\nPAIEMENT ESPECES`
       );
     }
   };
@@ -335,13 +351,15 @@ export default function FuelScannerPage() {
     setIsScanning(true);
 
     try {
+      const unitPrice = resolvePrice(fuelTypeOverride);
       const res = await FuelScannerClient.scanReceipt(
         {
           assetId: selectedAssetId,
           receiptTextRaw: rawText,
           manualOverrides: {
             liters: litersOverride,
-            totalAmountDzd: Math.round(litersOverride * 29.01),
+            unitPriceDzd: unitPrice,
+            totalAmountDzd: Math.round(litersOverride * unitPrice * 100) / 100,
             stationName: stationOverride,
             fuelType: fuelTypeOverride,
           },
@@ -352,8 +370,9 @@ export default function FuelScannerPage() {
       setCurrentResult(res);
       setRecentReceipts((prev) => [res, ...prev]);
       showNotification(`✓ Reçu analysé : Statut ${res.reconciliation.reconciliationStatus === 'VERIFIED' ? 'CONFORME' : 'ANOMALIE'}.`);
-    } catch (err: any) {
-      showNotification(`Erreur lors du scan : ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      showNotification(`Erreur lors du scan : ${msg}`);
     } finally {
       setIsScanning(false);
     }
@@ -362,6 +381,7 @@ export default function FuelScannerPage() {
   const handleCreateManualReceipt = (e: React.FormEvent) => {
     e.preventDefault();
     const matchedAsset = assets.find((a) => a.id === manualForm.assetId);
+    const unitPrice = resolvePrice(manualForm.fuelType);
     const newReceipt: FuelReceiptScanResult = {
       receiptId: `rcpt-manual-${Date.now().toString().slice(-4)}`,
       assetId: manualForm.assetId,
@@ -372,7 +392,7 @@ export default function FuelScannerPage() {
       liters: Number(manualForm.liters),
       totalAmountDzd: Number(manualForm.totalAmountDzd),
       fuelType: manualForm.fuelType,
-      unitPriceDzd: 29.01,
+      unitPriceDzd: unitPrice,
       dateTime: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       receiptConfidence: 1.0,
@@ -415,11 +435,11 @@ export default function FuelScannerPage() {
       prev.map((r) =>
         r.receiptId === editingReceipt.receiptId
           ? {
-              ...r,
-              stationName: editForm.stationName,
-              liters: Number(editForm.liters),
-              totalAmountDzd: Number(editForm.totalAmountDzd),
-            }
+            ...r,
+            stationName: editForm.stationName,
+            liters: Number(editForm.liters),
+            totalAmountDzd: Number(editForm.totalAmountDzd),
+          }
           : r
       )
     );
@@ -655,8 +675,8 @@ export default function FuelScannerPage() {
                 Scanner Intelligent de Reçus Naftal &amp; Réconciliation Télématique
               </h1>
               <p style={{ fontSize: '0.88rem', color: 'var(--df-text-secondary)', maxWidth: '840px', margin: 0, lineHeight: 1.55 }}>
-                Extraction optique des tickets de carburant et vérification croisée instantanée avec la jauge Traccar. 
-                Élimine les faux reçus, la surfacturation et certifie la présence réelle à la station au tarif officiel (29.01 DA/L).
+                Extraction optique des tickets de carburant et vérification croisée instantanée avec la jauge Traccar.
+                Élimine les faux reçus, la surfacturation et certifie la présence réelle à la station au tarif officiel ({tariffs.fuelPrices.gasoil.toFixed(2)} DA/L).
               </p>
             </div>
 
@@ -730,7 +750,7 @@ export default function FuelScannerPage() {
                       </label>
                       <select
                         value={fuelTypeOverride}
-                        onChange={(e) => setFuelTypeOverride(e.target.value)}
+                        onChange={(e) => setFuelTypeOverride(e.target.value as StandardFuelType)}
                         style={{
                           width: '100%',
                           padding: '0.5rem',
@@ -741,10 +761,10 @@ export default function FuelScannerPage() {
                           fontSize: '0.82rem',
                         }}
                       >
-                        <option value="Gasoil">Gasoil (29.01 DA/L)</option>
-                        <option value="Super">Super (45.97 DA/L)</option>
-                        <option value="Sans Plomb">Sans Plomb (45.62 DA/L)</option>
-                        <option value="GPL">GPL (9.00 DA/L)</option>
+                        <option value="Gasoil">Gasoil ({tariffs.fuelPrices.gasoil.toFixed(2)} DA/L)</option>
+                        <option value="Super">Super ({tariffs.fuelPrices.super.toFixed(2)} DA/L)</option>
+                        <option value="Sans Plomb">Sans Plomb ({tariffs.fuelPrices.sansPlomb.toFixed(2)} DA/L)</option>
+                        <option value="GPL">GPL / Sirghaz ({tariffs.fuelPrices.gpl.toFixed(2)} DA/L)</option>
                       </select>
                     </div>
                   </div>
@@ -808,13 +828,12 @@ export default function FuelScannerPage() {
               <div
                 style={{
                   background: 'var(--df-bg-surface-1)',
-                  border: `1px solid ${
-                    currentResult
-                      ? currentResult.reconciliation.reconciliationStatus === 'VERIFIED'
-                        ? 'var(--df-status-ok)'
-                        : 'var(--df-status-danger)'
-                      : 'var(--df-border-subtle)'
-                  }`,
+                  border: `1px solid ${currentResult
+                    ? currentResult.reconciliation.reconciliationStatus === 'VERIFIED'
+                      ? 'var(--df-status-ok)'
+                      : 'var(--df-status-danger)'
+                    : 'var(--df-border-subtle)'
+                    }`,
                   borderRadius: 'var(--df-radius-lg)',
                   padding: '1.25rem',
                   boxShadow: 'var(--df-shadow-sm)',
@@ -888,12 +907,21 @@ export default function FuelScannerPage() {
                       <strong>Audit CUSUM :</strong> {currentResult.reconciliation.explanation}
                     </div>
 
-                    <CalculationProofButton
-                      label="Voir Preuve de Calcul CUSUM"
-                      size="sm"
-                      variant={currentResult.reconciliation.reconciliationStatus === 'VERIFIED' ? 'emerald' : 'amber'}
-                      onClick={() => handleOpenFuelProof(currentResult)}
-                    />
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <CalculationProofButton
+                        label="Voir Preuve de Calcul CUSUM"
+                        size="sm"
+                        variant={currentResult.reconciliation.reconciliationStatus === 'VERIFIED' ? 'emerald' : 'amber'}
+                        onClick={() => handleOpenFuelProof(currentResult)}
+                      />
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setIsLegalReportOpen(true)}
+                      >
+                        ⚖️ Procès-Verbal Opposable
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--df-text-muted)' }}>
@@ -1095,7 +1123,15 @@ export default function FuelScannerPage() {
                 </label>
                 <select
                   value={manualForm.fuelType}
-                  onChange={(e) => setManualForm({ ...manualForm, fuelType: e.target.value as 'Gasoil' | 'Super' | 'Sans Plomb' | 'GPL' })}
+                  onChange={(e) => {
+                    const nextFuel = e.target.value as 'Gasoil' | 'Super' | 'Sans Plomb' | 'GPL';
+                    const unitP = resolvePrice(nextFuel);
+                    setManualForm({
+                      ...manualForm,
+                      fuelType: nextFuel,
+                      totalAmountDzd: Math.round(Number(manualForm.liters) * unitP * 100) / 100,
+                    });
+                  }}
                   style={{
                     width: '100%',
                     padding: '0.5rem',
@@ -1106,10 +1142,10 @@ export default function FuelScannerPage() {
                     fontSize: '0.82rem',
                   }}
                 >
-                  <option value="Gasoil">Gasoil (29.01 DA)</option>
-                  <option value="Sans Plomb">Sans Plomb (45.62 DA)</option>
-                  <option value="Super">Super (45.97 DA)</option>
-                  <option value="GPL">GPL / Sirghaz (9.00 DA)</option>
+                  <option value="Gasoil">Gasoil ({tariffs.fuelPrices.gasoil.toFixed(2)} DA)</option>
+                  <option value="Sans Plomb">Sans Plomb ({tariffs.fuelPrices.sansPlomb.toFixed(2)} DA)</option>
+                  <option value="Super">Super ({tariffs.fuelPrices.super.toFixed(2)} DA)</option>
+                  <option value="GPL">GPL / Sirghaz ({tariffs.fuelPrices.gpl.toFixed(2)} DA)</option>
                 </select>
               </div>
 
@@ -1146,7 +1182,8 @@ export default function FuelScannerPage() {
                     value={manualForm.liters}
                     onChange={(e) => {
                       const l = Number(e.target.value);
-                      setManualForm({ ...manualForm, liters: l, totalAmountDzd: Math.round(l * 29.01 * 100) / 100 });
+                      const unitP = resolvePrice(manualForm.fuelType);
+                      setManualForm({ ...manualForm, liters: l, totalAmountDzd: Math.round(l * unitP * 100) / 100 });
                     }}
                     className="df-mono"
                     style={{
@@ -1269,7 +1306,8 @@ export default function FuelScannerPage() {
                     value={editForm.liters}
                     onChange={(e) => {
                       const l = Number(e.target.value);
-                      setEditForm({ ...editForm, liters: l, totalAmountDzd: Math.round(l * 29.01 * 100) / 100 });
+                      const unitP = editingReceipt?.unitPriceDzd ?? resolvePrice(editingReceipt?.fuelType || 'Gasoil');
+                      setEditForm({ ...editForm, liters: l, totalAmountDzd: Math.round(l * unitP * 100) / 100 });
                     }}
                     className="df-mono"
                     style={{
@@ -1384,6 +1422,33 @@ export default function FuelScannerPage() {
         onClose={() => setIsProofModalOpen(false)}
         data={proofModalData}
       />
+
+      {/* PROCÈS-VERBAL CUSUM OPPOSABLE (PILIER 1) */}
+      {isLegalReportOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(5px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px',
+          }}
+        >
+          <div style={{ maxWidth: '1050px', width: '100%', maxHeight: '92vh', overflowY: 'auto' }}>
+            <CusumLegalReportViewer
+              onClose={() => setIsLegalReportOpen(false)}
+              token={sessionToken || undefined}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

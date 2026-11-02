@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SovereignRagService } from './sovereign-rag.service';
-import { JwtAuthGuard } from '../auth/auth.guard';
+import { JwtAuthGuard, AuthenticatedRequest } from '../auth/auth.guard';
 import {
   IngestKnowledgeItemDto,
   KnowledgeCategory,
@@ -28,7 +28,7 @@ export class SovereignRagController {
    */
   @Post('query')
   async query(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Body() dto: QueryKnowledgeDto,
     @Headers('x-tenant-id') headerTenantId?: string,
   ): Promise<KnowledgeQueryResponse> {
@@ -52,7 +52,7 @@ export class SovereignRagController {
    * Injection manuelle d'une nouvelle fiche technique ou procédure atelier.
    */
   @Post('ingest')
-  async ingest(@Req() req: any, @Body() dto: IngestKnowledgeItemDto) {
+  async ingest(@Req() req: AuthenticatedRequest, @Body() dto: IngestKnowledgeItemDto) {
     if (!dto.tenant_id && req?.tenantId) {
       dto.tenant_id = req.tenantId;
     }

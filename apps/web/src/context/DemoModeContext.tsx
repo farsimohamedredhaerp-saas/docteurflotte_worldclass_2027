@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { AuthClient } from '../lib/api-auth';
+import { AuthClient, NavbarSession } from '../lib/api-auth';
 
 interface DemoModeContextType {
   /** Vrai si l'utilisateur est en mode démonstration (données virtuelles) */
@@ -11,11 +11,7 @@ interface DemoModeContextType {
   /** Permet de basculer entre mode démo et mode réel (uniquement possible si connecté) */
   toggleDemoMode: (forceState?: boolean) => void;
   /** Session utilisateur connectée (ou null) */
-  session: {
-    token: string | null;
-    user: any | null;
-    tenant: any | null;
-  };
+  session: NavbarSession;
   /** Rafraîchit les données de session */
   refreshSession: () => void;
 }
@@ -25,11 +21,7 @@ const DemoModeContext = createContext<DemoModeContextType | undefined>(undefined
 const DEMO_STORAGE_KEY = 'df_demo_mode_active';
 
 export function DemoModeProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<{
-    token: string | null;
-    user: any | null;
-    tenant: any | null;
-  }>({ token: null, user: null, tenant: null });
+  const [session, setSession] = useState<NavbarSession>({ token: null, user: null, tenant: null });
   const [isDemoMode, setIsDemoMode] = useState<boolean>(true); // Démarre en démo tant que session non résolue
   const [isGuest, setIsGuest] = useState<boolean>(true);
   const [mounted, setMounted] = useState(false);
@@ -61,9 +53,16 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
     const handleStorageChange = () => {
       resolveSessionAndMode();
     };
+    const handleAuthChange = () => {
+      resolveSessionAndMode();
+    };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('auth:session-changed', handleAuthChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth:session-changed', handleAuthChange);
+    };
   }, [resolveSessionAndMode]);
 
   const toggleDemoMode = useCallback((forceState?: boolean) => {

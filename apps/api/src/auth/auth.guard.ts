@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import {
   CanActivate,
   ExecutionContext,
@@ -7,10 +8,16 @@ import {
 import { TokenService } from './token.service';
 import { JwtPayload } from '@docteurflotte/contracts';
 
-export interface AuthenticatedRequest {
-  user: JwtPayload;
+export interface AuthenticatedUserPayload extends Partial<JwtPayload> {
+  email?: string;
+  sub?: string;
+  tenantId?: string;
+  role?: JwtPayload['role'];
+}
+
+export interface AuthenticatedRequest extends Partial<Request> {
+  user?: AuthenticatedUserPayload;
   tenantId: string;
-  headers: Record<string, string | undefined>;
 }
 
 @Injectable()

@@ -223,7 +223,7 @@ export default function AssetsPage() {
     setIsResolvingOem(true);
 
     try {
-      let reqParam: any = {};
+      const reqParam: { vin?: string; make?: string; model?: string } = {};
       if (text.length === 17 && /^[A-HJ-NPR-Z0-9]{17}$/i.test(text)) {
         reqParam.vin = text.toUpperCase();
       } else {
@@ -488,10 +488,10 @@ export default function AssetsPage() {
                     ? 'var(--df-status-warning-text)'
                     : 'var(--df-status-danger-text)',
               border: `1px solid ${feedback.type === 'success'
-                  ? 'var(--df-status-ok-border)'
-                  : feedback.type === 'warning'
-                    ? 'var(--df-status-warning-border)'
-                    : 'var(--df-status-danger-border)'
+                ? 'var(--df-status-ok-border)'
+                : feedback.type === 'warning'
+                  ? 'var(--df-status-warning-border)'
+                  : 'var(--df-status-danger-border)'
                 }`,
             }}
           >
@@ -974,10 +974,10 @@ export default function AssetsPage() {
                                       ? 'var(--df-status-warning-text)'
                                       : 'var(--df-status-danger-text)',
                                 border: `1px solid ${asset.status === AssetStatus.OPERATIONAL
-                                    ? 'var(--df-status-ok-border)'
-                                    : asset.status === AssetStatus.MAINTENANCE_REQUIRED
-                                      ? 'var(--df-status-warning-border)'
-                                      : 'var(--df-status-danger-border)'
+                                  ? 'var(--df-status-ok-border)'
+                                  : asset.status === AssetStatus.MAINTENANCE_REQUIRED
+                                    ? 'var(--df-status-warning-border)'
+                                    : 'var(--df-status-danger-border)'
                                   }`,
                                 fontSize: '0.75rem',
                                 fontWeight: 600,

@@ -24,6 +24,7 @@ interface TopCommandBarProps {
   onTogglePlayPause: () => void;
   onInjectCriticalDtc?: () => void;
   onTriggerFuelDrop?: () => void;
+  onToggleDvirBlock?: () => void;
   selectedVehicleId?: string;
   isSidebarCollapsed?: boolean;
   onToggleSidebar?: () => void;
@@ -41,6 +42,7 @@ export function TopCommandBar({
   onTogglePlayPause,
   onInjectCriticalDtc,
   onTriggerFuelDrop,
+  onToggleDvirBlock,
   selectedVehicleId,
   isSidebarCollapsed,
   onToggleSidebar,
@@ -221,6 +223,27 @@ export function TopCommandBar({
             </span>
           </div>
 
+          {/* Consignations DVIR critiques */}
+          {(stats.dvirBlockedCount ?? 0) > 0 && (
+            <Link
+              href="/dvir"
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] transition-opacity hover:opacity-85"
+              style={{
+                backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                border: '1px solid rgba(239, 68, 68, 0.6)',
+                color: '#EF4444',
+                textDecoration: 'none',
+              }}
+              title="Véhicules sous consignation immédiate DVIR (Interdiction de départ)"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse" />
+              <span className="uppercase tracking-wide font-bold">🚫 DVIR</span>
+              <span className="font-mono tabular-nums font-bold">
+                {stats.dvirBlockedCount}
+              </span>
+            </Link>
+          )}
+
           {/* Hors ligne */}
           <div
             className="hidden 2xl:flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px]"
@@ -338,6 +361,22 @@ export function TopCommandBar({
             >
               <IconFlame size={11} strokeWidth={2} />
               <span>Fuite</span>
+            </button>
+            <button
+              onClick={onToggleDvirBlock}
+              className="px-1.5 py-1 text-[10px] font-mono font-medium rounded-sm flex items-center gap-1 transition-colors whitespace-nowrap cursor-pointer"
+              style={{
+                backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.4)',
+                color: '#EF4444',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.2rem',
+              }}
+              title="Basculer l'état de consignation sécurité DVIR de l'unité sélectionnée"
+            >
+              <span>🚫</span>
+              <span>DVIR</span>
             </button>
           </div>
         )}

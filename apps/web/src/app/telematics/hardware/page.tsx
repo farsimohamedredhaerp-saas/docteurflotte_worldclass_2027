@@ -1043,7 +1043,7 @@ export default function TelematicsHardwarePage() {
                 </label>
                 <select
                   value={selectedOperator}
-                  onChange={(e) => setSelectedOperator(e.target.value as any)}
+                  onChange={(e) => setSelectedOperator(e.target.value as 'mobilis' | 'ooredoo' | 'djezzy')}
                   style={{
                     width: '100%',
                     padding: '8px 10px',

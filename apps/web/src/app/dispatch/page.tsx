@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useDemoMode } from '@/context/DemoModeContext';
+import { AssetClient } from '@/lib/api-assets';
 import {
   DispatchDecisionResult,
   FleetIntelligenceClient,
@@ -13,6 +15,8 @@ import {
   VehicleStateDto,
   DriverStateDto,
   MissionRequestDto,
+  DispatchStatus,
+  DocumentTypeDZ,
 } from '@/lib/api-fleet-intelligence';
 import { PrintableMissionOrder } from '@/components/dispatch/PrintableMissionOrder';
 
@@ -39,16 +43,16 @@ const SAMPLE_VEHICLES: VehicleStateDto[] = [
     vehicleHealthIndex: 88.5,
     batterySohPct: 91.0,
     coolingEwmaResidualC: 3.2,
-    dispatchStatus: 'AVAILABLE' as any,
+    dispatchStatus: DispatchStatus.AVAILABLE,
     documents: [
       {
-        docType: 'CONTROLE_TECHNIQUE_ENACTA' as any,
+        docType: DocumentTypeDZ.CONTROLE_TECHNIQUE_ENACTA,
         docNumber: 'ENACTA-16-2026-9912',
         issuedAt: '2026-01-15',
         expiresAt: '2026-12-31',
       },
       {
-        docType: 'ASSURANCE_RC_CATNAT' as any,
+        docType: DocumentTypeDZ.ASSURANCE_RC_CATNAT,
         docNumber: 'SAA-POL-2026-8841',
         issuedAt: '2026-01-01',
         expiresAt: '2026-12-31',
@@ -78,16 +82,16 @@ const SAMPLE_VEHICLES: VehicleStateDto[] = [
     vehicleHealthIndex: 92.0,
     batterySohPct: 94.0,
     coolingEwmaResidualC: 2.1,
-    dispatchStatus: 'AVAILABLE' as any,
+    dispatchStatus: DispatchStatus.AVAILABLE,
     documents: [
       {
-        docType: 'CONTROLE_TECHNIQUE_ENACTA' as any,
+        docType: DocumentTypeDZ.CONTROLE_TECHNIQUE_ENACTA,
         docNumber: 'ENACTA-30-2026-4412',
         issuedAt: '2026-03-01',
         expiresAt: '2026-12-31',
       },
       {
-        docType: 'ASSURANCE_RC_CATNAT' as any,
+        docType: DocumentTypeDZ.ASSURANCE_RC_CATNAT,
         docNumber: 'CAAT-POL-2026-1190',
         issuedAt: '2026-01-01',
         expiresAt: '2026-12-31',
@@ -117,10 +121,10 @@ const SAMPLE_VEHICLES: VehicleStateDto[] = [
     vehicleHealthIndex: 44.0, // VHI CRITIQUE
     batterySohPct: 62.0,
     coolingEwmaResidualC: 13.5, // SURCHAUFFE
-    dispatchStatus: 'BLOCKED_SAFETY' as any,
+    dispatchStatus: DispatchStatus.BLOCKED_SAFETY,
     documents: [
       {
-        docType: 'CONTROLE_TECHNIQUE_ENACTA' as any,
+        docType: DocumentTypeDZ.CONTROLE_TECHNIQUE_ENACTA,
         docNumber: 'ENACTA-19-2025-0012',
         issuedAt: '2025-06-01',
         expiresAt: '2025-12-31', // EXPIRÉ
@@ -163,6 +167,11 @@ const SAMPLE_DRIVERS: DriverStateDto[] = [
 ];
 
 export default function DispatchPage() {
+  const { isDemoMode, isGuest, session } = useDemoMode();
+  const [vehicles, setVehicles] = useState<VehicleStateDto[]>(SAMPLE_VEHICLES);
+  const [drivers, setDrivers] = useState<DriverStateDto[]>(SAMPLE_DRIVERS);
+  const [loadingFleet, setLoadingFleet] = useState<boolean>(false);
+
   const [selectedSector, setSelectedSector] = useState<IndustrySector>(IndustrySector.TRANSPORT);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>('veh-kerax-440');
   const [selectedDriverId, setSelectedDriverId] = useState<string>('drv-karim-b');
@@ -191,8 +200,61 @@ export default function DispatchPage() {
   const [verifyTokenText, setVerifyTokenText] = useState<string>('');
   const [verificationOutput, setVerificationOutput] = useState<any>(null);
 
-  const selectedVehicle = SAMPLE_VEHICLES.find((v) => v.vehicleId === selectedVehicleId) || SAMPLE_VEHICLES[0];
-  const selectedDriver = SAMPLE_DRIVERS.find((d) => d.driverId === selectedDriverId) || SAMPLE_DRIVERS[0];
+  useEffect(() => {
+    if (isDemoMode || !session.token) {
+      setVehicles(SAMPLE_VEHICLES);
+      setDrivers(SAMPLE_DRIVERS);
+      setSelectedVehicleId(SAMPLE_VEHICLES[0].vehicleId);
+      setSelectedDriverId(SAMPLE_DRIVERS[0].driverId);
+      return;
+    }
+
+    setLoadingFleet(true);
+    AssetClient.listAssets(session.token)
+      .then((assetsList) => {
+        if (assetsList && assetsList.length > 0) {
+          const mapped: VehicleStateDto[] = assetsList.map((a) => ({
+            vehicleId: a.id,
+            registrationPlate: a.code || 'DZ-PARC',
+            makeModel: a.name || `${a.brand || ''} ${a.model || ''}`.trim() || 'Véhicule Flotte Actif',
+            category: AssetCategory.TRACTOR_TRAILER,
+            maxPayloadTons: 25.0,
+            grossVehicleWeightTons: 38.0,
+            fuelType: 'DIESEL',
+            refConsumptionL100Km: 32.0,
+            hasWorkingReefer: false,
+            hasWorkingPto: true,
+            currentWilayaCode: 16,
+            currentLat: 36.75,
+            currentLon: 3.05,
+            currentOdometerKm: 100000,
+            currentEngineHours: 3000,
+            annualTargetKm: 80000,
+            ytdDrivenKm: 45000,
+            vehicleHealthIndex: 90.0,
+            batterySohPct: 92.0,
+            coolingEwmaResidualC: 2.0,
+            dispatchStatus: DispatchStatus.AVAILABLE,
+            documents: [],
+            subsystemRuls: [],
+            activeDtcs: [],
+          }));
+          setVehicles(mapped);
+          setSelectedVehicleId(mapped[0].vehicleId);
+        } else {
+          setVehicles([]);
+          setSelectedVehicleId('');
+        }
+      })
+      .catch(() => {
+        setVehicles([]);
+        setSelectedVehicleId('');
+      })
+      .finally(() => setLoadingFleet(false));
+  }, [isDemoMode, session.token]);
+
+  const selectedVehicle = vehicles.find((v) => v.vehicleId === selectedVehicleId) || vehicles[0];
+  const selectedDriver = drivers.find((d) => d.driverId === selectedDriverId) || drivers[0];
 
   const handleEvaluateDispatch = async () => {
     setIsEvaluating(true);
@@ -204,9 +266,10 @@ export default function DispatchPage() {
       .map((s) => Number(s.trim()))
       .filter((n) => !isNaN(n) && n > 0);
 
+    const currentTenantId = session.tenant?.id || 'tenant-default';
     const mission: MissionRequestDto = {
       missionId: `MIS-2026-${Date.now().toString().slice(-5)}`,
-      tenantId: 'tenant-algeria-logistics-01',
+      tenantId: currentTenantId,
       industrySector: selectedSector,
       requestedVehicleId: selectedVehicleId,
       requestedDriverId: selectedDriverId,
@@ -230,12 +293,13 @@ export default function DispatchPage() {
     try {
       const res = await FleetIntelligenceClient.evaluateAndAssign({
         mission,
-        fleetVehicles: SAMPLE_VEHICLES,
-        fleetDrivers: SAMPLE_DRIVERS,
+        fleetVehicles: vehicles,
+        fleetDrivers: drivers,
       });
       setDecisionResult(res);
-    } catch (err: any) {
-      alert(`Erreur d'évaluation : ${err.message || 'Échec réseau'}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Erreur d'évaluation : ${msg || 'Échec réseau'}`);
     } finally {
       setIsEvaluating(false);
     }
@@ -247,12 +311,13 @@ export default function DispatchPage() {
     const assignedVehId = decisionResult.assignedVehicleId || selectedVehicleId;
     const assignedDrvId = decisionResult.assignedDriverId || selectedDriverId;
 
-    const v = SAMPLE_VEHICLES.find((x) => x.vehicleId === assignedVehId) || selectedVehicle;
-    const d = SAMPLE_DRIVERS.find((x) => x.driverId === assignedDrvId) || selectedDriver;
+    const v = vehicles.find((x) => x.vehicleId === assignedVehId) || selectedVehicle;
+    const d = drivers.find((x) => x.driverId === assignedDrvId) || selectedDriver;
 
+    const currentTenantId = session.tenant?.id || 'tenant-default';
     const mission: MissionRequestDto = {
       missionId: decisionResult.missionId,
-      tenantId: 'tenant-algeria-logistics-01',
+      tenantId: currentTenantId,
       industrySector: selectedSector,
       requestedVehicleId: v.vehicleId,
       requestedDriverId: d.driverId,
@@ -292,8 +357,9 @@ export default function DispatchPage() {
       setActiveMissionOrder(order);
       setVerifyQrText(order.qrVerificationPayload);
       setVerifyTokenText(order.offlineSignatureToken);
-    } catch (err: any) {
-      alert(`Impossible d'émettre l'Ordre de Mission : ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Impossible d'émettre l'Ordre de Mission : ${msg}`);
     }
   };
 
@@ -382,7 +448,7 @@ export default function DispatchPage() {
               </label>
               <select
                 value={selectedSector}
-                onChange={(e) => setSelectedSector(e.target.value as any)}
+                onChange={(e) => setSelectedSector(e.target.value as IndustrySector)}
                 style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '13px', fontWeight: 600 }}
               >
                 <option value={IndustrySector.TRANSPORT}>Transport Routier & Fret Général</option>
@@ -397,18 +463,23 @@ export default function DispatchPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--df-text-secondary)', marginBottom: '6px' }}>
-                  Véhicule Demandé
+                  Véhicule Demandé {loadingFleet ? '(Chargement...)' : ''}
                 </label>
                 <select
                   value={selectedVehicleId}
                   onChange={(e) => setSelectedVehicleId(e.target.value)}
+                  disabled={loadingFleet || vehicles.length === 0}
                   style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '12.5px', fontWeight: 600 }}
                 >
-                  {SAMPLE_VEHICLES.map((v) => (
-                    <option key={v.vehicleId} value={v.vehicleId}>
-                      {v.registrationPlate} ({v.makeModel.split(' ')[0]}) — VHI {v.vehicleHealthIndex}%
-                    </option>
-                  ))}
+                  {vehicles.length === 0 ? (
+                    <option value="">Aucun véhicule dans ce parc</option>
+                  ) : (
+                    vehicles.map((v) => (
+                      <option key={v.vehicleId} value={v.vehicleId}>
+                        {v.registrationPlate} ({v.makeModel.split(' ')[0]}) — VHI {v.vehicleHealthIndex}%
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
 
@@ -419,31 +490,42 @@ export default function DispatchPage() {
                 <select
                   value={selectedDriverId}
                   onChange={(e) => setSelectedDriverId(e.target.value)}
+                  disabled={drivers.length === 0}
                   style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '12.5px', fontWeight: 600 }}
                 >
-                  {SAMPLE_DRIVERS.map((d) => (
-                    <option key={d.driverId} value={d.driverId}>
-                      {d.fullName} ({d.licenseCategories.join('+')})
-                    </option>
-                  ))}
+                  {drivers.length === 0 ? (
+                    <option value="">Aucun conducteur disponible</option>
+                  ) : (
+                    drivers.map((d) => (
+                      <option key={d.driverId} value={d.driverId}>
+                        {d.fullName} ({d.licenseCategories.join('+')})
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
             </div>
 
             {/* BADGE ÉTAT DU VÉHICULE SÉLECTIONNÉ */}
-            <div style={{ background: 'var(--df-bg-surface-2)', padding: '12px', borderRadius: '8px', border: '1px solid var(--df-border-subtle)', fontSize: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <span style={{ fontWeight: 700, color: 'var(--df-text-main)' }}>{selectedVehicle.makeModel}</span>
-                <span style={{ padding: '2px 8px', borderRadius: '4px', fontWeight: 800, fontSize: '11px', background: selectedVehicle.vehicleHealthIndex >= 80 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)', color: selectedVehicle.vehicleHealthIndex >= 80 ? '#059669' : '#dc2626' }}>
-                  Santé VHI : {selectedVehicle.vehicleHealthIndex}/100
-                </span>
+            {selectedVehicle ? (
+              <div style={{ background: 'var(--df-bg-surface-2)', padding: '12px', borderRadius: '8px', border: '1px solid var(--df-border-subtle)', fontSize: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span style={{ fontWeight: 700, color: 'var(--df-text-main)' }}>{selectedVehicle.makeModel}</span>
+                  <span style={{ padding: '2px 8px', borderRadius: '4px', fontWeight: 800, fontSize: '11px', background: selectedVehicle.vehicleHealthIndex >= 80 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)', color: selectedVehicle.vehicleHealthIndex >= 80 ? '#059669' : '#dc2626' }}>
+                    Santé VHI : {selectedVehicle.vehicleHealthIndex}/100
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', color: 'var(--df-text-secondary)', fontSize: '11px' }}>
+                  <div>Batterie SOH : <strong>{selectedVehicle.batterySohPct}%</strong></div>
+                  <div>Charge Max : <strong>{selectedVehicle.maxPayloadTons}t</strong></div>
+                  <div>Consom. Réf : <strong>{selectedVehicle.refConsumptionL100Km} L</strong></div>
+                </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', color: 'var(--df-text-secondary)', fontSize: '11px' }}>
-                <div>Batterie SOH : <strong>{selectedVehicle.batterySohPct}%</strong></div>
-                <div>Charge Max : <strong>{selectedVehicle.maxPayloadTons}t</strong></div>
-                <div>Consom. Réf : <strong>{selectedVehicle.refConsumptionL100Km} L</strong></div>
+            ) : (
+              <div style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '12px', borderRadius: '8px', fontSize: '12px', color: 'var(--df-text-secondary)' }}>
+                ℹ️ Aucun véhicule assigné. En mode réel, veuillez créer vos actifs dans la section <Link href="/assets" style={{ color: 'var(--df-brand-blue)', fontWeight: 600 }}>Parc &amp; Actifs</Link> ou activer le Mode Démonstration dans la barre supérieure.
               </div>
-            </div>
+            )}
 
             {/* ITINÉRAIRE (ORIGINE / DESTINATION / TRANSIT) */}
             <div style={{ borderTop: '1px solid var(--df-border-subtle)', paddingTop: '14px' }}>
@@ -837,3 +919,4 @@ export default function DispatchPage() {
     </div>
   );
 }
+

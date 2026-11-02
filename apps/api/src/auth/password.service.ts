@@ -40,12 +40,16 @@ export class PasswordService {
       return false;
     }
 
-    const derivedKey = (await scryptAsync(password, salt, this.keyLength)) as Buffer;
-    if (keyBuffer.length !== derivedKey.length) {
+    try {
+      const derivedKey = (await scryptAsync(password, salt, this.keyLength)) as Buffer;
+      if (keyBuffer.length !== derivedKey.length) {
+        return false;
+      }
+
+      return crypto.timingSafeEqual(keyBuffer, derivedKey);
+    } catch {
       return false;
     }
-
-    return crypto.timingSafeEqual(keyBuffer, derivedKey);
   }
 
   /**

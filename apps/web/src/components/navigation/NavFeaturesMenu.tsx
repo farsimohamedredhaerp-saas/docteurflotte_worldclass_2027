@@ -32,7 +32,7 @@ interface FeatureCategory {
 const FEATURE_CATEGORIES: FeatureCategory[] = [
   {
     id: 'assets',
-    label: 'Actifs & Parc',
+    label: 'Parc & Actifs',
     shortLabel: 'Parc',
     iconNode: <IconTruck size={14} strokeWidth={1.75} />,
     subfeatures: [
@@ -76,8 +76,8 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
   },
   {
     id: 'maintenance',
-    label: 'Maintenance & Travaux',
-    shortLabel: 'Maintenance 5.0',
+    label: 'Maintenance 5.0',
+    shortLabel: 'Maintenance',
     iconNode: <IconWrench size={14} strokeWidth={1.75} />,
     subfeatures: [
       {
@@ -99,18 +99,6 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         badge: 'COPILOT IA',
       },
       {
-        title: 'Surveillance & Observabilité IA (Ollama / Qwen)',
-        desc: 'Télémétrie en temps réel (tok/s, CPU, RAM), audit Loi 18-07 ANPDP, inspecteur de requêtes et playground.',
-        href: '/admin/ai-observability',
-        badge: 'SURVEILLANCE IA',
-      },
-      {
-        title: 'Tableau Décisionnel',
-        desc: 'Arbitrages économiques explicables et boucle décision → action.',
-        href: '/decisions',
-        badge: 'ACTIF',
-      },
-      {
         title: 'DVIR Inspection Numérique Mobile',
         desc: 'Contrôles avant départ et fin de tournée, conformité ENACTA et déclenchement d’OT.',
         href: '/dvir',
@@ -128,11 +116,67 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         href: '/compliance',
         badge: 'ENACTA DZ',
       },
+      {
+        title: 'Tableau Décisionnel',
+        desc: 'Arbitrages économiques explicables et boucle décision → action.',
+        href: '/decisions',
+        badge: 'ACTIF',
+      },
+    ],
+  },
+  {
+    id: 'telematics',
+    label: 'Télématique & IoT',
+    shortLabel: 'Télématique',
+    iconNode: <IconActivity size={14} strokeWidth={1.75} />,
+    subfeatures: [
+      {
+        title: 'Live Cockpit & Télémétrie GIS',
+        desc: 'Vue temps réel ultra-haute densité : carte vectorielle, double vitesse, jauges OBD-II/J1939 et console CAN brute.',
+        href: '/live-cockpit',
+        badge: 'COCKPIT GIS',
+      },
+      {
+        title: 'Tactical HUD (Scanner Châssis)',
+        desc: 'Inspection vectorielle Hard Sci-Fi : 6 gabarits (Tourisme à Articulé), 5 organes CAN/J1939 cliquables, VHI & RUL.',
+        href: '/live-cockpit/hud',
+        badge: 'TACTICAL HUD',
+      },
+      {
+        title: 'Console Fleet Live & GPS',
+        desc: 'Positionnement en temps réel, vitesse et contact via passerelle Traccar.',
+        href: '/telematics',
+        badge: 'TRACCAR LIVE',
+      },
+      {
+        title: 'Scanner Naftal & Anti-Fraude',
+        desc: 'Extraction OCR des reçus de carburant et certification jauge Traccar.',
+        href: '/fuel-scanner',
+        badge: 'ANTI-FRAUDE',
+      },
+      {
+        title: 'Éco-Conduite & Gaspillage Naftal',
+        desc: 'Chasse au ralenti excessif, primes de conduite et valorisation financière selon le barème officiel.',
+        href: '/eco-driving',
+        badge: 'SAMSARA ECO',
+      },
+      {
+        title: 'Chaîne du Froid & Groupes Frigo',
+        desc: 'Télémétrie thermique Reefers (lait, viandes, vaccins) sous climat saharien.',
+        href: '/cold-chain',
+        badge: 'REEFER IOT',
+      },
+      {
+        title: 'Matériels IoT & Protocoles',
+        desc: 'Référentiel certifié des boîtiers Traccar & Flespi (Teltonika, Coban, Ruptela, Queclink, CAN J1939).',
+        href: '/telematics/hardware',
+        badge: 'CATALOGUE',
+      },
     ],
   },
   {
     id: 'economics',
-    label: 'Contrôle de Gestion',
+    label: 'Gestion & TCO',
     shortLabel: 'Gestion',
     iconNode: <IconBarChart3 size={14} strokeWidth={1.75} />,
     subfeatures: [
@@ -152,68 +196,7 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         title: 'Coût du Risque d\'Inaction',
         desc: 'Calcul financier des pannes potentielles non traitées.',
         href: '/decisions',
-        badge: 'ACTIF',
-      },
-    ],
-  },
-  {
-    id: 'telematics',
-    label: 'Télématique & IoT',
-    shortLabel: 'Télématique',
-    iconNode: <IconActivity size={14} strokeWidth={1.75} />,
-    subfeatures: [
-      {
-        title: 'Live Cockpit & Télémétrie GIS',
-        desc: 'Vue temps réel ultra-haute densité : carte vectorielle, double vitesse, jauges OBD-II/J1939 et console CAN brute.',
-        href: '/live-cockpit',
-        badge: 'NOUVEAU - COCKPIT',
-      },
-      {
-        title: 'Tactical HUD (Scanner Châssis)',
-        desc: 'Inspection vectorielle Hard Sci-Fi : 6 gabarits (Tourisme à Articulé), 5 organes CAN/J1939 cliquables, VHI & RUL.',
-        href: '/live-cockpit/hud',
-        badge: 'TACTICAL HUD',
-      },
-      {
-        title: 'Console Fleet Live & GPS',
-        desc: 'Positionnement en temps réel, vitesse et contact via passerelle Traccar.',
-        href: '/telematics',
-        badge: 'ACTIF',
-      },
-      {
-        title: 'Éco-Conduite & Gaspillage Naftal',
-        desc: 'Chasse au ralenti excessif, primes de conduite et valorisation financière selon le barème officiel.',
-        href: '/eco-driving',
-        badge: 'NOUVEAU - SAMSARA',
-      },
-      {
-        title: 'Chaîne du Froid & Groupes Frigo',
-        desc: 'Télémétrie thermique Reefers (lait, viandes, vaccins) sous climat saharien.',
-        href: '/cold-chain',
-        badge: 'NOUVEAU - SAMSARA',
-      },
-      {
-        title: 'Boîtiers & Appairages',
-        desc: 'Gestion des terminaux IMEI (Teltonika, Coban) et liaison aux actifs.',
-        href: '/telematics',
-        badge: 'ACTIF',
-      },
-      {
-        title: 'Alertes & Dérives Compteurs',
-        desc: 'Détection des retours d\'odomètre et franchissements de seuils.',
-        href: '/telematics',
-      },
-      {
-        title: 'Matériels IoT & Protocoles',
-        desc: 'Référentiel certifié des boîtiers Traccar & Flespi (Teltonika, Coban, Ruptela, Queclink, CAN J1939).',
-        href: '/telematics/hardware',
-        badge: 'CATALOGUE',
-      },
-      {
-        title: 'Scanner Naftal & Anti-Fraude',
-        desc: 'Extraction OCR des reçus de carburant et certification jauge Traccar.',
-        href: '/fuel-scanner',
-        badge: 'ANTI-FRAUDE',
+        badge: 'ARBITRAGE ADS',
       },
     ],
   },
@@ -233,6 +216,7 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         title: 'Données & Purge Démo',
         desc: 'Bascule propre vers les données réelles et purge synthétique.',
         href: '/settings',
+        badge: 'SOUVERAINETÉ',
       },
       {
         title: 'Assistant d\'Onboarding',
@@ -243,7 +227,7 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
   },
   {
     id: 'control-plane',
-    label: 'Control Plane SaaS',
+    label: 'Administration',
     shortLabel: 'Admin',
     iconNode: <IconShieldCheck size={14} strokeWidth={1.75} />,
     subfeatures: [
@@ -252,6 +236,12 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         desc: 'Pilotage global du SaaS, quotas tenants et métriques de la plateforme.',
         href: '/admin',
         badge: 'SUPERADMIN',
+      },
+      {
+        title: 'Surveillance IA Souveraine (Ollama / Qwen)',
+        desc: 'Console d’observabilité en temps réel, télémétrie GPU/CPU, buffer d’audit Loi 18-07 et test d’inférence.',
+        href: '/admin/ai-observability',
+        badge: 'QWEN 2.5 LIVE',
       },
       {
         title: 'Organisations & Tenants',
@@ -263,12 +253,6 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         desc: 'Gouvernance des 6 algorithmes physiques déterministes et rollbacks immuables.',
         href: '/admin/decision-engine',
         badge: 'v2.0 REVISED',
-      },
-      {
-        title: 'Surveillance IA Souveraine (Ollama / Qwen)',
-        desc: 'Console d’observabilité en temps réel, télémétrie GPU/CPU, buffer d’audit Loi 18-07 et test d’inférence.',
-        href: '/admin/ai-observability',
-        badge: 'QWEN 2.5 LIVE',
       },
       {
         title: 'Barèmes Fiscaux & Naftal',
@@ -315,9 +299,9 @@ export function NavFeaturesMenu() {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.15rem',
+          gap: '0.25rem',
           background: 'var(--df-bg-surface-2)',
-          padding: '0.2rem 0.25rem',
+          padding: '0.25rem 0.35rem',
           borderRadius: 'var(--df-radius-md)',
           border: '1px solid var(--df-border-subtle)',
         }}
@@ -335,15 +319,15 @@ export function NavFeaturesMenu() {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.25rem',
-                padding: '0.24rem 0.44rem',
+                gap: '0.28rem',
+                padding: '0.24rem 0.50rem',
                 borderRadius: 'var(--df-radius-sm)',
                 background: isOpen ? 'var(--df-bg-surface-3)' : 'transparent',
                 color: isOpen ? 'var(--df-text-main)' : 'var(--df-text-secondary)',
                 border: 'none',
                 cursor: 'pointer',
-                fontSize: '0.75rem',
-                fontWeight: isOpen ? 700 : 500,
+                fontSize: '0.78rem',
+                fontWeight: isOpen ? 700 : 600,
                 transition: 'all var(--df-transition-fast)',
                 outline: 'none',
                 whiteSpace: 'nowrap',
@@ -362,7 +346,8 @@ export function NavFeaturesMenu() {
               }}
             >
               <span style={{ display: 'flex', color: 'var(--df-accent-blue)' }}>{cat.iconNode}</span>
-              <span>{cat.shortLabel || cat.label}</span>
+              <span className="hidden 2xl:inline">{cat.label}</span>
+              <span className="inline 2xl:hidden">{cat.shortLabel || cat.label}</span>
               <span
                 style={{
                   display: 'flex',
@@ -378,25 +363,24 @@ export function NavFeaturesMenu() {
         })}
       </div>
 
-      {/* PANNEAU DÉROULANT (MEGAMENU CONTEXTUEL) */}
+      {/* PANNEAU DÉROULANT (MEGAMENU CONTEXTUEL LARGE À 2 COLONNES) */}
       {activeMenu && (
         <div
           role="region"
           aria-label="Sous-menu détaillé"
           style={{
             position: 'absolute',
-            top: 'calc(100% + 0.65rem)',
-            left: 0,
-            zIndex: 100,
-            width: '420px',
-            background: 'var(--df-bg-glass-elevated)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            border: '1px solid var(--df-border-medium)',
+            top: 'calc(100% + 0.5rem)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1000,
+            width: 'min(640px, calc(100vw - 2rem))',
+            background: 'var(--df-bg-surface-1)',
+            border: '1px solid var(--df-border-focus)',
             borderRadius: 'var(--df-radius-lg)',
-            boxShadow: 'var(--df-shadow-lg)',
+            boxShadow: '0 20px 45px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--df-border-subtle)',
             padding: '1.25rem',
-            animation: 'fadeIn 180ms ease-out',
+            animation: 'fadeIn 150ms ease-out',
           }}
         >
           {(() => {
@@ -435,7 +419,16 @@ export function NavFeaturesMenu() {
                   </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: cat.subfeatures.length > 2 ? 'repeat(auto-fit, minmax(260px, 1fr))' : '1fr',
+                    gap: '0.5rem',
+                    maxHeight: 'min(500px, calc(100vh - 120px))',
+                    overflowY: 'auto',
+                    paddingRight: '0.2rem',
+                  }}
+                >
                   {cat.subfeatures.map((item, idx) => (
                     <Link
                       key={idx}

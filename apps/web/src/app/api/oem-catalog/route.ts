@@ -38,9 +38,10 @@ export async function GET(request: NextRequest) {
       total: catalog.length,
       items: catalog,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const details = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to fetch OEM catalog', details: error.message },
+      { error: 'Failed to fetch OEM catalog', details },
       { status: 500 }
     );
   }

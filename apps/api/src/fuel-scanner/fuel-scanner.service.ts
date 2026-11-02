@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
+import { QueryResultRow } from 'pg';
 import { DatabaseService } from '../database/database.service';
 import {
   FuelReceiptScanResult,
@@ -6,19 +7,81 @@ import {
   FuelReconciliationStatus,
 } from '@docteurflotte/contracts';
 import { ScanFuelReceiptDto } from './dto/fuel-scanner.dto';
+import { OllamaSovereignService } from '../copilot/ollama-sovereign.service';
 import * as crypto from 'crypto';
+
+interface FuelScanAssetRow extends QueryResultRow {
+  id: string;
+  code: string;
+  name: string;
+  category?: string;
+  status?: string;
+}
 
 @Injectable()
 export class FuelScannerService {
   private readonly logger = new Logger(FuelScannerService.name);
 
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    @Optional() private readonly ollamaService?: OllamaSovereignService,
+  ) { }
 
-  private async queryInTenant(tenantId: string, sql: string, params: any[] = []): Promise<any> {
-    if (typeof this.db.withTenantContext === 'function') {
-      return this.db.withTenantContext(tenantId, (client) => client.query(sql, params));
+  private async queryInTenant<R extends QueryResultRow = QueryResultRow>(
+    tenantId: string,
+    sql: string,
+    params: (string | number | boolean | Date | null | undefined)[] = [],
+  ): Promise<{ rows: R[]; rowCount?: number | null }> {
+    if (typeof this.db.queryInTenant === 'function') {
+      return this.db.queryInTenant<R>(tenantId, sql, params);
     }
-    return this.db.query(sql, params);
+    if (typeof this.db.withTenantContext === 'function') {
+      return this.db.withTenantContext(tenantId, (client) => client.query<R>(sql, params));
+    }
+    return this.db.query<R>(sql, params);
+  }
+
+  /**
+   * Récupère le tarif officiel dynamique Naftal depuis platform_fiscal_fuel_prices
+   */
+  private async getActiveFuelPrice(fuelTypeKeyword: string, fallbackPrice: number): Promise<number> {
+    try {
+      const pool = this.db.getPool();
+      if (pool) {
+        const res = await pool.query(
+          `SELECT price_per_liter_dzd 
+           FROM platform_fiscal_fuel_prices 
+           WHERE is_active = TRUE AND fuel_type ILIKE $1 
+           ORDER BY effective_date DESC 
+           LIMIT 1`,
+          [`%${fuelTypeKeyword}%`],
+        );
+        if (res.rows.length > 0 && res.rows[0].price_per_liter_dzd) {
+          return Number(res.rows[0].price_per_liter_dzd);
+        }
+      }
+    } catch {
+      // Fallback si la table n'est pas encore migrée
+    }
+    return fallbackPrice;
+  }
+
+  async parseAndValidateReceipt(rawOcrText: string, expectedVehiclePlate?: string) {
+    const parsedData = this.ollamaService
+      ? await this.ollamaService.extractNaftalReceiptJson(rawOcrText)
+      : null;
+
+    this.logger.log(`Reçu analysé via Ollama/Qwen : ${JSON.stringify(parsedData)}`);
+
+    return {
+      success: Boolean(parsedData),
+      data: parsedData || {},
+      validation: {
+        is_litres_valid: (parsedData?.liters || 0) > 0 && (parsedData?.liters || 0) < 1000,
+        is_amount_valid: (parsedData?.totalAmountDzd || 0) > 0,
+        expected_plate: expectedVehiclePlate || 'N/A',
+      },
+    };
   }
 
   async scanAndReconcile(
@@ -27,7 +90,7 @@ export class FuelScannerService {
   ): Promise<FuelReceiptScanResult> {
     this.logger.log(`Scanning Naftal fuel receipt for asset [${dto.assetId}], tenant [${tenantId}]`);
 
-    const assetRes = await this.queryInTenant(
+    const assetRes = await this.queryInTenant<FuelScanAssetRow>(
       tenantId,
       `SELECT id, code, name, category, status FROM assets WHERE id = $1 AND tenant_id = $2`,
       [dto.assetId, tenantId],
@@ -40,29 +103,39 @@ export class FuelScannerService {
     };
 
     const rawText = dto.receiptTextRaw || '';
-    let liters = dto.manualOverrides?.liters || 50.0;
+    let extractedVolume = dto.manualOverrides?.liters || 0;
+    let extractedAmountDzd = dto.manualOverrides?.totalAmountDzd || 0;
     let fuelType: FuelReceiptScanResult['fuelType'] =
-      (dto.manualOverrides?.fuelType as any) || 'Gasoil';
+      dto.manualOverrides?.fuelType || 'Gasoil';
     let stationName =
       dto.manualOverrides?.stationName || 'Station Naftal Chéraga (RN41)';
     let stationWilaya = '16 - Alger';
-    let unitPriceDzd = 29.01;
+
+    // Lecture dynamique des tarifs officiels Naftal depuis platform_fiscal_fuel_prices
+    const activeDiesel = await this.getActiveFuelPrice('DIESEL', 31.0);
+    const activeEssence = await this.getActiveFuelPrice('SANS_PLOMB', 47.0);
+    const activeSuper = await this.getActiveFuelPrice('SUPER', 45.97);
+    const activeGpl = await this.getActiveFuelPrice('GPL', 12.0);
+
+    let unitPriceDzd = dto.manualOverrides?.unitPriceDzd ?? activeDiesel;
 
     if (rawText.length > 0) {
       if (rawText.toLowerCase().includes('sans plomb')) {
         fuelType = 'Sans Plomb';
-        unitPriceDzd = 45.62;
+        unitPriceDzd = dto.manualOverrides?.unitPriceDzd ?? activeEssence;
       } else if (rawText.toLowerCase().includes('super')) {
         fuelType = 'Super';
-        unitPriceDzd = 45.97;
-      } else if (rawText.toLowerCase().includes('gpl')) {
+        unitPriceDzd = dto.manualOverrides?.unitPriceDzd ?? activeSuper;
+      } else if (rawText.toLowerCase().includes('gpl') || rawText.toLowerCase().includes('sirghaz')) {
         fuelType = 'GPL';
-        unitPriceDzd = 9.0;
+        unitPriceDzd = dto.manualOverrides?.unitPriceDzd ?? activeGpl;
+      } else {
+        unitPriceDzd = dto.manualOverrides?.unitPriceDzd ?? activeDiesel;
       }
 
       const literMatch = rawText.match(/(\d+[.,]?\d*)\s*(?:l|litres?|liters?)/i);
       if (literMatch && !dto.manualOverrides?.liters) {
-        liters = parseFloat(literMatch[1].replace(',', '.'));
+        extractedVolume = parseFloat(literMatch[1].replace(',', '.'));
       }
 
       if (rawText.toLowerCase().includes('oran')) {
@@ -75,10 +148,29 @@ export class FuelScannerService {
         stationName = 'Station Naftal El Eulma';
         stationWilaya = '19 - Sétif';
       }
+
+      // Si le texte OCR est complexe et non résolu par Regex, extraction JSON via Qwen dans scanAndReconcile()
+      if ((!extractedVolume || extractedVolume <= 0) && this.ollamaService) {
+        const qwenExtracted = await this.ollamaService.extractNaftalReceiptJson(rawText);
+        if (qwenExtracted && qwenExtracted.liters) {
+          extractedVolume = qwenExtracted.liters;
+          extractedAmountDzd = qwenExtracted.totalAmountDzd || extractedAmountDzd;
+          if (qwenExtracted.fuelType && !dto.manualOverrides?.fuelType) {
+            fuelType = qwenExtracted.fuelType;
+          }
+          if (qwenExtracted.stationName && !dto.manualOverrides?.stationName) {
+            stationName = qwenExtracted.stationName;
+          }
+          if (qwenExtracted.stationWilaya) {
+            stationWilaya = qwenExtracted.stationWilaya;
+          }
+        }
+      }
     }
 
+    const liters = extractedVolume > 0 ? extractedVolume : 50.0;
     const totalAmountDzd =
-      dto.manualOverrides?.totalAmountDzd || Math.round(liters * unitPriceDzd);
+      extractedAmountDzd > 0 ? extractedAmountDzd : Math.round(liters * unitPriceDzd);
 
     const distanceToStationMeters = 85;
     const isLocationVerified = true;
@@ -133,6 +225,7 @@ export class FuelScannerService {
   }
 
   async listRecentReceipts(_tenantId: string): Promise<FuelReceiptScanResult[]> {
+    const activeDiesel = await this.getActiveFuelPrice('DIESEL', 31.0);
     return [
       {
         receiptId: 'rcpt-demo-01',
@@ -143,8 +236,8 @@ export class FuelScannerService {
         stationWilaya: '16 - Alger',
         fuelType: 'Gasoil',
         liters: 45.0,
-        unitPriceDzd: 29.01,
-        totalAmountDzd: 1305,
+        unitPriceDzd: activeDiesel,
+        totalAmountDzd: Math.round(45.0 * activeDiesel * 100) / 100,
         dateTime: new Date(Date.now() - 3600000 * 5).toISOString(),
         receiptConfidence: 0.98,
         reconciliation: {
@@ -171,8 +264,8 @@ export class FuelScannerService {
         stationWilaya: '30 - Ouargla',
         fuelType: 'Gasoil',
         liters: 380.0,
-        unitPriceDzd: 29.01,
-        totalAmountDzd: 11024,
+        unitPriceDzd: activeDiesel,
+        totalAmountDzd: Math.round(380.0 * activeDiesel * 100) / 100,
         dateTime: new Date(Date.now() - 3600000 * 24).toISOString(),
         receiptConfidence: 0.95,
         reconciliation: {
@@ -199,8 +292,8 @@ export class FuelScannerService {
         stationWilaya: '09 - Blida',
         fuelType: 'Gasoil',
         liters: 65.0,
-        unitPriceDzd: 29.01,
-        totalAmountDzd: 1886,
+        unitPriceDzd: activeDiesel,
+        totalAmountDzd: Math.round(65.0 * activeDiesel * 100) / 100,
         dateTime: new Date(Date.now() - 3600000 * 48).toISOString(),
         receiptConfidence: 0.89,
         reconciliation: {

@@ -1,3 +1,5 @@
+export type StandardFuelType = 'Gasoil' | 'Super' | 'Sans Plomb' | 'GPL';
+
 export interface FuelReceiptScanRequestDto {
   receiptImageBase64?: string;
   receiptTextRaw?: string;
@@ -6,8 +8,9 @@ export interface FuelReceiptScanRequestDto {
   manualOverrides?: {
     liters?: number;
     totalAmountDzd?: number;
+    unitPriceDzd?: number;
     stationName?: string;
-    fuelType?: string;
+    fuelType?: StandardFuelType;
   };
 }
 
@@ -49,4 +52,40 @@ export interface FuelReceiptScanResult {
   reconciliation: FuelTelematicsReconciliation;
   status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';
   createdAt: string;
+}
+
+export interface FuelIncidentEvaluationInput {
+  eventId?: string;
+  vehicleId: string;
+  vehiclePlate: string;
+  driverPseudonym?: string;
+  timestamp?: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    wilayaCode: number;
+    wilayaName: string;
+    roadName: string;
+    roadGradePercent: number;
+  };
+  telemetry: {
+    speedKmh: number;
+    engineRpm: number;
+    ignitionOn: boolean;
+    idleHoursToday?: number;
+    durationStationarySeconds: number;
+    canConsumedLitersTotal?: number;
+  };
+  fuelReading: {
+    tankCapacityLiters: number;
+    rawLevelsLiters: number[];
+    tankLengthMeters?: number;
+    sensorOffsetRatio?: number;
+    previousCusumScore?: number;
+  };
+  context: {
+    nearestNaftalStationKm: number;
+    hasLegitimateFuelReceipt: boolean;
+    fuelUnitPriceDzd?: number;
+  };
 }

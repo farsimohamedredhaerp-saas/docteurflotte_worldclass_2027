@@ -17,6 +17,37 @@ import {
   WorkOrderStatus,
 } from '@docteurflotte/contracts';
 
+export interface AssetDatabaseRow {
+  id: string;
+  tenant_id: string;
+  name: string;
+  code: string;
+  category: AssetCategory;
+  brand?: string | null;
+  model?: string | null;
+  year?: string | number | null;
+  status: Asset['status'];
+  data_origin: Asset['dataOrigin'];
+  primary_meter_type: Asset['primaryMeterType'];
+  current_meter_value: string | number;
+  maintenance_interval_value?: string | number | null;
+  next_maintenance_meter_value?: string | number | null;
+  created_at: string | Date;
+  updated_at: string | Date;
+}
+
+export interface MeterReadingDatabaseRow {
+  id: string;
+  tenant_id: string;
+  asset_id: string;
+  meter_type: MeterReading['meterType'];
+  value: string | number;
+  source: MeterReading['source'];
+  recorded_at: string | Date;
+  is_validated: boolean;
+  validation_error?: string | null;
+}
+
 @Injectable()
 export class AssetsService {
   constructor(private readonly databaseService: DatabaseService) {}
@@ -76,7 +107,7 @@ export class AssetsService {
   async listAssets(tenantId: string, category?: AssetCategory): Promise<Asset[]> {
     return this.databaseService.withTenantContext(tenantId, async (client) => {
       let query = 'SELECT * FROM assets WHERE tenant_id = $1';
-      const params: any[] = [tenantId];
+      const params: (string | AssetCategory)[] = [tenantId];
 
       if (category) {
         query += ' AND category = $2';
@@ -84,7 +115,7 @@ export class AssetsService {
       }
 
       query += ' ORDER BY created_at DESC';
-      const res = await client.query(query, params);
+      const res = await client.query<AssetDatabaseRow>(query, params);
       return res.rows.map((row) => this.mapAsset(row));
     });
   }
@@ -275,7 +306,7 @@ export class AssetsService {
     });
   }
 
-  private mapAsset(row: any): Asset {
+  private mapAsset(row: AssetDatabaseRow): Asset {
     return {
       id: row.id,
       tenantId: row.tenant_id,
@@ -300,7 +331,7 @@ export class AssetsService {
     };
   }
 
-  private mapMeterReading(row: any): MeterReading {
+  private mapMeterReading(row: MeterReadingDatabaseRow): MeterReading {
     return {
       id: row.id,
       tenantId: row.tenant_id,

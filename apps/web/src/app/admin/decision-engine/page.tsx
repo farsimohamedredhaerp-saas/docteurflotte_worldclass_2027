@@ -218,8 +218,8 @@ export default function AdminDecisionEnginePage() {
         setIsModalOpen(false);
         loadData();
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsProcessing(false);
     }
@@ -240,8 +240,8 @@ export default function AdminDecisionEnginePage() {
       const approved = await PlatformAdminClient.approveDecisionConfig(configId, session.token);
       setActionSuccess(`Version ${approved.version} approuvée (Statut : APPROVED). Prête pour activation.`);
       loadData();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsProcessing(false);
     }
@@ -269,8 +269,8 @@ export default function AdminDecisionEnginePage() {
       setIsActivateModalOpen(false);
       setActivationJustification('');
       loadData();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsProcessing(false);
     }
@@ -293,8 +293,8 @@ export default function AdminDecisionEnginePage() {
       );
       setActionSuccess(`Rollback réussi : version active rétablie (${res.version}).`);
       loadData();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsProcessing(false);
     }
@@ -330,8 +330,9 @@ export default function AdminDecisionEnginePage() {
         session.token
       );
       setSimulationResult(sim);
-    } catch (err: any) {
-      setError(`Échec simulation : ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`Échec simulation : ${msg}`);
     } finally {
       setIsSimulating(false);
     }

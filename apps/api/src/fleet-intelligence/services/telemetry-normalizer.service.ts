@@ -41,7 +41,7 @@ export class TelemetryNormalizerService {
     let needsFlespi = false;
 
     if (attrs.j1939_raw && typeof attrs.j1939_raw === 'object') {
-      const res = this.canDecoder.decodeRawJ1939Frames(attrs.j1939_raw);
+      const res = this.canDecoder.decodeRawJ1939Frames(attrs.j1939_raw as Record<string, string>);
       j1939Decoded = res.metrics;
       needsFlespi = res.hasUnknownFrames;
     } else if (attrs.raw && !attrs.obdOdometer && Object.keys(ioDecoded).length === 0) {
@@ -98,7 +98,7 @@ export class TelemetryNormalizerService {
         ? attrs.dtcs.split(',')
         : [];
 
-    const extraIot: Record<string, any> = {};
+    const extraIot: Record<string, unknown> = {};
     for (const k of ['bleTemp1C', 'bleTemp2C', 'fuelLevelLiters']) {
       if (ioDecoded[k] !== undefined) extraIot[k] = ioDecoded[k];
     }
@@ -143,11 +143,11 @@ export class TelemetryNormalizerService {
    * 2. Normalisation du Failover Stateless Flespi (Conforme Loi Algérienne 18-07)
    */
   fromFlespiMessage(
-    msg: Record<string, any>,
+    msg: Record<string, unknown>,
     tenantId: string,
     vehicleId: string,
   ): CanonicalTelemetryEvent {
-    const tsUnix = msg.timestamp ?? Date.now() / 1000;
+    const tsUnix = typeof msg.timestamp === 'number' ? msg.timestamp : Date.now() / 1000;
     const eventTime = new Date(Number(tsUnix) * 1000).toISOString();
 
     const imei = String(msg.ident || 'UNKNOWN_IMEI');
@@ -171,7 +171,7 @@ export class TelemetryNormalizerService {
         ? Math.round(Number(extVoltageV) * 1000)
         : null;
 
-    const extraIot: Record<string, any> = {};
+    const extraIot: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(msg)) {
       if (k.startsWith('ble.sensor.') || k.startsWith('refrigerator.')) {
         extraIot[k] = v;

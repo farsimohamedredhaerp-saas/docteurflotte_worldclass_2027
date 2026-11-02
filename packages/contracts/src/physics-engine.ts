@@ -193,10 +193,10 @@ export interface ThermalResidualResult {
   ewmaResidualC: number;
   thermalHealthScore: number; // 0 à 100
   diagnosis:
-    | 'NORMAL_THERMAL_EQUILIBRIUM'
-    | 'THERMOSTAT_STUCK_OPEN'
-    | 'RADIATOR_SCALING_OR_VISCO_COUPLING_FAILURE'
-    | 'CRITICAL_HEAD_GASKET_RISK';
+  | 'NORMAL_THERMAL_EQUILIBRIUM'
+  | 'THERMOSTAT_STUCK_OPEN'
+  | 'RADIATOR_SCALING_OR_VISCO_COUPLING_FAILURE'
+  | 'CRITICAL_HEAD_GASKET_RISK';
   proof: string;
 }
 
@@ -708,6 +708,7 @@ export interface HydraulicWorkAuditInput {
   nominalPowerKw: number;
   ambientTempC?: number;
   hourlyRentalRateDzd?: number;
+  fuelUnitPriceDzd?: number;
 }
 
 export interface HydraulicWorkAuditResult {
@@ -761,8 +762,9 @@ export function calculateHydraulicWorkAndFraud(input: HydraulicWorkAuditInput): 
     classification = 'RALENTI_FORCÉ_FRAUDE';
     isFraud = true;
     confidenceScore = 96;
-    // Surcoût = heure de location indue + carburant gaspillé (29.01 DZD/L Naftal)
-    unjustifiedCostDzd = Math.round((hourlyRateDzd * durationH) + (fuelRateLh * durationH * 29.01));
+    // Surcoût = heure de location indue + carburant gaspillé (tarif officiel dynamique Naftal DZD)
+    const fuelPrice = input.fuelUnitPriceDzd ?? 31.00;
+    unjustifiedCostDzd = Math.round((hourlyRateDzd * durationH) + (fuelRateLh * durationH * fuelPrice));
   } else {
     classification = 'ATTENTE_ACTIVE';
     confidenceScore = 90;
@@ -891,6 +893,7 @@ export interface KinematicMicroSlipInput {
   nominalTireRadiusMm?: number;
   engineTorquePct: number;
   nominalColdPressureBar?: number;
+  fuelUnitPriceDzd?: number;
 }
 
 export interface KinematicMicroSlipResult {
@@ -926,16 +929,17 @@ export function calculateKinematicMicroSlipTire(input: KinematicMicroSlipInput):
   let status: KinematicMicroSlipResult['tireIntegrityStatus'] = 'PRESSION_OPTIMALE';
   let burstAlert = false;
   let fuelLossDzd = 0;
+  const fuelPrice = input.fuelUnitPriceDzd ?? 31.00;
 
   if (!isStraightLine) {
     status = 'PRESSION_OPTIMALE'; // Filtre de rejet en virage
   } else if (absDeltaPct >= 1.25 || estimatedPressureDeficitBar >= 1.8) {
     status = 'DANGER_ECLATEMENT_IMMINENT';
     burstAlert = true;
-    fuelLossDzd = Math.round(18.5 * 29.01 * 1.5); // +1.5 L/100km sur 1000 km
+    fuelLossDzd = Math.round(18.5 * fuelPrice * 1.5); // +1.5 L/100km sur 1000 km
   } else if (absDeltaPct >= 0.55 || estimatedPressureDeficitBar >= 0.8) {
     status = 'SOUS_GONFLAGE_LEGER';
-    fuelLossDzd = Math.round(10.0 * 29.01);
+    fuelLossDzd = Math.round(10.0 * fuelPrice);
   } else if (absDeltaPct >= 0.35 && Math.abs(input.engineTorquePct) > 60.0) {
     status = 'SURCHARGE_ASYMETRIQUE';
   }

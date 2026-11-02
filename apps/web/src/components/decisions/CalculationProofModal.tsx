@@ -21,7 +21,7 @@ export interface CalculationStep {
 export interface CalculationProofData {
   title: string;
   decisionOrMetricName: string;
-  category: 'FINANCIAL' | 'PHYSICS_RUL' | 'REGULATORY' | 'DISPATCH_TOPSIS' | 'VHI';
+  category: 'FINANCIAL' | 'PHYSICS_RUL' | 'REGULATORY' | 'DISPATCH_TOPSIS' | 'VHI' | 'TELEMATICS';
   ruleId: string;
   legalOrOemReference: string;
   deterministicFormula: string;
@@ -71,6 +71,10 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
         return { label: 'Arbre des 4 Portes & TOPSIS', bg: 'rgba(168, 85, 247, 0.15)', color: '#a855f7', border: '#a855f7' };
       case 'VHI':
         return { label: 'Indice de Santé VHI (0-100)', bg: 'rgba(236, 72, 153, 0.15)', color: '#ec4899', border: '#ec4899' };
+      case 'TELEMATICS':
+        return { label: 'Télématique & IoT Traccar', bg: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '#3b82f6' };
+      default:
+        return { label: 'Calcul Déterministe', bg: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8', border: '#94a3b8' };
     }
   };
 

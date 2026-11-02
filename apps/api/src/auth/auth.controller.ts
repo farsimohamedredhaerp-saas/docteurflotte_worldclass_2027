@@ -12,8 +12,8 @@ import {
 import { AuthService } from './auth.service';
 import { RegisterTenantDto } from './dto/register-tenant.dto';
 import { LoginDto } from './dto/login.dto';
-import { JwtAuthGuard } from './auth.guard';
-import { AuthResponse } from '@docteurflotte/contracts';
+import { JwtAuthGuard, AuthenticatedRequest } from './auth.guard';
+import { AuthResponse, UserProfileResponse } from '@docteurflotte/contracts';
 
 @Controller('auth')
 export class AuthController {
@@ -39,7 +39,9 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getProfile(@Req() req: any) {
-    return this.authService.getProfile(req.user.sub, req.user.tenantId);
+  async getProfile(@Req() req: AuthenticatedRequest): Promise<UserProfileResponse> {
+    const userId = req.user?.sub || '';
+    const tenantId = req.user?.tenantId || req.tenantId || '';
+    return this.authService.getProfile(userId, tenantId);
   }
 }

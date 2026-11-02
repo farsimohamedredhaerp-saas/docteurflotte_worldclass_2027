@@ -574,7 +574,7 @@ export interface OemPartItem {
   nameFr: string;
   oemReference: string;
   oemBrand: string;
-  technicalSpecs: Record<string, any>;
+  technicalSpecs: Record<string, unknown>;
   unitPriceDzd: number;
   equivalences: Array<{
     aftermarketBrand: string;

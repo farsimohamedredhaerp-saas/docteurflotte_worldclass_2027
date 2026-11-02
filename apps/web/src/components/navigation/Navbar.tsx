@@ -2,52 +2,54 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { AuthClient } from '../../lib/api-auth';
+import { AuthClient, NavbarSession } from '../../lib/api-auth';
 import { TenantIdentityBadge } from './TenantIdentityBadge';
 import { NavFeaturesMenu } from './NavFeaturesMenu';
 import { UserMenuDropdown } from './UserMenuDropdown';
 import { DemoModeToggle } from './DemoModeToggle';
 import { ThemeToggle } from '../ThemeToggle';
-import {
-  IconCpu,
-  IconLayers,
-  IconWrench,
-  IconSearch,
-  IconActivity,
-  IconShieldCheck,
-  IconRefreshCw,
-  IconNavigation,
-} from './TechIcons';
+import { PlatformStatusBar } from './PlatformStatusBar';
+import { MobileNavDrawer } from './MobileNavDrawer';
+import { IconRefreshCw, IconNavigation } from './TechIcons';
 
 interface NavbarProps {
   onResetDemo?: () => void;
 }
 
 export function Navbar({ onResetDemo }: NavbarProps) {
-  const [session, setSession] = useState<{
-    token: string | null;
-    user: any | null;
-    tenant: any | null;
-  }>({ token: null, user: null, tenant: null });
-  const [mounted, setMounted] = useState(false);
-
-  const loadSession = () => {
-    const s = AuthClient.getSession();
-    setSession(s);
-  };
+  const [session, setSession] = useState<NavbarSession | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   useEffect(() => {
-    loadSession();
-    setMounted(true);
+    const syncSession = () => {
+      try {
+        setSession(AuthClient.getSession());
+      } catch (err) {
+        console.error('[Navbar] Échec de synchronisation de session:', err);
+        setSession(null);
+      } finally {
+        setSessionReady(true);
+      }
+    };
 
-    const handleStorage = () => loadSession();
+    syncSession();
+
+    const handleStorage = () => syncSession();
+    const handleSessionChanged = () => syncSession();
+
     window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    window.addEventListener('auth:session-changed', handleSessionChanged);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('auth:session-changed', handleSessionChanged);
+    };
   }, []);
 
   const handleLogout = () => {
     AuthClient.clearSession();
-    setSession({ token: null, user: null, tenant: null });
+    setSession(null);
   };
 
   return (
@@ -55,7 +57,7 @@ export function Navbar({ onResetDemo }: NavbarProps) {
       style={{
         position: 'sticky',
         top: 0,
-        zIndex: 90,
+        zIndex: 100,
         background: 'var(--df-bg-glass-elevated)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
@@ -65,85 +67,56 @@ export function Navbar({ onResetDemo }: NavbarProps) {
         transition: 'background var(--df-transition-smooth), border-color var(--df-transition-smooth)',
       }}
     >
-      {/* BANDE SUPÉRIEURE DE TÉLÉMÉTRIE LIVE (SAMSARA FLEET PULSE) */}
+      {/* 1. BARRE SUPÉRIEURE D'OBSERVABILITÉ RÉELLE DE LA PLATEFORME */}
+      <PlatformStatusBar userRole={session?.user?.role} />
+
+      {/* 2. BARRE PRINCIPALE DE NAVIGATION (PLEINE LARGEUR FLUIDE) */}
       <div
         style={{
-          background: 'var(--df-bg-surface-2)',
-          borderBottom: '1px solid var(--df-border-subtle)',
-          fontSize: '0.72rem',
-          color: 'var(--df-text-muted)',
-        }}
-      >
-        <div
-          style={{
-            maxWidth: '1320px',
-            margin: '0 auto',
-            padding: '0.25rem 1rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '0.5rem',
-            boxSizing: 'border-box',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <span className="df-pulse-live" />
-              <span style={{ fontWeight: 600, color: 'var(--df-text-secondary)' }}>
-                Traccar IoT Gateway : En Ligne
-              </span>
-              <span className="df-mono hidden sm:inline" style={{ color: 'var(--df-text-faint)' }}>(Port 5055 / 5093)</span>
-            </div>
-            <span style={{ color: 'var(--df-border-medium)' }}>•</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <span className="hidden md:inline">Flux Télématique :</span>
-              <strong className="df-mono" style={{ color: 'var(--df-status-ok)' }}>100% Synchro RLS</strong>
-            </div>
-            <span className="hidden md:inline" style={{ color: 'var(--df-border-medium)' }}>•</span>
-            <div className="hidden md:flex" style={{ alignItems: 'center', gap: '0.35rem' }}>
-              <span style={{ color: 'var(--df-text-muted)' }}>Mode :</span>
-              <strong className="df-mono" style={{ color: 'var(--df-accent-blue)', fontSize: '0.70rem' }}>OEM-First (0 / 1 / 2)</strong>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <span className="df-mono hidden sm:inline" style={{ color: 'var(--df-text-faint)' }}>
-              Latence : &lt; 24ms
-            </span>
-            <span className="hidden sm:inline" style={{ color: 'var(--df-border-medium)' }}>•</span>
-            <span style={{ color: 'var(--df-status-ok-text)', background: 'var(--df-status-ok-bg)', padding: '1px 6px', borderRadius: '3px', fontWeight: 600, border: '1px solid var(--df-status-ok-border)', fontSize: '0.70rem' }}>
-              Hébergement Souverain • Loi 18-07 (ANPDP)
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* BARRE PRINCIPALE DE NAVIGATION */}
-      <div
-        style={{
-          maxWidth: '1320px',
+          maxWidth: '100%',
           margin: '0 auto',
-          padding: '0.5rem 1rem',
+          padding: '0.45rem 1.5rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '0.65rem',
+          gap: '0.75rem',
           flexWrap: 'nowrap',
           width: '100%',
           boxSizing: 'border-box',
         }}
       >
-        {/* SECTION GAUCHE : LOGO & IDENTITÉ TENANT */}
+        {/* SECTION GAUCHE : HAMBURGER MOBILE, LOGO & IDENTITÉ TENANT */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexShrink: 0 }}>
+          {/* BOUTON MENU MOBILE (< 1024px) */}
+          <button
+            type="button"
+            onClick={() => setIsMobileDrawerOpen(true)}
+            aria-label="Ouvrir le menu de navigation mobile"
+            aria-expanded={isMobileDrawerOpen}
+            className="inline-flex lg:hidden"
+            style={{
+              background: 'var(--df-bg-surface-2)',
+              border: '1px solid var(--df-border-subtle)',
+              color: 'var(--df-text-main)',
+              padding: '0.25rem 0.5rem',
+              borderRadius: 'var(--df-radius-sm)',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              lineHeight: 1,
+            }}
+          >
+            ☰
+          </button>
+
           <Link
             href="/"
+            aria-label="DocteurFlotte - Retour à l'accueil"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.55rem',
               textDecoration: 'none',
-              outline: 'none',
+              borderRadius: 'var(--df-radius-sm)',
             }}
           >
             <div
@@ -190,7 +163,7 @@ export function Navbar({ onResetDemo }: NavbarProps) {
                   DZ
                 </span>
               </div>
-              <span className="hidden lg:block" style={{ fontSize: '0.65rem', color: 'var(--df-text-muted)' }}>
+              <span className="hidden xl:block" style={{ fontSize: '0.65rem', color: 'var(--df-text-muted)' }}>
                 Contrôle & Décisionnel
               </span>
             </div>
@@ -198,6 +171,7 @@ export function Navbar({ onResetDemo }: NavbarProps) {
 
           {/* SÉPARATEUR VERTICAL */}
           <div
+            className="hidden sm:block"
             style={{
               width: '1px',
               height: '20px',
@@ -205,54 +179,66 @@ export function Navbar({ onResetDemo }: NavbarProps) {
             }}
           />
 
-          {/* BADGES TENANT DYNAMIQUE (SI AUTHENTIFIÉ) */}
-          {mounted && <TenantIdentityBadge tenant={session.tenant} />}
+          {/* BADGES TENANT DYNAMIQUE (SI AUTHENTIFIÉ OU DÉMO) */}
+          {sessionReady && <TenantIdentityBadge tenant={session?.tenant ?? null} />}
         </div>
 
-        {/* SECTION CENTRALE : MENU DE FONCTIONNALITÉS PROFESSIONNEL */}
-        <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+        {/* SECTION CENTRALE : MENU DE FONCTIONNALITÉS PROFESSIONNEL (DESKTOP) */}
+        <div
+          className="hidden lg:flex"
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            position: 'relative',
+          }}
+        >
           <NavFeaturesMenu />
         </div>
 
         {/* SECTION DROITE : RACCOURCIS CRITIQUES, THÈME & PROFIL */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
           {/* RACCOURCI LIVE FLEET COCKPIT & TÉLÉMÉTRIE GIS */}
           <Link
             href="/live-cockpit"
+            aria-label="Accéder au Cockpit Télématique Live (GIS, CAN J1939)"
+            title="Cockpit Télématique Live (GIS, CAN J1939)"
             style={{
               textDecoration: 'none',
               background: 'var(--df-status-ok-bg)',
               border: '1px solid var(--df-status-ok)',
               color: 'var(--df-status-ok-text)',
-              padding: '0.26rem 0.45rem',
+              padding: '0.28rem 0.6rem',
               borderRadius: 'var(--df-radius-sm)',
-              fontSize: '0.72rem',
+              fontSize: '0.74rem',
               fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
-              gap: '0.25rem',
+              gap: '0.35rem',
               whiteSpace: 'nowrap',
               boxShadow: 'var(--df-shadow-sm)',
-              transition: 'all var(--df-transition-fast)',
+              transition: 'background var(--df-transition-fast), border-color var(--df-transition-fast)',
             }}
-            title="Cockpit Télématique Live (GIS, CAN J1939)"
           >
             <span
               style={{
-                width: 5,
-                height: 5,
+                width: 6,
+                height: 6,
                 borderRadius: '50%',
                 background: 'var(--df-status-ok)',
-                boxShadow: '0 0 5px var(--df-status-ok)',
+                boxShadow: '0 0 6px var(--df-status-ok)',
               }}
+              aria-hidden="true"
             />
-            <IconNavigation size={12} strokeWidth={2} style={{ color: 'var(--df-status-ok)' }} />
+            <IconNavigation size={13} strokeWidth={2} style={{ color: 'var(--df-status-ok)' }} aria-hidden="true" />
+            <span className="hidden 2xl:inline">Cockpit Live</span>
           </Link>
 
           {onResetDemo && (
             <button
               onClick={onResetDemo}
               type="button"
+              aria-label="Réinitialiser les scénarios de démonstration"
               title="Réinitialiser les scénarios de démonstration"
               style={{
                 background: 'var(--df-bg-surface-2)',
@@ -267,18 +253,10 @@ export function Navbar({ onResetDemo }: NavbarProps) {
                 alignItems: 'center',
                 gap: '0.25rem',
                 whiteSpace: 'nowrap',
-                transition: 'all var(--df-transition-fast)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--df-border-medium)';
-                e.currentTarget.style.color = 'var(--df-text-main)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--df-border-subtle)';
-                e.currentTarget.style.color = 'var(--df-text-muted)';
+                transition: 'border-color var(--df-transition-fast), color var(--df-transition-fast)',
               }}
             >
-              <IconRefreshCw size={12} strokeWidth={1.75} />
+              <IconRefreshCw size={12} strokeWidth={1.75} aria-hidden="true" />
             </button>
           )}
 
@@ -289,15 +267,22 @@ export function Navbar({ onResetDemo }: NavbarProps) {
           <ThemeToggle />
 
           {/* MENU PROFIL / AUTHENTIFICATION */}
-          {mounted && (
+          {sessionReady && (
             <UserMenuDropdown
-              user={session.user}
-              tenant={session.tenant}
+              user={session?.user ?? null}
+              tenant={session?.tenant ?? null}
               onLogout={handleLogout}
             />
           )}
         </div>
       </div>
+
+      {/* 3. TIROIR DE NAVIGATION MOBILE ET TABLETTE (< 1024px) */}
+      <MobileNavDrawer
+        isOpen={isMobileDrawerOpen}
+        onClose={() => setIsMobileDrawerOpen(false)}
+        session={session}
+      />
     </header>
   );
 }

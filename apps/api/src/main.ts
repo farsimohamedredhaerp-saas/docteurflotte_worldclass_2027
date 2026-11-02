@@ -1,6 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
+import type { Request, Response, NextFunction } from 'express';
+import * as crypto from 'crypto';
 import { AppModule } from './app.module';
+
+// Registre de Rate Limiting anti-brute force en mémoire (IP -> { count, resetTime })
+const authRateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+function cleanupRateLimitMap() {
+  const now = Date.now();
+  for (const [key, record] of authRateLimitMap.entries()) {
+    if (record.resetTime < now) {
+      authRateLimitMap.delete(key);
+    }
+  }
+}
+
+// Nettoyage régulier toutes les 5 minutes
+setInterval(cleanupRateLimitMap, 5 * 60 * 1000).unref();
 
 function parseAllowedOrigins(): (string | RegExp)[] {
   const raw = process.env.CORS_ORIGINS || process.env.ALLOWED_ORIGINS || '';
@@ -52,11 +69,59 @@ async function bootstrap() {
     ],
   });
 
+  // Traçabilité et corrélation de bout en bout (X-Request-Id)
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const incomingId = req.headers['x-request-id'];
+    const requestId = typeof incomingId === 'string' && incomingId ? incomingId : crypto.randomUUID();
+    req.headers['x-request-id'] = requestId;
+    res.setHeader('X-Request-Id', requestId);
+    next();
+  });
+
+  // Protection Anti-Brute Force ciblée sur les routes d'authentification
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.method === 'POST' && (req.path.endsWith('/auth/login') || req.path.endsWith('/auth/register-tenant'))) {
+      const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+      const key = `${clientIp}:${req.path}`;
+      const now = Date.now();
+      const limitWindowMs = 60 * 1000; // 1 minute
+      const maxAttempts = req.path.endsWith('/auth/login') ? 15 : 6;
+
+      const record = authRateLimitMap.get(key) || { count: 0, resetTime: now + limitWindowMs };
+
+      if (record.resetTime < now) {
+        record.count = 0;
+        record.resetTime = now + limitWindowMs;
+      }
+
+      record.count += 1;
+      authRateLimitMap.set(key, record);
+
+      res.setHeader('X-RateLimit-Limit', maxAttempts.toString());
+      res.setHeader('X-RateLimit-Remaining', Math.max(0, maxAttempts - record.count).toString());
+      res.setHeader('X-RateLimit-Reset', Math.ceil(record.resetTime / 1000).toString());
+
+      if (record.count > maxAttempts) {
+        const retryAfterSeconds = Math.ceil((record.resetTime - now) / 1000);
+        res.setHeader('Retry-After', retryAfterSeconds.toString());
+        res.status(429).json({
+          statusCode: 429,
+          message: 'Trop de tentatives sur cette ressource. Veuillez patienter avant de réessayer.',
+          error: 'Too Many Requests',
+          retryAfterSeconds,
+        });
+        return;
+      }
+    }
+    next();
+  });
+
   // En-têtes de sécurité HTTP (OWASP Best Practices)
-  app.use((_req: any, res: any, next: () => void) => {
+  app.use((_req: Request, res: Response, next: NextFunction) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none';");
     res.setHeader('X-XSS-Protection', '0');
     res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(self), microphone=()');
     if (isProd) {

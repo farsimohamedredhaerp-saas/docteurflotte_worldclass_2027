@@ -9,6 +9,7 @@ import {
   CopilotResponse,
   CopilotInsightItem,
   CopilotActionSuggestion,
+  OllamaStatusResponse,
 } from '@docteurflotte/contracts';
 
 interface Message {
@@ -25,6 +26,14 @@ export default function CopilotPage() {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [insights, setInsights] = useState<CopilotInsightItem[]>([]);
+  const [aiStatus, setAiStatus] = useState<OllamaStatusResponse>({
+    available: false,
+    model: 'docteurflotte (qwen2.5:1.5b-instruct)',
+    baseUrl: 'http://localhost:11434',
+    sovereign: true,
+    loi1807Compliant: true,
+    mode: 'DETERMINISTIC_FALLBACK',
+  });
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
@@ -33,6 +42,9 @@ export default function CopilotPage() {
     if (s.token) {
       setSessionToken(s.token);
       loadInsights(s.token);
+      loadAiStatus(s.token);
+    } else {
+      loadAiStatus();
     }
     // Message d'accueil initial
     setMessages([
@@ -40,7 +52,7 @@ export default function CopilotPage() {
         id: 'msg-init',
         sender: 'copilot',
         text: `Bonjour. Je suis **DocteurFlotte Copilot**, votre assistant décisionnel et d'ingénierie de parc. 
-J'analyse en continu les flux télématiques Traccar, les équations physiques déterministes (Arrhenius, Cranking, Thermique, Archard, CUSUM) et vos budgets en Dinars Algériens.
+J'analyse en continu les flux télématiques Traccar, les équations physiques déterministes (Arrhenius, Cranking, Thermique, Archard, CUSUM) et vos budgets en Dinars Algériens, avec enrichissement souverain local **Ollama / Qwen2.5** conforme à la **Loi 18-07 (ANPDP)**.
 Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
         timestamp: new Date().toLocaleTimeString('fr-DZ', { hour: '2-digit', minute: '2-digit' }),
       },
@@ -50,6 +62,15 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const loadAiStatus = async (token?: string) => {
+    try {
+      const status = await CopilotClient.getAiStatus(token);
+      setAiStatus(status);
+    } catch {
+      // Fallback
+    }
+  };
 
   const loadInsights = async (token: string) => {
     try {
@@ -81,6 +102,14 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
 
     try {
       const res = await CopilotClient.ask({ prompt: query }, sessionToken);
+      if (res.aiSource) {
+        setAiStatus((prev) => ({
+          ...prev,
+          available: res.aiSource === 'OLLAMA_QWEN_LOCAL',
+          mode: res.aiSource || prev.mode,
+          model: res.aiModel || prev.model,
+        }));
+      }
       setMessages([
         ...newMessages,
         {
@@ -91,13 +120,14 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
           timestamp: new Date().toLocaleTimeString('fr-DZ', { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
       setMessages([
         ...newMessages,
         {
           id: `err-${Date.now()}`,
           sender: 'copilot',
-          text: `Désolé, une erreur s'est produite lors de l'analyse : ${err.message}`,
+          text: `Désolé, une erreur s'est produite lors de l'analyse : ${msg}`,
           timestamp: new Date().toLocaleTimeString('fr-DZ', { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
@@ -109,15 +139,35 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
   const handleExecuteAction = async (action: CopilotActionSuggestion) => {
     if (!sessionToken) return;
     try {
-      const res = await CopilotClient.executeAction(
+      const res = await CopilotClient.approveAction(
         action.id,
-        `Validation instantanée via le Copilote d'Exploitation pour ${action.assetName}`,
+        `Validation formelle via le Copilote (Human-in-the-Loop) pour ${action.assetName}`,
         sessionToken
       );
-      setActionFeedback(`✓ Action exécutée avec succès ! ${res.message} (Numéro d'OT : ${res.generatedWorkOrderId})`);
+      action.status = 'EXECUTED';
+      const codeMsg = res.confirmationCode ? ` [Code ANPDP : ${res.confirmationCode}]` : '';
+      setActionFeedback(`✓ Action validée avec succès ! ${res.message}${codeMsg} (Réf : ${res.generatedWorkOrderId})`);
+      setTimeout(() => setActionFeedback(null), 8000);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setActionFeedback(`Erreur lors de l'exécution : ${msg}`);
+    }
+  };
+
+  const handleRejectAction = async (action: CopilotActionSuggestion) => {
+    if (!sessionToken) return;
+    try {
+      await CopilotClient.rejectAction(
+        action.id,
+        `Rejeté manuellement par l'opérateur de parc`,
+        sessionToken
+      );
+      action.status = 'REJECTED';
+      setActionFeedback(`✕ Action ${action.id} rejetée avec succès et consignée dans le registre d'audit.`);
       setTimeout(() => setActionFeedback(null), 6000);
-    } catch (err: any) {
-      setActionFeedback(`Erreur lors de l'exécution : ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setActionFeedback(`Erreur lors du rejet : ${msg}`);
     }
   };
 
@@ -135,13 +185,32 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
       >
         <div style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '22px' }}>🧠</span>
               <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
                 Ask DocteurFlotte — Copilote Décisionnel d’Exploitation (SAD → ADS)
               </h1>
               <span style={{ fontSize: '11px', background: 'rgba(99, 102, 241, 0.3)', color: '#c7d2fe', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
                 IA SOUVERAINE & PHYSIQUE
+              </span>
+              <span
+                style={{
+                  fontSize: '11px',
+                  background: aiStatus.available
+                    ? 'rgba(16, 185, 129, 0.22)'
+                    : 'rgba(245, 158, 11, 0.2)',
+                  border: aiStatus.available
+                    ? '1px solid rgba(16, 185, 129, 0.45)'
+                    : '1px solid rgba(245, 158, 11, 0.4)',
+                  color: aiStatus.available ? '#6ee7b7' : '#fcd34d',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontWeight: 700,
+                }}
+              >
+                {aiStatus.available
+                  ? `🟢 OLLAMA / QWEN2.5 ACTIF (${aiStatus.model}) • LOI 18-07`
+                  : '🟡 MODE DÉTERMINISTE PUR (FALLBACK GRACIEUX • OLLAMA HORS-LIGNE)'}
               </span>
             </div>
             <p style={{ fontSize: '13.5px', color: '#94a3b8', margin: 0 }}>
@@ -150,6 +219,26 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
           </div>
 
           <div style={{ display: 'flex', gap: '10px' }}>
+            <Link
+              href="/admin/ai-observability"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                background: 'rgba(99, 102, 241, 0.2)',
+                border: '1px solid rgba(129, 140, 248, 0.45)',
+                color: '#a5b4fc',
+                fontSize: '12.5px',
+                fontWeight: 700,
+                textDecoration: 'none',
+              }}
+            >
+              <span>⚡</span>
+              <span>Observabilité & Audit IA</span>
+            </Link>
+
             <Link
               href="/fuel-scanner"
               style={{
@@ -289,10 +378,32 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
+                      flexWrap: 'wrap',
                     }}
                   >
                     <span>{msg.sender === 'user' ? '👤 Vous' : '🧠 DocteurFlotte Copilot'}</span>
                     <span style={{ color: 'rgba(255,255,255,0.4)' }}>• {msg.timestamp}</span>
+                    {msg.responsePayload?.aiSource && (
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          padding: '1px 6px',
+                          borderRadius: '4px',
+                          background:
+                            msg.responsePayload.aiSource === 'OLLAMA_QWEN_LOCAL'
+                              ? 'rgba(16, 185, 129, 0.2)'
+                              : 'rgba(99, 102, 241, 0.2)',
+                          color:
+                            msg.responsePayload.aiSource === 'OLLAMA_QWEN_LOCAL'
+                              ? '#6ee7b7'
+                              : '#c7d2fe',
+                        }}
+                      >
+                        {msg.responsePayload.aiSource === 'OLLAMA_QWEN_LOCAL'
+                          ? '⚡ Hybride : Moteur Physique + Qwen2.5 Local'
+                          : '📐 Moteur Physique Déterministe (Loi 18-07)'}
+                      </span>
+                    )}
                   </div>
 
                   {/* Body Text */}
@@ -336,61 +447,165 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                         </div>
                       )}
 
-                      {/* Suggested Actions (ADS Loop) */}
+                      {/* Suggested Actions (ADS Loop & Human-in-the-Loop) */}
                       {msg.responsePayload.suggestedActions.length > 0 && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          <div style={{ fontSize: '11px', fontWeight: 700, color: '#34d399', textTransform: 'uppercase' }}>
-                            ⚡ Décisions Autonomes & Arbitrages Recommandés (ADS)
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ fontSize: '11px', fontWeight: 700, color: '#34d399', textTransform: 'uppercase' }}>
+                              ⚡ Décisions & Actions Préparées (Draft & Commit)
+                            </div>
+                            <span style={{ fontSize: '10px', color: '#94a3b8' }}>
+                              Machine à États Souveraine • Validation Humaine Requise
+                            </span>
                           </div>
                           {msg.responsePayload.suggestedActions.map((act) => (
                             <div
                               key={act.id}
                               style={{
-                                background: 'rgba(16, 185, 129, 0.08)',
-                                border: '1px solid rgba(16, 185, 129, 0.3)',
+                                background: act.status === 'PENDING_APPROVAL'
+                                  ? 'rgba(234, 179, 8, 0.08)'
+                                  : act.status === 'EXECUTED'
+                                    ? 'rgba(16, 185, 129, 0.08)'
+                                    : 'rgba(239, 68, 68, 0.08)',
+                                border: `1px solid ${act.status === 'PENDING_APPROVAL'
+                                  ? 'rgba(234, 179, 8, 0.4)'
+                                  : act.status === 'EXECUTED'
+                                    ? 'rgba(16, 185, 129, 0.4)'
+                                    : 'rgba(239, 68, 68, 0.4)'
+                                  }`,
                                 borderRadius: '10px',
-                                padding: '12px 16px',
+                                padding: '14px 18px',
                                 display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                flexWrap: 'wrap',
-                                gap: '12px',
+                                flexDirection: 'column',
+                                gap: '10px',
                               }}
                             >
-                              <div>
-                                <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#6ee7b7' }}>
-                                  {act.title}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                                <div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                    <span style={{ fontSize: '14px', fontWeight: 700, color: act.status === 'PENDING_APPROVAL' ? '#fef08a' : '#6ee7b7' }}>
+                                      {act.title}
+                                    </span>
+                                    {act.status === 'PENDING_APPROVAL' && (
+                                      <span style={{ background: 'rgba(234, 179, 8, 0.25)', border: '1px solid #eab308', color: '#fef08a', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 800 }}>
+                                        ⏳ EN ATTENTE APPROBATION
+                                      </span>
+                                    )}
+                                    {act.status === 'EXECUTED' && (
+                                      <span style={{ background: 'rgba(16, 185, 129, 0.25)', border: '1px solid #10b981', color: '#6ee7b7', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 800 }}>
+                                        ✓ EXÉCUTÉ & AUDITÉ
+                                      </span>
+                                    )}
+                                    {act.status === 'REJECTED' && (
+                                      <span style={{ background: 'rgba(239, 68, 68, 0.25)', border: '1px solid #ef4444', color: '#fca5a5', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 800 }}>
+                                        ✕ REJETÉ
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div style={{ fontSize: '12.5px', color: '#cbd5e1', marginTop: '4px', lineHeight: 1.45 }}>
+                                    {act.description}
+                                  </div>
+                                  <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '6px' }}>
+                                    Coût Action : <strong>{act.estimatedCostDzd.toLocaleString('fr-DZ')} DZD</strong> •
+                                    Risque Évité : <strong style={{ color: '#f87171' }}>{act.estimatedRiskDzd.toLocaleString('fr-DZ')} DZD</strong> •
+                                    Gain Net : <strong style={{ color: '#34d399' }}>+{act.netSavingsDzd.toLocaleString('fr-DZ')} DZD (ROI x{act.roiMultiplier})</strong>
+                                  </div>
                                 </div>
-                                <div style={{ fontSize: '12px', color: '#cbd5e1', marginTop: '2px' }}>
-                                  {act.description}
-                                </div>
-                                <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
-                                  Coût Action : <strong>{act.estimatedCostDzd.toLocaleString('fr-DZ')} DZD</strong> • 
-                                  Risque Inaction Évité : <strong style={{ color: '#f87171' }}>{act.estimatedRiskDzd.toLocaleString('fr-DZ')} DZD</strong> • 
-                                  Gain Net : <strong style={{ color: '#34d399' }}>+{act.netSavingsDzd.toLocaleString('fr-DZ')} DZD (ROI x{act.roiMultiplier})</strong>
+
+                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                  {act.status === 'PENDING_APPROVAL' || act.status === 'PROPOSED' ? (
+                                    <>
+                                      <button
+                                        onClick={() => handleExecuteAction(act)}
+                                        style={{
+                                          padding: '8px 14px',
+                                          borderRadius: '8px',
+                                          background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                                          border: 'none',
+                                          color: '#fff',
+                                          fontWeight: 700,
+                                          fontSize: '12px',
+                                          cursor: 'pointer',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '6px',
+                                          whiteSpace: 'nowrap',
+                                          boxShadow: '0 2px 8px rgba(5, 150, 105, 0.3)',
+                                        }}
+                                      >
+                                        <span>✓</span>
+                                        <span>Confirmer l&apos;Exécution</span>
+                                      </button>
+                                      <button
+                                        onClick={() => handleRejectAction(act)}
+                                        style={{
+                                          padding: '8px 12px',
+                                          borderRadius: '8px',
+                                          background: 'rgba(239, 68, 68, 0.15)',
+                                          border: '1px solid rgba(239, 68, 68, 0.4)',
+                                          color: '#fca5a5',
+                                          fontWeight: 600,
+                                          fontSize: '12px',
+                                          cursor: 'pointer',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '4px',
+                                          whiteSpace: 'nowrap',
+                                        }}
+                                      >
+                                        <span>✕</span>
+                                        <span>Rejeter</span>
+                                      </button>
+                                    </>
+                                  ) : act.status === 'EXECUTED' ? (
+                                    <span style={{ fontSize: '11px', color: '#6ee7b7', fontWeight: 700 }}>
+                                      ✓ Enregistré au Registre des Ordres
+                                    </span>
+                                  ) : (
+                                    <span style={{ fontSize: '11px', color: '#fca5a5', fontWeight: 600 }}>
+                                      ✕ Action Classée
+                                    </span>
+                                  )}
                                 </div>
                               </div>
 
-                              <button
-                                onClick={() => handleExecuteAction(act)}
-                                style={{
-                                  padding: '8px 14px',
-                                  borderRadius: '8px',
-                                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                                  border: 'none',
-                                  color: '#fff',
-                                  fontWeight: 700,
-                                  fontSize: '12px',
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  whiteSpace: 'nowrap',
-                                }}
-                              >
-                                <span>⚡</span>
-                                <span>Émettre l’Ordre de Travail</span>
-                              </button>
+                              {/* TABLEAU MULTI-CRITÈRES TOPSIS SI CANDIDATS PRÉSENTS */}
+                              {act.candidateVehicles && act.candidateVehicles.length > 0 && (
+                                <div style={{ marginTop: '6px', background: 'rgba(15, 23, 42, 0.65)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '8px', padding: '10px' }}>
+                                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#a78bfa', marginBottom: '6px' }}>
+                                    📊 Classement des Candidats TOPSIS (Score Multicritère Algérie) :
+                                  </div>
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+                                    {act.candidateVehicles.map((c) => (
+                                      <div
+                                        key={c.vehicleId}
+                                        style={{
+                                          background: c.rank === 1 ? 'rgba(167, 139, 250, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                                          border: `1px solid ${c.rank === 1 ? '#a78bfa' : 'rgba(255, 255, 255, 0.08)'}`,
+                                          borderRadius: '6px',
+                                          padding: '8px 10px',
+                                          fontSize: '11px',
+                                        }}
+                                      >
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                          <strong style={{ color: c.rank === 1 ? '#c4b5fd' : '#cbd5e1' }}>
+                                            #{c.rank} {c.vehicleName}
+                                          </strong>
+                                          <span style={{ fontWeight: 800, color: c.rank === 1 ? '#34d399' : '#94a3b8' }}>
+                                            {(c.topsisScore * 100).toFixed(1)}%
+                                          </span>
+                                        </div>
+                                        <div style={{ color: '#94a3b8', fontSize: '10px', marginTop: '2px' }}>
+                                          Plaque : {c.vehiclePlate} • VHI : {c.vhiScore}/100
+                                        </div>
+                                        <div style={{ color: '#94a3b8', fontSize: '10px' }}>
+                                          Approche : {c.approachDistanceKm} km • Naftal : {c.fuelCostDzd.toLocaleString('fr-DZ')} DZD
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>

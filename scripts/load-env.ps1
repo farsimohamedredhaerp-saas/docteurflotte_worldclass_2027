@@ -30,7 +30,7 @@ if (Test-Path $nodeBinDir) {
     $cleanPathParts = $env:PATH -split ';' | Where-Object { $_ -and $_ -notlike '*Program Files\nodejs*' }
     $env:PATH = "$nodeBinDir;" + ($cleanPathParts -join ';')
 }
-$env:NODE_OPTIONS = if ($env:NODE_OPTIONS) { "$env:NODE_OPTIONS --disable-warning=DEP0190 --preserve-symlinks-main --max-old-space-size=1536" } else { "--disable-warning=DEP0190 --preserve-symlinks-main --max-old-space-size=1536" }
+$env:NODE_OPTIONS = "--disable-warning=DEP0190 --preserve-symlinks-main --max-old-space-size=2048"
 
 if ($pythonBinDir -and (Test-Path $pythonBinDir)) {
     $currentPathParts = $env:PATH -split ';'
@@ -66,21 +66,21 @@ Write-Host "  Traccar Local Port  : 8085" -ForegroundColor Gray
 # ──────────────────────────────────────────────────────────────────────────────
 # Ollama (IA Souveraine — CPU-only, offline, Loi 18-07)
 # ──────────────────────────────────────────────────────────────────────────────
-$env:OLLAMA_BASE_URL = "http://localhost:11434"
+$env:OLLAMA_BASE_URL = if ($env:OLLAMA_BASE_URL) { $env:OLLAMA_BASE_URL } else { "http://127.0.0.1:11434" }
 $env:OLLAMA_MODEL_NAME = "docteurflotte"
 $env:OLLAMA_NUM_PARALLEL = "1"          # 1 requête simultanée (8 Go RAM)
 $env:OLLAMA_MAX_LOADED_MODELS = "1"     # 1 seul modèle en RAM
 $env:OLLAMA_KEEP_ALIVE = "5m"           # Décharger après 5 min d'inactivité
 $env:OLLAMA_FLASH_ATTENTION = "1"       # Réduction mémoire ~20%
 $env:OLLAMA_MAX_TOKENS = "512"
-$env:OLLAMA_TIMEOUT = "30"
+$env:OLLAMA_TIMEOUT = "60"
 $env:OLLAMA_CACHE_TTL = "3600"
 
-# Vérification de la disponibilité d'Ollama
+# Vérification de la disponibilité d'Ollama (127.0.0.1 direct pour éviter latence IPv6)
 $ollamaAvailable = $false
 try {
-    $ollamaResp = Invoke-RestMethod -Uri "$($env:OLLAMA_BASE_URL)/api/tags" -TimeoutSec 2 -ErrorAction SilentlyContinue
-    if ($ollamaResp) { $ollamaAvailable = $true }
+    $ollamaResp = Invoke-RestMethod -Uri "$($env:OLLAMA_BASE_URL)/api/tags" -TimeoutSec 4 -ErrorAction SilentlyContinue
+    if ($ollamaResp -and $ollamaResp.models) { $ollamaAvailable = $true }
 } catch { }
 if ($ollamaAvailable) {
     Write-Host "  Ollama Local Port   : 11434 (IA Souveraine Active)" -ForegroundColor Green

@@ -192,7 +192,7 @@ export default function DriversPage() {
         name: formState.name || '',
         matriculeNumber: formState.matriculeNumber || `DRV-${Date.now().toString().slice(-3)}`,
         phone: formState.phone || '0550 00 00 00',
-        licenseCategory: (formState.licenseCategory as any) || 'E',
+        licenseCategory: (formState.licenseCategory as DriverRecord['licenseCategory']) || 'E',
         licenseNumber: formState.licenseNumber || '',
         licenseExpiry: formState.licenseExpiry || '2028-01-01',
         medicalCheckExpiry: formState.medicalCheckExpiry || '2026-12-31',
@@ -202,7 +202,7 @@ export default function DriversPage() {
         ecoDrivingScore: 85,
         harshBrakingCount: 0,
         excessiveIdleMinutes: 0,
-        status: (formState.status as any) || 'AVAILABLE',
+        status: (formState.status as DriverRecord['status']) || 'AVAILABLE',
       };
       setDrivers((prev) => [newDriver, ...prev]);
       setNotification(`✓ Nouveau conducteur ${newDriver.name} enregistré avec succès.`);
@@ -631,7 +631,7 @@ export default function DriversPage() {
                   </label>
                   <select
                     value={formState.licenseCategory || 'E'}
-                    onChange={(e) => setFormState({ ...formState, licenseCategory: e.target.value as any })}
+                    onChange={(e) => setFormState({ ...formState, licenseCategory: e.target.value as DriverRecord['licenseCategory'] })}
                     style={{
                       width: '100%',
                       padding: '0.5rem 0.75rem',
@@ -740,7 +740,7 @@ export default function DriversPage() {
                   </label>
                   <select
                     value={formState.status || 'AVAILABLE'}
-                    onChange={(e) => setFormState({ ...formState, status: e.target.value as any })}
+                    onChange={(e) => setFormState({ ...formState, status: e.target.value as DriverRecord['status'] })}
                     style={{
                       width: '100%',
                       padding: '0.5rem 0.75rem',

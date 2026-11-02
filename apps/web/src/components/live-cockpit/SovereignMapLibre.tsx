@@ -1,8 +1,21 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
+import type * as maplibreModule from 'maplibre-gl';
+
+type MapLibreStatic = typeof maplibreModule;
+type MapLibreMapInstance = maplibreModule.Map;
 import { VehicleTelemetryState, GeofenceZone } from './types';
 import { useTheme } from '../../context/ThemeContext';
+
+interface PMTilesProtocol {
+  new (): { tile: Parameters<typeof maplibreModule.addProtocol>[1] };
+}
+
+interface ProtomapsBasemaps {
+  namedFlavor: (flavor: string) => Record<string, string>;
+  layers: (source: string, theme: unknown, options: { lang: string }) => unknown[];
+}
 
 interface SovereignMapLibreProps {
   vehicles: VehicleTelemetryState[];
@@ -44,9 +57,9 @@ export function SovereignMapLibre({
       if (!mapContainerRef.current) return;
 
       try {
-        let maplibregl: any;
-        let Protocol: any;
-        let basemaps: any;
+        let maplibregl: MapLibreStatic | undefined;
+        let Protocol: PMTilesProtocol | undefined;
+        let basemaps: ProtomapsBasemaps | undefined;
 
         try {
           const mlPkg = 'maplibre-gl';
@@ -110,8 +123,8 @@ export function SovereignMapLibre({
 
         // 3. Instanciation MapLibre
         const map = new maplibregl.Map({
-          container: mapContainerRef.current,
-          style: styleObj as any,
+          container: mapContainerRef.current!,
+          style: styleObj,
           center: [3.0588, 36.7538], // Alger
           zoom: 6.2,
           pitch: 20,
@@ -129,17 +142,18 @@ export function SovereignMapLibre({
           setIsMapReady(true);
         });
 
-        map.on('error', (e: any) => {
+        map.on('error', (e: unknown) => {
           // Erreur de tuiles ou réseau local
           console.warn('[SovereignMapLibre] Erreur de flux cartographique :', e);
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : String(err);
         console.warn(
           '[SovereignMapLibre] Packages MapLibre / PMTiles non disponibles ou serveur hors ligne, basculement mode vectoriel natif :',
-          err?.message
+          errMsg
         );
         if (!isCancelled) {
-          setLoadError(err?.message || 'Erreur initialisation cartographie');
+          setLoadError(errMsg || 'Erreur initialisation cartographie');
           if (onFallbackRequested) onFallbackRequested();
         }
       }

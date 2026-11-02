@@ -67,6 +67,14 @@ export const DARJA_MECHANICAL_DICTIONARY: WorkshopDictionaryEntry[] = [
   },
 ];
 
+interface SovereignKnowledgeVaultRow {
+  section_title: string;
+  content: string;
+  structured_specs: Record<string, unknown>;
+  model_series: string;
+  manufacturer: string;
+}
+
 @Injectable()
 export class WorkshopVoiceService {
   private readonly logger = new Logger(WorkshopVoiceService.name);
@@ -74,7 +82,7 @@ export class WorkshopVoiceService {
   constructor(
     private readonly db: DatabaseService,
     @Optional() private readonly ragService?: SovereignRagService,
-  ) {}
+  ) { }
 
   /**
    * Retourne le glossaire mécanique franco-arabe algérien de référence.
@@ -130,7 +138,7 @@ export class WorkshopVoiceService {
     // Cas 1 : Intention identifiée pour un court-circuit déterministe
     if (matchedEntry) {
       const pool = this.db.getPool();
-      let dbRecord: any = null;
+      let dbRecord: SovereignKnowledgeVaultRow | null = null;
 
       if (pool) {
         const query = `
@@ -239,13 +247,13 @@ export class WorkshopVoiceService {
   private formatSpokenResponse(
     entry: WorkshopDictionaryEntry,
     vehicle: string,
-    specs: Record<string, any>,
+    specs: Record<string, unknown>,
   ): { spokenFr: string; spokenDarja: string } {
     switch (entry.darjaTerm) {
       case 'zeyer culasse': {
-        const p1 = specs.step1_torque_nm || 60;
-        const p2 = specs.step2_torque_nm || (vehicle === 'SHACMAN' ? 180 : 150);
-        const ang = specs.step3_angle_deg || specs.step4_angle_deg || (vehicle === 'SHACMAN' ? 90 : 270);
+        const p1 = Number(specs.step1_torque_nm) || 60;
+        const p2 = Number(specs.step2_torque_nm) || (vehicle === 'SHACMAN' ? 180 : 150);
+        const ang = Number(specs.step3_angle_deg || specs.step4_angle_deg) || (vehicle === 'SHACMAN' ? 90 : 270);
         return {
           spokenFr: `Culasse ${vehicle} : Serrage en plusieurs passes. Passe 1 à ${p1} Newton-mètres, passe 2 à ${p2} Newton-mètres, puis serrage angulaire final à ${ang} degrés. Vis neuves huilées obligatoires.`,
           spokenDarja: `Zeyer culasse ta3 ${vehicle} : Dir ${p1} Nm fel bdaya, men ba3d ${p2} Nm, w fel lekher dawar ${ang} daraja b'zawiya. Lazem les vis jdad w mzeytin.`,
@@ -253,9 +261,9 @@ export class WorkshopVoiceService {
       }
 
       case 'chhal zit': {
-        const cap = specs.oil_capacity_liters || 36.0;
-        const visc = specs.oil_viscosity || '15W-40';
-        const norm = specs.oil_standard || 'API CI-4';
+        const cap = Number(specs.oil_capacity_liters) || 36.0;
+        const visc = String(specs.oil_viscosity || '15W-40');
+        const norm = String(specs.oil_standard || 'API CI-4');
         return {
           spokenFr: `Capacité d'huile ${vehicle} : ${cap} Litres avec les filtres. Préconisation pour climat saharien : Huile ${visc} répondant à la norme ${norm}. Intervalle sévère à 15 000 kilomètres.`,
           spokenDarja: `Quantité zit ta3 ${vehicle} : ${cap} litres m3a les filtres. Fel sahwa lazem zit ${visc} norme ${norm}. Vidange kol 15 alef kilometre.`,
@@ -263,9 +271,9 @@ export class WorkshopVoiceService {
       }
 
       case 'disques farih': {
-        const minWear = specs.pad_thickness_min_wear_mm || 3.0;
-        const newThick = specs.pad_thickness_new_mm || 21.0;
-        const discRebut = specs.disc_thickness_min_mm || 37.0;
+        const minWear = Number(specs.pad_thickness_min_wear_mm) || 3.0;
+        const newThick = Number(specs.pad_thickness_new_mm) || 21.0;
+        const discRebut = Number(specs.disc_thickness_min_mm) || 37.0;
         return {
           spokenFr: `Freinage ${vehicle} : Épaisseur minimale des plaquettes à ${minWear} millimètres pour ${newThick} mm à neuf. Cote de rebut du disque ventilé à ${discRebut} millimètres.`,
           spokenDarja: `Freinage ${vehicle} : Les plaquettes lazem ykounou kter men ${minWear} mm. Disque ta3 l'frein ki yelhaq ${discRebut} mm lazem yetbadal fawran.`,
@@ -273,8 +281,8 @@ export class WorkshopVoiceService {
       }
 
       case 'injecteur m grippi': {
-        const maxBar = specs.rail_pressure_max_bar || 1600;
-        const maxLeak = specs.max_injector_leak_ml_per_min || 25;
+        const maxBar = Number(specs.rail_pressure_max_bar) || 1600;
+        const maxLeak = Number(specs.max_injector_leak_ml_per_min) || 25;
         return {
           spokenFr: `Injection Common Rail ${vehicle} : Pression de rampe normale ${maxBar} bar. Fuite maximale autorisée au retour d'injecteur : ${maxLeak} millilitres par minute. Contrôler le préfiltre décanteur d'eau.`,
           spokenDarja: `Système Common Rail ${vehicle} : Pression ta3 l'rail ${maxBar} bar. Retour injecteur ma ydepasich ${maxLeak} ml f'dqiqa. Chouf filtre décanteur.`,
@@ -282,8 +290,8 @@ export class WorkshopVoiceService {
       }
 
       case 'freinage enacta': {
-        const minEff = specs.min_service_brake_efficiency_pct || 50.0;
-        const maxImb = specs.max_steering_axle_imbalance_pct || 20.0;
+        const minEff = Number(specs.min_service_brake_efficiency_pct) || 50.0;
+        const maxImb = Number(specs.max_steering_axle_imbalance_pct) || 20.0;
         return {
           spokenFr: `Contrôle ENACTA : Efficacité minimale du frein de service requise à ${minEff} pour cent. Déséquilibre maximal toléré sur l'essieu avant directeur à ${maxImb} pour cent.`,
           spokenDarja: `Contrôle technique ENACTA : L'kofaa ta3 l'frein lazem tfout ${minEff} fel mya. Déséquilibre fel essieu l'qodami ma ydepasich ${maxImb} fel mya.`,

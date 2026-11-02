@@ -47,6 +47,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       connectionTimeoutMillis: 3000,
     });
 
+    this.pool.on('error', (err: Error) => {
+      this.logger.error(`Erreur inattendue sur un client inactif du pool PostgreSQL: ${err.message}`, err.stack);
+    });
+
     try {
       const client = await this.pool.connect();
       try {
@@ -125,9 +129,23 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * Exécute une requête protégée dans le contexte RLS étanche d'un tenant.
+   */
+  async queryInTenant<R extends QueryResultRow = QueryResultRow>(
+    tenantId: string,
+    sql: string,
+    params: (string | number | boolean | Date | null | undefined)[] = [],
+  ): Promise<QueryResult<R>> {
+    return this.withTenantContext(tenantId, (client) => client.query<R>(sql, params));
+  }
+
+  /**
    * Exécute une requête administrative ou de découverte hors contexte tenant restreint.
    */
-  async query<R extends QueryResultRow = any>(text: string, params?: any[]): Promise<QueryResult<R>> {
+  async query<R extends QueryResultRow = QueryResultRow>(
+    text: string,
+    params?: (string | number | boolean | Date | null | undefined)[],
+  ): Promise<QueryResult<R>> {
     if (!this.pool) {
       throw new Error('Base de données non disponible.');
     }

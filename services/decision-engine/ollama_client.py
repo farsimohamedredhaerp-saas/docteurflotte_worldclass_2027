@@ -25,7 +25,7 @@ from urllib.error import URLError
 logger = logging.getLogger("docteurflotte.ollama")
 
 # Configuration par variables d'environnement (ou valeurs par défaut)
-OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
 MODEL_NAME = os.environ.get("OLLAMA_MODEL_NAME", "docteurflotte")
 MAX_TOKENS = int(os.environ.get("OLLAMA_MAX_TOKENS", "512"))
 TIMEOUT_SECONDS = int(os.environ.get("OLLAMA_TIMEOUT", "60"))

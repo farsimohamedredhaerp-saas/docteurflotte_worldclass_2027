@@ -126,13 +126,7 @@ export class TelemetryBurstBufferService {
 
     if (this.storageService) {
       for (const batch of batches) {
-        if (typeof (this.storageService as any).persistCanonicalEventBatch === 'function') {
-          await this.storageService.persistCanonicalEventBatch(batch);
-        } else {
-          for (const evt of batch) {
-            await this.storageService.persistCanonicalEvent(evt);
-          }
-        }
+        await this.storageService.persistCanonicalEventBatch(batch);
       }
     }
 

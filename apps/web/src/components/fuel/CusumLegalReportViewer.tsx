@@ -112,8 +112,9 @@ export function CusumLegalReportViewer({
       const preset = CUSUM_PRESET_INCIDENTS[index];
       const result = await FuelScannerClient.evaluateFuelIncident(preset.payload, token);
       setReport(result);
-    } catch (err: any) {
-      setErrorMsg(err.message || "Erreur lors de l'évaluation physique de l'incident.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMsg(msg || "Erreur lors de l'évaluation physique de l'incident.");
     } finally {
       setIsEvaluating(false);
     }
@@ -346,11 +347,10 @@ export function CusumLegalReportViewer({
             <div
               style={{
                 background: 'var(--df-bg-base)',
-                border: `1px solid ${
-                  report.status === 'OPPOSABLE_DISCIPLINAIRE'
-                    ? 'rgba(239, 68, 68, 0.5)'
-                    : 'rgba(16, 185, 129, 0.5)'
-                }`,
+                border: `1px solid ${report.status === 'OPPOSABLE_DISCIPLINAIRE'
+                  ? 'rgba(239, 68, 68, 0.5)'
+                  : 'rgba(16, 185, 129, 0.5)'
+                  }`,
                 borderRadius: '10px',
                 padding: '12px',
               }}

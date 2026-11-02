@@ -72,6 +72,17 @@ export class FinancialArbitragePayloadDto {
   clientPenaltyPerHourDzd?: number;
 }
 
+export interface MissionCompanyInfo {
+  legalName?: string;
+  nif?: string;
+  nis?: string;
+  rcNumber?: string;
+  address?: string;
+  wilayaCode?: number;
+  phone?: string;
+  [key: string]: unknown;
+}
+
 export class MissionOrderIssuanceDto {
   @IsDefined()
   @IsObject()
@@ -83,11 +94,11 @@ export class MissionOrderIssuanceDto {
 
   @IsDefined()
   @IsObject()
-  driver!: any;
+  driver!: DriverStateDto & { nationalIdNumber?: string };
 
   @IsOptional()
   @IsObject()
-  companyInfo?: any;
+  companyInfo?: MissionCompanyInfo;
 }
 
 export class VerifyMissionOrderDto {

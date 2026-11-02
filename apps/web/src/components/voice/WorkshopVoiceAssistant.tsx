@@ -22,7 +22,7 @@ interface VoiceResult {
   subsystemDetected?: string;
   spokenResponseFr: string;
   spokenResponseDarja: string;
-  structuredData?: Record<string, any>;
+  structuredData?: Record<string, unknown>;
   sourceManualReference?: string;
   executionMs: number;
 }
@@ -35,6 +35,32 @@ const DARJA_PRESET_PHRASES = [
   { label: 'Seuil freinage ENACTA', query: 'seuil desequilibre frein enacta visite' },
 ];
 
+interface ISpeechRecognitionEvent {
+  results: {
+    [index: number]: {
+      [index: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
+
+interface ISpeechRecognition {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: ISpeechRecognitionEvent) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+
+interface IWindowWithSpeech extends Window {
+  SpeechRecognition?: new () => ISpeechRecognition;
+  webkitSpeechRecognition?: new () => ISpeechRecognition;
+}
+
 export function WorkshopVoiceAssistant({ token }: { token?: string }) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('kifech zeyer culasse ta3 kerax 440');
@@ -42,20 +68,21 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedVoiceLanguage, setSelectedVoiceLanguage] = useState<'FR' | 'DARJA'>('FR');
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<ISpeechRecognition | null>(null);
 
   // Initialisation Web Speech Recognition si supporté
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const speechWin = window as unknown as IWindowWithSpeech;
       const SpeechRecognition =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        speechWin.SpeechRecognition || speechWin.webkitSpeechRecognition;
       if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
         recognition.continuous = false;
         recognition.interimResults = false;
         recognition.lang = 'fr-DZ';
 
-        recognition.onresult = (event: any) => {
+        recognition.onresult = (event: ISpeechRecognitionEvent) => {
           const spokenText = event.results[0][0].transcript;
           setTranscript(spokenText);
           setIsListening(false);
@@ -526,3 +553,4 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
     </div>
   );
 }
+

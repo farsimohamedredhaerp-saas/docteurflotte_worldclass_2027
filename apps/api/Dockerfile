@@ -42,6 +42,7 @@ COPY --chown=node:node --from=builder /app/apps/api/package.json ./apps/api/
 COPY --chown=node:node --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --chown=node:node --from=dependencies /app/node_modules ./node_modules
 COPY --chown=node:node --from=dependencies /app/apps/api/node_modules ./apps/api/node_modules
+COPY --chown=node:node database/migrations ./database/migrations
 
 EXPOSE 3001
 

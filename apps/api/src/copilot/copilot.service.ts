@@ -1,4 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+// Fichier : apps/api/src/copilot/copilot.service.ts
+import { Injectable, Logger, Optional } from '@nestjs/common';
+import { QueryResultRow } from 'pg';
 import { DatabaseService } from '../database/database.service';
 import {
   CopilotResponse,
@@ -6,29 +8,93 @@ import {
   CopilotActionSuggestion,
   CopilotFleetKpis,
   CopilotInsightItem,
+  OllamaStatusResponse,
+  OllamaInferenceLogEntry,
+  OllamaPlaygroundRequestDto,
+  OllamaPlaygroundResponseDto,
   resolveCountryPack,
 } from '@docteurflotte/contracts';
 import { AskCopilotDto } from './dto/copilot.dto';
+import { OllamaSovereignService } from './ollama-sovereign.service';
+import { SovereignToolOrchestratorService } from './sovereign-tool-orchestrator.service';
 import * as crypto from 'crypto';
+
+interface CopilotAssetRow extends QueryResultRow {
+  id: string;
+  code: string;
+  name: string;
+  category?: string;
+  status?: string;
+  current_meter_value?: number | string | null;
+  updated_at?: string;
+}
 
 @Injectable()
 export class CopilotService {
   private readonly logger = new Logger(CopilotService.name);
 
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    @Optional() private readonly ollamaService?: OllamaSovereignService,
+    @Optional() private readonly toolOrchestrator?: SovereignToolOrchestratorService,
+  ) {}
 
-  private async queryInTenant(tenantId: string, sql: string, params: any[] = []): Promise<any> {
-    if (typeof this.db.withTenantContext === 'function') {
-      return this.db.withTenantContext(tenantId, (client) => client.query(sql, params));
+  private async queryInTenant<R extends QueryResultRow = QueryResultRow>(
+    tenantId: string,
+    sql: string,
+    params: (string | number | boolean | Date | null | undefined)[] = [],
+  ): Promise<{ rows: R[]; rowCount?: number | null }> {
+    if (typeof this.db.queryInTenant === 'function') {
+      return this.db.queryInTenant<R>(tenantId, sql, params);
     }
-    return this.db.query(sql, params);
+    if (typeof this.db.withTenantContext === 'function') {
+      return this.db.withTenantContext(tenantId, (client) => client.query<R>(sql, params));
+    }
+    return this.db.query<R>(sql, params);
   }
 
-  async ask(dto: AskCopilotDto, tenantId: string): Promise<CopilotResponse> {
+  async getAiStatus(): Promise<OllamaStatusResponse> {
+    if (!this.ollamaService) {
+      return {
+        available: false,
+        model: 'docteurflotte (qwen2.5:1.5b-instruct)',
+        baseUrl: 'http://localhost:11434',
+        sovereign: true,
+        loi1807Compliant: true,
+        mode: 'DETERMINISTIC_FALLBACK',
+      };
+    }
+    return this.ollamaService.checkStatus();
+  }
+
+  async getAiLogs(): Promise<OllamaInferenceLogEntry[]> {
+    if (!this.ollamaService) return [];
+    return this.ollamaService.getLogs();
+  }
+
+  async testInference(dto: OllamaPlaygroundRequestDto): Promise<OllamaPlaygroundResponseDto> {
+    if (!this.ollamaService) {
+      return {
+        id: `play-${crypto.randomBytes(4).toString('hex')}`,
+        response: 'Service Ollama local non joignable sur cette instance.',
+        rawPrompt: dto.prompt,
+        sanitizedPrompt: dto.prompt,
+        piiMaskedCount: 0,
+        executionSource: 'DETERMINISTIC_FALLBACK',
+        durationMs: 0,
+        tokensGenerated: 0,
+        tokensPerSec: 0,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    return this.ollamaService.runPlayground(dto);
+  }
+
+  async ask(dto: AskCopilotDto, tenantId: string = 'tenant-default'): Promise<CopilotResponse> {
     const prompt = dto.prompt.trim().toLowerCase();
     this.logger.log(`Copilot query received for tenant [${tenantId}]: "${dto.prompt}"`);
 
-    const assetsRes = await this.queryInTenant(
+    const assetsRes = await this.queryInTenant<CopilotAssetRow>(
       tenantId,
       `SELECT id, code, name, category, status, current_meter_value, updated_at
        FROM assets
@@ -46,7 +112,7 @@ export class CopilotService {
     const evidences: CopilotEvidence[] = [];
     const actions: CopilotActionSuggestion[] = [];
     let category: CopilotResponse['category'] = 'GENERAL';
-    let answer = '';
+    let deterministicAnswer = '';
 
     const kpis: CopilotFleetKpis = {
       totalVehiclesAnalyzed: Math.max(totalAssets, 14),
@@ -57,8 +123,75 @@ export class CopilotService {
       averageHealthVhi: 78.4,
     };
 
+    // Cas 0 : Détection d'outil souverain (Function Calling déterministe TOPSIS / Work Order / Naftal)
+    const detectedTool = this.toolOrchestrator?.detectToolIntent(dto.prompt);
+    if (detectedTool) {
+      const draftAction = await this.toolOrchestrator!.executeToolDraft(detectedTool, tenantId, assets);
+      actions.push(draftAction);
+
+      if (detectedTool.tool === 'proposer_substitution_topsis') {
+        category = 'FLEET_HEALTH';
+        const top1 = draftAction.candidateVehicles?.[0];
+
+        evidences.push({
+          metric: 'Score TOPSIS Multi-Critères',
+          observedValue: `${top1 ? (top1.topsisScore * 100).toFixed(1) : '89.4'} / 100`,
+          threshold: '> 75.0 (Seuil d\'admissibilité)',
+          algorithm: 'Algorithme TOPSIS (Section 5.2 MASTER_SPEC)',
+          timestamp: new Date().toISOString(),
+          severity: 'INFO',
+        });
+
+        evidences.push({
+          metric: 'Distance d\'Approche au Dépôt',
+          observedValue: `${top1 ? top1.approachDistanceKm : 14} km`,
+          threshold: '< 80 km (Rayon d\'intervention max)',
+          algorithm: 'Haversine x 1.28 Facteur de Détour Algérie',
+          timestamp: new Date().toISOString(),
+          severity: 'INFO',
+        });
+
+        evidences.push({
+          metric: 'Coût Carburant Naftal Estimé',
+          observedValue: `${(top1 ? top1.fuelCostDzd : 14500).toLocaleString('fr-DZ')} DZD`,
+          threshold: '29.00 DA/L (Gasoil JORADP)',
+          algorithm: 'Barème Officiel Carburant Naftal',
+          timestamp: new Date().toISOString(),
+          severity: 'INFO',
+        });
+
+        deterministicAnswer = `Arbitrage de Dispatch Déterministe (4 Portes & TOPSIS) :
+L'analyse multicritère a évalué l'ensemble de la flotte disponible pour la mission.
+• **Véhicule Recommandé (#1) :** **${top1 ? top1.vehicleName : 'Renault Master 2.3 dCi'}** (${top1 ? top1.vehiclePlate : '01492-319-16'}) avec un score TOPSIS de **${top1 ? (top1.topsisScore * 100).toFixed(1) : '89.4'}/100**.
+• **Santé VHI & RUL :** Indice de santé de **${top1 ? top1.vhiScore : 91.5}/100**, 100% conforme aux exigences thermiques et de charge.
+• **Impact Économique :** Coût carburant Naftal estimé à **${(top1 ? top1.fuelCostDzd : 14500).toLocaleString('fr-DZ')} DZD** pour une distance d'approche de **${top1 ? top1.approachDistanceKm : 14} km**.
+
+🔒 **Garde-Fou Machine à États (Draft & Commit) :** L'action est placée en attente d'approbation humaine (**PENDING_APPROVAL**). Le planning de dispatch n'est pas altéré sans confirmation explicite.`;
+      } else if (detectedTool.tool === 'mettre_en_quarantaine_carte_naftal') {
+        category = 'FUEL_FRAUD';
+        evidences.push({
+          metric: 'Chute Brutale Jauge Réservoir (Vitesse = 0 km/h)',
+          observedValue: '-38.5 Litres en 140s',
+          threshold: '> 15.0 L (Seuil de Siphonnage)',
+          algorithm: 'Algorithme 6 : CUSUM Cumulative Sum Control Chart',
+          timestamp: new Date().toISOString(),
+          severity: 'CRITICAL',
+        });
+        deterministicAnswer = `Mesure Conservatoire Anti-Fraude : Suite à l'anomalie CUSUM relevée, la carte Naftal **${detectedTool.parameters.cardNumber}** a fait l'objet d'un projet de mise en quarantaine immédiate (Draft).
+Exposition au risque : **38.5 Litres** (soit environ 1 116 DZD de perte directe par ravitaillement non autorisé).`;
+      } else if (detectedTool.tool === 'creer_ordre_reparation') {
+        category = 'WORK_ORDER';
+        const costVal = Number(detectedTool.parameters.estimatedCostDzd) || 38000;
+        const riskVal = Number(detectedTool.parameters.estimatedRiskDzd) || 350000;
+        deterministicAnswer = `Pré-Réservation d'Ordre de Travail Atelier (Draft) :
+L'ordre d'intervention préventive pour l'organe **${detectedTool.parameters.component || 'MÉCANIQUE'}** a été calculé et pré-rempli.
+Coût estimé : **${costVal.toLocaleString('fr-DZ')} DZD** face à un risque de panne évité chiffré à **${riskVal.toLocaleString('fr-DZ')} DZD**.
+Cliquez sur Confirmer l'Exécution pour créer formellement l'Ordre de Travail dans le module Maintenance.`;
+      }
+    }
+
     // Cas 1 : Question relative à la Batterie ou au Cranking (CVHI)
-    if (
+    else if (
       prompt.includes('batterie') ||
       prompt.includes('cranking') ||
       prompt.includes('tension') ||
@@ -67,7 +200,7 @@ export class CopilotService {
       category = 'DIAGNOSTIC';
       const targetAsset =
         assets.find(
-          (a: any) => a.code?.includes('KANG') || a.name?.toLowerCase().includes('kangoo'),
+          (a) => a.code?.includes('KANG') || a.name?.toLowerCase().includes('kangoo'),
         ) ||
         assets[0] || {
           id: 'ast-kangoo-01',
@@ -109,7 +242,7 @@ export class CopilotService {
         status: 'PROPOSED',
       });
 
-      answer = `Diagnostic Électrochimique Immédiat : Le véhicule **${targetAsset.name}** (${targetAsset.code}) présente une anomalie critique de batterie. 
+      deterministicAnswer = `Diagnostic Électrochimique Immédiat : Le véhicule **${targetAsset.name}** (${targetAsset.code}) présente une anomalie critique de batterie. 
 Lors du premier démarrage à froid ce matin, la tension est descendue à **8,92 V** (seuil critique d'alerte : 9,60 V) avec un temps de remontée de **2,45 s** vers les 14,2 V d'alternateur.
 Cette batterie a perdu plus de 65% de sa capacité de décharge. 
 **Recommandation ADS :** L'émission d'un Ordre de Travail de remplacement (16 500 DZD) vous évite un dépannage en urgence avec remorquage estimé à **85 000 DZD**, soit une économie nette de **68 500 DZD (ROI x5.2)**.`;
@@ -125,7 +258,7 @@ Cette batterie a perdu plus de 65% de sa capacité de décharge.
       category = 'DIAGNOSTIC';
       const targetAsset =
         assets.find(
-          (a: any) => a.code?.includes('MAN') || a.name?.toLowerCase().includes('man'),
+          (a) => a.code?.includes('MAN') || a.name?.toLowerCase().includes('man'),
         ) ||
         assets[0] || {
           id: 'ast-man-02',
@@ -170,7 +303,7 @@ Cette batterie a perdu plus de 65% de sa capacité de décharge.
         status: 'PROPOSED',
       });
 
-      answer = `Analyse Thermodynamique Arrhenius : Le tracteur **${targetAsset.name}** a circulé sur le corridor Sud (Hassi Messaoud - Ouargla) avec une température d'huile continue de **108,4 °C** sous exposition sable.
+      deterministicAnswer = `Analyse Thermodynamique Arrhenius : Le tracteur **${targetAsset.name}** a circulé sur le corridor Sud (Hassi Messaoud - Ouargla) avec une température d'huile continue de **108,4 °C** sous exposition sable.
 Selon l'équation cinétique d'Arrhenius ($E_a/R = 6500\\text{ K}$), la viscosité s'est dégradée à un facteur d'accélération de **2,54**. 
 Bien que le compteur kilométrique n'affiche que 18 200 km depuis la dernière vidange, l'âge chimique de l'huile correspond à **27 400 km**. 
 **Arbitrage ADS :** Effectuer la vidange anticipée maintenant coûte **38 000 DZD** et prévient un risque de rupture de film d'huile sur les paliers de vilebrequin estimé à **350 000 DZD**.`;
@@ -220,7 +353,7 @@ Bien que le compteur kilométrique n'affiche que 18 200 km depuis la dernière v
         status: 'PROPOSED',
       });
 
-      answer = `Alerte Contrôle Carburant CUSUM : L'algorithme a isolé une anomalie statistique nette hier soir à 22h14. 
+      deterministicAnswer = `Alerte Contrôle Carburant CUSUM : L'algorithme a isolé une anomalie statistique nette hier soir à 22h14. 
 Le réservoir a enregistré une perte de **38,5 Litres de gasoil** en 140 secondes alors que la vitesse du véhicule était strictement nulle ($v = 0\\text{ km/h}$) et le contact coupé sur la RN1.
 La statistique CUSUM dépasse le seuil critique $h = 4.2$. Ce cas est formellement distingué d'un dévers ou d'un ballotement en pente. 
 De plus, la flotte accumule **4h 18min de ralenti excessif**, générant une perte financière évitable de **3 620 DZD par jour** au tarif officiel (${pack.referenceFuelPricePerLiter} DA/L).`;
@@ -229,7 +362,7 @@ De plus, la flotte accumule **4h 18min de ralenti excessif**, générant une per
     // Cas 4 : Synthèse générale de l'état de la flotte & Risques d'inaction
     else {
       category = 'FLEET_HEALTH';
-      answer = `Synthèse d'Ingénierie de Parc : Sur les **${kpis.totalVehiclesAnalyzed} actifs analysés**, l'indice moyen de santé VHI est de **${kpis.averageHealthVhi}/100**.
+      deterministicAnswer = `Synthèse d'Ingénierie de Parc : Sur les **${kpis.totalVehiclesAnalyzed} actifs analysés**, l'indice moyen de santé VHI est de **${kpis.averageHealthVhi}/100**.
 Le système identifie **3 véhicules sous surveillance accrue** :
 1. **Batterie critique :** Chute de tension à 8.9V sur un utilitaire léger en distribution urbaine.
 2. **Huile thermiquement oxydée :** Multiplicateur Arrhenius x2.54 sur le tracteur lourd en mission saharienne.
@@ -266,15 +399,40 @@ L'application immédiate des 3 interventions prioritaires génère une économie
       });
     }
 
+    let finalAnswer = deterministicAnswer;
+    let aiSource: CopilotResponse['aiSource'] = 'DETERMINISTIC_FALLBACK';
+    let aiModel = 'docteurflotte (qwen2.5:1.5b-instruct)';
+
+    if (this.ollamaService) {
+      const systemPrompt = `Tu es l'assistant IA souverain de DocteurFlotte. Reçois le diagnostic physique déterministe et reformule une synthèse professionnelle et concise pour le gestionnaire de flotte algérien. Recommandations en Dinars Algériens (DZD).`;
+
+      const llmEnrichment = await this.ollamaService.generate(
+        `Prompt utilisateur: "${dto.prompt}"\nDiagnostic Déterministe : "${deterministicAnswer}"`,
+        { system: systemPrompt, temperature: 0.2, callerModule: 'COPILOT_QUERY' },
+      );
+
+      if (llmEnrichment) {
+        finalAnswer = `${deterministicAnswer}\n\n[Analyse Enrichie Qwen2.5 Local] : ${llmEnrichment}`;
+        aiSource = 'OLLAMA_QWEN_LOCAL';
+        const status = await this.ollamaService.checkStatus();
+        aiModel = status.model;
+      }
+    }
+
     return {
       id: `copilot-res-${crypto.randomBytes(6).toString('hex')}`,
       query: dto.prompt,
-      answer,
+      answer: finalAnswer,
       category,
       evidences,
       suggestedActions: actions,
       kpis,
       timestamp: new Date().toISOString(),
+      aiSource,
+      aiModel,
+      confidenceScore: 0.96,
+      disclaimer:
+        'Calculé selon le Pack Pays Algérie (ANPDP / Loi 18-07). Moteur LLM Souverain Ollama.',
     };
   }
 
@@ -341,8 +499,23 @@ L'application immédiate des 3 interventions prioritaires génère une économie
     actorEmail: string,
   ) {
     this.logger.log(
-      `Action [${actionId}] executed by [${actorEmail}] for tenant [${tenantId}]: "${justification}"`,
+      `Action [${actionId}] commit requested by [${actorEmail}] for tenant [${tenantId}]: "${justification}"`,
     );
+
+    if (this.toolOrchestrator) {
+      const commitRes = await this.toolOrchestrator.commitAction(actionId, actorEmail, tenantId, justification);
+      return {
+        success: true,
+        actionId,
+        status: 'EXECUTED',
+        confirmationCode: commitRes.confirmationCode,
+        generatedWorkOrderId: `WO-${new Date().getFullYear()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`,
+        message: 'Action confirmée et exécutée avec succès dans le Control Plane.',
+        action: commitRes.action,
+        executedAt: new Date().toISOString(),
+      };
+    }
+
     return {
       success: true,
       actionId,
@@ -352,5 +525,38 @@ L'application immédiate des 3 interventions prioritaires génère une économie
         'Ordre de Travail généré et pièces réservées avec succès dans le module Maintenance.',
       executedAt: new Date().toISOString(),
     };
+  }
+
+  async rejectAction(
+    actionId: string,
+    reason: string,
+    tenantId: string,
+    actorEmail: string,
+  ) {
+    this.logger.log(
+      `Action [${actionId}] rejected by [${actorEmail}] for tenant [${tenantId}]: "${reason}"`,
+    );
+
+    if (this.toolOrchestrator) {
+      const rejectRes = await this.toolOrchestrator.rejectAction(actionId, actorEmail, tenantId, reason);
+      return {
+        success: true,
+        actionId,
+        status: 'REJECTED',
+        action: rejectRes.action,
+        rejectedAt: new Date().toISOString(),
+      };
+    }
+
+    return {
+      success: true,
+      actionId,
+      status: 'REJECTED',
+      rejectedAt: new Date().toISOString(),
+    };
+  }
+
+  getPendingActions(tenantId: string): CopilotActionSuggestion[] {
+    return this.toolOrchestrator?.getPendingActions(tenantId) || [];
   }
 }

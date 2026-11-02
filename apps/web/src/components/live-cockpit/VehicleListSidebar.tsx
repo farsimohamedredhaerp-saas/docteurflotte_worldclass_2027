@@ -21,7 +21,7 @@ interface VehicleListSidebarProps {
   searchFilter: string;
 }
 
-type FilterCategory = 'ALL' | 'MOTION' | 'IDLE' | 'DTC' | 'OFFLINE';
+type FilterCategory = 'ALL' | 'MOTION' | 'IDLE' | 'DTC' | 'DVIR_BLOCK' | 'OFFLINE';
 
 export function VehicleListSidebar({
   vehicles,
@@ -39,6 +39,7 @@ export function VehicleListSidebar({
     if (activeFilter === 'MOTION' && v.status !== 'MOTION') return false;
     if (activeFilter === 'IDLE' && v.status !== 'IDLE_WARNING') return false;
     if (activeFilter === 'DTC' && v.status !== 'DTC_CRITICAL') return false;
+    if (activeFilter === 'DVIR_BLOCK' && !v.dvirStatus?.isBlocked) return false;
     if (
       activeFilter === 'OFFLINE' &&
       v.status !== 'OFFLINE' &&
@@ -57,7 +58,8 @@ export function VehicleListSidebar({
       const matchDtc = v.activeDtcs.some((d) =>
         d.codeString.toLowerCase().includes(q)
       );
-      return matchPlate || matchVin || matchDriver || matchModel || matchWilaya || matchDtc;
+      const matchDvir = v.dvirStatus?.isBlocked && (q.includes('dvir') || q.includes('consign'));
+      return matchPlate || matchVin || matchDriver || matchModel || matchWilaya || matchDtc || Boolean(matchDvir);
     }
 
     return true;
@@ -176,7 +178,7 @@ export function VehicleListSidebar({
           borderBottom: '1px solid var(--df-cockpit-border)',
         }}
       >
-        <div className="grid grid-cols-5 gap-1 text-[9px] font-mono">
+        <div className="grid grid-cols-6 gap-0.5 text-[8.5px] font-mono">
           <button
             onClick={() => setActiveFilter('ALL')}
             className="py-1 rounded-xs uppercase tracking-tight text-center transition-colors cursor-pointer"
@@ -255,6 +257,27 @@ export function VehicleListSidebar({
             }
           >
             DTC
+          </button>
+          <button
+            onClick={() => setActiveFilter('DVIR_BLOCK')}
+            className="py-1 rounded-xs uppercase tracking-tight text-center transition-colors cursor-pointer"
+            style={
+              activeFilter === 'DVIR_BLOCK'
+                ? {
+                    backgroundColor: 'rgba(239, 68, 68, 0.25)',
+                    color: '#EF4444',
+                    border: '1px solid #EF4444',
+                    fontWeight: 700,
+                  }
+                : {
+                    color: '#EF4444',
+                    opacity: 0.8,
+                    backgroundColor: 'transparent',
+                  }
+            }
+            title="Consignation Sécurité DVIR"
+          >
+            DVIR
           </button>
           <button
             onClick={() => setActiveFilter('OFFLINE')}
@@ -423,6 +446,28 @@ export function VehicleListSidebar({
                     {vehicle.driverName}
                   </span>
                 </div>
+
+                {/* Alerte Consignation Sécurité DVIR */}
+                {vehicle.dvirStatus?.isBlocked && (
+                  <div
+                    className="flex items-center justify-between px-1.5 py-0.5 rounded-xs text-[9.5px] font-mono font-bold"
+                    style={{
+                      backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                      border: '1px solid rgba(239, 68, 68, 0.4)',
+                      color: '#EF4444',
+                    }}
+                  >
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse" />
+                      <span>CONSIGNÉ DVIR</span>
+                    </span>
+                    {vehicle.dvirStatus.generatedWorkOrderId && (
+                      <span className="opacity-80 underline text-[8.5px]">
+                        {vehicle.dvirStatus.generatedWorkOrderId}
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Ligne 3 : Jauges Miniatures (Carburant, Signal GSM, Anomalies) */}
                 <div className="flex items-center justify-between gap-2 pt-0.5">

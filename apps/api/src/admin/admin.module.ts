@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../database/database.module';
 import { AuthModule } from '../auth/auth.module';
 import { AdminController } from './admin.controller';
+import { ReferenceConfigController } from './controllers/reference-config.controller';
 import { AdminTenantsService } from './services/admin-tenants.service';
 import { AdminDecisionEngineService } from './services/admin-decision-engine.service';
 import { AdminFiscalService } from './services/admin-fiscal.service';
@@ -11,7 +12,7 @@ import { PlatformAdminGuard } from './guards/platform-admin.guard';
 
 @Module({
   imports: [DatabaseModule, AuthModule],
-  controllers: [AdminController],
+  controllers: [AdminController, ReferenceConfigController],
   providers: [
     AdminTenantsService,
     AdminDecisionEngineService,

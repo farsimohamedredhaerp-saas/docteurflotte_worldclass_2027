@@ -72,8 +72,8 @@ export default function AdminFiscalPage() {
       setSuccessMsg(`Prix du carburant « ${selectedFuel.label_fr} » mis à jour.`);
       loadData();
       setTimeout(() => setSelectedFuel(null), 1200);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsUpdating(false);
     }

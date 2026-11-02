@@ -222,10 +222,10 @@ export default function TcoPage() {
         id: `tco-${Date.now().toString().slice(-4)}`,
         registrationNumber: formState.registrationNumber || '',
         makeModel: formState.makeModel || 'Véhicule',
-        category: (formState.category as any) || 'PL_BENNE',
+        category: (formState.category as AssetTcoRecord['category']) || 'PL_BENNE',
         categoryLabel: formState.categoryLabel || 'Poids Lourds',
         kmOrHoursPeriod: usage,
-        unitType: (formState.unitType as any) || 'km',
+        unitType: (formState.unitType as AssetTcoRecord['unitType']) || 'km',
         fuelCostDzd: fuel,
         maintenanceCostDzd: maint,
         driverCostDzd: driver,
@@ -673,7 +673,7 @@ export default function TcoPage() {
                   </label>
                   <select
                     value={formState.unitType || 'km'}
-                    onChange={(e) => setFormState({ ...formState, unitType: e.target.value as any })}
+                    onChange={(e) => setFormState({ ...formState, unitType: e.target.value as AssetTcoRecord['unitType'] })}
                     style={{
                       width: '100%',
                       padding: '0.5rem 0.75rem',
