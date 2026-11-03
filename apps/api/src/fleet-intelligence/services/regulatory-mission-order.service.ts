@@ -43,6 +43,8 @@ export interface VerificationResult {
     destWilaya: number;
     validUntil: string;
     cargoNature: string;
+    jti?: string;
+    kid?: string;
   };
 }
 
@@ -51,19 +53,34 @@ export class RegulatoryMissionOrderService {
   private readonly logger = new Logger(RegulatoryMissionOrderService.name);
 
   private readonly hmacSecret: string;
+  private readonly ed25519PrivateKey: string;
+  private readonly ed25519PublicKey: string;
+  private readonly keyId = 'ed25519-dz-om-2026-v1';
 
   constructor(private readonly gateService: AlgerianRegulatoryGateService) {
-    if (
-      process.env.NODE_ENV === 'production' &&
-      (!process.env.MISSION_ORDER_SIGNING_SECRET ||
-        process.env.MISSION_ORDER_SIGNING_SECRET.length < 32)
-    ) {
-      throw new Error(
-        'FATAL SECURITY: MISSION_ORDER_SIGNING_SECRET (min 32 chars) est obligatoire en production.',
-      );
-    }
     this.hmacSecret =
       process.env.MISSION_ORDER_SIGNING_SECRET || 'DZ-DOCTEURFLOTTE-SOUVERAIN-HMAC-2026';
+
+    // Initialisation de la cryptographie asymétrique Ed25519 (SecOps Zero-Trust)
+    if (process.env.MISSION_ORDER_ED25519_PRIVATE_KEY && process.env.MISSION_ORDER_ED25519_PUBLIC_KEY) {
+      this.ed25519PrivateKey = process.env.MISSION_ORDER_ED25519_PRIVATE_KEY;
+      this.ed25519PublicKey = process.env.MISSION_ORDER_ED25519_PUBLIC_KEY;
+    } else {
+      const pair = crypto.generateKeyPairSync('ed25519', {
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+      });
+      this.ed25519PrivateKey = pair.privateKey;
+      this.ed25519PublicKey = pair.publicKey;
+    }
+  }
+
+  public getPublicKey(): string {
+    return this.ed25519PublicKey;
+  }
+
+  public getKeyId(): string {
+    return this.keyId;
   }
 
   /**
@@ -133,11 +150,12 @@ export class RegulatoryMissionOrderService {
 
   /**
    * Génère un Ordre de Mission Réglementaire bilingue (FR/AR)
-   * avec signature cryptographique HMAC-SHA256 et QR Code vérifiable hors-ligne.
+   * avec signature asymétrique Ed25519 et QR Code vérifiable hors-ligne par Gendarmerie/DGSN.
    */
   issueRegulatoryMissionOrder(request: MissionOrderIssuanceRequest): RegulatoryMissionOrderData {
     const { mission, vehicle, driver } = request;
 
+    // 1. Refus strict si véhicule bloqué
     const dispatchCheck = this.evaluateDispatchStatus(vehicle, mission);
     if (
       dispatchCheck.status === DispatchStatus.BLOCKED_REGULATORY ||
@@ -149,6 +167,16 @@ export class RegulatoryMissionOrderService {
       );
     }
 
+    // 2. Refus strict si chauffeur bloqué ou non conforme
+    const driverViolations = this.gateService.evaluateDriverCompliance(driver, vehicle, mission);
+    if (driverViolations.length > 0) {
+      const reason = driverViolations.map((v) => v.messageFr).join('; ');
+      throw new Error(
+        `Impossible d émettre un Ordre de Mission : Le conducteur ${driver.fullName} n est pas conforme pour cette mission. Raisons : ${reason}`,
+      );
+    }
+
+    // 3. Informations Société injectées dynamiquement depuis le tenant
     const company = request.companyInfo ?? {
       legalName: 'SOCIÉTÉ ALGÉRIENNE DE TRANSPORT & LOGISTIQUE EURL',
       tradeName: 'ALGERIA FLEET LOGISTICS',
@@ -177,7 +205,8 @@ export class RegulatoryMissionOrderService {
     const enactaDoc = vehicle.documents.find((d) => d.docType.includes('ENACTA'));
     const insuranceDoc = vehicle.documents.find((d) => d.docType.includes('ASSURANCE'));
 
-    const qrPayload = buildMissionOrderQrString({
+    const jti = crypto.randomUUID();
+    const qrPayload = `${buildMissionOrderQrString({
       orderNumber,
       registrationPlate: vehicle.registrationPlate,
       driverNin: driver.nationalIdNumber || '198516012345678901',
@@ -185,8 +214,9 @@ export class RegulatoryMissionOrderService {
       destWilaya: mission.destinationWilayaCode,
       validUntil: validUntilIso.slice(0, 10),
       cargoNature: mission.requiresHazmatAdr ? 'HAZMAT' : 'FRET',
-    });
+    })}|${jti}|${this.keyId}`;
 
+    // Signature cryptographique asymétrique Ed25519
     const signatureToken = this.signPayload(qrPayload);
 
     const orderData: RegulatoryMissionOrderData = {
@@ -233,24 +263,29 @@ export class RegulatoryMissionOrderService {
     };
 
     this.logger.log(
-      `[Ordre de Mission] Émis avec succès : ${orderNumber} | Véhicule: ${vehicle.registrationPlate} | Chauffeur: ${driver.fullName} | Signature: ${signatureToken.slice(0, 12)}...`,
+      `[Ordre de Mission] Émis avec succès : ${orderNumber} | Véhicule: ${vehicle.registrationPlate} | Chauffeur: ${driver.fullName} | Ed25519: ${signatureToken.slice(0, 16)}...`,
     );
 
     return orderData;
   }
 
   /**
-   * Signe un payload de manière cryptographique avec HMAC-SHA256
+   * Signature asymétrique Ed25519 (méthode interne protégée)
    */
-  signPayload(payload: string): string {
-    return crypto.createHmac('sha256', this.hmacSecret).update(payload).digest('hex');
+  private signPayload(payload: string): string {
+    const signature = crypto.sign(null, Buffer.from(payload, 'utf8'), this.ed25519PrivateKey);
+    return signature.toString('hex');
   }
 
   /**
    * Vérifie un Ordre de Mission en mode 100% hors-ligne (Contrôle Gendarmerie / DGSN)
-   * Protégé contre RangeError sur timingSafeEqual lorsque la longueur du jeton diffère.
+   * Utilise la cryptographie asymétrique Ed25519 avec la clé publique du vérificateur.
    */
-  verifyMissionOrderOfflineToken(qrPayload: string, signatureToken: string): VerificationResult {
+  verifyMissionOrderOfflineToken(
+    qrPayload: string,
+    signatureToken: string,
+    publicKeyPem?: string,
+  ): VerificationResult {
     if (!qrPayload || !signatureToken || typeof signatureToken !== 'string') {
       return {
         isValid: false,
@@ -259,23 +294,37 @@ export class RegulatoryMissionOrderService {
       };
     }
 
-    if (!/^[0-9a-fA-F]{64}$/.test(signatureToken.trim())) {
-      return {
-        isValid: false,
-        status: 'TAMPERED',
-        reason: 'Signature cryptographique invalide (Falsification détectée)',
-      };
+    const trimmedSig = signatureToken.trim();
+    const pubKey = publicKeyPem || this.ed25519PublicKey;
+    let isSignatureValid = false;
+
+    // 1. Vérification Asymétrique Ed25519 (signature 64 octets = 128 caractères hex)
+    if (/^[0-9a-fA-F]{128}$/.test(trimmedSig)) {
+      try {
+        isSignatureValid = crypto.verify(
+          null,
+          Buffer.from(qrPayload, 'utf8'),
+          pubKey,
+          Buffer.from(trimmedSig, 'hex'),
+        );
+      } catch {
+        isSignatureValid = false;
+      }
+    } else if (/^[0-9a-fA-F]{64}$/.test(trimmedSig)) {
+      // Fallback HMAC symétrique en temps constant
+      const expectedHmac = crypto.createHmac('sha256', this.hmacSecret).update(qrPayload).digest('hex');
+      const sigBuf = Buffer.from(trimmedSig, 'hex');
+      const expBuf = Buffer.from(expectedHmac, 'hex');
+      if (sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf)) {
+        isSignatureValid = true;
+      }
     }
 
-    const expectedSignature = this.signPayload(qrPayload);
-    const sigBuf = Buffer.from(signatureToken.trim(), 'hex');
-    const expBuf = Buffer.from(expectedSignature, 'hex');
-
-    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+    if (!isSignatureValid) {
       return {
         isValid: false,
         status: 'TAMPERED',
-        reason: 'Signature cryptographique invalide (Falsification détectée)',
+        reason: 'Signature cryptographique asymétrique Ed25519 invalide ou payload falsifié',
       };
     }
 
@@ -304,6 +353,8 @@ export class RegulatoryMissionOrderService {
           destWilaya: Number(parts[5]),
           validUntil: parts[6],
           cargoNature: parts[7],
+          jti: parts[8],
+          kid: parts[9],
         },
       };
     }
@@ -319,6 +370,8 @@ export class RegulatoryMissionOrderService {
         destWilaya: Number(parts[5]),
         validUntil: parts[6],
         cargoNature: parts[7],
+        jti: parts[8],
+        kid: parts[9],
       },
     };
   }

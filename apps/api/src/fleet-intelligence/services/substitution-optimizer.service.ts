@@ -81,6 +81,11 @@ export class SubstitutionOptimizerService {
     for (const vehicle of fleetVehicles) {
       if (vehicle.dispatchStatus !== DispatchStatus.AVAILABLE) continue;
 
+      // 0. Isolation Multi-Tenant Fail-Closed (Loi 18-07 ANPDP)
+      if (mission.tenantId && vehicle.tenantId && vehicle.tenantId !== mission.tenantId) {
+        continue;
+      }
+
       // 1. Indicateur Légal I_Legal(v, M)
       const regViolations = this.gateService.evaluateVehicleRegulatoryCompliance(vehicle, mission);
       if (regViolations.length > 0) continue;
@@ -106,6 +111,9 @@ export class SubstitutionOptimizerService {
       // Sélection du meilleur chauffeur disponible et qualifié
       let bestDriver: DriverStateDto | null = null;
       for (const driver of fleetDrivers) {
+        if (mission.tenantId && driver.tenantId && driver.tenantId !== mission.tenantId) {
+          continue;
+        }
         const dViolations = this.gateService.evaluateDriverCompliance(driver, vehicle, mission);
         if (dViolations.length === 0) {
           if (!bestDriver || driver.safetyScore > bestDriver.safetyScore) {

@@ -77,6 +77,7 @@ export interface ActiveDTC {
 
 export interface VehicleStateDto {
   vehicleId: string;
+  tenantId?: string;
   registrationPlate: string;
   makeModel: string;
   category: DispatchAssetCategory;
@@ -106,6 +107,7 @@ export interface VehicleStateDto {
 
 export interface DriverStateDto {
   driverId: string;
+  tenantId?: string;
   fullName: string;
   phoneDz: string;
   licenseCategories: LicenseCategoryDZ[];
