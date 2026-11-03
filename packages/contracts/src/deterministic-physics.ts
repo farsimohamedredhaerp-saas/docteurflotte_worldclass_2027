@@ -430,3 +430,4 @@ export const OFF_ROAD_BTP_PRESET: VehiclePhysicsConfig = {
   maxPadWearJoules: 3.2e9,
   coolantCriticalTempC: 102.0,
 };
+

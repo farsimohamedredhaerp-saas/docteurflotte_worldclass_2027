@@ -107,4 +107,57 @@ describe('DigitalTwinService', () => {
       expect(twinDegraded.substitutionAsset?.vhiScore).toBeGreaterThan(80);
     }
   });
+
+  it('should process stream telemetry frame with 12 physical models and persist VHI in assets', async () => {
+    // 1. SELECT asset
+    dbMock.query.mockResolvedValueOnce({
+      rows: [
+        {
+          id: 'ast-test-01',
+          code: 'VEH-016-ALG',
+          category: 'HEAVY_TRUCK',
+          physics_state: {},
+          vhi_score: 95.0,
+          status: 'OPERATIONAL',
+        },
+      ],
+    });
+    // 2. UPDATE assets
+    dbMock.query.mockResolvedValueOnce({ rowCount: 1 });
+
+    const result = await service.processTelemetryFrame('tenant-test', 'ast-test-01', {
+      timestamp: 1730006000,
+      dt: 1.0,
+      rpm: 1450,
+      speed_kmh: 85,
+      engine_load_pct: 45,
+      coolant_temp_c: 88,
+      oil_temp_c: 94,
+      ambient_temp_c: 25,
+      battery_voltage_v: 28.0,
+      cranking_v_min: null,
+      map_kpa: 140,
+      maf_gs: 120,
+      dpf_delta_p_kpa: 0.20,
+      fuel_level_pct: 75,
+      fuel_rate_lh: 24,
+      rail_pressure_bar: 1650,
+      stft_pct: 0,
+      ltft_pct: 0,
+      imu_ax: 0,
+      imu_ay: 0,
+      imu_az: 9.81,
+      ignition_on: true,
+      vehicle_mass_kg: 26000,
+    });
+
+    expect(result.vhiReport).toBeDefined();
+    expect(result.vhiReport.vhiFinal).toBeGreaterThanOrEqual(90);
+    expect(result.vhiReport.operationalStatus).toBe('OPTIMAL');
+    expect(result.nextState).toBeDefined();
+    expect(dbMock.query).toHaveBeenCalledWith(
+      expect.stringContaining('UPDATE assets'),
+      expect.arrayContaining([expect.any(Number), 'OPTIMAL', expect.any(String)]),
+    );
+  });
 });

@@ -8,7 +8,18 @@ import {
   DigitalTwinFinancialArbitrage,
   ALGERIA_58_WILAYAS_PROFILES,
   AlgeriaWilayaProfile,
+  TelemetryFrame,
+  VehiclePhysicsConfig,
+  VehiclePhysicsState,
+  VHIReport,
+  LIGHT_COMMERCIAL_PRESET,
+  HEAVY_TRUCK_PRESET,
+  OFF_ROAD_BTP_PRESET,
+  AssetStatus,
+  WorkOrderPriority,
+  WorkOrderStatus,
 } from '@docteurflotte/contracts';
+import { DeterministicPhysicsEngine, VHICalculator } from './physics';
 
 interface DigitalTwinAssetDatabaseRow extends QueryResultRow {
   id: string;
@@ -20,11 +31,17 @@ interface DigitalTwinAssetDatabaseRow extends QueryResultRow {
   model?: string;
   year?: number;
   current_meter_value?: number | string | null;
+  vhi_score?: number | string | null;
+  vhi_status?: string | null;
+  bottleneck_component?: string | null;
+  physics_state?: Record<string, unknown> | null;
+  last_physics_update?: string | null;
 }
 
 @Injectable()
 export class DigitalTwinService {
   private readonly logger = new Logger(DigitalTwinService.name);
+  private readonly physicsEngine = new DeterministicPhysicsEngine();
 
   constructor(private readonly db: DatabaseService) {}
 
@@ -168,6 +185,97 @@ export class DigitalTwinService {
       climateMultiplier,
       params.driverAggressivenessMultiplier,
     );
+  }
+
+  /**
+   * Traitement d'un flux de télémétrie haute fréquence CAN/J1939/Traccar en O(1)
+   * Connecté au DeterministicPhysicsEngine et à l'agrégateur VHICalculator
+   */
+  async processTelemetryFrame(
+    tenantId: string,
+    assetId: string,
+    frame: TelemetryFrame,
+    customConfig?: VehiclePhysicsConfig,
+  ): Promise<{
+    vhiReport: VHIReport;
+    nextState: VehiclePhysicsState;
+    metrics: Record<string, number | boolean | string>;
+  }> {
+    const assetRes = await this.queryInTenant<DigitalTwinAssetDatabaseRow>(
+      tenantId,
+      `SELECT id, code, name, category, physics_state, vhi_score, status
+       FROM assets
+       WHERE id = $1 AND tenant_id = $2`,
+      [assetId, tenantId],
+    );
+
+    const asset = assetRes.rows[0];
+    const category = (asset?.category || 'HEAVY_TRUCK').toUpperCase();
+
+    // Résolution du preset segmenté
+    let config = customConfig;
+    if (!config) {
+      if (category.includes('LIGHT') || category.includes('VAN') || category.includes('CAR')) {
+        config = LIGHT_COMMERCIAL_PRESET;
+      } else if (category.includes('BTP') || category.includes('OFF_ROAD') || category.includes('MINING') || category.includes('EXCAVATOR')) {
+        config = OFF_ROAD_BTP_PRESET;
+      } else {
+        config = HEAVY_TRUCK_PRESET;
+      }
+    }
+
+    // Récupération de l'état persistant antérieur ou initialisation
+    let currentState: VehiclePhysicsState;
+    if (asset?.physics_state && typeof asset.physics_state === 'object' && Object.keys(asset.physics_state).length > 0) {
+      currentState = asset.physics_state as unknown as VehiclePhysicsState;
+    } else {
+      currentState = DeterministicPhysicsEngine.createInitialState(config);
+    }
+
+    // Exécution du pas incrémental O(1)
+    const stepResult = this.physicsEngine.step(currentState, frame, config);
+    const vhiReport = VHICalculator.calculate(stepResult.degradations, frame.timestamp);
+
+    // Si Hard Veto critique déclenché, basculement de l'actif en révision requise
+    const shouldRequireMaintenance =
+      vhiReport.operationalStatus === 'CRITIQUE_VETO' &&
+      asset?.status !== AssetStatus.MAINTENANCE_REQUIRED &&
+      asset?.status !== AssetStatus.DOWN;
+
+    await this.queryInTenant(
+      tenantId,
+      `UPDATE assets
+       SET vhi_score = $1,
+           vhi_status = $2,
+           bottleneck_component = $3,
+           physics_state = $4,
+           status = CASE WHEN $5::boolean THEN $6 ELSE status END,
+           last_physics_update = NOW(),
+           updated_at = NOW()
+       WHERE id = $7 AND tenant_id = $8`,
+      [
+        vhiReport.vhiFinal,
+        vhiReport.operationalStatus,
+        vhiReport.bottleneckComponent,
+        JSON.stringify(stepResult.nextState),
+        Boolean(shouldRequireMaintenance),
+        AssetStatus.MAINTENANCE_REQUIRED,
+        assetId,
+        tenantId,
+      ],
+    );
+
+    if (shouldRequireMaintenance) {
+      this.logger.warn(
+        `🚨 HARD VETO DÉCLENCHÉ sur ${asset?.code ?? assetId} : VHI=${vhiReport.vhiFinal} (Organe: ${vhiReport.hardVetoOrgan ?? vhiReport.bottleneckComponent}). Basculement en MAINTENANCE_REQUIRED.`,
+      );
+    }
+
+    return {
+      vhiReport,
+      nextState: stepResult.nextState,
+      metrics: stepResult.metrics,
+    };
   }
 
   public getWilayaProfile(code: number): AlgeriaWilayaProfile {

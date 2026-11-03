@@ -96,6 +96,9 @@ export interface FleetLiveAsset {
   currentMeterValue: number;
   nextMaintenanceMeterValue?: number;
   maintenanceDue: boolean;
+  vhiScore?: number;
+  vhiStatus?: string;
+  bottleneckComponent?: string;
 }
 
 export interface TraccarGatewayHealth {

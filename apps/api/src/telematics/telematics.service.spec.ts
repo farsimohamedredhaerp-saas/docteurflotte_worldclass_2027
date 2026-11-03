@@ -213,4 +213,105 @@ describe('TelematicsService (Unit)', () => {
     expect(res.assetUpdated?.maintenanceTriggered).toBe(true);
     expect(res.assetUpdated?.newMeterValue).toBe(160500);
   });
+
+  it('ingestPosition transmet la trame au DigitalTwinService et calcule le score VHI en continu', async () => {
+    const mockDigitalTwinService = {
+      processTelemetryFrame: jest.fn().mockResolvedValue({
+        vhiReport: {
+          vhiFinal: 88.5,
+          vhiSoft: 88.5,
+          operationalStatus: 'OPTIMAL',
+          bottleneckComponent: 'cylinderHead',
+          hardVetoTriggered: false,
+        },
+        nextState: {},
+        metrics: {},
+      }),
+    };
+
+    const moduleWithTwin: TestingModule = await Test.createTestingModule({
+      providers: [
+        TelematicsService,
+        { provide: DatabaseService, useValue: mockDatabaseService },
+        { provide: TraccarAdapterService, useValue: mockTraccarAdapter },
+        { provide: 'DigitalTwinService', useValue: mockDigitalTwinService },
+      ],
+    })
+      .useMocker((token) => {
+        if (token?.toString().includes('DigitalTwinService')) {
+          return mockDigitalTwinService;
+        }
+      })
+      .compile();
+
+    const serviceWithTwin = new TelematicsService(
+      mockDatabaseService,
+      mockTraccarAdapter,
+      mockDigitalTwinService as any,
+    );
+
+    // 1. SELECT dupCheck -> aucun doublon
+    mockClient.query.mockResolvedValueOnce({ rows: [] });
+    // 2. SELECT device existant
+    mockClient.query.mockResolvedValueOnce({ rows: [{ id: 'dev-1', name: 'GPS Tracker' }] });
+    // 3. UPDATE device last_update
+    mockClient.query.mockResolvedValueOnce({ rowCount: 1 });
+    // 4. SELECT binding actif -> relié à asset-1
+    mockClient.query.mockResolvedValueOnce({ rows: [{ asset_id: 'asset-1' }] });
+    // 5. INSERT telematics_positions
+    mockClient.query.mockResolvedValueOnce({
+      rows: [
+        {
+          id: 'pos-101',
+          tenant_id: 'tenant-1',
+          traccar_position_id: 'TRAC-1001',
+          device_id: 'dev-1',
+          asset_id: 'asset-1',
+          latitude: 36.75,
+          longitude: 3.05,
+          speed: 80,
+          ignition: true,
+          odometer_km: 120000,
+          recorded_at: new Date(),
+          created_at: new Date(),
+        },
+      ],
+    });
+    // 6. SELECT asset
+    mockClient.query.mockResolvedValueOnce({
+      rows: [
+        {
+          id: 'asset-1',
+          primary_meter_type: MeterType.ODOMETER_KM,
+          current_meter_value: 119900,
+          next_maintenance_meter_value: 150000,
+        },
+      ],
+    });
+    // 7. UPDATE asset
+    mockClient.query.mockResolvedValueOnce({ rowCount: 1 });
+    // 8. INSERT meter_readings
+    mockClient.query.mockResolvedValueOnce({ rows: [{ id: 'mr-1' }] });
+
+    const res = await serviceWithTwin.ingestPosition('tenant-1', {
+      traccarPositionId: 'TRAC-1001',
+      uniqueId: '864200051234567',
+      latitude: 36.75,
+      longitude: 3.05,
+      speed: 80,
+      ignition: true,
+      odometerKm: 120000,
+      recordedAt: new Date().toISOString(),
+      attributes: {
+        rpm: 1500,
+        coolantTemp: 89,
+        engineLoad: 50,
+      },
+    });
+
+    expect(mockDigitalTwinService.processTelemetryFrame).toHaveBeenCalledTimes(1);
+    expect(res.vhiUpdated).toBeDefined();
+    expect(res.vhiUpdated?.vhiScore).toBe(88.5);
+    expect(res.vhiUpdated?.status).toBe('OPTIMAL');
+  });
 });

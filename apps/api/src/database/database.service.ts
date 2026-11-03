@@ -240,6 +240,12 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       CREATE INDEX IF NOT EXISTS idx_assets_category ON assets(category);
       CREATE INDEX IF NOT EXISTS idx_assets_status ON assets(status);
 
+      ALTER TABLE assets ADD COLUMN IF NOT EXISTS vhi_score NUMERIC(5, 2) DEFAULT 100.0;
+      ALTER TABLE assets ADD COLUMN IF NOT EXISTS vhi_status VARCHAR(50) DEFAULT 'OPTIMAL';
+      ALTER TABLE assets ADD COLUMN IF NOT EXISTS bottleneck_component VARCHAR(50) DEFAULT 'cylinderHead';
+      ALTER TABLE assets ADD COLUMN IF NOT EXISTS physics_state JSONB DEFAULT '{}'::jsonb;
+      ALTER TABLE assets ADD COLUMN IF NOT EXISTS last_physics_update TIMESTAMPTZ;
+
       -- Table des Relevés Métrologiques & Compteurs (Gate 2)
       CREATE TABLE IF NOT EXISTS meter_readings (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

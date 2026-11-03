@@ -3,9 +3,11 @@ import {
   NotFoundException,
   BadRequestException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { TraccarAdapterService } from './traccar-adapter.service';
+import { DigitalTwinService } from '../digital-twin/digital-twin.service';
 import {
   AssetStatus,
   DeviceStatus,
@@ -19,6 +21,7 @@ import {
   TraccarGatewayHealth,
   WorkOrderPriority,
   WorkOrderStatus,
+  TelemetryFrame,
 } from '@docteurflotte/contracts';
 
 interface TelematicsDeviceDatabaseRow {
@@ -60,6 +63,7 @@ export class TelematicsService {
   constructor(
     private readonly db: DatabaseService,
     private readonly traccarAdapter: TraccarAdapterService,
+    @Optional() private readonly digitalTwinService?: DigitalTwinService,
   ) { }
 
   /**
@@ -228,6 +232,12 @@ export class TelematicsService {
       newMeterValue: number;
       maintenanceTriggered: boolean;
     };
+    vhiUpdated?: {
+      vhiScore: number;
+      status: string;
+      bottleneck: string;
+      hardVeto: boolean;
+    };
   }> {
     return this.db.withTenantContext(tenantId, async (client) => {
       // 1. Contrôle d'Idempotence stricte (traccar_position_id déjà présent ?)
@@ -379,12 +389,62 @@ export class TelematicsService {
         }
       }
 
+      // 6. Ingestion incrémentale dans le Jumeau Numérique (DeterministicPhysicsEngine & VHI)
+      let vhiResult = undefined;
+      if (assetId && this.digitalTwinService) {
+        try {
+          const frame = this.buildTelemetryFrameFromPosition(dto);
+          const twinResult = await this.digitalTwinService.processTelemetryFrame(tenantId, assetId, frame);
+          vhiResult = {
+            vhiScore: twinResult.vhiReport.vhiFinal,
+            status: twinResult.vhiReport.operationalStatus,
+            bottleneck: twinResult.vhiReport.bottleneckComponent,
+            hardVeto: twinResult.vhiReport.hardVetoTriggered,
+          };
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
+          this.logger.warn(`Erreur calcul physique digital twin pour asset ${assetId}: ${msg}`);
+        }
+      }
+
       return {
         duplicate: false,
         position: savedPosition,
         assetUpdated: assetUpdateResult,
+        vhiUpdated: vhiResult,
       };
     });
+  }
+
+  private buildTelemetryFrameFromPosition(dto: IngestPositionDto): TelemetryFrame {
+    const ts = Math.floor(new Date(dto.recordedAt).getTime() / 1000);
+    const attr = (dto.attributes || {}) as Record<string, unknown>;
+
+    return {
+      timestamp: ts,
+      dt: 1.0,
+      rpm: Number(attr.rpm ?? attr.engineRpm ?? (dto.ignition ? 1450 : 0)),
+      speed_kmh: Number(dto.speed ?? attr.speed ?? 0),
+      engine_load_pct: Number(attr.load ?? attr.engineLoad ?? (dto.ignition ? 45.0 : 0)),
+      coolant_temp_c: Number(attr.coolantTemp ?? attr.temp ?? 88.0),
+      oil_temp_c: attr.oilTemp != null ? Number(attr.oilTemp) : undefined,
+      ambient_temp_c: Number(attr.ambientTemp ?? attr.ambient_temp_c ?? 25.0),
+      battery_voltage_v: Number(attr.battery ?? attr.power ?? (attr.systemVoltage === 24 ? 28.0 : 13.8)),
+      cranking_v_min: attr.crankingVMin != null ? Number(attr.crankingVMin) : undefined,
+      map_kpa: Number(attr.map ?? attr.boost ?? 120.0),
+      maf_gs: Number(attr.maf ?? 80.0),
+      dpf_delta_p_kpa: Number(attr.dpfDeltaP ?? attr.dpf_pressure ?? 0.25),
+      fuel_level_pct: Number(attr.fuel ?? attr.fuelLevel ?? 75.0),
+      fuel_rate_lh: Number(attr.fuelRate ?? attr.consumption ?? (dto.ignition ? 18.0 : 0)),
+      rail_pressure_bar: Number(attr.railPressure ?? attr.commonRail ?? 1600.0),
+      stft_pct: Number(attr.stft ?? 0.0),
+      ltft_pct: Number(attr.ltft ?? 0.0),
+      imu_ax: Number(attr.ax ?? attr.imu_ax ?? 0.0),
+      imu_ay: Number(attr.ay ?? attr.imu_ay ?? 0.0),
+      imu_az: Number(attr.az ?? attr.imu_az ?? 9.81),
+      ignition_on: Boolean(dto.ignition),
+      vehicle_mass_kg: attr.mass ? Number(attr.mass) : 18000,
+    };
   }
 
   /**
@@ -401,6 +461,9 @@ export class TelematicsService {
            a.current_meter_value,
            a.next_maintenance_meter_value,
            a.status as asset_status,
+           a.vhi_score,
+           a.vhi_status,
+           a.bottleneck_component,
            d.id as device_id,
            d.unique_id as device_unique_id,
            d.status as device_status,
@@ -447,6 +510,9 @@ export class TelematicsService {
             ? Number(r.next_maintenance_meter_value)
             : undefined,
           maintenanceDue: Boolean(isDue),
+          vhiScore: r.vhi_score != null ? Number(r.vhi_score) : 100.0,
+          vhiStatus: r.vhi_status || 'OPTIMAL',
+          bottleneckComponent: r.bottleneck_component || undefined,
         };
       });
     });

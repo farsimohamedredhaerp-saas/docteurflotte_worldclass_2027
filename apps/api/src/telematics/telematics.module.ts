@@ -4,9 +4,10 @@ import { TelematicsController } from './telematics.controller';
 import { TraccarAdapterService } from './traccar-adapter.service';
 import { DatabaseModule } from '../database/database.module';
 import { AuthModule } from '../auth/auth.module';
+import { DigitalTwinModule } from '../digital-twin/digital-twin.module';
 
 @Module({
-  imports: [DatabaseModule, AuthModule],
+  imports: [DatabaseModule, AuthModule, DigitalTwinModule],
   controllers: [TelematicsController],
   providers: [TelematicsService, TraccarAdapterService],
   exports: [TelematicsService, TraccarAdapterService],
