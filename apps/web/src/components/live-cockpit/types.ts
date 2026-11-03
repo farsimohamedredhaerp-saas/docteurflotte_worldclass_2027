@@ -110,6 +110,22 @@ export interface VehicleTelemetryState {
   
   // Indices & Diagnostics Prédictifs (EPIC 3 & EPIC 4)
   vhiHealthScore: number; // 0-100 Vehicle Health Index
+  vhiStatus?: 'OPTIMAL' | 'SURVEILLANCE' | 'MAINTENANCE_REQUISE' | 'CRITIQUE_VETO' | string;
+  bottleneckComponent?: string;
+  bottleneckScore?: number;
+  hardVetoTriggered?: boolean;
+  hardVetoOrgan?: string | null;
+  organDetails?: Record<string, {
+    organId: string;
+    nameFr: string;
+    nameAr: string;
+    degradationIndex: number;
+    healthScore: number;
+    weight: number;
+    isVitalSafetyOrgan: boolean;
+    rulEstimate: { value: number; unit: string };
+    physicalSummary: string;
+  }>;
   odometerKm: number;
   engineHours: number;
   activeDtcs: DtcAlert[];

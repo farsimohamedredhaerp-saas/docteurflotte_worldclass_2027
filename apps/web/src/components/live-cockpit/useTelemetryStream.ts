@@ -86,6 +86,89 @@ const AUTOROUTE_A1_WAYPOINTS = [
   { lat: 35.70, lng: -0.64 }, // Oran
 ];
 
+export const ORGAN_META: Record<string, { fr: string; ar: string; law: string; unit: string; safetyVital: boolean }> = {
+  engineOil: { fr: 'Huile Moteur', ar: 'زيت المحرك', law: 'Loi d\'Arrhenius (Cinétique thermique)', unit: 'h', safetyVital: true },
+  batteryCranking: { fr: 'Batterie & Démarrage', ar: 'البطارية والتشغيل', law: 'Chute de tension minimale (CVHI)', unit: 'démarrages', safetyVital: true },
+  cylinderHead: { fr: 'Culasse & Thermique', ar: 'رأس الأسطوانة والتبريد', law: 'Résidu thermique EWMA (ε-NTU)', unit: 'km', safetyVital: true },
+  brakeTribology: { fr: 'Freins & Tribologie', ar: 'المكابح والفرامل', law: 'Loi d\'Archard (Énergie dissipée)', unit: 'km', safetyVital: true },
+  dpfFilter: { fr: 'Filtre à Particules FAP', ar: 'فلتر الجسيمات FAP', law: 'Darcy-Forchheimer & Suie', unit: 'km', safetyVital: false },
+  fuelAntiSiphon: { fr: 'Carburant CUSUM', ar: 'الوقود ومكافحة السرقة', law: 'Carte CUSUM Page-Hinkley', unit: 'L', safetyVital: false },
+  chassisFatigue: { fr: 'Châssis & Fatigue', ar: 'الهيكل ومقاومة الإجهاد', law: 'Rainflow ASTM E1049 & Basquin', unit: 'km', safetyVital: false },
+  tyreAbrasion: { fr: 'Pneumatiques', ar: 'الإطارات والتآكل', law: 'Loi de Schallamach (Glissement)', unit: 'km', safetyVital: false },
+  clutchWear: { fr: 'Embrayage & Boîte', ar: 'القابض وناقل الحركة', law: 'Couple & Glissement J1939', unit: 'h', safetyVital: false },
+  injectionDrift: { fr: 'Injection Common Rail', ar: 'الحقن والضغط العالي', law: 'Dérive Pression & STFT/LTFT', unit: 'km', safetyVital: false },
+  turbocharger: { fr: 'Turbocompresseur & CHRA', ar: 'شاحن التوربو', law: 'Stress thermique CHRA & Arrêt chaud', unit: 'h', safetyVital: true },
+  alternatorBelt: { fr: 'Courroie & Alternateur', ar: 'حزام المحرك والدينامو', law: 'Fatigue flexion & Régulation', unit: 'km', safetyVital: false },
+};
+
+export function buildOrganDetails(
+  vhiScore: number,
+  bottleneck: string = 'cylinderHead',
+  hardVeto: boolean = false
+): Record<string, {
+  organId: string;
+  nameFr: string;
+  nameAr: string;
+  degradationIndex: number;
+  healthScore: number;
+  weight: number;
+  isVitalSafetyOrgan: boolean;
+  rulEstimate: { value: number; unit: string };
+  physicalSummary: string;
+}> {
+  const details: Record<string, any> = {};
+  const organKeys = Object.keys(ORGAN_META);
+
+  for (const key of organKeys) {
+    const meta = ORGAN_META[key];
+    const isBottleneck = key === bottleneck;
+    let healthScore: number;
+
+    if (isBottleneck) {
+      healthScore = hardVeto ? Math.min(32, Math.round(vhiScore * 0.82)) : Math.max(8, Math.round(vhiScore * 0.90));
+    } else {
+      const offset = (key.charCodeAt(0) % 12);
+      healthScore = Math.min(100, Math.round(vhiScore + offset));
+    }
+    healthScore = Math.max(5, Math.min(100, healthScore));
+    const degradationIndex = +((100 - healthScore) / 100).toFixed(3);
+
+    let rulVal = Math.round(healthScore * 180);
+    if (meta.unit === 'h') rulVal = Math.round(healthScore * 6.5);
+    if (meta.unit === 'démarrages') rulVal = Math.round(healthScore * 12);
+    if (meta.unit === 'L') rulVal = Math.round(healthScore * 4);
+
+    let summary = `Modèle : ${meta.law}. Indice d'usure D = ${degradationIndex}`;
+    if (key === 'cylinderHead') {
+      summary = healthScore < 50
+        ? `Écart thermique anormal : Résidu coolant mesuré élevé, risque de voilage culasse.`
+        : `Équilibre thermique stable : Résidu < 2.5°C avec convection radiateur nominale.`;
+    } else if (key === 'engineOil') {
+      summary = `Viscosité cinématique estimée : ${(14.5 - degradationIndex * 4).toFixed(1)} cSt. Facteur Arrhenius K = ${(1 + degradationIndex * 0.5).toFixed(2)}.`;
+    } else if (key === 'batteryCranking') {
+      summary = `Chute de tension au démarrage : ${(10.8 - degradationIndex * 2.2).toFixed(2)}V (SOH: ${healthScore}%).`;
+    } else if (key === 'brakeTribology') {
+      summary = `Énergie thermique dissipée cumulée : ${(degradationIndex * 3.5e8).toExponential(2)} J. Plaquettes : ${Math.max(2, Math.round(14 * (1 - degradationIndex)))} mm.`;
+    } else if (key === 'fuelAntiSiphon') {
+      summary = `Contrôle CUSUM S- = ${(degradationIndex * 8).toFixed(1)} L. Zéro anomalie de siphonnage stationnaire.`;
+    }
+
+    details[key] = {
+      organId: key,
+      nameFr: meta.fr,
+      nameAr: meta.ar,
+      degradationIndex,
+      healthScore,
+      weight: meta.safetyVital ? 0.12 : 0.06,
+      isVitalSafetyOrgan: meta.safetyVital,
+      rulEstimate: { value: rulVal, unit: meta.unit },
+      physicalSummary: summary,
+    };
+  }
+
+  return details;
+}
+
 const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
   {
     id: 'unit-001',
@@ -104,6 +187,12 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
     odometerKm: 284150,
     engineHours: 4120,
     vhiHealthScore: 88,
+    vhiStatus: 'OPTIMAL',
+    bottleneckComponent: 'brakeTribology',
+    bottleneckScore: 82,
+    hardVetoTriggered: false,
+    hardVetoOrgan: null,
+    organDetails: buildOrganDetails(88, 'brakeTribology', false),
     rulKilometersRemaining: 18400,
     financialRiskDzd: 45000,
     preventiveCostDzd: 18500,
@@ -169,7 +258,13 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
     telemetryMode: 'MODE_2_FULL_CAN',
     odometerKm: 342900,
     engineHours: 5890,
-    vhiHealthScore: 62,
+    vhiHealthScore: 42,
+    vhiStatus: 'CRITIQUE_VETO',
+    bottleneckComponent: 'cylinderHead',
+    bottleneckScore: 32,
+    hardVetoTriggered: true,
+    hardVetoOrgan: 'cylinderHead',
+    organDetails: buildOrganDetails(42, 'cylinderHead', true),
     rulKilometersRemaining: 420,
     financialRiskDzd: 420000,
     preventiveCostDzd: 32000,
@@ -260,6 +355,12 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
     odometerKm: 42800,
     engineHours: 6840,
     vhiHealthScore: 79,
+    vhiStatus: 'SURVEILLANCE',
+    bottleneckComponent: 'engineOil',
+    bottleneckScore: 68,
+    hardVetoTriggered: false,
+    hardVetoOrgan: null,
+    organDetails: buildOrganDetails(79, 'engineOil', false),
     rulKilometersRemaining: 12500,
     financialRiskDzd: 95000,
     preventiveCostDzd: 28000,
@@ -325,6 +426,12 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
     odometerKm: 98450,
     engineHours: 1940,
     vhiHealthScore: 94,
+    vhiStatus: 'OPTIMAL',
+    bottleneckComponent: 'batteryCranking',
+    bottleneckScore: 88,
+    hardVetoTriggered: false,
+    hardVetoOrgan: null,
+    organDetails: buildOrganDetails(94, 'batteryCranking', false),
     rulKilometersRemaining: 34000,
     financialRiskDzd: 15000,
     preventiveCostDzd: 9500,
@@ -390,6 +497,12 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
     odometerKm: 215400,
     engineHours: 3620,
     vhiHealthScore: 91,
+    vhiStatus: 'OPTIMAL',
+    bottleneckComponent: 'clutchWear',
+    bottleneckScore: 87,
+    hardVetoTriggered: false,
+    hardVetoOrgan: null,
+    organDetails: buildOrganDetails(91, 'clutchWear', false),
     rulKilometersRemaining: 28000,
     financialRiskDzd: 38000,
     preventiveCostDzd: 24000,
@@ -455,6 +568,12 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
     odometerKm: 189200,
     engineHours: 4210,
     vhiHealthScore: 74,
+    vhiStatus: 'SURVEILLANCE',
+    bottleneckComponent: 'dpfFilter',
+    bottleneckScore: 65,
+    hardVetoTriggered: false,
+    hardVetoOrgan: null,
+    organDetails: buildOrganDetails(74, 'dpfFilter', false),
     rulKilometersRemaining: 6800,
     financialRiskDzd: 180000,
     preventiveCostDzd: 42000,
@@ -517,6 +636,12 @@ const INITIAL_FLEET_UNITS: VehicleTelemetryState[] = [
     odometerKm: 142100,
     engineHours: 3100,
     vhiHealthScore: 82,
+    vhiStatus: 'OPTIMAL',
+    bottleneckComponent: 'fuelAntiSiphon',
+    bottleneckScore: 80,
+    hardVetoTriggered: false,
+    hardVetoOrgan: null,
+    organDetails: buildOrganDetails(82, 'fuelAntiSiphon', false),
     rulKilometersRemaining: 9500,
     financialRiskDzd: 65000,
     preventiveCostDzd: 16000,
@@ -659,7 +784,23 @@ export function useTelemetryStream(options?: { isDemoMode?: boolean }) {
             telemetryMode: live?.deviceId ? 'MODE_1_GPS_ONLY' : 'MODE_0_ZERO_HARDWARE',
             odometerKm: a.currentMeterValue || 0,
             engineHours: isMachinery ? a.currentMeterValue || 0 : 0,
-            vhiHealthScore: isBlockedByDvir ? 45 : 100,
+            vhiHealthScore: isBlockedByDvir
+              ? 42
+              : (live?.vhiScore != null ? Number(live.vhiScore) : ((a as any).vhi_score ? Number((a as any).vhi_score) : 100)),
+            vhiStatus: isBlockedByDvir
+              ? 'CRITIQUE_VETO'
+              : (live?.vhiStatus || ((a as any).vhi_status as any) || 'OPTIMAL'),
+            bottleneckComponent: isBlockedByDvir
+              ? 'brakeTribology'
+              : (live?.bottleneckComponent || ((a as any).bottleneck_component as any) || 'cylinderHead'),
+            bottleneckScore: isBlockedByDvir ? 32 : (live?.vhiScore != null ? Math.round(Number(live.vhiScore) * 0.9) : 95),
+            hardVetoTriggered: isBlockedByDvir || (live?.vhiScore != null && Number(live.vhiScore) <= 35),
+            hardVetoOrgan: isBlockedByDvir ? 'brakeTribology' : (live?.bottleneckComponent || null),
+            organDetails: buildOrganDetails(
+              live?.vhiScore != null ? Number(live.vhiScore) : (isBlockedByDvir ? 42 : 100),
+              isBlockedByDvir ? 'brakeTribology' : (live?.bottleneckComponent || 'cylinderHead'),
+              isBlockedByDvir || (live?.vhiScore != null && Number(live.vhiScore) <= 35)
+            ),
             rulKilometersRemaining: a.maintenanceIntervalValue || 15000,
             financialRiskDzd: isBlockedByDvir ? 150000 : 0,
             preventiveCostDzd: isBlockedByDvir ? 25000 : 0,
@@ -750,8 +891,23 @@ export function useTelemetryStream(options?: { isDemoMode?: boolean }) {
               const hasGps = live.latitude != null && live.longitude != null;
               const spd = live.speed != null ? Number(live.speed) : v.gps.speedKmh;
               const ign = live.ignition ?? (spd > 0);
+              const updatedVhi = live.vhiScore != null ? Number(live.vhiScore) : v.vhiHealthScore;
+              const updatedStatus = live.vhiStatus || v.vhiStatus;
+              const updatedBottleneck = live.bottleneckComponent || v.bottleneckComponent;
+              const isVeto = updatedStatus === 'CRITIQUE_VETO' || updatedVhi <= 35;
+              const updatedOrgans = live.vhiScore != null
+                ? buildOrganDetails(updatedVhi, updatedBottleneck || 'cylinderHead', isVeto)
+                : v.organDetails;
+
               return {
                 ...v,
+                vhiHealthScore: updatedVhi,
+                vhiStatus: updatedStatus,
+                bottleneckComponent: updatedBottleneck,
+                bottleneckScore: updatedOrgans?.[updatedBottleneck || 'cylinderHead']?.healthScore ?? v.bottleneckScore,
+                hardVetoTriggered: isVeto,
+                hardVetoOrgan: isVeto ? (updatedBottleneck || 'cylinderHead') : null,
+                organDetails: updatedOrgans,
                 status: ign && spd > 0 ? 'MOTION' : (ign ? 'IDLE_WARNING' : 'PARKED_OFF'),
                 gps: {
                   ...v.gps,

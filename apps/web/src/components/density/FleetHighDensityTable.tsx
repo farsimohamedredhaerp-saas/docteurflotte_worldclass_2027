@@ -38,6 +38,8 @@ export interface FleetUnitRecord {
   fuelLiters: number;
   adBluePercent?: number;
   vhiHealthScore: number; // 0-100 Vehicle Health Index
+  vhiStatus?: string;
+  bottleneckComponent?: string;
   assignedDriver: string;
   currentSite: string;
   wilayaCode: string;
@@ -524,24 +526,31 @@ export function FleetHighDensityTable({
     }
   };
 
-  const renderHealthScoreGauge = (score: number) => {
-    const isGood = score >= 80;
-    const isWarn = score >= 65 && score < 80;
-    const colorClass = isGood
-      ? 'bg-emerald-500'
-      : isWarn
-        ? 'bg-amber-500'
-        : 'bg-rose-500';
-    const textClass = isGood
-      ? 'text-emerald-700 dark:text-emerald-400'
-      : isWarn
-        ? 'text-amber-700 dark:text-amber-400'
-        : 'text-rose-700 dark:text-rose-400';
-    const gaugeColor = isGood
-      ? 'var(--df-status-ok)'
-      : isWarn
-        ? 'var(--df-status-warning)'
-        : 'var(--df-status-danger)';
+  const renderHealthScoreGauge = (score: number, vhiStatus?: string, bottleneck?: string) => {
+    const isCritVeto = vhiStatus === 'CRITIQUE_VETO' || score <= 35;
+    const isGood = score >= 80 && !isCritVeto;
+    const isWarn = score >= 65 && score < 80 && !isCritVeto;
+    const colorClass = isCritVeto
+      ? 'bg-rose-600 animate-pulse'
+      : isGood
+        ? 'bg-emerald-500'
+        : isWarn
+          ? 'bg-amber-500'
+          : 'bg-rose-500';
+    const textClass = isCritVeto
+      ? 'text-rose-500 font-bold'
+      : isGood
+        ? 'text-emerald-700 dark:text-emerald-400'
+        : isWarn
+          ? 'text-amber-700 dark:text-amber-400'
+          : 'text-rose-700 dark:text-rose-400';
+    const gaugeColor = isCritVeto
+      ? '#EF4444'
+      : isGood
+        ? 'var(--df-status-ok)'
+        : isWarn
+          ? 'var(--df-status-warning)'
+          : 'var(--df-status-danger)';
 
     return (
       <div
@@ -563,12 +572,23 @@ export function FleetHighDensityTable({
             style={{ width: `${Math.min(100, score)}%`, height: '100%', background: gaugeColor, borderRadius: '9999px' }}
           />
         </div>
-        <span
-          className={`text-[11px] font-mono font-semibold tabular-nums ${textClass}`}
-          style={{ fontSize: '11px', fontFamily: 'var(--df-font-mono)', fontWeight: 700, color: gaugeColor }}
-        >
-          {score}
-        </span>
+        <div className="flex items-center gap-1">
+          <span
+            className={`text-[11px] font-mono font-semibold tabular-nums ${textClass}`}
+            style={{ fontSize: '11px', fontFamily: 'var(--df-font-mono)', fontWeight: 700, color: gaugeColor }}
+            title={bottleneck ? `Goulot : ${bottleneck}` : undefined}
+          >
+            {score}
+          </span>
+          {isCritVeto && (
+            <span
+              className="text-[8px] font-mono px-1 py-0.2 rounded-xs font-bold text-white bg-rose-600 animate-pulse"
+              title="VETO SÉCURITÉ ACTIF (Hard Veto)"
+            >
+              VETO
+            </span>
+          )}
+        </div>
       </div>
     );
   };
@@ -822,7 +842,7 @@ export function FleetHighDensityTable({
 
                     {/* SANTÉ VHI */}
                     <td className="py-2 px-3 whitespace-nowrap">
-                      {renderHealthScoreGauge(u.vhiHealthScore)}
+                      {renderHealthScoreGauge(u.vhiHealthScore, u.vhiStatus, u.bottleneckComponent)}
                     </td>
 
                     {/* CHAUFFEUR */}

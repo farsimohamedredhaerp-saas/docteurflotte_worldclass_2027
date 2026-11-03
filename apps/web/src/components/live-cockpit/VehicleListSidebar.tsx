@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { VehicleTelemetryState, VehicleOperationalStatus } from './types';
+import { ORGAN_META } from './useTelemetryStream';
 import {
   IconTruck,
   IconChevronLeft,
@@ -412,14 +413,24 @@ export function VehicleListSidebar({
                   </div>
 
                   <div className="flex items-center gap-1.5">
-                    {/* Badge VHI */}
-                    <span
-                      className="text-[9px] font-mono px-1 py-0.2 rounded-xs border tabular-nums font-semibold"
-                      style={healthStyle}
-                      title={`Score de Santé VHI: ${vehicle.vhiHealthScore}/100`}
-                    >
-                      {vehicle.vhiHealthScore}
-                    </span>
+                    {/* Badge VHI & Alerte Hard Veto */}
+                    <div className="flex items-center gap-1">
+                      <span
+                        className="text-[9px] font-mono px-1 py-0.2 rounded-xs border tabular-nums font-semibold"
+                        style={healthStyle}
+                        title={`Score VHI: ${vehicle.vhiHealthScore}/100 — Statut: ${vehicle.vhiStatus || 'OPTIMAL'}${vehicle.bottleneckComponent ? ` — Goulot: ${ORGAN_META[vehicle.bottleneckComponent]?.fr || vehicle.bottleneckComponent}` : ''}`}
+                      >
+                        {vehicle.vhiHealthScore}
+                      </span>
+                      {vehicle.hardVetoTriggered && (
+                        <span
+                          className="text-[8px] font-mono px-1 py-0.2 rounded-xs font-bold animate-pulse text-white bg-rose-600 border border-rose-700"
+                          title="VETO SÉCURITÉ : Organe critique sous seuil d'alerte vitale (Hard Veto)"
+                        >
+                          VETO
+                        </span>
+                      )}
+                    </div>
 
                     {/* Vitesse / État */}
                     <span
@@ -446,6 +457,27 @@ export function VehicleListSidebar({
                     {vehicle.driverName}
                   </span>
                 </div>
+
+                {/* Organe Goulot d'Étranglement si dégradation */}
+                {vehicle.bottleneckComponent && vehicle.vhiHealthScore < 92 && (
+                  <div className="flex items-center justify-between text-[9px] font-mono">
+                    <span className="flex items-center gap-1 text-amber-500 font-semibold truncate max-w-[200px]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                      <span className="truncate">Goulot : {ORGAN_META[vehicle.bottleneckComponent]?.fr || vehicle.bottleneckComponent}</span>
+                    </span>
+                    <span
+                      className={`tabular-nums font-bold ${
+                        (vehicle.bottleneckScore ?? 80) <= 35
+                          ? 'text-rose-500'
+                          : (vehicle.bottleneckScore ?? 80) < 70
+                            ? 'text-amber-500'
+                            : 'text-emerald-500'
+                      }`}
+                    >
+                      {vehicle.bottleneckScore ?? Math.round(vehicle.vhiHealthScore * 0.9)}%
+                    </span>
+                  </div>
+                )}
 
                 {/* Alerte Consignation Sécurité DVIR */}
                 {vehicle.dvirStatus?.isBlocked && (
