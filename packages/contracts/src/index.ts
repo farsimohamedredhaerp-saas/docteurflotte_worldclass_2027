@@ -18,9 +18,15 @@ export * from './algeria-regulatory';
 export * from './country-packs';
 export * from './dispatch';
 export * from './subscriptions';
+export * from './deterministic-physics';
 
 // Explicit re-exports of runtime constants for bundlers (Turbopack / Webpack / Vite)
 export { ALGERIA_58_WILAYAS_PROFILES } from './digital-twin';
+export {
+  LIGHT_COMMERCIAL_PRESET,
+  HEAVY_TRUCK_PRESET,
+  OFF_ROAD_BTP_PRESET,
+} from './deterministic-physics';
 export {
   ENACTA_REGULATORY_MATRIX,
   NAFTAL_FUEL_PRICES_DZD,
