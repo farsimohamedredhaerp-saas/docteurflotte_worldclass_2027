@@ -1,0 +1,67 @@
+# ==============================================================================
+# DOCTEURFLOTTE — Dockerfile Distroless Hardened (Zero-Source Shipping)
+# ==============================================================================
+# Étape 1 : Base avec pnpm activé et mise en cache
+FROM node:22-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Étape 2 : Résolution et installation des dépendances complètes
+FROM base AS dependencies
+WORKDIR /app
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY packages/contracts/package.json ./packages/contracts/
+COPY apps/api/package.json ./apps/api/
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+# Étape 3 : Compilation TypeScript en mode sécurisé (Zero Source Maps)
+FROM base AS builder
+WORKDIR /app
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=dependencies /app/packages/contracts/node_modules ./packages/contracts/node_modules
+COPY --from=dependencies /app/apps/api/node_modules ./apps/api/node_modules
+COPY package.json pnpm-workspace.yaml tsconfig.base.json tsconfig.json ./
+COPY packages/contracts ./packages/contracts
+COPY apps/api ./apps/api
+
+# Build sans source maps et avec suppression des commentaires
+RUN pnpm --filter @docteurflotte/contracts build
+RUN pnpm --filter @docteurflotte/api build
+
+# Étape 4 : Extraction stricte des dépendances de production uniquement
+FROM base AS prod-dependencies
+WORKDIR /app
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY packages/contracts/package.json ./packages/contracts/
+COPY apps/api/package.json ./apps/api/
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+
+# ==============================================================================
+# Étape 5 : Runner Distroless Google Cloud (Zéro Shell, Zéro Outil, Zéro Code Source)
+# ==============================================================================
+# Image officielle durcie : aucun shell (/bin/sh, /bin/bash), aucun package manager (apt/apk)
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3001
+ENV NODE_OPTIONS="--max-old-space-size=2048 --no-deprecation"
+
+# L'utilisateur par défaut dans Distroless est 'nonroot' (UID 65532)
+USER 65532:65532
+
+# Copie exclusive des dépendances de production et des bundles compilés (zéro .ts)
+COPY --chown=65532:65532 --from=prod-dependencies /app/node_modules ./node_modules
+COPY --chown=65532:65532 --from=prod-dependencies /app/apps/api/node_modules ./apps/api/node_modules
+COPY --chown=65532:65532 --from=builder /app/packages/contracts/dist ./packages/contracts/dist
+COPY --chown=65532:65532 --from=builder /app/packages/contracts/package.json ./packages/contracts/
+COPY --chown=65532:65532 --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --chown=65532:65532 --from=builder /app/apps/api/package.json ./apps/api/
+COPY --chown=65532:65532 database/migrations ./database/migrations
+
+EXPOSE 3001
+
+# L'entrypoint de l'image distroless/nodejs est directement "/nodejs/bin/node"
+CMD ["apps/api/dist/main.js"]
+

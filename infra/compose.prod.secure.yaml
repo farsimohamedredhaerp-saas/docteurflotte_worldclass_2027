@@ -1,0 +1,237 @@
+# ==============================================================================
+# DOCTEURFLOTTE — Docker Compose Production Hardened (SecOps / Zero-Trust)
+# ==============================================================================
+# - Système de fichiers racine en lecture seule (read_only: true)
+# - Retrait total des privilèges noyau Linux (cap_drop: [ALL])
+# - Interdiction d'escalade de privilèges (no-new-privileges: true)
+# - Exécution sous utilisateur non-root sans privilèges (USER nonroot / node)
+# - Stockage temporaire volatile isolé (tmpfs)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: docteurflotte_postgres_prod
+    restart: unless-stopped
+    read_only: true
+    user: "postgres"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=100m
+      - /var/run/postgresql:rw,noexec,nosuid,size=50m
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-docteurflotte_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Veuillez définir POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-docteurflotte_prod}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./postgres/001-init-rls.sql:/docker-entrypoint-initdb.d/001-init-rls.sql:ro
+      - ../database/migrations/01_oem_maintenance_schema.sql:/docker-entrypoint-initdb.d/002-01_oem_maintenance_schema.sql:ro
+      - ../database/migrations/02_oem_reference_catalog.sql:/docker-entrypoint-initdb.d/003-02_oem_reference_catalog.sql:ro
+      - ../database/migrations/03_saas_platform_admin.sql:/docker-entrypoint-initdb.d/004-03_saas_platform_admin.sql:ro
+      - ../database/migrations/04_telemetry_timescaledb_hypertables.sql:/docker-entrypoint-initdb.d/005-04_telemetry_timescaledb_hypertables.sql:ro
+      - ../database/migrations/05_sovereign_knowledge_vault.sql:/docker-entrypoint-initdb.d/006-05_sovereign_knowledge_vault.sql:ro
+      - ../database/migrations/06_anomaly_cooldown_ledger.sql:/docker-entrypoint-initdb.d/007-06_anomaly_cooldown_ledger.sql:ro
+      - ../database/migrations/07_saas_subscription_plans.sql:/docker-entrypoint-initdb.d/008-07_saas_subscription_plans.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-docteurflotte_app} -d ${POSTGRES_DB:-docteurflotte_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - docteurflotte_backend_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: docteurflotte_redis_prod
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?Veuillez définir REDIS_PASSWORD}"]
+    volumes:
+      - redis_prod_data:/data
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=50m
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - docteurflotte_backend_net
+
+  traccar:
+    image: traccar/traccar:6.15.2-alpine
+    container_name: docteurflotte_traccar_prod
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "5055:5055"       # OsmAnd / Protocole HTTP Mobile
+      - "5023:5023"       # Teltonika FMB920 / FMB120 (TCP)
+      - "5023:5023/udp"   # Teltonika (UDP)
+    volumes:
+      - traccar_prod_data:/opt/traccar/data
+      - traccar_prod_logs:/opt/traccar/logs
+      - ./traccar/traccar.xml:/opt/traccar/conf/traccar.xml:ro
+    networks:
+      - docteurflotte_backend_net
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile.distroless
+    container_name: docteurflotte_api_prod
+    restart: unless-stopped
+    read_only: true
+    user: "65532:65532"  # Utilisateur distroless 'nonroot'
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=100m
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${POSTGRES_USER:-docteurflotte_app}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_NAME: ${POSTGRES_DB:-docteurflotte_prod}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Veuillez définir JWT_SECRET}
+      MISSION_ORDER_SIGNING_SECRET: ${MISSION_ORDER_SIGNING_SECRET:?Veuillez définir MISSION_ORDER_SIGNING_SECRET}
+      CORS_ORIGINS: https://${DOMAIN_WEB:-app.votreflotte.dz}
+      TRACCAR_API_URL: http://traccar:8082
+      TRACCAR_URL: http://traccar:8082
+      TRACCAR_USER: ${TRACCAR_USER:-admin}
+      TRACCAR_PASSWORD: ${TRACCAR_PASSWORD:?Veuillez définir TRACCAR_PASSWORD}
+      TRACCAR_WEBHOOK_SECRET: ${TRACCAR_WEBHOOK_SECRET:-}
+      FLESPI_WEBHOOK_TOKEN: ${FLESPI_WEBHOOK_TOKEN:-}
+      OLLAMA_BASE_URL: http://ollama:11434
+      LICENSE_CHECK_ENFORCED: ${LICENSE_CHECK_ENFORCED:-true}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    networks:
+      - docteurflotte_backend_net
+      - docteurflotte_ingress_net
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: docteurflotte_ollama_prod
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ollama_prod_data:/root/.ollama
+      - ./ollama/Modelfile.docteurflotte:/tmp/Modelfile.docteurflotte:ro
+    environment:
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_KEEP_ALIVE=5m
+      - OLLAMA_FLASH_ATTENTION=1
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+          cpus: "3.0"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - docteurflotte_backend_net
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-https://api.votreflotte.dz}
+        NEXT_PUBLIC_NEST_API_URL: ${PUBLIC_API_URL:-https://api.votreflotte.dz}
+    container_name: docteurflotte_web_prod
+    restart: unless-stopped
+    read_only: true
+    user: "1000:1000"  # Utilisateur node Alpine
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=100m
+      - /app/apps/web/.next/cache:rw,noexec,nosuid,size=256m
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-https://api.votreflotte.dz}
+      NEXT_PUBLIC_NEST_API_URL: ${PUBLIC_API_URL:-https://api.votreflotte.dz}
+    depends_on:
+      - api
+    networks:
+      - docteurflotte_ingress_net
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: docteurflotte_caddy_prod
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN_WEB: ${DOMAIN_WEB:-app.votreflotte.dz}
+      DOMAIN_API: ${DOMAIN_API:-api.votreflotte.dz}
+      DOMAIN_TRACCAR: ${DOMAIN_TRACCAR:-traccar.votreflotte.dz}
+      DOMAIN_MAPS: ${DOMAIN_MAPS:-maps.votreflotte.dz}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - maps_prod_data:/var/www/maps:ro
+      - caddy_prod_data:/data
+      - caddy_prod_config:/config
+    depends_on:
+      - web
+      - api
+      - traccar
+    networks:
+      - docteurflotte_ingress_net
+      - docteurflotte_backend_net
+
+volumes:
+  postgres_prod_data:
+  redis_prod_data:
+  traccar_prod_data:
+  traccar_prod_logs:
+  ollama_prod_data:
+  maps_prod_data:
+  caddy_prod_data:
+  caddy_prod_config:
+
+networks:
+  # Réseau applicatif interne (base de données et cache inaccessibles depuis l'extérieur)
+  docteurflotte_backend_net:
+    internal: true
+  # Réseau d'entrée exposé via le reverse proxy Caddy
+  docteurflotte_ingress_net:
+    driver: bridge
+

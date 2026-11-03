@@ -3,6 +3,7 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  productionBrowserSourceMaps: false,
   transpilePackages: ['@docteurflotte/contracts'],
   async headers() {
     return [

@@ -1,0 +1,60 @@
+# ==============================================================================
+# DOCTEURFLOTTE — Configuration Gitleaks (Détection de Secrets & Clés API)
+# ==============================================================================
+title = "DocteurFlotte Gitleaks Security Rules"
+
+[extend]
+useDefault = true
+
+# 1. Règle Clés Privées Cryptographiques
+[[rules]]
+id = "crypto-private-key"
+description = "Détection d'une clé privée cryptographique (RSA, EC, Ed25519, PGP)"
+regex = '''-----BEGIN (RSA|EC|OPENSSH|DSA|PGP|ENCRYPTED)?\s*PRIVATE KEY-----'''
+keywords = ["BEGIN", "PRIVATE KEY"]
+
+# 2. Règle Chaîne de connexion PostgreSQL avec mot de passe en clair
+[[rules]]
+id = "postgres-credential-url"
+description = "URL de connexion PostgreSQL contenant un mot de passe en clair"
+regex = '''postgresql:\/\/[^:]+:[^@\s"']+@[^/\s"']+'''
+keywords = ["postgresql://"]
+
+# 3. Règle Tokens Télématiques (Traccar / Flespi)
+[[rules]]
+id = "telematics-tokens"
+description = "Token API sensible Traccar ou Flespi"
+regex = '''(?i)(traccar|flespi)_(token|secret|password|api_key)\s*[:=]\s*['"][a-zA-Z0-9_\-]{16,}['"]'''
+keywords = ["traccar", "flespi"]
+
+# 4. Règle JWT Tokens en dur
+[[rules]]
+id = "jwt-secret-hardcoded"
+description = "Token JWT ou Secret de signature hardcodé"
+regex = '''(?i)(jwt_secret|signing_secret)\s*[:=]\s*['"][a-zA-Z0-9_\-\.\$]{24,}['"]'''
+keywords = ["jwt_secret", "signing_secret"]
+
+# 5. Règle Mots de Passe & Secrets Génériques à Haute Entropie
+[[rules]]
+id = "high-entropy-secret"
+description = "Assignation d'un mot de passe ou secret de production"
+regex = '''(?i)(password|secret|apikey|api_key|auth_token)\s*[:=]\s*['"][a-zA-Z0-9_\-\$]{24,}['"]'''
+keywords = ["password", "secret", "apikey", "auth_token"]
+
+# Allowlist globale pour faux positifs contrôlés
+[allowlist]
+description = "Faux positifs autorisés pour les exemples et mocks de tests"
+paths = [
+  '''\.env\.example$''',
+  '''\.env\.production\.example$''',
+  '''scripts/guardrails/check-secrets\.cjs$''',
+  '''\.gitleaks\.toml$''',
+  '''pnpm-lock\.yaml$''',
+]
+regexes = [
+  '''docteurflotte_dev_password_local_only''',
+  '''docteurflotte_dev_secret_local_only''',
+  '''mock_token''',
+  '''example_key''',
+]
+

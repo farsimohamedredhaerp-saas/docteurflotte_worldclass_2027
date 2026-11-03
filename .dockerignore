@@ -1,0 +1,120 @@
+# ==============================================================================
+# DOCTEURFLOTTE — .dockerignore STRICT (ZERO-SOURCE SHIPPING & LEAK PREVENTION)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. CONTRÔLE DE VERSION & MÉTADONNÉES GIT (CRITIQUE : NE JAMAIS LIVRER L'HISTORIQUE)
+# ------------------------------------------------------------------------------
+.git
+.github
+.gitignore
+.dockerignore
+
+# ------------------------------------------------------------------------------
+# 2. SECRETS, CLÉS CRYPTOGRAPHIQUES & FICHIERS D'ENVIRONNEMENT
+# ------------------------------------------------------------------------------
+.env*
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+*.id_rsa
+*.id_ed25519
+*.pub
+license.key
+license-private.pem
+ed25519_license_private.pem
+private.pem
+
+# ------------------------------------------------------------------------------
+# 3. SPÉCIFICATIONS MÉTIER, ARCHITECTURE & DOCUMENTATION PRIVÉE
+# ------------------------------------------------------------------------------
+docs/
+*.md
+LICENSE
+MASTER_SPEC.md
+AGENTS.md
+model_question.md
+PROMPT_BOOTSTRAP_ANTIGRAVITY.md
+
+# ------------------------------------------------------------------------------
+# 4. OUTILS DE DÉVELOPPEMENT, SCRIPTS LOCAUX & AGENTS
+# ------------------------------------------------------------------------------
+.vscode
+.idea
+.agents
+.turbo
+scratch/
+scripts/
+
+# ------------------------------------------------------------------------------
+# 5. TESTS, MOCKS & RAPPORTS DE COUVERTURE
+# ------------------------------------------------------------------------------
+test/
+**/test/
+test-results/
+coverage/
+*.spec.ts
+*.spec.js
+*.test.ts
+*.test.js
+jest.config.*
+
+# ------------------------------------------------------------------------------
+# 6. DÉPENDANCES ET CACHES LOCAUX (LE DOCKERFILE LES RÉ-INSTALLE PROPREMENT)
+# ------------------------------------------------------------------------------
+node_modules/
+**/node_modules/
+.pnpm-store/
+.npm/
+
+# ------------------------------------------------------------------------------
+# 7. ARTEFACTS DE BUILD LOCAUX & SOURCE MAPS (INTERDITS EN PROD)
+# ------------------------------------------------------------------------------
+dist/
+**/dist/
+.next/
+out/
+build/
+*.tsbuildinfo
+*.js.map
+*.d.ts.map
+*.map
+
+# ------------------------------------------------------------------------------
+# 8. BASES DE DONNÉES LOCALES & INFRASTRUCTURE
+# ------------------------------------------------------------------------------
+infra/pgdata/
+infra/redisdata/
+database/dumps/
+*.sql.gz
+*.dump
+*.tar
+*.bak
+*.sqlite
+*.db
+
+# ------------------------------------------------------------------------------
+# 9. POIDS IA & CARTOGRAPHIE HORS CONTENEUR
+# ------------------------------------------------------------------------------
+*.onnx
+*.safetensors
+*.gguf
+*.bin
+*.pt
+*.pth
+*.mbtiles
+*.pbf
+*.osm
+
+# ------------------------------------------------------------------------------
+# 10. FICHIERS SYSTÈME & LOGS
+# ------------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+

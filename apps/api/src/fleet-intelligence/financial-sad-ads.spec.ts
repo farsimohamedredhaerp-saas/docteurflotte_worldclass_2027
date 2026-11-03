@@ -64,7 +64,7 @@ describe('EPIC 4 : Financial Arbitrage (SAD -> ADS), ENACTA & Multicriteria Subs
     destinationName: 'Base de Vie Irara (Hassi Messaoud)',
     destinationWilayaCode: 30,
     transitWilayaCodes: [9, 26, 17, 3], // Blida, Médéa, Djelfa, Laghouat
-    plannedDepartureUtc: '2026-10-30T05:00:00Z',
+    plannedDepartureUtc: new Date().toISOString(),
     routeDistanceKm: 850,
     estimatedDrivingHours: 12,
     requiredPayloadTons: 24,

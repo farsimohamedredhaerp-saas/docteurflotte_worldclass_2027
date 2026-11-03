@@ -1,54 +1,147 @@
-# Dependencies
+# ==============================================================================
+# DOCTEURFLOTTE — .gitignore STRICT DE SÉCURITÉ & PROPRIÉTÉ INTELLECTUELLE
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. DÉPENDANCES & RUNTIMES
+# ------------------------------------------------------------------------------
 node_modules/
+**/node_modules/
 .pnpm-store/
-
-# Turbo
 .turbo/
+.npm/
 
-# Build outputs
+# ------------------------------------------------------------------------------
+# 2. SECRETS, CLÉS CRYPTOGRAPHIQUES & ENVIRONNEMENTS (STRICT ANTI-LEAK)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.production.example
+.env.local
+.env.*.local
+*.env
+.env.vault
+.env.keys
+
+# Clés privées, certificats SSL/TLS et licences
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+*.id_rsa
+*.id_ed25519
+*.pub
+license.key
+license.lic
+license-private.pem
+ed25519_license_private.pem
+private.pem
+
+# ------------------------------------------------------------------------------
+# 3. DUMPS DE BASES DE DONNÉES & COPIES LOCALES
+# ------------------------------------------------------------------------------
+*.sql.gz
+*.dump
+*.tar
+*.bak
+*.sqlite
+*.sqlite3
+*.db
+database/dumps/
+infra/pgdata/
+infra/redisdata/
+traccar_prod_data/
+traccar_prod_logs/
+ollama_prod_data/
+
+# ------------------------------------------------------------------------------
+# 4. MODÈLES D'INTELLIGENCE ARTIFICIELLE & POIDS BINAIRES LOURDS
+# ------------------------------------------------------------------------------
+*.onnx
+*.safetensors
+*.gguf
+*.bin
+*.pt
+*.pth
+*.tflite
+models/weights/
+ollama/models/
+
+# ------------------------------------------------------------------------------
+# 5. CARTOGRAPHIE GÉOGRAPHIQUE & TUILLES VECTORIELLES LOURDES (GIS)
+# ------------------------------------------------------------------------------
+*.mbtiles
+*.pbf
+*.osm
+maps_prod_data/
+data/cache/
+data/tiles/
+
+# ------------------------------------------------------------------------------
+# 6. ARTEFACTS DE COMPILATION, SOURCE MAPS & BYTECODE V8 / NATIVE
+# ------------------------------------------------------------------------------
 dist/
+**/dist/
 .next/
 out/
 build/
 *.tsbuildinfo
+*.js.map
+*.d.ts.map
+*.map
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-*.log
+# Bytecode Bytenode & Binaires Cython / Nuitka
+*.jsc
+*.so
+*.pyd
+*.dylib
+*.dll
+dist-bytecode/
+dist-obfuscated/
+dist-native/
 
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*.env
-
-# OS / Editor
-.DS_Store
-Thumbs.db
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-.idea/
-
-# Coverage and test artifacts
-coverage/
-*.lcov
-test-results/
-
-# Infra
-infra/pgdata/
-infra/redisdata/
-
-# Python & Temporary
+# ------------------------------------------------------------------------------
+# 7. PYTHON & ENVIRONNEMENTS VIRTUELS
+# ------------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
 .venv/
 venv/
-.agents/tmp/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.eggs/
 
+# ------------------------------------------------------------------------------
+# 8. JOURNAUX (LOGS) & AUDIT LOCAL
+# ------------------------------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ------------------------------------------------------------------------------
+# 9. COUVERTURE DE TESTS & RAPPORTS
+# ------------------------------------------------------------------------------
+coverage/
+*.lcov
+test-results/
+.nyc_output/
+
+# ------------------------------------------------------------------------------
+# 10. FICHIERS SYSTÈME & IDE
+# ------------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.agents/tmp/
+scratch/

@@ -94,6 +94,27 @@ CREATE TABLE IF NOT EXISTS tenant_subscription_invoices (
 CREATE INDEX IF NOT EXISTS idx_tenant_sub_invoices_tenant_id ON tenant_subscription_invoices(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_tenant_sub_invoices_number ON tenant_subscription_invoices(invoice_number);
 
+-- Activation stricte du Row-Level Security (RLS Fail-Closed) sur les tables multi-tenant
+ALTER TABLE tenant_subscriptions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_subscriptions_isolation_policy ON tenant_subscriptions;
+CREATE POLICY tenant_subscriptions_isolation_policy ON tenant_subscriptions
+    FOR ALL
+    USING (
+        tenant_id::text = current_setting('app.current_tenant_id', true)
+        OR current_setting('app.current_tenant_id', true) = 'PLATFORM_SUPERADMIN'
+        OR current_setting('app.is_platform_admin', true) = 'true'
+    );
+
+ALTER TABLE tenant_subscription_invoices ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_subscription_invoices_isolation_policy ON tenant_subscription_invoices;
+CREATE POLICY tenant_subscription_invoices_isolation_policy ON tenant_subscription_invoices
+    FOR ALL
+    USING (
+        tenant_id::text = current_setting('app.current_tenant_id', true)
+        OR current_setting('app.current_tenant_id', true) = 'PLATFORM_SUPERADMIN'
+        OR current_setting('app.is_platform_admin', true) = 'true'
+    );
+
 -- 4. Insertion des 5 Plans de Référence Algérie (Souveraineté, Hardware-Agnostic & Maintenance 5.0)
 INSERT INTO saas_subscription_plans (
     code, name, description, billing_model, price_per_asset_dzd, base_fee_dzd,
