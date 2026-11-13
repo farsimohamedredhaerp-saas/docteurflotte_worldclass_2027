@@ -90,7 +90,7 @@ L'ensemble des développements du monorepo s'appuie sur les 7 innovations de rup
 - **Zéro Constante Métier ou Tarif en Dur :** Les prix du carburant (Gasoil, Sirghaz, Sans Plomb), forfaits de dépannage, forfaits de remorquage saharien, taux de TVA (résolus via `ALGERIA_FISCAL_RATES`) et paramètres régionaux doivent obligatoirement provenir des tables de configuration administrables (`SystemConfig`, `country_pack_dz`) et jamais de valeurs codées en dur dans le code source.
 - **Zéro Fuite Multi-Tenant (PostgreSQL RLS Fail-Closed) :** Tout accès SQL aux données d'exploitation doit transiter par le contexte tenant validé avec isolation RLS stricte (`df_tenant_role`). Tout contournement par clé superuser dans une route métier est proscrit.
 - **Zéro Violation Loi 18-07 (ANPDP) :** Aucune donnée personnelle (nom de chauffeur, numéro de téléphone, NIN, plaque, raison sociale) ne doit sortir vers un tiers (Flespi, cartographie externe, API LLM cloud). Coupe-feu applicatif `Law1807SanitizerMiddleware` actif sur toutes les routes. Seul l'identifiant matériel pseudonymisé (`device_uuid`) est toléré vers les passerelles matérielles.
-- **Zéro Donnée Démo en Environnement Réel :** Séparation étanche des données de simulation (`data_origin = 'DEMO'`) vis-à-vis des données réelles de flotte et de facturation.
+- **Zéro Donnée Démo en Environnement Réel & Zéro Mock Inline UI :** Séparation étanche des données de simulation (`data_origin = 'DEMO'`) vis-à-vis des données réelles de flotte et de facturation. Tout jeu de données de démonstration doit résider exclusivement dans `@/lib/simulation-sandbox/` sous forme de modules chargés dynamiquement (`await import(...)`), garantissant un bundle de production exempt de tout mock (0 Ko). Les pages UI doivent afficher un *Empty State* explicite lorsque le parc de l'organisation est vierge.
 - **Zéro Déclaration Sans Preuve :** Aucun statut `PASS` ne peut être affirmé sans exécution effective des tests automatisés, vérification du code retour et inspection des logs.
 - **Préservation de l'Hôte :** Ne jamais stopper ou altérer un conteneur, un port ou un processus hôte extérieur au projet DocteurFlotte.
 
@@ -130,6 +130,9 @@ L'ensemble des développements du monorepo s'appuie sur les 7 innovations de rup
 - `apps/web/src/components/cockpit/` : Cockpit cartographique souverain MapLibre (`MapLibreCorridorsMap.tsx`) avec les 3 paliers télématiques et corridors 58 Wilayas.
 - `apps/web/src/components/decisions/` : Preuves de calcul formelles et modale d'export ERP 1-clic (`TechnicalDossierModal.tsx`).
 - `apps/web/src/lib/` : Persistance IndexedDB DVIR PWA Offline-First (`offline-dvir-storage.ts`).
+- `apps/web/src/lib/simulation-sandbox/` : Isolation hermétique des jeux de données de simulation/démo chargés dynamiquement (0 Ko dans le bundle de production).
+- `apps/web/public/sw.js` & `apps/web/src/app/manifest.ts` : PWA installable et Service Worker de cache hors-ligne souverain pour les zones blanches sahariennes.
+- `packages/decision-engine/` : Primitives mathématiques exactes (`Decimal.clone()`, `roundDzd`), moteur AST d'évaluation et modèle d'audit immuable SHA-256.
 - `apps/web/src/app/` : Cockpits Next.js 15 (`/digital-twin`, `/live-cockpit`, `/map`, `/fuel-scanner`, `/guide`, `/work-orders`, `/dispatch`, `/cold-chain`, `/dvir`, `/preventive`, `/copilot`, `/admin`).
 - `infra/` : Déploiement souverain air-gapped on-premise (`docker-compose.onpremise.yml`).
 
@@ -186,7 +189,8 @@ Une tâche n'est déclarée `PASS` que si **100 %** des critères suivants sont 
 - [ ] **Isolation Multi-Tenant :** Requêtes SQL filtrées par tenant avec contexte RLS PostgreSQL Fail-Closed (`df_tenant_role`).
 - [ ] **Souveraineté Loi 18-07 (ANPDP) :** Zéro donnée à caractère personnel (PII) émise vers l'extérieur ; coupe-feu applicatif `Law1807SanitizerMiddleware` actif.
 - [ ] **Zéro Hardcode :** Constantes métier (tarifs carburant Naftal, forfaits dépannage, barèmes, taux de TVA ENACTA) injectées dynamiquement depuis `SystemConfig` / `ALGERIA_FISCAL_RATES`.
-- [ ] **Résilience & Données IoT :** Tolérance aux rafales Store-and-Forward triées par `device_timestamp` ; persistance DVIR PWA Offline-First sous IndexedDB.
+- [ ] **Isolation Démo / Production :** 100% des pages UI respectent l'isolation stricte Démo/Production validée par `scripts/guardrails/lint-zero-hardcode-ui.cjs` (0 mock inline).
+- [ ] **Résilience & Données IoT :** Tolérance aux rafales Store-and-Forward triées par `device_timestamp` ; persistance DVIR PWA Offline-First sous IndexedDB et Service Worker souverain.
 - [ ] **Adaptation Algérie :** Monnaie `DZD`, forfaits sahariens (75 000 DZD Sud vs 35 000 DZD Nord), profils des 58 Wilayas et support bilingue FR/AR (RTL).
 - [ ] **Qualité Validée :** `pnpm typecheck` à 0 erreur TypeScript et 100% des suites de tests Jest (40 suites, 287 tests) et Vitest (5 suites, 24 tests) au statut vert.
 
