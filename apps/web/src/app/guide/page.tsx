@@ -257,6 +257,26 @@ export default function GuidePage() {
               <span>🌐</span>
               <span>Jumeau Numérique</span>
             </Link>
+
+            <Link
+              href="/map"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 16px',
+                borderRadius: '8px',
+                background: 'var(--df-bg-surface-1)',
+                color: 'var(--df-text-main)',
+                fontSize: '13px',
+                fontWeight: 600,
+                textDecoration: 'none',
+                border: '1px solid var(--df-border-medium)',
+              }}
+            >
+              <span>🗺️</span>
+              <span>Cockpit MapLibre Corridors</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -1832,6 +1852,51 @@ export default function GuidePage() {
                 </p>
                 <Link href="/dvir" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
                   Ouvrir le Module DVIR ➔
+                </Link>
+              </div>
+
+              <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '20px' }}>📑</span>
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
+                    Dossier d'Expertise Technique &amp; Export ERP 1-Clic
+                  </h3>
+                </div>
+                <p style={{ fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.6, marginBottom: '12px' }}>
+                  Édition instantanée du <strong>Dossier d'Expertise Technique &amp; Traçabilité Carburant</strong> avec scellement SHA-256, courbe CUSUM et compensation topographique Valhalla. Export direct sans ressaisie vers les ERPs du marché algérien : <strong>PC Compta (SCF DGI)</strong>, <strong>Sage 100</strong>, <strong>Odoo</strong> et <strong>SAP PM</strong>.
+                </p>
+                <Link href="/fuel-scanner" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
+                  Voir les Dossiers Techniques ➔
+                </Link>
+              </div>
+
+              <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '20px' }}>🗺️</span>
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
+                    Cockpit MapLibre Souverain (58 Wilayas &amp; 4 Corridors)
+                  </h3>
+                </div>
+                <p style={{ fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.6, marginBottom: '12px' }}>
+                  Cartographie vectorielle souveraine <strong>MapLibre GL JS</strong> pointant sur les serveurs locaux (OSM Algérie) et le profil d'élévation Valhalla. Visualisation des 4 corridors majeurs (RN1, A1, RN3, RN6), des zones blanches sahariennes et filtrage par palier réel : <strong>Mode 0 (Déclaratif)</strong>, <strong>Mode 1 (GNSS)</strong>, <strong>Mode 2 (CAN/J1939)</strong>.
+                </p>
+                <Link href="/map" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
+                  Ouvrir la Carte des Corridors ➔
+                </Link>
+              </div>
+
+              <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '20px' }}>🎙️</span>
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
+                    Routeur Vocal Atelier en Darja Phonétique &amp; Base OEM
+                  </h3>
+                </div>
+                <p style={{ fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.6, marginBottom: '12px' }}>
+                  Conçu pour les mécaniciens en combinaison de travail : interprétation instantanée des requêtes en dialecte algérien (<em>« choufli zit el moteur »</em>, <em>« aatini l'batterie »</em>, <em>« serrage culasse shacman »</em>) avec <strong>court-circuit déterministe sous les 50 ms sans LLM</strong> pointant vers la base officielle multi-constructeurs (Shacman, Renault Trucks, MAN, Mercedes).
+                </p>
+                <Link href="/copilot" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
+                  Tester les Commandes Vocales ➔
                 </Link>
               </div>
             </div>
