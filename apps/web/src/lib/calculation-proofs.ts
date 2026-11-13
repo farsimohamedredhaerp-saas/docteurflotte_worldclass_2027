@@ -1,6 +1,11 @@
 import { CalculationProofData } from '../components/decisions/CalculationProofModal';
-import { DigitalTwinOrganStatus, DigitalTwinAsset } from '@docteurflotte/contracts';
+import {
+  DigitalTwinOrganStatus,
+  DigitalTwinAsset,
+  DigitalTwinUiConfig,
+} from '@docteurflotte/contracts';
 import { DispatchDecisionResult } from './api-fleet-intelligence';
+import { formatCurrency } from './currency-formatter';
 
 export interface EconomicExplanationDossier {
   economicHypotheses?: {
@@ -196,66 +201,382 @@ export class CalculationProofBuilder {
   /**
    * Preuve de calcul pour le Score VHI Global (Jumeau Numérique 6 Organes)
    */
-  static buildVhiScoreProof(twin: DigitalTwinAsset): CalculationProofData {
-    const oil = twin.organs.find((o) => o.organ === 'ENGINE_OIL')?.healthPercent || 70;
-    const battery = twin.organs.find((o) => o.organ === 'BATTERY_CRANKING')?.healthPercent || 80;
-    const brakes = twin.organs.find((o) => o.organ === 'BRAKE_PADS')?.healthPercent || 60;
-    const cooling = twin.organs.find((o) => o.organ === 'COOLING_SYSTEM')?.healthPercent || 85;
-    const fap = twin.organs.find((o) => o.organ === 'DPF_FILTER')?.healthPercent || 75;
-    const transmission = twin.organs.find((o) => o.organ === 'TRANSMISSION_DRIVETRAIN')?.healthPercent || 92;
+  static buildVhiScoreProof(
+    twin: DigitalTwinAsset,
+    config?: DigitalTwinUiConfig
+  ): CalculationProofData | null {
+    if (!twin || !twin.organs || twin.organs.length === 0) {
+      return null;
+    }
+
+    const oil = twin.organs.find((o) => o.organ === 'ENGINE_OIL')?.healthPercent;
+    const battery = twin.organs.find((o) => o.organ === 'BATTERY_CRANKING')?.healthPercent;
+    const brakes = twin.organs.find((o) => o.organ === 'BRAKE_PADS')?.healthPercent;
+    const cooling = twin.organs.find((o) => o.organ === 'COOLING_SYSTEM')?.healthPercent;
+    const fap = twin.organs.find((o) => o.organ === 'DPF_FILTER')?.healthPercent;
+    const transmission = twin.organs.find((o) => o.organ === 'TRANSMISSION_DRIVETRAIN')?.healthPercent;
+
+    if (
+      oil === undefined ||
+      battery === undefined ||
+      brakes === undefined ||
+      cooling === undefined ||
+      fap === undefined ||
+      transmission === undefined
+    ) {
+      return null;
+    }
+
+    const weights =
+      config?.modelParameters?.vhiWeights ??
+      twin.modelParameters?.vhiWeights ?? {
+        ENGINE_OIL: 0.22,
+        BATTERY_CRANKING: 0.18,
+        BRAKE_PADS: 0.18,
+        COOLING_SYSTEM: 0.18,
+        DPF_FILTER: 0.14,
+        TRANSMISSION_DRIVETRAIN: 0.10,
+      };
+    const wOil = weights.ENGINE_OIL ?? 0.22;
+    const wBat = weights.BATTERY_CRANKING ?? 0.18;
+    const wBrake = weights.BRAKE_PADS ?? 0.18;
+    const wCool = weights.COOLING_SYSTEM ?? 0.18;
+    const wDpf = weights.DPF_FILTER ?? 0.14;
+    const wTrans = weights.TRANSMISSION_DRIVETRAIN ?? 0.10;
+
+    const spec =
+      twin.modelParameters?.specVersion ||
+      twin.specVersion ||
+      config?.specVersion ||
+      'MASTER_SPEC v2.0 §4.1 (Modèle Physique Intégré VHI 6 Organes)';
+    const ruleId = twin.modelParameters?.ruleId || 'ALGO-PHYS-VHI-01';
+    const healthyThreshold = config?.vhiThresholds.healthyMin ?? 70;
+    const warningThreshold = config?.vhiThresholds.warningMin ?? 50;
 
     return {
       title: 'Preuve de Calcul du Score de Santé Globale VHI (0-100)',
       decisionOrMetricName: `${twin.assetName} (${twin.assetCode}) — VHI Global 6 Organes`,
       category: 'VHI',
-      ruleId: 'ALGO-PHYS-VHI-01',
-      legalOrOemReference: 'MASTER_SPEC v2.0 §4.1 (Modèle Physique Intégré VHI 6 Organes)',
-      deterministicFormula: 'VHI = (0.22 × Huile) + (0.18 × Batterie) + (0.18 × Freins) + (0.18 × Refroidissement) + (0.14 × FAP) + (0.10 × Transmission)',
+      ruleId,
+      legalOrOemReference: spec,
+      deterministicFormula: `VHI = (${wOil} × Huile) + (${wBat} × Batterie) + (${wBrake} × Freins) + (${wCool} × Refroidissement) + (${wDpf} × FAP) + (${wTrans} × Transmission)`,
       formulaExplanation:
         'Le Vehicle Health Index (VHI) ne fait aucune moyenne naïve : chacun des 6 organes d\'usure est modélisé par son équation physique dédiée puis agrégé selon sa criticité opérationnelle.',
       variables: [
-        { name: 'Santé Huile (Arrhenius)', symbol: 'S_huile', value: oil, unit: '%', source: 'Loi cinétique d\'Arrhenius (Ea/R=6500K)' },
-        { name: 'Santé Batterie (CVHI)', symbol: 'S_bat', value: battery, unit: '%', source: 'Tension résiduelle au pic démarreur' },
-        { name: 'Santé Freins (Archard)', symbol: 'S_freins', value: brakes, unit: '%', source: 'Épaisseur garniture mm / Loi d\'Archard' },
-        { name: 'Santé Refroidissement', symbol: 'S_refroid', value: cooling, unit: '%', source: 'Gradient thermique différentiel EWMA' },
-        { name: 'Santé FAP (Suie/Silice)', symbol: 'S_fap', value: fap, unit: '%', source: 'Bilan massique & contre-pression mbar' },
-        { name: 'Santé Transmission / Pont', symbol: 'S_trans', value: transmission, unit: '%', source: 'Micro-glissement cinématique J1939' },
+        { name: `Santé Huile (${(wOil * 100).toFixed(0)}%)`, symbol: 'S_huile', value: oil, unit: '%', source: 'Loi cinétique d\'Arrhenius (Ea/R=6500K)' },
+        { name: `Santé Batterie (${(wBat * 100).toFixed(0)}%)`, symbol: 'S_bat', value: battery, unit: '%', source: 'Tension résiduelle au pic démarreur' },
+        { name: `Santé Freins (${(wBrake * 100).toFixed(0)}%)`, symbol: 'S_freins', value: brakes, unit: '%', source: 'Épaisseur garniture mm / Loi d\'Archard' },
+        { name: `Santé Refroidissement (${(wCool * 100).toFixed(0)}%)`, symbol: 'S_refroid', value: cooling, unit: '%', source: 'Gradient thermique différentiel EWMA' },
+        { name: `Santé FAP (${(wDpf * 100).toFixed(0)}%)`, symbol: 'S_fap', value: fap, unit: '%', source: 'Bilan massique & contre-pression mbar' },
+        { name: `Santé Transmission (${(wTrans * 100).toFixed(0)}%)`, symbol: 'S_trans', value: transmission, unit: '%', source: 'Micro-glissement cinématique J1939' },
       ],
       steps: [
         {
           stepNumber: 1,
-          description: 'Pondération Huile Moteur & Viscosité (Poids 22%)',
-          formula: '0.22 × S_huile',
-          calculation: `0.22 × ${oil}%`,
-          intermediateResult: `${(0.22 * oil).toFixed(1)} pts`,
+          description: `Pondération Huile Moteur & Viscosité (Poids ${(wOil * 100).toFixed(0)}%)`,
+          formula: `${wOil} × S_huile`,
+          calculation: `${wOil} × ${oil}%`,
+          intermediateResult: `${(wOil * oil).toFixed(1)} pts`,
         },
         {
           stepNumber: 2,
-          description: 'Pondération Batterie & Démarreur (Poids 18%)',
-          formula: '0.18 × S_bat',
-          calculation: `0.18 × ${battery}%`,
-          intermediateResult: `${(0.18 * battery).toFixed(1)} pts`,
+          description: `Pondération Batterie & Démarreur (Poids ${(wBat * 100).toFixed(0)}%)`,
+          formula: `${wBat} × S_bat`,
+          calculation: `${wBat} × ${battery}%`,
+          intermediateResult: `${(wBat * battery).toFixed(1)} pts`,
         },
         {
           stepNumber: 3,
-          description: 'Pondération Freinage & Refroidissement (Poids 18% + 18%)',
-          formula: '(0.18 × S_freins) + (0.18 × S_refroid)',
-          calculation: `(0.18 × ${brakes}%) + (0.18 × ${cooling}%)`,
-          intermediateResult: `${(0.18 * brakes + 0.18 * cooling).toFixed(1)} pts`,
+          description: `Pondération Freinage & Refroidissement (Poids ${(wBrake * 100).toFixed(0)}% + ${(wCool * 100).toFixed(0)}%)`,
+          formula: `(${wBrake} × S_freins) + (${wCool} × S_refroid)`,
+          calculation: `(${wBrake} × ${brakes}%) + (${wCool} × ${cooling}%)`,
+          intermediateResult: `${(wBrake * brakes + wCool * cooling).toFixed(1)} pts`,
         },
         {
           stepNumber: 4,
-          description: 'Pondération FAP & Transmission (Poids 14% + 10%)',
-          formula: '(0.14 × S_fap) + (0.10 × S_trans)',
-          calculation: `(0.14 × ${fap}%) + (0.10 × ${transmission}%)`,
-          intermediateResult: `${(0.14 * fap + 0.1 * transmission).toFixed(1)} pts`,
+          description: `Pondération FAP & Transmission (Poids ${(wDpf * 100).toFixed(0)}% + ${(wTrans * 100).toFixed(0)}%)`,
+          formula: `(${wDpf} × S_fap) + (${wTrans} × S_trans)`,
+          calculation: `(${wDpf} × ${fap}%) + (${wTrans} × ${transmission}%)`,
+          intermediateResult: `${(wDpf * fap + wTrans * transmission).toFixed(1)} pts`,
         },
       ],
       finalResult: {
         label: 'Score Synthétique VHI',
         value: `${twin.currentVhi}`,
         unit: '/ 100',
-        conclusion: `Score calculé à ${twin.currentVhi}/100. ${twin.currentVhi >= 70 ? 'Véhicule en excellente condition opérationnelle.' : twin.currentVhi >= 50 ? 'Vigilance et intervention préventive requises.' : 'Alerte critique : risque d\'immobilisation.'}`,
+        conclusion: `Score calculé à ${twin.currentVhi}/100. ${twin.currentVhi >= healthyThreshold ? 'Véhicule en excellente condition opérationnelle.' : twin.currentVhi >= warningThreshold ? 'Vigilance et intervention préventive requises.' : 'Alerte critique : risque d\'immobilisation.'}`,
+      },
+    };
+  }
+
+  /**
+   * Preuve de la trajectoire prédictive déterministe (J0 à J+90)
+   * Extrait tous les paramètres du modèle ou de la configuration sans constantes en dur
+   */
+  static buildTrajectoryProof(
+    twin: DigitalTwinAsset,
+    config?: DigitalTwinUiConfig
+  ): CalculationProofData | null {
+    if (!twin || !twin.projectionTrajectory) {
+      return null;
+    }
+    const params = twin.modelParameters || config?.modelParameters;
+    const degradation30 =
+      params?.degradationRate30d !== undefined ? params.degradationRate30d : 'Donnée indisponible';
+    const degradation90 =
+      params?.degradationRate90d !== undefined ? params.degradationRate90d : 'Donnée indisponible';
+    const recoveryPts =
+      params?.sadRecoveryPoints !== undefined ? params.sadRecoveryPoints : 'Donnée indisponible';
+    const cap = params?.vhiCap !== undefined ? params.vhiCap : 'Donnée indisponible';
+    const spec =
+      params?.specVersion ||
+      twin.specVersion ||
+      config?.specVersion ||
+      'MASTER_SPEC v2.0 §4.6 (Projection Temporelle & SAD)';
+    const ruleId = params?.ruleId || 'ALGO-TRAJECTORY-90D';
+
+    const stressFactor =
+      twin.climateSeverityFactor && twin.driverAggressivenessScore
+        ? Number((twin.climateSeverityFactor * twin.driverAggressivenessScore).toFixed(2))
+        : 'Donnée indisponible';
+
+    return {
+      title: 'Preuve de la Trajectoire Prédictive Déterministe (J0 à J+90)',
+      decisionOrMetricName: `${twin.assetName} — Projection Temporelle VHI`,
+      category: 'PHYSICS_RUL',
+      ruleId,
+      legalOrOemReference: spec,
+      deterministicFormula: 'VHI(t) = VHI_0 - (Taux_Dégradation × t × K_clim × K_driver)',
+      formulaExplanation:
+        typeof recoveryPts === 'number'
+          ? `Modélisation de la pente de chute du score de santé sans intervention préventive versus stabilisation post-intervention atelier (+${recoveryPts} pts).`
+          : 'Modélisation de la pente de chute du score de santé sans intervention préventive versus stabilisation post-intervention atelier.',
+      variables: [
+        {
+          name: 'Score Initial (J0)',
+          symbol: 'VHI_0',
+          value: twin.projectionTrajectory?.day0Vhi ?? 'Donnée indisponible',
+          source: 'Calcul Présent VHI',
+        },
+        {
+          name: 'Facteur de Stress Combiné',
+          symbol: 'K_stress',
+          value: typeof stressFactor === 'number' ? `x${stressFactor}` : stressFactor,
+          source: 'Climat × Conduite',
+        },
+        {
+          name: 'Projection Sans Action à J+30',
+          symbol: 'VHI_30',
+          value:
+            twin.projectionTrajectory?.day30VhiWithoutAction !== undefined
+              ? `${twin.projectionTrajectory.day30VhiWithoutAction}/100`
+              : 'Donnée indisponible',
+          source: 'Équation temporelle',
+        },
+        {
+          name: 'Projection Avec Action à J+30',
+          symbol: 'VHI_30_SAD',
+          value:
+            twin.projectionTrajectory?.day30VhiWithAction !== undefined
+              ? `${twin.projectionTrajectory.day30VhiWithAction}/100`
+              : 'Donnée indisponible',
+          source: 'Remise à niveau atelier',
+        },
+      ],
+      steps: [
+        {
+          stepNumber: 1,
+          description: 'Projection sans intervention à 30 jours (Chute de santé)',
+          formula:
+            typeof degradation30 === 'number'
+              ? `VHI_0 - (${degradation30} × K_stress)`
+              : 'VHI_0 - (Taux_30 × K_stress)',
+          calculation:
+            typeof degradation30 === 'number' && typeof stressFactor === 'number' && twin.projectionTrajectory
+              ? `${twin.projectionTrajectory.day0Vhi} - (${degradation30} × ${stressFactor})`
+              : 'Donnée indisponible',
+          intermediateResult:
+            twin.projectionTrajectory?.day30VhiWithoutAction !== undefined
+              ? `${twin.projectionTrajectory.day30VhiWithoutAction} VHI`
+              : 'Donnée indisponible',
+        },
+        {
+          stepNumber: 2,
+          description:
+            typeof recoveryPts === 'number'
+              ? `Projection avec intervention préventive SAD (+${recoveryPts} pts)`
+              : 'Projection avec intervention préventive SAD',
+          formula:
+            typeof cap === 'number' && typeof recoveryPts === 'number'
+              ? `min(${cap}, VHI_0 + ${recoveryPts})`
+              : 'min(Cap, VHI_0 + Gain)',
+          calculation:
+            typeof cap === 'number' && typeof recoveryPts === 'number' && twin.projectionTrajectory
+              ? `min(${cap}, ${twin.projectionTrajectory.day0Vhi} + ${recoveryPts})`
+              : 'Donnée indisponible',
+          intermediateResult:
+            twin.projectionTrajectory?.day30VhiWithAction !== undefined
+              ? `${twin.projectionTrajectory.day30VhiWithAction} VHI`
+              : 'Donnée indisponible',
+        },
+        {
+          stepNumber: 3,
+          description: 'Chute critique à 90 jours sans intervention',
+          formula:
+            typeof degradation90 === 'number'
+              ? `VHI_0 - (${degradation90} × K_stress)`
+              : 'VHI_0 - (Taux_90 × K_stress)',
+          calculation:
+            typeof degradation90 === 'number' && typeof stressFactor === 'number' && twin.projectionTrajectory
+              ? `${twin.projectionTrajectory.day0Vhi} - (${degradation90} × ${stressFactor})`
+              : 'Donnée indisponible',
+          intermediateResult:
+            twin.projectionTrajectory?.day90VhiWithoutAction !== undefined
+              ? `${twin.projectionTrajectory.day90VhiWithoutAction} VHI (Risque Panne Élevé)`
+              : 'Donnée indisponible',
+        },
+      ],
+      finalResult: {
+        label: 'Bilan de Trajectoire',
+        value: twin.projectionTrajectory
+          ? `${twin.projectionTrajectory.day30VhiWithoutAction} vs ${twin.projectionTrajectory.day30VhiWithAction}`
+          : 'Donnée indisponible',
+        unit: 'VHI',
+        conclusion: (() => {
+          const day30Without = twin.projectionTrajectory?.day30VhiWithoutAction;
+          const day30With = twin.projectionTrajectory?.day30VhiWithAction;
+          if (typeof day30Without === 'number' && typeof day30With === 'number') {
+            const delta = day30With - day30Without;
+            return `L'action préventive immédiate permet un gain net de +${delta} pts VHI à 30 jours, maintenant le véhicule au-dessus du seuil de rentabilité sans immobilisation.`;
+          }
+          return 'L\'action préventive immédiate permet de maintenir le véhicule au-dessus du seuil de rentabilité sans immobilisation.';
+        })(),
+      },
+    };
+  }
+
+  /**
+   * Preuve de l'arbitrage financier SAD → ADS (Devise configurable)
+   */
+  static buildFinancialProof(
+    twin: DigitalTwinAsset,
+    config?: DigitalTwinUiConfig
+  ): CalculationProofData | null {
+    if (!twin) {
+      return null;
+    }
+    const params = twin.modelParameters || config?.modelParameters;
+    const arb = twin.financialArbitrage;
+    const currency = config?.currency || 'DZD';
+    const locale = config?.locale || 'fr-DZ';
+
+    const spec =
+      params?.specVersion ||
+      twin.specVersion ||
+      config?.specVersion ||
+      'MASTER_SPEC v2.0 §5.1 (Arbitrage Financier Déterministe)';
+    const ruleId = params?.ruleId || 'RULE-FIN-ADS-001';
+    const immoDays =
+      params?.immobilizationDays !== undefined ? params.immobilizationDays : 'Donnée indisponible';
+
+    if (!arb) {
+      return {
+        title: `Preuve de l’Arbitrage Financier SAD → ADS (${currency})`,
+        decisionOrMetricName: `${twin.assetName} — Arbitrage Coût Préventif vs Inaction`,
+        category: 'FINANCIAL',
+        ruleId,
+        legalOrOemReference: spec,
+        deterministicFormula: 'Économie Nette = Risque d\'Inaction - Coût d\'Action Immédiate',
+        formulaExplanation: 'Données d\'arbitrage financier non disponibles pour cet actif.',
+        variables: [],
+        steps: [],
+        finalResult: {
+          label: 'Statut Arbitrage',
+          value: 'Donnée indisponible',
+          unit: currency,
+          conclusion: 'Veuillez relancer la modélisation financière pour ce véhicule.',
+        },
+      };
+    }
+
+    return {
+      title: `Preuve de l’Arbitrage Financier SAD → ADS (${currency})`,
+      decisionOrMetricName: `${twin.assetName} — Arbitrage Coût Préventif vs Inaction`,
+      category: 'FINANCIAL',
+      ruleId,
+      legalOrOemReference: spec,
+      deterministicFormula: 'Économie Nette = Risque d\'Inaction - Coût d\'Action Immédiate',
+      formulaExplanation:
+        'Le risque financier d\'inaction modélise la défaillance sévère en exploitation : forfait remorquage selon la Wilaya, coût d\'immobilisation journalière et coefficient d\'amplification des dégâts matériels.',
+      variables: [
+        {
+          name: 'Coût Préventif Immédiat',
+          symbol: 'C_prev',
+          value: formatCurrency(arb.preventiveInterventionCostDzd, currency, locale),
+          source: 'Catalogue RMI & Pièces en Stock',
+        },
+        {
+          name: 'Risque Financier Panne Inaction',
+          symbol: 'R_inaction',
+          value: formatCurrency(arb.unplannedBreakdownRiskDzd, currency, locale),
+          source: 'Modèle Physique Cascades',
+        },
+        {
+          name: 'Forfait Remorquage Wilaya',
+          symbol: 'C_remorquage',
+          value: formatCurrency(arb.desertTowingCostDzd, currency, locale),
+          source: `Barème Assistance Wilaya ${twin.wilayaCode ?? 'Donnée indisponible'}`,
+        },
+        {
+          name: 'Perte d\'Immobilisation Journalière',
+          symbol: 'L_immo',
+          value: `${formatCurrency(arb.dailyImmobilizationLossDzd, currency, locale)}/j`,
+          source: 'Perte d\'Exploitation Fret/BTP',
+        },
+        {
+          name: 'Économie Nette Attendue',
+          symbol: 'Gain_net',
+          value: formatCurrency(arb.netBenefitDzd, currency, locale),
+          source: 'Calcul Différentiel',
+        },
+        {
+          name: 'Ratio ROI',
+          symbol: 'ROI',
+          value: `${arb.roiRatio.toFixed(1)}x`,
+          source: 'R_inaction / C_prev',
+        },
+      ],
+      steps: [
+        {
+          stepNumber: 1,
+          description: 'Calcul du coût d\'intervention préventive planifiée',
+          formula: 'C_pièces + C_main_oeuvre',
+          calculation: formatCurrency(arb.preventiveInterventionCostDzd, currency, locale),
+          intermediateResult: formatCurrency(arb.preventiveInterventionCostDzd, currency, locale),
+        },
+        {
+          stepNumber: 2,
+          description: 'Évaluation du coût d\'inaction (panne sévère en ligne)',
+          formula:
+            typeof immoDays === 'number'
+              ? `C_casse_moteur + C_remorquage + (L_immo × ${immoDays} jours)`
+              : 'C_casse_moteur + C_remorquage + (L_immo × Jours_Immo)',
+          calculation: formatCurrency(arb.unplannedBreakdownRiskDzd, currency, locale),
+          intermediateResult: formatCurrency(arb.unplannedBreakdownRiskDzd, currency, locale),
+        },
+        {
+          stepNumber: 3,
+          description: 'Calcul du bénéfice net d\'action immédiate',
+          formula: 'R_inaction - C_prev',
+          calculation: `${arb.unplannedBreakdownRiskDzd} - ${arb.preventiveInterventionCostDzd}`,
+          intermediateResult: formatCurrency(arb.netBenefitDzd, currency, locale),
+        },
+      ],
+      finalResult: {
+        label: 'Arbitrage Rentabilité SAD',
+        value: `Gain Net: +${formatCurrency(arb.netBenefitDzd, currency, locale)} (ROI: ${arb.roiRatio.toFixed(1)}x)`,
+        unit: currency,
+        conclusion: `Intervention préventive hautement rentable. Recommandation : intervention sous ${arb.actionDeadlineDays} jours.`,
       },
     };
   }
@@ -263,9 +584,27 @@ export class CalculationProofBuilder {
   /**
    * Preuve de calcul pour un organe physique spécifique (Huile, Freins, Batterie, etc.)
    */
-  static buildOrganProof(organ: DigitalTwinOrganStatus, twin: DigitalTwinAsset): CalculationProofData {
+  static buildOrganProof(
+    organ: DigitalTwinOrganStatus,
+    twin: DigitalTwinAsset,
+    _config?: DigitalTwinUiConfig
+  ): CalculationProofData | null {
+    if (!organ || !twin) {
+      return null;
+    }
+
+    const traceSteps = organ.calculationTrace && organ.calculationTrace.length > 0
+      ? organ.calculationTrace.map((item, idx) => ({
+          stepNumber: idx + 1,
+          description: item.step,
+          formula: item.formula ?? 'Calcul déterministe',
+          calculation: `${item.step}: ${item.value}`,
+          intermediateResult: String(item.value),
+        }))
+      : null;
+
     switch (organ.organ) {
-      case 'ENGINE_OIL':
+      case 'ENGINE_OIL': {
         return {
           title: 'Preuve de la Loi Cinétique d\'Arrhenius (Huile & Viscosité)',
           decisionOrMetricName: `Huile Moteur — RUL : ${organ.remainingUsefulLifeValue.toLocaleString()} ${organ.remainingUsefulLifeUnit}`,
@@ -281,7 +620,7 @@ export class CalculationProofBuilder {
             { name: 'Odomètre Actuel', symbol: 'Km_réel', value: twin.currentOdometerKm.toLocaleString(), unit: 'km', source: 'Compteur Traccar' },
             { name: 'Intervalle Constructeur RMI', symbol: 'Interv_OEM', value: '15 000', unit: 'km', source: 'Spécification OEM' },
           ],
-          steps: [
+          steps: traceSteps ?? [
             {
               stepNumber: 1,
               description: 'Calcul du Facteur de Contrainte Combiné',
@@ -311,10 +650,19 @@ export class CalculationProofBuilder {
             conclusion: `Vidange et remplacement filtre requis dans ${organ.remainingUsefulLifeValue.toLocaleString()} km pour éviter le cisaillement du film lubrifiant.`,
           },
         };
+      }
 
-      case 'BRAKE_PADS':
-        const padThickness = parseFloat(String(organ.observedMetrics[0]?.value || '4.2'));
-        const usefulPad = Math.max(0, padThickness - 3.0);
+      case 'BRAKE_PADS': {
+        const metric = organ.observedMetrics[0];
+        const padThickness =
+          metric?.valueNumeric ??
+          (typeof metric?.value === 'number' ? metric.value : parseFloat(String(metric?.value ?? '4.2')));
+        const safetyThreshold =
+          metric?.thresholdNumeric ??
+          (typeof metric?.threshold === 'number'
+            ? metric.threshold
+            : parseFloat(String(metric?.threshold ?? '3.0')) || 3.0);
+        const usefulPad = Math.max(0, padThickness - safetyThreshold);
 
         return {
           title: 'Preuve de la Loi Tribologique d\'Archard (Usure des Plaquettes)',
@@ -322,21 +670,21 @@ export class CalculationProofBuilder {
           category: 'PHYSICS_RUL',
           ruleId: 'ALGO-ARCHARD-03',
           legalOrOemReference: 'MASTER_SPEC v2.0 §4.4 (Loi d\'Archard W = K × 1/2 m Δv²)',
-          deterministicFormula: 'Épaisseur(mm) = 12.0 - ((Km mod 40 000) / 4 000) × K_stress',
+          deterministicFormula: 'Épaisseur(mm) = E_neuve - ((Km mod 40 000) / 4 000) × K_stress',
           formulaExplanation:
-            'L\'usure surfacique des garnitures de friction dépend directement de l\'énergie cinétique dissipée à chaque décélération. Le seuil de sécurité constructeur minimal est fixé à 3.0 mm.',
+            `L\'usure surfacique des garnitures de friction dépend directement de l\'énergie cinétique dissipée à chaque décélération. Le seuil de sécurité constructeur minimal est fixé à ${safetyThreshold} mm.`,
           variables: [
             { name: 'Épaisseur Initiale Plaquette Neuve', symbol: 'E_neuve', value: '12.0', unit: 'mm', source: 'Cahier des charges OEM' },
-            { name: 'Seuil Critique Constructeur', symbol: 'E_min', value: '3.0', unit: 'mm', source: 'Norme Sécurité ENACTA' },
-            { name: 'Épaisseur Actuelle Mesurée', symbol: 'E_actuelle', value: organ.observedMetrics[0]?.value || '4.2 mm', source: 'Calcul d\'usure cinétique CAN' },
+            { name: 'Seuil Critique Constructeur', symbol: 'E_min', value: `${safetyThreshold}`, unit: 'mm', source: 'Norme Sécurité ENACTA' },
+            { name: 'Épaisseur Actuelle Mesurée', symbol: 'E_actuelle', value: `${padThickness} mm`, source: 'Calcul d\'usure cinétique CAN' },
             { name: 'Agressivité de Freinage', symbol: 'K_driver', value: twin.driverAggressivenessScore, source: 'Accéléromètre 3-axes Traccar' },
           ],
-          steps: [
+          steps: traceSteps ?? [
             {
               stepNumber: 1,
               description: 'Calcul de l\'Épaisseur Résiduelle de Garniture',
-              formula: 'Garniture_Utile = Épaisseur_Actuelle - Seuil_Sécurité (3.0 mm)',
-              calculation: `${padThickness.toFixed(1)} mm - 3.0 mm`,
+              formula: `Garniture_Utile = Épaisseur_Actuelle - Seuil_Sécurité (${safetyThreshold} mm)`,
+              calculation: `${padThickness.toFixed(1)} mm - ${safetyThreshold.toFixed(1)} mm`,
               intermediateResult: `${usefulPad.toFixed(1)} mm`,
             },
             {
@@ -354,8 +702,9 @@ export class CalculationProofBuilder {
             conclusion: `Remplacement impératif avant les ${organ.remainingUsefulLifeValue.toLocaleString()} prochains km pour préserver les disques et la conformité au contrôle technique.`,
           },
         };
+      }
 
-      case 'TRANSMISSION_DRIVETRAIN':
+      case 'TRANSMISSION_DRIVETRAIN': {
         return {
           title: 'Preuve du Modèle de Transmission & Pont Arrière (Micro-Glissement)',
           decisionOrMetricName: `Transmission / Pont — RUL : ${organ.remainingUsefulLifeValue.toLocaleString()} ${organ.remainingUsefulLifeUnit}`,
@@ -369,12 +718,12 @@ export class CalculationProofBuilder {
             value: m.value,
             source: `Télémétrique CAN J1939 (Seuil: ${m.threshold})`,
           })),
-          steps: [
+          steps: traceSteps ?? [
             {
               stepNumber: 1,
               description: 'Analyse du micro-glissement sous couple',
               formula: 'Glissement_Mesuré vs Tolérance',
-              calculation: `Donnée observée : ${organ.observedMetrics[0]?.value || '0.65%'}`,
+              calculation: `Donnée observée : ${organ.observedMetrics[0]?.value || 'Nominale'}`,
               intermediateResult: 'Nominal',
             },
             {
@@ -392,8 +741,9 @@ export class CalculationProofBuilder {
             conclusion: organ.explanation,
           },
         };
+      }
 
-      default:
+      default: {
         return {
           title: `Preuve du Modèle Physique : ${organ.name}`,
           decisionOrMetricName: `${organ.name} — Santé : ${organ.healthPercent}%`,
@@ -407,7 +757,7 @@ export class CalculationProofBuilder {
             value: m.value,
             source: `Télématique IoT (Seuil: ${m.threshold})`,
           })),
-          steps: [
+          steps: traceSteps ?? [
             {
               stepNumber: 1,
               description: 'Acquisition des flux télématiques Traccar / CAN',
@@ -430,6 +780,7 @@ export class CalculationProofBuilder {
             conclusion: organ.explanation,
           },
         };
+      }
     }
   }
 }

@@ -14,11 +14,17 @@ import {
   DigitalTwinAsset,
   AlgeriaWilayaProfile,
   ALGERIA_58_WILAYAS_PROFILES,
+  DigitalTwinUiConfig,
 } from '@docteurflotte/contracts';
 
 @Controller('digital-twin')
 export class DigitalTwinController {
   constructor(private readonly digitalTwinService: DigitalTwinService) {}
+
+  @Get('config')
+  getDigitalTwinConfig(): DigitalTwinUiConfig {
+    return this.digitalTwinService.getDigitalTwinConfig();
+  }
 
   @Get('wilayas')
   getAlgeriaWilayas(): AlgeriaWilayaProfile[] {

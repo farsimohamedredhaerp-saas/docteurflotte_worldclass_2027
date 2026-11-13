@@ -6,6 +6,9 @@ import {
   DigitalTwinOrganStatus,
   DigitalTwinSimulationParams,
   DigitalTwinFinancialArbitrage,
+  DigitalTwinUiConfig,
+  DEFAULT_DIGITAL_TWIN_CONFIG,
+  DEFAULT_MODEL_PARAMETERS,
   ALGERIA_58_WILAYAS_PROFILES,
   AlgeriaWilayaProfile,
   TelemetryFrame,
@@ -349,6 +352,7 @@ export class DigitalTwinService {
         remainingUsefulLifeUnit: 'KM',
         status: oilHealth < 30 ? 'CRITICAL' : oilHealth < 60 ? 'PRE_CRITICAL' : 'HEALTHY',
         physicsAlgorithm: 'Arrhenius Cinétique (Ea/R = 6500 K)',
+        algorithmShortName: 'Arrhenius',
         observedMetrics: [
           { label: 'Facteur d’Accélération Arrhenius', value: `x${oilDegradationMult}`, threshold: '< 1.5' },
           { label: 'Température Ambiante Wilaya', value: `${wilaya.ambientTempSummerC} °C`, threshold: '< 40 °C' },
@@ -365,6 +369,7 @@ export class DigitalTwinService {
         remainingUsefulLifeUnit: 'STARTS',
         status: crankingVoltage < 9.6 ? 'CRITICAL' : batteryHealth < 60 ? 'PRE_CRITICAL' : 'HEALTHY',
         physicsAlgorithm: 'Cranking Health CVHI (Tension au pic démarreur 100ms)',
+        algorithmShortName: 'CVHI',
         observedMetrics: [
           { label: 'Tension Cranking Minimale (V_min)', value: `${crankingVoltage} V`, threshold: '> 9.60 V' },
           { label: 'Facteur d’Évaporation Électrolyte', value: `x${wilaya.batteryEvapFactor}`, threshold: '< 1.5' },
@@ -380,6 +385,7 @@ export class DigitalTwinService {
         remainingUsefulLifeUnit: 'KM',
         status: brakePadThicknessMm <= 3.5 ? 'CRITICAL' : brakeHealth < 50 ? 'PRE_CRITICAL' : 'HEALTHY',
         physicsAlgorithm: 'Loi Tribologique d’Archard (Énergie Cinétique W = 1/2 m Δv²)',
+        algorithmShortName: 'Archard',
         observedMetrics: [
           { label: 'Épaisseur Restante de Garniture', value: `${brakePadThicknessMm} mm`, threshold: '> 3.0 mm' },
           { label: 'Déclivité / Pente Wilaya', value: `x${wilaya.brakeGradientFactor}`, threshold: '< 1.3' },
@@ -395,6 +401,7 @@ export class DigitalTwinService {
         remainingUsefulLifeUnit: 'PERCENT',
         status: coolingHealth < 50 ? 'CRITICAL' : 'HEALTHY',
         physicsAlgorithm: 'Modèle Thermique Différentiel EWMA ΔT = |T_huile - T_eau|',
+        algorithmShortName: 'EWMA',
         observedMetrics: [
           { label: 'Écart Thermique Huile / Liquide (ΔT)', value: `${tempDelta} °C`, threshold: '< 16.0 °C' },
           { label: 'Pression Circuit Calostat', value: '1.45 bar', threshold: '1.2 - 1.8 bar' },
@@ -410,6 +417,7 @@ export class DigitalTwinService {
         remainingUsefulLifeUnit: 'KM',
         status: sootGrams >= 40.0 ? 'PRE_CRITICAL' : 'HEALTHY',
         physicsAlgorithm: 'Bilan Massique d’Accumulation de Suie & Silice Saharienne',
+        algorithmShortName: 'FAP',
         observedMetrics: [
           { label: 'Masse de Suie Accumulée', value: `${sootGrams} g`, threshold: '< 45.0 g' },
           { label: 'Indice Poussière Siliceuse Wilaya', value: `x${wilaya.dustSilicaFactor}`, threshold: '< 1.5' },
@@ -425,6 +433,7 @@ export class DigitalTwinService {
         remainingUsefulLifeUnit: 'KM',
         status: transmissionHealth < 50 ? 'CRITICAL' : transmissionHealth < 75 ? 'PRE_CRITICAL' : 'HEALTHY',
         physicsAlgorithm: 'Cinématique de Glissement J1939 (SPN 524 / SPN 191) & Couple de Friction',
+        algorithmShortName: 'J1939',
         observedMetrics: [
           { label: 'Glissement Boîte / Pont Estimé', value: `${transmissionSlipPct} %`, threshold: '< 1.00 %' },
           { label: 'Viscosité Lubrifiant Pont (80W90)', value: '14.2 cSt', threshold: '13.5 - 18.5 cSt' },
@@ -519,6 +528,16 @@ export class DigitalTwinService {
         estimatedCostDzd: 18500,
         oemHomologation: 'Homologation Constructeur Certifiée RMI',
       },
+      modelParameters: {
+        ...DEFAULT_MODEL_PARAMETERS,
+        desertTowingCostDzd: desertTowingCost,
+        dailyImmobilizationLossDzd: dailyImmobilization,
+      },
+      specVersion: DEFAULT_DIGITAL_TWIN_CONFIG.specVersion,
     };
+  }
+
+  getDigitalTwinConfig(): DigitalTwinUiConfig {
+    return DEFAULT_DIGITAL_TWIN_CONFIG;
   }
 }

@@ -21,7 +21,22 @@ export * from './subscriptions';
 export * from './deterministic-physics';
 
 // Explicit re-exports of runtime constants for bundlers (Turbopack / Webpack / Vite)
-export { ALGERIA_58_WILAYAS_PROFILES } from './digital-twin';
+export {
+  ALGERIA_58_WILAYAS_PROFILES,
+  DESERT_ZONE_CODE,
+  isDesertZone,
+  DEFAULT_DIGITAL_TWIN_CONFIG,
+  DEFAULT_SIMULATION_PRESETS,
+  DEFAULT_SIMULATION_LIMITS,
+  DEFAULT_VHI_THRESHOLDS,
+  DEFAULT_MODEL_PARAMETERS,
+  DigitalTwinUiConfigSchema,
+  SimulationPresetSchema,
+  SimulationLimitsSchema,
+  VhiThresholdsSchema,
+  ModelParametersSchema,
+  DigitalTwinAssetSchema,
+} from './digital-twin';
 export {
   LIGHT_COMMERCIAL_PRESET,
   HEAVY_TRUCK_PRESET,

@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export type DigitalTwinOrganType =
   | 'ENGINE_OIL'
   | 'BATTERY_CRANKING'
@@ -5,6 +7,14 @@ export type DigitalTwinOrganType =
   | 'COOLING_SYSTEM'
   | 'DPF_FILTER'
   | 'TRANSMISSION_DRIVETRAIN';
+
+export interface DigitalTwinObservedMetric {
+  label: string;
+  value: string | number;
+  threshold: string | number;
+  valueNumeric?: number;
+  thresholdNumeric?: number;
+}
 
 export interface DigitalTwinOrganStatus {
   organ: DigitalTwinOrganType;
@@ -15,11 +25,9 @@ export interface DigitalTwinOrganStatus {
   remainingUsefulLifeUnit: 'KM' | 'DAYS' | 'STARTS' | 'PERCENT';
   status: 'HEALTHY' | 'PRE_CRITICAL' | 'CRITICAL';
   physicsAlgorithm: string;
-  observedMetrics: {
-    label: string;
-    value: string | number;
-    threshold: string | number;
-  }[];
+  algorithmShortName?: string;
+  observedMetrics: DigitalTwinObservedMetric[];
+  calculationTrace?: Array<{ step: string; value: string | number; formula?: string }>;
   explanation: string;
 }
 
@@ -157,6 +165,313 @@ export interface DigitalTwinAsset {
     inStock: boolean;
     warehouseStockQty: number;
     estimatedCostDzd: number;
-    oemHomologation: string;
+    oemHomologation?: string;
   };
+  modelParameters?: ModelParameters;
+  specVersion?: string;
 }
+
+export const ALGERIA_WILAYAS_PROFILES = ALGERIA_58_WILAYAS_PROFILES;
+export const DESERT_ZONE_CODE = 'ZONE_3_SAHARA' as const;
+
+export function isDesertZone(profile?: { zone?: string; isDesertZone?: boolean } | null): boolean {
+  if (!profile) return false;
+  if (typeof profile.isDesertZone === 'boolean') return profile.isDesertZone;
+  return profile.zone === DESERT_ZONE_CODE;
+}
+
+export interface SimulationPreset {
+  id: string;
+  label: string;
+  wilayaCode: number;
+  driverMultiplier: number;
+  isDesertTransit?: boolean;
+}
+
+export const SimulationPresetSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  wilayaCode: z.number().int().min(1).max(58),
+  driverMultiplier: z.number(),
+  isDesertTransit: z.boolean().optional(),
+});
+
+export const DEFAULT_SIMULATION_PRESETS: SimulationPreset[] = [
+  { id: 'alger', label: 'Alger (Urbain / Bouchons)', wilayaCode: 16, driverMultiplier: 0.95, isDesertTransit: false },
+  { id: 'sahara', label: 'Sahara (Ouargla / HMD)', wilayaCode: 30, driverMultiplier: 1.25, isDesertTransit: true },
+  { id: 'chiffa', label: 'Atlas / Chiffa (Pente 8%)', wilayaCode: 9, driverMultiplier: 1.4, isDesertTransit: false },
+  { id: 'tamanrasset', label: 'Grand Sud (Tamanrasset)', wilayaCode: 11, driverMultiplier: 1.3, isDesertTransit: true },
+];
+
+export interface SliderLimit {
+  min: number;
+  max: number;
+  step: number;
+  defaultVal: number;
+  minLabelKey: string;
+  maxLabelKey: string;
+}
+
+export interface SimulationLimits {
+  climate: SliderLimit;
+  driver: SliderLimit;
+}
+
+export const SimulationLimitsSchema = z.object({
+  climate: z.object({
+    min: z.number(),
+    max: z.number(),
+    step: z.number(),
+    defaultVal: z.number(),
+    minLabelKey: z.string(),
+    maxLabelKey: z.string(),
+  }),
+  driver: z.object({
+    min: z.number(),
+    max: z.number(),
+    step: z.number(),
+    defaultVal: z.number(),
+    minLabelKey: z.string(),
+    maxLabelKey: z.string(),
+  }),
+});
+
+export const DEFAULT_SIMULATION_LIMITS: SimulationLimits = {
+  climate: {
+    min: 1.0,
+    max: 1.7,
+    step: 0.05,
+    defaultVal: 1.15,
+    minLabelKey: 'digitalTwin.simulation.limits.climateMin',
+    maxLabelKey: 'digitalTwin.simulation.limits.climateMax',
+  },
+  driver: {
+    min: 0.8,
+    max: 1.6,
+    step: 0.05,
+    defaultVal: 1.1,
+    minLabelKey: 'digitalTwin.simulation.limits.driverMin',
+    maxLabelKey: 'digitalTwin.simulation.limits.driverMax',
+  },
+};
+
+export interface VhiThresholdTier {
+  minScore: number;
+  statusKey: string;
+  color: string;
+  bgRgba: string;
+}
+
+export interface VhiThresholds {
+  healthyMin: number;
+  warningMin: number;
+  criticalMin: number;
+  tiers: VhiThresholdTier[];
+}
+
+export const VhiThresholdTierSchema = z.object({
+  minScore: z.number(),
+  statusKey: z.string(),
+  color: z.string(),
+  bgRgba: z.string(),
+});
+
+export const VhiThresholdsSchema = z.object({
+  healthyMin: z.number(),
+  warningMin: z.number(),
+  criticalMin: z.number(),
+  tiers: z.array(VhiThresholdTierSchema),
+});
+
+export const DEFAULT_VHI_THRESHOLDS: VhiThresholds = {
+  healthyMin: 70,
+  warningMin: 50,
+  criticalMin: 0,
+  tiers: [
+    { minScore: 75, statusKey: 'digitalTwin.status.excellent', color: '#10b981', bgRgba: 'rgba(16, 185, 129, 0.15)' },
+    { minScore: 60, statusKey: 'digitalTwin.status.vigilance', color: '#f59e0b', bgRgba: 'rgba(245, 158, 11, 0.15)' },
+    { minScore: 45, statusKey: 'digitalTwin.status.preCriticalRisk', color: '#f59e0b', bgRgba: 'rgba(245, 158, 11, 0.15)' },
+    { minScore: 0, statusKey: 'digitalTwin.status.immediateStop', color: '#ef4444', bgRgba: 'rgba(239, 68, 68, 0.15)' },
+  ],
+};
+
+export interface ModelParameters {
+  degradationRate30d: number;
+  degradationRate90d: number;
+  sadRecoveryPoints: number;
+  vhiCap: number;
+  immobilizationDays: number;
+  desertTowingCostDzd: number;
+  dailyImmobilizationLossDzd: number;
+  substitutionVhiThreshold: number;
+  specVersion?: string;
+  ruleId?: string;
+  vhiWeights?: Record<string, number>;
+}
+
+export const ModelParametersSchema = z.object({
+  degradationRate30d: z.number(),
+  degradationRate90d: z.number(),
+  sadRecoveryPoints: z.number(),
+  vhiCap: z.number(),
+  immobilizationDays: z.number(),
+  desertTowingCostDzd: z.number(),
+  dailyImmobilizationLossDzd: z.number(),
+  substitutionVhiThreshold: z.number(),
+  specVersion: z.string().optional(),
+  ruleId: z.string().optional(),
+  vhiWeights: z.record(z.string(), z.number()).optional(),
+});
+
+export const DEFAULT_MODEL_PARAMETERS: ModelParameters = {
+  degradationRate30d: 12,
+  degradationRate90d: 42,
+  sadRecoveryPoints: 18,
+  vhiCap: 96,
+  immobilizationDays: 2,
+  desertTowingCostDzd: 75000,
+  dailyImmobilizationLossDzd: 25000,
+  substitutionVhiThreshold: 65,
+  specVersion: 'MASTER_SPEC v2.0 §4.6',
+  ruleId: 'ALGO-TRAJECTORY-90D',
+  vhiWeights: {
+    ENGINE_OIL: 0.2,
+    BATTERY_CRANKING: 0.15,
+    BRAKE_PADS: 0.2,
+    COOLING_SYSTEM: 0.15,
+    DPF_FILTER: 0.15,
+    TRANSMISSION_DRIVETRAIN: 0.15,
+  },
+};
+
+export interface DigitalTwinUiConfig {
+  locale: string;
+  currency: string;
+  specVersion: string;
+  notificationDurationMs: number;
+  vhiThresholds: VhiThresholds;
+  simulationLimits: SimulationLimits;
+  simulationPresets: SimulationPreset[];
+  modelParameters: ModelParameters;
+  configSource?: 'server' | 'default';
+}
+
+export const DigitalTwinUiConfigSchema = z.object({
+  locale: z.string(),
+  currency: z.string(),
+  specVersion: z.string(),
+  notificationDurationMs: z.number(),
+  vhiThresholds: VhiThresholdsSchema,
+  simulationLimits: SimulationLimitsSchema,
+  simulationPresets: z.array(SimulationPresetSchema),
+  modelParameters: ModelParametersSchema,
+  configSource: z.enum(['server', 'default']).optional(),
+});
+
+export const DEFAULT_DIGITAL_TWIN_CONFIG: DigitalTwinUiConfig = {
+  locale: 'fr-DZ',
+  currency: 'DZD',
+  specVersion: 'MASTER_SPEC v2.0 §4.6',
+  notificationDurationMs: 4000,
+  vhiThresholds: DEFAULT_VHI_THRESHOLDS,
+  simulationLimits: DEFAULT_SIMULATION_LIMITS,
+  simulationPresets: DEFAULT_SIMULATION_PRESETS,
+  modelParameters: DEFAULT_MODEL_PARAMETERS,
+  configSource: 'default',
+};
+
+export const DigitalTwinOrganStatusSchema = z.object({
+  organ: z.enum([
+    'ENGINE_OIL',
+    'BATTERY_CRANKING',
+    'BRAKE_PADS',
+    'COOLING_SYSTEM',
+    'DPF_FILTER',
+    'TRANSMISSION_DRIVETRAIN',
+  ]),
+  name: z.string(),
+  icon: z.string(),
+  healthPercent: z.number(),
+  remainingUsefulLifeValue: z.number(),
+  remainingUsefulLifeUnit: z.enum(['KM', 'DAYS', 'STARTS', 'PERCENT']),
+  status: z.enum(['HEALTHY', 'PRE_CRITICAL', 'CRITICAL']),
+  physicsAlgorithm: z.string(),
+  algorithmShortName: z.string().optional(),
+  observedMetrics: z.array(
+    z.object({
+      label: z.string(),
+      value: z.union([z.string(), z.number()]),
+      threshold: z.union([z.string(), z.number()]),
+      valueNumeric: z.number().optional(),
+      thresholdNumeric: z.number().optional(),
+    })
+  ),
+  calculationTrace: z
+    .array(
+      z.object({
+        step: z.string(),
+        value: z.union([z.string(), z.number()]),
+        formula: z.string().optional(),
+      })
+    )
+    .optional(),
+  explanation: z.string(),
+});
+
+export const DigitalTwinFinancialArbitrageSchema = z.object({
+  preventiveInterventionCostDzd: z.number(),
+  unplannedBreakdownRiskDzd: z.number(),
+  desertTowingCostDzd: z.number(),
+  dailyImmobilizationLossDzd: z.number(),
+  netBenefitDzd: z.number(),
+  roiRatio: z.number(),
+  recommendedAction: z.enum(['MAINTENANCE_IMMÉDIATE', 'SURVEILLANCE_APPROFONDIE', 'OPÉRATIONNEL_NOMINAL']),
+  actionDeadlineDays: z.number(),
+});
+
+export const DigitalTwinAssetSchema = z.object({
+  assetId: z.string(),
+  assetName: z.string(),
+  assetCode: z.string(),
+  category: z.string(),
+  brand: z.string(),
+  model: z.string(),
+  year: z.number(),
+  currentOdometerKm: z.number(),
+  currentVhi: z.number(),
+  wilayaLocation: z.string(),
+  wilayaCode: z.number(),
+  driverAggressivenessScore: z.number(),
+  climateSeverityFactor: z.number(),
+  organs: z.array(DigitalTwinOrganStatusSchema),
+  financialArbitrage: DigitalTwinFinancialArbitrageSchema,
+  projectionTrajectory: z.object({
+    day0Vhi: z.number(),
+    day30VhiWithoutAction: z.number(),
+    day60VhiWithoutAction: z.number(),
+    day90VhiWithoutAction: z.number(),
+    day30VhiWithAction: z.number(),
+  }),
+  substitutionAsset: z
+    .object({
+      assetId: z.string(),
+      assetName: z.string(),
+      assetCode: z.string(),
+      vhiScore: z.number(),
+      locationWilaya: z.string(),
+      reason: z.string(),
+    })
+    .optional(),
+  partsReservation: z
+    .object({
+      partNumber: z.string(),
+      partName: z.string(),
+      inStock: z.boolean(),
+      warehouseStockQty: z.number(),
+      estimatedCostDzd: z.number(),
+      oemHomologation: z.string().optional(),
+    })
+    .optional(),
+  modelParameters: ModelParametersSchema.optional(),
+  specVersion: z.string().optional(),
+});

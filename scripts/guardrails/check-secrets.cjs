@@ -26,6 +26,7 @@ const IGNORED_PATHS = [
   'pnpm-lock.yaml',
   '.env.example',
   'check-secrets.cjs',
+  'scratch',
 ];
 
 function scanDirectory(dir, violations = []) {

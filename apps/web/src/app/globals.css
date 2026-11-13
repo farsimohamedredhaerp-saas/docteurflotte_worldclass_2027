@@ -124,6 +124,29 @@
   --df-cockpit-hud-text: #0F172A;
   --df-cockpit-hud-btn-bg: #F1F5F9;
   --df-cockpit-hud-btn-hover: #E2E8F0;
+
+  /* Toast & Layout Tokens */
+  --df-toast-bg: #0284C7;
+  --df-toast-text: #FFFFFF;
+  --df-container-max: 1280px;
+  --df-page-padding: 32px 24px;
+
+  /* Spacing, Gaps & Feedback Banners */
+  --df-warning-bg: #FEF3C7;
+  --df-warning-text: #92400E;
+  --df-warning-border: #FCD34D;
+  --df-error-bg: #FEE2E2;
+  --df-error-text: #991B1B;
+  --df-error-border: #FCA5A5;
+  --df-bg-surface: #FFFFFF;
+  --df-gap-xs: 6px;
+  --df-gap-sm: 8px;
+  --df-gap-lg: 20px;
+  --df-gap-xl: 24px;
+  --df-space-xs: 8px;
+  --df-space-sm: 12px;
+  --df-space-md: 16px;
+  --df-font-sm: 14px;
 }
 
 @keyframes dfPulse {
@@ -152,6 +175,15 @@ html.dark,
   --df-bg-card: #111827;
   --df-bg-glass: #111827;
   --df-bg-glass-elevated: #111827;
+  --df-bg-surface: #111827;
+
+  /* Spacing, Gaps & Feedback Banners Dark */
+  --df-warning-bg: rgba(245, 158, 11, 0.15);
+  --df-warning-text: #FBBF24;
+  --df-warning-border: rgba(245, 158, 11, 0.35);
+  --df-error-bg: rgba(239, 68, 68, 0.15);
+  --df-error-text: #F87171;
+  --df-error-border: rgba(239, 68, 68, 0.35);
 
   --df-border-subtle: #1F2937;
   --df-border-hairline: #1F2937;
