@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TelemetryTier } from './telemetry-tiers';
 
 export type DigitalTwinOrganType =
   | 'ENGINE_OIL'
@@ -133,6 +134,7 @@ export interface DigitalTwinAsset {
   assetName: string;
   assetCode: string;
   category: string;
+  telemetryTier?: TelemetryTier;
   brand: string;
   model: string;
   year: number;
@@ -434,6 +436,7 @@ export const DigitalTwinAssetSchema = z.object({
   assetName: z.string(),
   assetCode: z.string(),
   category: z.string(),
+  telemetryTier: z.nativeEnum(TelemetryTier).optional(),
   brand: z.string(),
   model: z.string(),
   year: z.number(),

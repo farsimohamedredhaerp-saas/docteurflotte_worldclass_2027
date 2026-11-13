@@ -20,6 +20,7 @@ import {
 import { Asset } from '@docteurflotte/contracts';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { SignaturePad, PhotoProofCapture } from '../../components/dvir';
+import { saveDvirOffline, getPendingOfflineInspections, markDvirSynced } from '../../lib/offline-dvir-storage';
 
 interface VehicleProfile {
   id: string;
@@ -511,8 +512,32 @@ export default function DvirPage() {
       setOfflineQueue(updatedQueue);
       try {
         localStorage.setItem('df_dvir_offline_queue', JSON.stringify(updatedQueue));
+        // Persistance native IndexedDB pour gestion des photos et signatures volumineuses
+        await saveDvirOffline({
+          assetId: selectedAssetId,
+          assetPlate: selectedVehicle?.plate || '',
+          driverId: selectedVehicle?.driverId || 'drv-01',
+          driverName,
+          inspectionType: inspectionType === DVIRInspectionType.POST_TRIP ? 'POST_TRIP' : 'PRE_TRIP',
+          odometerKm,
+          items: checklist.map((i) => ({
+            code: i.code,
+            label: i.label,
+            category: String(i.category || 'SECURITY'),
+            status:
+              i.status === DVIRItemStatus.FAIL_CRITICAL
+                ? 'DEFECT_CRITICAL'
+                : i.status === DVIRItemStatus.FAIL_MINOR
+                  ? 'DEFECT_MINOR'
+                  : 'PASS',
+            comment: i.comment,
+            photoUrl: i.photoUrl,
+          })),
+          signatureBase64: signatureDataUrl || undefined,
+          deviceTimestamp: new Date().toISOString(),
+        });
       } catch {
-        // Ignoré
+        // Fallback localStorage actif
       }
 
       const hasCritical = checklist.some((i) => i.status === DVIRItemStatus.FAIL_CRITICAL);

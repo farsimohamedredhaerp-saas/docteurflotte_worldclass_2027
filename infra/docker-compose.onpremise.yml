@@ -1,0 +1,156 @@
+# =============================================================================
+# DOCTEURFLOTTE — DÉPLOIEMENT SOUVERAIN SUR SITE CLIENT (AIR-GAPPED ON-PREMISE)
+# Conformité stricte : Loi 18-07 (ANPDP) — 100% On-Premise, Zéro Fuite PII
+# Infrastructure isolée : PostgreSQL 16 / TimescaleDB, Redis, Traccar 6.x,
+#                         Valhalla Local, Ollama Qwen 2.5, API NestJS & PWA Next.js
+# =============================================================================
+
+version: '3.8'
+
+networks:
+  sovereign_internal_net:
+    driver: bridge
+    internal: false # Passer à true en environnement réseau physiquement déconnecté
+
+services:
+  # 1. Base de données PostgreSQL 16 + TimescaleDB
+  postgres:
+    image: postgres:16-alpine
+    container_name: df_sovereign_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-docteurflotte}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Securite_ANPDP_2027_Souveraine!}
+      POSTGRES_DB: ${POSTGRES_DB:-docteurflotte_prod}
+    ports:
+      - "5434:5432"
+    volumes:
+      - df_onprem_pgdata:/var/lib/postgresql/data
+      - ../database/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-docteurflotte} -d ${POSTGRES_DB:-docteurflotte_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sovereign_internal_net
+
+  # 2. Cache & Verrous Distribués Redis
+  redis:
+    image: redis:7-alpine
+    container_name: df_sovereign_redis
+    restart: always
+    ports:
+      - "6380:6379"
+    volumes:
+      - df_onprem_redisdata:/data
+    networks:
+      - sovereign_internal_net
+
+  # 3. Serveur Télématique Traccar 6.x auto-hébergé
+  traccar:
+    image: traccar/traccar:6.15.2
+    container_name: df_sovereign_traccar
+    restart: always
+    ports:
+      - "8085:8082" # Web & REST API
+      - "5055:5055" # OsmAnd / DVIR PWA Mobile
+      - "5023:5023" # Boîtiers Teltonika FMB920/FMB120
+      - "5001:5001" # Ruptela
+      - "5002:5002" # Queclink
+    volumes:
+      - ./traccar/traccar.xml:/opt/traccar/conf/traccar.xml:ro
+      - df_onprem_traccardata:/opt/traccar/data
+    networks:
+      - sovereign_internal_net
+
+  # 4. Moteur de Routage Topographique Valhalla (Réseau routier Algérie 58 Wilayas)
+  valhalla:
+    image: gisops/valhalla:latest
+    container_name: df_sovereign_valhalla
+    restart: always
+    ports:
+      - "8002:8002"
+    environment:
+      - build_elevation=True
+      - build_admins=True
+    volumes:
+      - df_onprem_valhalla_data:/custom_files
+    networks:
+      - sovereign_internal_net
+
+  # 5. IA Souveraine Embarquée Ollama (Qwen 2.5 1.5B Instruct - CPU 3 threads)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: df_sovereign_ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - df_onprem_ollama_data:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+          cpus: "3.0"
+    networks:
+      - sovereign_internal_net
+
+  # 6. Backend API NestJS
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    container_name: df_sovereign_api
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${POSTGRES_USER:-docteurflotte}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-Securite_ANPDP_2027_Souveraine!}
+      DATABASE_NAME: ${POSTGRES_DB:-docteurflotte_prod}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      VALHALLA_URL: http://valhalla:8002
+      OLLAMA_URL: http://ollama:11434
+      TRACCAR_API_URL: http://traccar:8082
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sovereign_internal_net
+
+  # 7. Frontend Cockpit Next.js 15 & PWA Offline-First
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    container_name: df_sovereign_web
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_MAP_SERVER_URL: http://localhost:8080/tiles
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - sovereign_internal_net
+
+volumes:
+  df_onprem_pgdata:
+    name: df_onprem_pgdata
+  df_onprem_redisdata:
+    name: df_onprem_redisdata
+  df_onprem_traccardata:
+    name: df_onprem_traccardata
+  df_onprem_valhalla_data:
+    name: df_onprem_valhalla_data
+  df_onprem_ollama_data:
+    name: df_onprem_ollama_data

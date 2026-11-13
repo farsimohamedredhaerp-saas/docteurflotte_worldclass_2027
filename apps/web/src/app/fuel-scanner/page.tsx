@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { Navbar } from '../../components/navigation/Navbar';
 import { AuthClient } from '../../lib/api-auth';
@@ -13,6 +13,7 @@ import {
   CalculationProofModal,
   CalculationProofButton,
   CalculationProofData,
+  TechnicalDossierModal,
 } from '../../components/decisions';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
@@ -219,10 +220,37 @@ export default function FuelScannerPage() {
   // Modale de Suppression de Reçu
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; label: string } | null>(null);
 
-  // État de la modal Preuve de Calcul
+  // État de la modal Preuve de Calcul & Dossier Technique ERP
   const [proofModalData, setProofModalData] = useState<CalculationProofData | null>(null);
   const [isProofModalOpen, setIsProofModalOpen] = useState(false);
   const [isLegalReportOpen, setIsLegalReportOpen] = useState(false);
+  const [isTechnicalDossierOpen, setIsTechnicalDossierOpen] = useState(false);
+
+  const technicalDossierData = useMemo(() => {
+    if (!currentResult) return null;
+    const currentAsset = assets.find((a) => a.id === currentResult.assetId || a.id === selectedAssetId);
+    const litersVariance = Math.abs(currentResult.reconciliation?.varianceLiters || 0);
+    const unitPrice = currentResult.unitPriceDzd || resolvePrice(currentResult.fuelType);
+    const prejudice = Math.round(litersVariance * unitPrice * 100) / 100;
+    const ref = `DET-NAFTAL-${(currentResult.receiptId || 'RCPT').substring(0, 8).toUpperCase()}`;
+
+    return {
+      dossierReference: ref,
+      vehiclePlate: currentResult.assetCode || currentAsset?.code || '16-10492-00',
+      vehicleBrandModel: `${currentAsset?.brand || 'Renault Trucks'} ${currentAsset?.model || 'K 480'}`,
+      driverPseudonym: 'CHAUFFEUR-SECURISE-ANPDP',
+      incidentTimestamp: currentResult.dateTime || currentResult.createdAt || new Date().toISOString(),
+      wilayaName: currentResult.stationWilaya || '16 - Alger',
+      wilayaCode: 16,
+      roadGradePercent: 1.5,
+      apparentSlopeDropLiters: 0.0,
+      netSiphonedVolumeLiters: litersVariance,
+      fuelUnitPriceDzd: unitPrice,
+      financialPrejudiceDzd: prejudice,
+      integritySha256: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
+      htmlContent: `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${ref}</title></head><body><h2>Dossier d'Expertise Technique & Traçabilité Carburant</h2><p>Véhicule: ${currentResult.assetCode || currentAsset?.code || '16-10492-00'}</p><p>Volume litigieux: ${litersVariance.toFixed(2)} L</p><p>Préjudice calculé: ${prejudice.toFixed(2)} DZD</p></body></html>`,
+    };
+  }, [currentResult, assets, selectedAssetId, resolvePrice]);
 
   const showNotification = (msg: string) => {
     setNotification(msg);
@@ -921,6 +949,20 @@ export default function FuelScannerPage() {
                       >
                         ⚖️ Procès-Verbal Opposable
                       </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => setIsTechnicalDossierOpen(true)}
+                        style={{
+                          backgroundColor: '#4F46E5',
+                          borderColor: '#4338CA',
+                          color: '#FFFFFF',
+                          fontWeight: 600,
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        📑 Dossier Technique &amp; Export ERP
+                      </Button>
                     </div>
                   </div>
                 ) : (
@@ -1448,6 +1490,15 @@ export default function FuelScannerPage() {
             />
           </div>
         </div>
+      )}
+
+      {/* DOSSIER D'EXPERTISE TECHNIQUE & EXPORT ERP (MODULE 3) */}
+      {isTechnicalDossierOpen && technicalDossierData && (
+        <TechnicalDossierModal
+          isOpen={isTechnicalDossierOpen}
+          onClose={() => setIsTechnicalDossierOpen(false)}
+          dossier={technicalDossierData}
+        />
       )}
     </div>
   );

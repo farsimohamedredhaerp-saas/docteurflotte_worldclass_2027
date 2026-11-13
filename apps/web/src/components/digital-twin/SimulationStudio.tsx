@@ -5,6 +5,7 @@ import {
   SimulationPreset,
   DEFAULT_SIMULATION_LIMITS,
   DEFAULT_SIMULATION_PRESETS,
+  TelemetryTier,
 } from '@docteurflotte/contracts';
 import { formatCurrency } from '../../lib/currency-formatter';
 import { useI18n } from '../../lib/i18n';
@@ -34,6 +35,7 @@ export interface SimulationStudioProps {
   isSimulating: boolean;
   currency?: string;
   desertTowingAmount?: number;
+  telemetryTier?: TelemetryTier;
   actions: SimulationActions;
 }
 
@@ -46,6 +48,7 @@ export const SimulationStudio: React.FC<SimulationStudioProps> = ({
   isSimulating,
   currency = 'DZD',
   desertTowingAmount,
+  telemetryTier = TelemetryTier.MODE_2_CAN_J1939,
   actions,
 }) => {
   const { t, locale } = useI18n();
@@ -99,9 +102,38 @@ export const SimulationStudio: React.FC<SimulationStudioProps> = ({
         }}
       >
         <div>
-          <h4 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 4px', color: '#f8fafc' }}>
-            {t('digitalTwin.simulation.title', { wilayasCount })}
-          </h4>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <h4 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 4px', color: '#f8fafc' }}>
+              {t('digitalTwin.simulation.title', { wilayasCount })}
+            </h4>
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '6px',
+                backgroundColor:
+                  telemetryTier === TelemetryTier.MODE_2_CAN_J1939
+                    ? 'rgba(16, 185, 129, 0.2)'
+                    : telemetryTier === TelemetryTier.MODE_1_GNSS
+                      ? 'rgba(56, 189, 248, 0.2)'
+                      : 'rgba(148, 163, 184, 0.2)',
+                color:
+                  telemetryTier === TelemetryTier.MODE_2_CAN_J1939
+                    ? '#34d399'
+                    : telemetryTier === TelemetryTier.MODE_1_GNSS
+                      ? '#38bdf8'
+                      : '#cbd5e1',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+              }}
+            >
+              {telemetryTier === TelemetryTier.MODE_2_CAN_J1939
+                ? 'Mode 2 · Full CAN J1939'
+                : telemetryTier === TelemetryTier.MODE_1_GNSS
+                  ? 'Mode 1 · GNSS Standard'
+                  : 'Mode 0 · Déclaratif (DVIR)'}
+            </span>
+          </div>
           <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>
             {t('digitalTwin.simulation.subtitle', { wilayasCount })}
           </p>

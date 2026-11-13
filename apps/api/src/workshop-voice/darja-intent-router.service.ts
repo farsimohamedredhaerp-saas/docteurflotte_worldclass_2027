@@ -38,7 +38,7 @@ export interface DarjaIntentRoutingResult {
 export class DarjaIntentRouterService {
   private readonly logger = new Logger(DarjaIntentRouterService.name);
 
-  constructor(@Optional() private readonly db?: DatabaseService) {}
+  constructor(@Optional() private readonly db?: DatabaseService) { }
 
   /**
    * Route une requête en langage naturel (Darja phonétique ou français d atelier)

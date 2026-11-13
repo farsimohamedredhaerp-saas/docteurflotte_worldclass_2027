@@ -385,6 +385,7 @@ export default function DigitalTwinPage() {
                 isSimulating={isSimulating}
                 currency={config?.currency}
                 desertTowingAmount={desertTowingAmount}
+                telemetryTier={digitalTwin?.telemetryTier}
                 actions={{
                   selectWilaya,
                   toggleDesertTransit,
