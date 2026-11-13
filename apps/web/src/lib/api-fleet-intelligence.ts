@@ -276,8 +276,9 @@ export class FleetIntelligenceClient {
 
   /**
    * Étape 2 : Rapports DVIR Numériques Mobiles
+   * Cloisonnement strict : Zéro fausse donnée en mode réel de production.
    */
-  static async getDvirReports(token?: string): Promise<DVIRInspectionReport[]> {
+  static async getDvirReports(token?: string, isDemo = false): Promise<DVIRInspectionReport[]> {
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -292,6 +293,11 @@ export class FleetIntelligenceClient {
       }
     } catch {
       // repli local
+    }
+
+    // En environnement de production réel : retourner strictement la liste vide (parc vierge)
+    if (!isDemo) {
+      return [];
     }
 
     const demoOdoA = 185.4 * 1000;

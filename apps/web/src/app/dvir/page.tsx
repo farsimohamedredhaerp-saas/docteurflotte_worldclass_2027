@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Navbar } from '../../components/navigation/Navbar';
 import { Card } from '../../components/Card';
@@ -39,7 +39,9 @@ interface VehicleProfile {
   traccarDeviceId?: string;
 }
 
-const DEFAULT_FLEET_VEHICLES: VehicleProfile[] = [
+// Jeux de données exclusivement réservé aux démonstrations commerciales (isDemoMode === true)
+// Zéro donnée démo ou valeur en dur en environnement de production réel.
+const DEMO_SIMULATION_VEHICLES: VehicleProfile[] = [
   {
     id: 'ast-t480-01',
     name: 'Renault Trucks T 480 4x2 Optidriver',
@@ -280,18 +282,18 @@ export default function DvirPage() {
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [offlineQueue, setOfflineQueue] = useState<DVIRSubmissionDto[]>([]);
   const [isSyncingOffline, setIsSyncingOffline] = useState<boolean>(false);
-  const [vehicles, setVehicles] = useState<VehicleProfile[]>(DEFAULT_FLEET_VEHICLES);
+  const [vehicles, setVehicles] = useState<VehicleProfile[]>([]);
   const [reports, setReports] = useState<DVIRInspectionReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'ok' | 'danger'; text: string } | null>(null);
   const [filterReportsByAsset, setFilterReportsByAsset] = useState<boolean>(false);
 
-  // Formulaire d'inspection active lié au véhicule sélectionné
-  const [selectedAssetId, setSelectedAssetId] = useState<string>(DEFAULT_FLEET_VEHICLES[0].id);
-  const [driverName, setDriverName] = useState<string>(DEFAULT_FLEET_VEHICLES[0].driverName);
+  // Formulaire d'inspection active lié au véhicule sélectionné (vide par défaut en production)
+  const [selectedAssetId, setSelectedAssetId] = useState<string>('');
+  const [driverName, setDriverName] = useState<string>('');
   const [inspectionType, setInspectionType] = useState<DVIRInspectionType>(DVIRInspectionType.PRE_TRIP);
-  const [odometerKm, setOdometerKm] = useState<number>(DEFAULT_FLEET_VEHICLES[0].odometerKm);
+  const [odometerKm, setOdometerKm] = useState<number>(0);
   const [checklist, setChecklist] = useState<DVIRChecklistItem[]>(INITIAL_CHECKLIST);
   const [generalNotes, setGeneralNotes] = useState<string>('');
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
@@ -375,52 +377,60 @@ export default function DvirPage() {
     }
   };
 
-  const loadReportsAndAssets = async () => {
+  const loadReportsAndAssets = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await FleetIntelligenceClient.getDvirReports();
+      const session = AuthClient.getSession();
+      const token = session.token || undefined;
+      const data = await FleetIntelligenceClient.getDvirReports(token, isDemoMode);
       setReports(data);
 
       if (isDemoMode) {
-        setVehicles(DEFAULT_FLEET_VEHICLES);
-        if (DEFAULT_FLEET_VEHICLES.length > 0) {
-          handleAssetChange(DEFAULT_FLEET_VEHICLES[0].id, DEFAULT_FLEET_VEHICLES);
+        setVehicles(DEMO_SIMULATION_VEHICLES);
+        if (DEMO_SIMULATION_VEHICLES.length > 0) {
+          handleAssetChange(DEMO_SIMULATION_VEHICLES[0].id, DEMO_SIMULATION_VEHICLES);
         }
       } else {
-        // Mode Réel : Uniquement les données d'entreprise
-        const session = AuthClient.getSession();
-        if (session.token) {
+        // Mode Réel Production : Strictement les données de l'organisation
+        if (token) {
           try {
-            const apiAssets: Asset[] = await AssetClient.listAssets(session.token);
+            const apiAssets: Asset[] = await AssetClient.listAssets(token);
             if (apiAssets && apiAssets.length > 0) {
               const mappedProfiles: VehicleProfile[] = apiAssets.map((a, idx) => ({
                 id: a.id,
                 name: a.name,
                 plate: a.code || `DZ-${idx + 1}-16`,
                 category: a.category,
-                driverName: 'Conducteur Affecté',
-                driverId: `drv-${idx + 1}`,
+                driverName: (a as any).assignedDriverName || 'Conducteur Non Assigné',
+                driverId: (a as any).assignedDriverId || `drv-${a.id.substring(0, 8)}`,
                 odometerKm: a.currentMeterValue || 0,
                 engineHours: 0,
-                wilaya: '16 - Alger',
-                fuelType: 'Gazole Naftal',
-                lastInspectionDate: 'Récemment',
+                wilaya: (a as any).assignedWilaya || '16 - Alger',
+                fuelType: (a as any).fuelType || 'Gazole Naftal',
+                lastInspectionDate: 'Aucune inspection',
                 lastInspectionResult: 'PASS',
-                traccarDeviceId: `TK-${a.id}`,
+                traccarDeviceId: (a as any).traccarDeviceId || `TK-${a.id}`,
               }));
               setVehicles(mappedProfiles);
               handleAssetChange(mappedProfiles[0].id, mappedProfiles);
             } else {
               setVehicles([]);
               setSelectedAssetId('');
+              setDriverName('');
+              setOdometerKm(0);
             }
           } catch {
             setVehicles([]);
             setSelectedAssetId('');
+            setDriverName('');
+            setOdometerKm(0);
           }
         } else {
-          setVehicles(DEFAULT_FLEET_VEHICLES);
-          handleAssetChange(DEFAULT_FLEET_VEHICLES[0].id, DEFAULT_FLEET_VEHICLES);
+          // Aucun jeton en mode réel : parc vierge, ne pas injecter de fausses données !
+          setVehicles([]);
+          setSelectedAssetId('');
+          setDriverName('');
+          setOdometerKm(0);
         }
       }
     } catch (err) {
@@ -428,7 +438,7 @@ export default function DvirPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isDemoMode]);
 
   /**
    * Action déclenchée dès que l'utilisateur change de véhicule dans le sélecteur.
@@ -443,9 +453,7 @@ export default function DvirPage() {
     if (targetVehicle) {
       setOdometerKm(targetVehicle.odometerKm);
       setDriverName(targetVehicle.driverName);
-      // Réinitialisation des notes générales
       setGeneralNotes('');
-      // Réinitialisation de la checklist avec état conforme par défaut
       setChecklist(
         INITIAL_CHECKLIST.map((item) => ({
           ...item,
@@ -453,10 +461,13 @@ export default function DvirPage() {
           comment: undefined,
         }))
       );
+    } else {
+      setOdometerKm(0);
+      setDriverName('');
     }
   };
 
-  const selectedVehicle = vehicles.find((v) => v.id === selectedAssetId) || vehicles[0];
+  const selectedVehicle = vehicles.find((v) => v.id === selectedAssetId) || (vehicles.length > 0 ? vehicles[0] : null);
 
   const handleStatusChange = (code: string, newStatus: DVIRItemStatus) => {
     setChecklist((prev) =>
@@ -491,6 +502,13 @@ export default function DvirPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedAssetId || !selectedVehicle) {
+      setFeedbackMessage({
+        type: 'danger',
+        text: 'Veuillez sélectionner un véhicule de votre parc avant de soumettre l’inspection.',
+      });
+      return;
+    }
     setIsSubmitting(true);
     setFeedbackMessage(null);
 
@@ -640,6 +658,12 @@ export default function DvirPage() {
                 {t.pageTitle}
               </h1>
               <Badge variant="ok">{t.badge}</Badge>
+              <Badge variant={isDemoMode ? 'warning' : 'neutral'}>
+                {isDemoMode ? 'MODE SIMULATION (DÉMO)' : 'PARC RÉEL (PRODUCTION RLS)'}
+              </Badge>
+              {!isDemoMode && vehicles.length === 0 && (
+                <Badge variant="danger">Parc Vierge (0 actif)</Badge>
+              )}
             </div>
             <p
               style={{
@@ -1515,7 +1539,7 @@ export default function DvirPage() {
                 <span style={{ fontSize: '0.75rem', color: 'var(--df-text-muted)' }}>
                   {language === 'ar' ? 'توقيع مشفر ومؤرخ تلقائياً • مطابق للقانون 18-07' : 'Signature horodatée automatique • Loi 18-07 ANPDP'}
                 </span>
-                <Button type="submit" variant="primary" disabled={isSubmitting}>
+                <Button type="submit" variant="primary" disabled={isSubmitting || !selectedVehicle || vehicles.length === 0}>
                   {isSubmitting ? t.submitting : t.btnSubmit}
                 </Button>
               </div>
