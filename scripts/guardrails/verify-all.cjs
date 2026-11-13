@@ -34,7 +34,7 @@ function runStep(name, cmd) {
       LOCALAPPDATA: sandboxTmp,
       APPDATA: sandboxTmp,
       PNPM_HOME: path.join(sandboxTmp, 'pnpm'),
-      NODE_OPTIONS: `${process.env.NODE_OPTIONS || ''} --preserve-symlinks --preserve-symlinks-main --max-old-space-size=4096`.trim(),
+      NODE_OPTIONS: `${process.env.NODE_OPTIONS || ''} --max-old-space-size=4096`.trim(),
     };
     execSync(cmd, { stdio: 'inherit', cwd: process.cwd(), shell: true, env });
     console.log(`✓ SUCCÈS : ${name}`);

@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX-lite",
   "specVersion": "1.4",
-  "serialNumber": "urn:uuid:docteurflotte-sbom-1793739211703",
+  "serialNumber": "urn:uuid:docteurflotte-sbom-1794602079364",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-03T20:53:31.703Z",
+    "timestamp": "2026-11-13T20:34:39.364Z",
     "component": {
       "type": "application",
       "name": "docteurflotte-monorepo",
@@ -163,6 +163,10 @@
         {
           "name": "typescript",
           "version": "^5.7.3"
+        },
+        {
+          "name": "vitest",
+          "version": "^5.1.0"
         }
       ]
     },
@@ -170,7 +174,12 @@
       "name": "@docteurflotte/contracts",
       "version": "0.1.0",
       "type": "library",
-      "dependencies": []
+      "dependencies": [
+        {
+          "name": "zod",
+          "version": "^4.6.7"
+        }
+      ]
     }
   ]
 }
