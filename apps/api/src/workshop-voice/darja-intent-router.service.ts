@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
+import { DatabaseService } from '../database/database.service';
 import {
   OemMake,
   OemComponentCode,
@@ -37,18 +38,18 @@ export interface DarjaIntentRoutingResult {
 export class DarjaIntentRouterService {
   private readonly logger = new Logger(DarjaIntentRouterService.name);
 
+  constructor(@Optional() private readonly db?: DatabaseService) {}
+
   /**
    * Route une requête en langage naturel (Darja phonétique ou français d atelier)
    * directement vers la donnée constructeur OEM officielle en moins de 50 ms.
+   * Interroge dynamiquement les tables OEM si la base est connectée, avec fallback catalogue certifié.
    */
-  routeWorkshopQuery(rawTranscript: string): DarjaIntentRoutingResult {
+  async routeWorkshopQueryAsync(rawTranscript: string): Promise<DarjaIntentRoutingResult> {
     const startTime = performance.now();
     const clean = this.normalizeDarjaText(rawTranscript);
-
-    // 1. Détection de la marque constructeur
     const detectedMake = this.detectMake(clean);
 
-    // 2. Détection de l'intention et des entités mécaniques
     let detectedIntent: WorkshopQueryIntent = 'WORKSHOP_GENERAL_HELP';
     let detectedComponent: OemComponentCode | undefined;
     let detectedCompartment: OemFluidCompartment | undefined;
@@ -56,27 +57,77 @@ export class DarjaIntentRouterService {
     let matchedFluidCapacity: OemFluidCapacity | undefined;
     let matchedDtcFault: OemDtcFault | undefined;
 
-    // A. Recherche Couple de serrage (ex: "zeyer culasse", "serrer culasse", "couple bielle")
+    const pool = this.db?.getPool();
+
+    // A. Recherche Couple de serrage
     if (this.matchesAny(clean, ['zeyer', 'serrage', 'couple', 'tziyar', 'vis', 'boulon', 'boulonatt', 'tighten'])) {
       detectedIntent = 'QUERY_TORQUE_SPEC';
       detectedComponent = this.detectComponent(clean);
-
       const targetMake = detectedMake || OemMake.SHACMAN;
-      matchedTorqueSpec = OFFICIAL_OEM_TORQUE_SPECS.find(
-        (s) => s.make === targetMake && (!detectedComponent || s.componentCode === detectedComponent),
-      );
+
+      if (pool) {
+        try {
+          const res = await pool.query<any>(
+            `SELECT make, model_family as "modelFamily", engine_code as "engineCode",
+                    component_code as "componentCode", component_name_fr as "componentNameFr",
+                    component_name_darja as "componentNameDarja",
+                    stage_1_torque_nm as "stage1TorqueNm", stage_2_torque_nm as "stage2TorqueNm",
+                    stage_3_torque_nm as "stage3TorqueNm", angle_stage_1_degrees as "angleStage1Degrees",
+                    notes_dz as "notesDz"
+             FROM oem_torque_specs
+             WHERE make = $1 AND ($2::text IS NULL OR component_code = $2)
+             LIMIT 1`,
+            [targetMake, detectedComponent || null],
+          );
+          if (res.rows.length > 0) {
+            matchedTorqueSpec = res.rows[0];
+          }
+        } catch {
+          // Fallback en mémoire
+        }
+      }
+
+      if (!matchedTorqueSpec) {
+        matchedTorqueSpec = OFFICIAL_OEM_TORQUE_SPECS.find(
+          (s) => s.make === targetMake && (!detectedComponent || s.componentCode === detectedComponent),
+        );
+      }
     }
-    // B. Recherche Contenance fluides / Huile (ex: "chhal zit", "capacite huile", "zit boite", "zit pont")
+    // B. Recherche Contenance fluides / Huile
     else if (this.matchesAny(clean, ['chhal', 'zit', 'zyt', 'huile', 'capacite', 'litre', 'combien', 'vidange'])) {
       detectedIntent = 'QUERY_FLUID_CAPACITY';
       detectedCompartment = this.detectCompartment(clean);
-
       const targetMake = detectedMake || OemMake.SHACMAN;
-      matchedFluidCapacity = OFFICIAL_OEM_FLUID_CAPACITIES.find(
-        (f) => f.make === targetMake && (!detectedCompartment || f.compartmentCode === detectedCompartment),
-      );
+
+      if (pool) {
+        try {
+          const res = await pool.query<any>(
+            `SELECT make, model_family as "modelFamily", engine_code as "engineCode",
+                    compartment_code as "compartmentCode", compartment_name_fr as "compartmentNameFr",
+                    compartment_name_darja as "compartmentNameDarja",
+                    capacity_liters as "capacityLiters", standard_viscosity as "standardViscosity",
+                    saharan_heavy_viscosity as "saharanHeavyViscosity",
+                    standard_interval_km as "standardIntervalKm", saharan_interval_km as "saharanIntervalKm"
+             FROM oem_fluid_capacities
+             WHERE make = $1 AND ($2::text IS NULL OR compartment_code = $2)
+             LIMIT 1`,
+            [targetMake, detectedCompartment || null],
+          );
+          if (res.rows.length > 0) {
+            matchedFluidCapacity = res.rows[0];
+          }
+        } catch {
+          // Fallback en mémoire
+        }
+      }
+
+      if (!matchedFluidCapacity) {
+        matchedFluidCapacity = OFFICIAL_OEM_FLUID_CAPACITIES.find(
+          (f) => f.make === targetMake && (!detectedCompartment || f.compartmentCode === detectedCompartment),
+        );
+      }
     }
-    // C. Recherche Code Défaut DTC / J1939 (ex: "code spn 100", "p0299", "defaut voyant")
+    // C. Recherche Code Défaut DTC / J1939
     else if (this.matchesAny(clean, ['code', 'dtc', 'spn', 'voyant', 'defaut', 'panne', 'moteur naqess'])) {
       detectedIntent = 'QUERY_DTC_FAULT';
       const targetMake = detectedMake || OemMake.SHACMAN;
@@ -90,7 +141,87 @@ export class DarjaIntentRouterService {
       );
     }
 
-    // 3. Synthèse de la réponse bilingue
+    return this.buildRoutingResult(
+      rawTranscript,
+      clean,
+      detectedIntent,
+      detectedMake,
+      detectedComponent,
+      detectedCompartment,
+      matchedTorqueSpec,
+      matchedFluidCapacity,
+      matchedDtcFault,
+      startTime,
+    );
+  }
+
+  /**
+   * Version synchrone déterministe
+   */
+  routeWorkshopQuery(rawTranscript: string): DarjaIntentRoutingResult {
+    const startTime = performance.now();
+    const clean = this.normalizeDarjaText(rawTranscript);
+    const detectedMake = this.detectMake(clean);
+
+    let detectedIntent: WorkshopQueryIntent = 'WORKSHOP_GENERAL_HELP';
+    let detectedComponent: OemComponentCode | undefined;
+    let detectedCompartment: OemFluidCompartment | undefined;
+    let matchedTorqueSpec: OemTorqueSpec | undefined;
+    let matchedFluidCapacity: OemFluidCapacity | undefined;
+    let matchedDtcFault: OemDtcFault | undefined;
+
+    if (this.matchesAny(clean, ['zeyer', 'serrage', 'couple', 'tziyar', 'vis', 'boulon', 'boulonatt', 'tighten'])) {
+      detectedIntent = 'QUERY_TORQUE_SPEC';
+      detectedComponent = this.detectComponent(clean);
+      const targetMake = detectedMake || OemMake.SHACMAN;
+      matchedTorqueSpec = OFFICIAL_OEM_TORQUE_SPECS.find(
+        (s) => s.make === targetMake && (!detectedComponent || s.componentCode === detectedComponent),
+      );
+    } else if (this.matchesAny(clean, ['chhal', 'zit', 'zyt', 'huile', 'capacite', 'litre', 'combien', 'vidange'])) {
+      detectedIntent = 'QUERY_FLUID_CAPACITY';
+      detectedCompartment = this.detectCompartment(clean);
+      const targetMake = detectedMake || OemMake.SHACMAN;
+      matchedFluidCapacity = OFFICIAL_OEM_FLUID_CAPACITIES.find(
+        (f) => f.make === targetMake && (!detectedCompartment || f.compartmentCode === detectedCompartment),
+      );
+    } else if (this.matchesAny(clean, ['code', 'dtc', 'spn', 'voyant', 'defaut', 'panne', 'moteur naqess'])) {
+      detectedIntent = 'QUERY_DTC_FAULT';
+      const targetMake = detectedMake || OemMake.SHACMAN;
+      matchedDtcFault = OFFICIAL_OEM_DTC_FAULTS.find(
+        (d) =>
+          d.make === targetMake ||
+          clean.includes(d.faultCode.toLowerCase().replace(/\s+/g, '')) ||
+          clean.includes('spn 100') ||
+          clean.includes('pression'),
+      );
+    }
+
+    return this.buildRoutingResult(
+      rawTranscript,
+      clean,
+      detectedIntent,
+      detectedMake,
+      detectedComponent,
+      detectedCompartment,
+      matchedTorqueSpec,
+      matchedFluidCapacity,
+      matchedDtcFault,
+      startTime,
+    );
+  }
+
+  private buildRoutingResult(
+    rawTranscript: string,
+    clean: string,
+    detectedIntent: WorkshopQueryIntent,
+    detectedMake?: OemMake,
+    detectedComponent?: OemComponentCode,
+    detectedCompartment?: OemFluidCompartment,
+    matchedTorqueSpec?: OemTorqueSpec,
+    matchedFluidCapacity?: OemFluidCapacity,
+    matchedDtcFault?: OemDtcFault,
+    startTime = performance.now(),
+  ): DarjaIntentRoutingResult {
     let answerFr = '';
     let answerDarjaAudioText = '';
 
@@ -193,4 +324,3 @@ export class DarjaIntentRouterService {
     return keywords.some((kw) => text.includes(kw));
   }
 }
-

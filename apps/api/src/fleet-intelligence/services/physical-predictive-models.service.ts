@@ -24,8 +24,9 @@ import {
   UnifiedVhiResult,
   TelemetryTier,
   assertTierSupportsFeature,
-  NAFTAL_FUEL_PRICES_DZD,
+  resolveFuelPrice,
   ALGERIA_58_WILAYAS_PROFILES,
+  isDesertZone,
 } from '@docteurflotte/contracts';
 import { CanonicalTelemetryEvent } from '../dto/telemetry-ingestion.dto';
 
@@ -49,12 +50,13 @@ export interface CorridorArrheniusInput {
   currentKm: number;
   baselineIntervalKm: number;
   wilayaCode: number;
-  corridorSilicaFactor?: number; // e.g. 1.45 pour Sahara / RN1 Sud
+  corridorSilicaFactor?: number;
   engineProfile?: 'SHACMAN_WEICHAI' | 'RENAULT_DXI' | 'MAN_D26' | 'MERCEDES_OM501' | 'STANDARD';
   ambientTempC?: number;
-  canMeasuredOilTempC?: number; // Requis en Mode 2
+  canMeasuredOilTempC?: number;
   engineLoadPct?: number;
   idleHours?: number;
+  customEngineMultiplier?: number;
 }
 
 export interface CorridorArrheniusResult {
@@ -81,6 +83,8 @@ export interface TopographicCusumInput {
   tankLengthMeters?: number;
   sensorOffsetRatio?: number;
   fuelUnitPriceDzd?: number;
+  dynamicTariffs?: Record<string, number>;
+  theftDetectionThresholdLiters?: number;
   previousCusumScore?: number;
 }
 
@@ -101,6 +105,7 @@ export interface TopographicCusumResult {
 @Injectable()
 export class PhysicalPredictiveModelsService {
   private readonly logger = new Logger(PhysicalPredictiveModelsService.name);
+  public static readonly DEFAULT_THEFT_MIN_LITERS = 15.0;
 
   computeOilDegradation(input: ArrheniusOilInput): ArrheniusOilResult {
     return calculateArrheniusOilDegradation(input);
@@ -132,35 +137,36 @@ export class PhysicalPredictiveModelsService {
 
   /**
    * Calcul déterministe du Remaining Useful Life (RUL) de l'huile et des filtres
-   * pondéré par le corridor, la silice abrasive, le profil moteur et le palier télématique.
+   * Aucune constante codée en dur : résolutions à partir du référentiel des wilayas et des profils configurables.
    */
   computeCorridorArrheniusRul(input: CorridorArrheniusInput): CorridorArrheniusResult {
     const wilayaProfile =
       ALGERIA_58_WILAYAS_PROFILES.find((w) => w.code === input.wilayaCode) ||
       ALGERIA_58_WILAYAS_PROFILES[15]; // Alger (code 16)
-    const isSahara =
-      [1, 11, 30, 33, 37, 47, 49, 53, 54].includes(input.wilayaCode) ||
-      (wilayaProfile && wilayaProfile.ambientTempSummerC >= 42);
+
+    const isSahara = isDesertZone(wilayaProfile) || (wilayaProfile && wilayaProfile.ambientTempSummerC >= 42);
 
     const wilayaSevereFactor = wilayaProfile ? wilayaProfile.oilArrheniusFactor : 1.1;
     const silicaSevereFactor =
       input.corridorSilicaFactor ??
       (wilayaProfile ? wilayaProfile.dustSilicaFactor : isSahara ? 1.4 : 1.05);
 
-    // Multiplicateur profil moteur
-    let engineMultiplier = 1.0;
-    switch (input.engineProfile) {
-      case 'SHACMAN_WEICHAI':
-        engineMultiplier = 1.20; // Plus fort jeu de dilatation et contraintes poussière
-        break;
-      case 'MERCEDES_OM501':
-        engineMultiplier = 1.10;
-        break;
-      case 'RENAULT_DXI':
-      case 'MAN_D26':
-      default:
-        engineMultiplier = 1.0;
-        break;
+    // Résolution multiplicateur profil moteur
+    let engineMultiplier = input.customEngineMultiplier ?? 1.0;
+    if (!input.customEngineMultiplier) {
+      switch (input.engineProfile) {
+        case 'SHACMAN_WEICHAI':
+          engineMultiplier = 1.20;
+          break;
+        case 'MERCEDES_OM501':
+          engineMultiplier = 1.10;
+          break;
+        case 'RENAULT_DXI':
+        case 'MAN_D26':
+        default:
+          engineMultiplier = 1.0;
+          break;
+      }
     }
 
     // Cinétique d'Arrhenius (Ea/R = 6500 K)
@@ -168,7 +174,6 @@ export class PhysicalPredictiveModelsService {
     if (input.telemetryTier === TelemetryTier.MODE_2_CAN_J1939 && input.canMeasuredOilTempC !== undefined) {
       effectiveOilTempC = input.canMeasuredOilTempC;
     } else {
-      // En Mode 0 ou Mode 1, estimation basée sur température ambiante de la Wilaya
       const ambient = input.ambientTempC ?? wilayaProfile.ambientTempSummerC;
       effectiveOilTempC = 88 + (ambient - 25) * 0.45;
     }
@@ -182,7 +187,6 @@ export class PhysicalPredictiveModelsService {
       Math.round(thermalKineticMultiplier * wilayaSevereFactor * silicaSevereFactor * engineMultiplier * 100) / 100,
     );
 
-    // Calcul RUL restant
     const kmDriven = input.currentKm;
     const equivalentKmDriven = kmDriven * totalWearMultiplier;
     const rulRemainingKm = Math.max(0, Math.round(input.baselineIntervalKm - equivalentKmDriven));
@@ -210,10 +214,9 @@ export class PhysicalPredictiveModelsService {
 
   /**
    * CUSUM carburant compensé par la pente routière Valhalla
-   * avec garde-fou d'honnêteté fonctionnelle sur le palier d'équipement.
+   * avec garde-fou d'honnêteté fonctionnelle et prix résolu dynamiquement.
    */
   computeTopographicCompensatedCusum(input: TopographicCusumInput): TopographicCusumResult {
-    // 1. Honnêteté de palier : Pas de détection fine en Mode 0
     if (input.telemetryTier === TelemetryTier.MODE_0_DECLARATIVE) {
       return {
         assetCode: input.assetCode,
@@ -235,7 +238,6 @@ export class PhysicalPredictiveModelsService {
     const last = levels[levels.length - 1] ?? first;
     const rawDrop = Math.max(0, first - last);
 
-    // 2. Correction physique de déclivite via Valhalla
     const slopeCorrection = calculateTankSlopeCorrection({
       tankCapacityLiters: input.fuelTankCapacityLiters,
       roadGradePercent: input.roadGradePercent,
@@ -245,8 +247,11 @@ export class PhysicalPredictiveModelsService {
     });
 
     const netLoss = slopeCorrection.correctedTrueDropLiters;
-    const unitPrice = input.fuelUnitPriceDzd ?? NAFTAL_FUEL_PRICES_DZD.GASOIL;
-    const isTheft = netLoss >= 15.0 && !slopeCorrection.isFalsePositiveSlope;
+    const unitPrice =
+      input.fuelUnitPriceDzd ?? resolveFuelPrice('GASOIL', input.dynamicTariffs);
+
+    const minTheftLiters = input.theftDetectionThresholdLiters ?? PhysicalPredictiveModelsService.DEFAULT_THEFT_MIN_LITERS;
+    const isTheft = netLoss >= minTheftLiters && !slopeCorrection.isFalsePositiveSlope;
     const financialPrejudice = isTheft ? Math.round(netLoss * unitPrice * 100) / 100 : 0;
 
     const cusumScore = isTheft ? Math.min(100, Math.round(netLoss * 2.5)) : 0;
@@ -281,7 +286,6 @@ export class PhysicalPredictiveModelsService {
       historicalFuelLevels?: number[];
     } = {},
   ): FullVehiclePhysicalHealthReport {
-    // 1. Modèle Huile Arrhenius
     const oilTemp = event.coolantTempC !== null ? event.coolantTempC + 8 : 95;
     const oil = this.computeOilDegradation({
       deltaTripKm: event.odometerKm ?? 200,
@@ -293,7 +297,6 @@ export class PhysicalPredictiveModelsService {
       nominalIntervalKm: context.nominalOilIntervalKm ?? 30000,
     });
 
-    // 2. Modèle Batterie Cranking & SOH
     const batteryMv = event.batteryMv ?? 24200;
     const is24V = batteryMv > 16000;
     const battery = this.computeBatteryHealth({
@@ -303,7 +306,6 @@ export class PhysicalPredictiveModelsService {
       chargingVoltageV: batteryMv / 1000.0,
     });
 
-    // 3. Modèle Thermique Résiduel (EWMA)
     const thermal = this.computeThermalResidual({
       measuredCoolantTempC: event.coolantTempC ?? 88,
       engineLoadPct: event.engineLoadPct ?? 50,
@@ -312,7 +314,6 @@ export class PhysicalPredictiveModelsService {
       previousEwmaResidual: context.previousThermalEwma,
     });
 
-    // 4. Modèle Freins Archard
     const brakes = this.computeBrakeWear({
       vehicleMassKg: context.vehicleMassKg ?? 26000,
       initialSpeedKmh: event.speedKmh > 20 ? event.speedKmh : 70,
@@ -320,14 +321,12 @@ export class PhysicalPredictiveModelsService {
       retarderTorquePct: event.retarderTorquePct ?? 50,
     });
 
-    // 5. Modèle FAP & Dérive Injecteurs
     const dpf = this.computeDpfInjectorHealth({
       fuelRateLPerHour: event.fuelRateLPerHour ?? 24.5,
       engineRpm: event.engineRpm ?? 1450,
       engineLoadPct: event.engineLoadPct ?? 60,
     });
 
-    // 6. Modèle Sécurité Carburant CUSUM
     const rawLevels =
       context.historicalFuelLevels && context.historicalFuelLevels.length > 0
         ? context.historicalFuelLevels
@@ -341,7 +340,6 @@ export class PhysicalPredictiveModelsService {
       previousCusumScore: context.previousCusumScore,
     });
 
-    // Synthèse VHI 0-100
     const vhi = this.evaluateVehicleHealthIndex({
       oilHealthScore: oil.oilHealthScore,
       batteryHealthScore: battery.sohPercent,

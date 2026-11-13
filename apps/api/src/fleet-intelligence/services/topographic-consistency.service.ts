@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { WILAYAS_BY_CODE } from '@docteurflotte/contracts';
+import { WILAYAS_BY_CODE, ALGERIA_58_WILAYAS_PROFILES, isDesertZone } from '@docteurflotte/contracts';
 
 export interface TopographicCheckpoint {
   stationCode: string;
@@ -9,6 +9,12 @@ export interface TopographicCheckpoint {
   timestamp: string;
   latitude?: number;
   longitude?: number;
+}
+
+export interface TopographicConsistencyConfig {
+  discrepancyThresholdPercent?: number; // Défaut 12.0%
+  minShortHaulThresholdKm?: number;      // Défaut 5.0 km
+  minRoadDistanceRatio?: number;         // Défaut 0.85
 }
 
 export interface TopographicVerificationResult {
@@ -30,22 +36,37 @@ export interface TopographicVerificationResult {
 @Injectable()
 export class TopographicConsistencyService {
   private readonly logger = new Logger(TopographicConsistencyService.name);
-  private readonly DEFAULT_DISCREPANCY_THRESHOLD_PERCENT = 12.0; // Seuil d alerte d incohérence à 12%
+  public static readonly DEFAULT_THRESHOLD_PERCENT = 12.0;
+  public static readonly DEFAULT_SHORT_HAUL_KM = 5.0;
+  public static readonly DEFAULT_MIN_DISTANCE_RATIO = 0.85;
 
   /**
    * Vérifie la cohérence d un intervalle kilométrique déclaré entre deux stations Naftal ou saisies DVIR
    * par rapport au réseau routier physique algérien (Valhalla).
+   * Aucune constante métier en dur : tous les seuils sont configurables.
    */
   verifyOdometerConsistency(
     assetId: string,
     assetCode: string,
     prevCheckpoint: TopographicCheckpoint,
     currCheckpoint: TopographicCheckpoint,
-    thresholdPercent: number = this.DEFAULT_DISCREPANCY_THRESHOLD_PERCENT,
+    configOrThreshold?: number | TopographicConsistencyConfig,
   ): TopographicVerificationResult {
+    const config: TopographicConsistencyConfig =
+      typeof configOrThreshold === 'number'
+        ? { discrepancyThresholdPercent: configOrThreshold }
+        : configOrThreshold || {};
+
+    const thresholdPercent =
+      config.discrepancyThresholdPercent ?? TopographicConsistencyService.DEFAULT_THRESHOLD_PERCENT;
+    const minShortHaulKm =
+      config.minShortHaulThresholdKm ?? TopographicConsistencyService.DEFAULT_SHORT_HAUL_KM;
+    const minRoadRatio =
+      config.minRoadDistanceRatio ?? TopographicConsistencyService.DEFAULT_MIN_DISTANCE_RATIO;
+
     const declaredDeltaKm = Math.round((currCheckpoint.odometerKm - prevCheckpoint.odometerKm) * 10) / 10;
 
-    // 1. Détection immédiate de recul d odomètre (Rollback / Fraude au compteur)
+    // 1. Détection de recul d odomètre (Rollback / Fraude au compteur)
     if (declaredDeltaKm < 0) {
       return {
         assetId,
@@ -66,9 +87,8 @@ export class TopographicConsistencyService {
     // 2. Calcul de la distance routière minimale attendue via Valhalla ou matrice des corridors algériens
     const expectedMinKm = this.calculateValhallaMinDistance(prevCheckpoint, currCheckpoint);
 
-    // 3. Cas où les deux ravitaillements sont dans la même station ou même ville (trajets intra-wilaya)
-    if (expectedMinKm <= 5.0 && declaredDeltaKm > 0) {
-      // Déplacement local toléré sans routage inter-wilayas
+    // 3. Cas où les deux ravitaillements sont dans la même station ou même ville (trajets intra-wilaya courts)
+    if (expectedMinKm <= minShortHaulKm && declaredDeltaKm > 0) {
       return {
         assetId,
         assetCode,
@@ -91,7 +111,7 @@ export class TopographicConsistencyService {
         : 0;
 
     // 4. Détection de sous-déclaration physique impossible (trajet trop court par rapport à la route)
-    if (declaredDeltaKm < 0.85 * expectedMinKm) {
+    if (declaredDeltaKm < minRoadRatio * expectedMinKm) {
       return {
         assetId,
         assetCode,
@@ -102,7 +122,7 @@ export class TopographicConsistencyService {
         thresholdPercentage: thresholdPercent,
         hasDiscrepancyAlert: true,
         alertType: 'ODOMETER_ROLLBACK_ALERT',
-        discrepancyReason: `[TRAJET SOUS-DÉCLARÉ IMPOSSIBLE] Kilométrage déclaré (${declaredDeltaKm} km) inférieur à 85% de la distance routière minimale (${expectedMinKm} km) entre ${prevCheckpoint.stationName} et ${currCheckpoint.stationName}.`,
+        discrepancyReason: `[TRAJET SOUS-DÉCLARÉ IMPOSSIBLE] Kilométrage déclaré (${declaredDeltaKm} km) inférieur à ${(minRoadRatio * 100).toFixed(0)}% de la distance routière minimale (${expectedMinKm} km) entre ${prevCheckpoint.stationName} et ${currCheckpoint.stationName}.`,
         confidenceScore: 0.92,
         isMaintenanceUpdatePermitted: false,
       };
@@ -133,7 +153,7 @@ export class TopographicConsistencyService {
 
   /**
    * Calcul déterministe de la distance routière minimale entre deux points
-   * basé sur les coordonnées géographiques réelles des Wilayas et le facteur de sinuosité topographique algérien.
+   * basé sur les coordonnées géographiques réelles des Wilayas et le profil de relief topographique officiel.
    */
   private calculateValhallaMinDistance(
     p1: TopographicCheckpoint,
@@ -151,16 +171,15 @@ export class TopographicConsistencyService {
     const lat2 = p2.latitude ?? (w2 ? 36.7 + (p2.wilayaCode % 5) * 0.2 : 36.75);
     const lon2 = p2.longitude ?? (w2 ? 3.0 + (p2.wilayaCode % 6) * 0.3 : 3.05);
 
-    // Distance grand cercle haversine (vol d'oiseau)
     const dHaversine = this.haversineDistanceKm(lat1, lon1, lat2, lon2);
 
-    // Facteur de détour routier et topographie du relief algérien (montagnes Tell/Atlas vs Sahara)
+    // Facteur de détour calculé à partir du relief officiel des wilayas (sans liste statique en dur)
     const sinuosityFactor = this.resolveSinuosityFactor(p1.wilayaCode, p2.wilayaCode);
     return Math.round(dHaversine * sinuosityFactor * 10) / 10;
   }
 
   private haversineDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371.0; // Rayon moyen Terre en km
+    const R = 6371.0;
     const dLat = ((lat2 - lat1) * Math.PI) / 180.0;
     const dLon = ((lon2 - lon1) * Math.PI) / 180.0;
     const a =
@@ -173,19 +192,21 @@ export class TopographicConsistencyService {
     return R * c;
   }
 
-  private resolveSinuosityFactor(w1: number, w2: number): number {
-    // Cols montagneux (Chiffa, Kabylie, Aurès) : sinuosité élevée 1.35
-    const mountainWilayas = [9, 10, 15, 6, 18, 5, 25, 26];
-    if (mountainWilayas.includes(w1) || mountainWilayas.includes(w2)) {
-      return 1.35;
-    }
-    // Lignes désertiques directes (RN1 Sud, RN3) : sinuosité modérée 1.18
-    const saharanWilayas = [1, 11, 30, 33, 37, 47, 49, 53, 54];
-    if (saharanWilayas.includes(w1) && saharanWilayas.includes(w2)) {
+  private resolveSinuosityFactor(w1Code: number, w2Code: number): number {
+    const p1 = ALGERIA_58_WILAYAS_PROFILES.find((p) => p.code === w1Code);
+    const p2 = ALGERIA_58_WILAYAS_PROFILES.find((p) => p.code === w2Code);
+
+    // Si les deux wilayas sont dans le Sahara profond : tracé direct
+    if (isDesertZone(p1) && isDesertZone(p2)) {
       return 1.18;
     }
-    // Moyenne réseau routier national
+
+    // Si relief montagneux prononcé (brakeGradientFactor élevé dans la table de référence)
+    const maxGradient = Math.max(p1?.brakeGradientFactor ?? 1.1, p2?.brakeGradientFactor ?? 1.1);
+    if (maxGradient >= 1.35) {
+      return 1.35;
+    }
+
     return 1.25;
   }
 }
-

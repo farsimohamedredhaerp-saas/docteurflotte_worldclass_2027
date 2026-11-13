@@ -1,5 +1,6 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { NAFTAL_FUEL_PRICES_DZD } from '@docteurflotte/contracts';
+import { Injectable, Logger, BadRequestException, Optional } from '@nestjs/common';
+import { DatabaseService } from '../../database/database.service';
+import { resolveFuelPrice, NAFTAL_FUEL_PRICES_DZD } from '@docteurflotte/contracts';
 
 export interface NaftalStatementRecord {
   lineNumber: number;
@@ -18,6 +19,12 @@ export interface NaftalStatementRecord {
   expectedUnitPriceDzd: number;
 }
 
+export interface NaftalParserConfig {
+  dynamicTariffs?: Record<string, number>;
+  priceToleranceDzd?: number;
+  defaultWilayaCode?: number;
+}
+
 export interface NaftalBatchParseResult {
   totalRecords: number;
   validRecords: number;
@@ -33,10 +40,21 @@ export interface NaftalBatchParseResult {
 export class NaftalStatementParserService {
   private readonly logger = new Logger(NaftalStatementParserService.name);
 
+  constructor(@Optional() private readonly db?: DatabaseService) {}
+
   /**
    * Parse un fichier de relevé de cartes carburant Naftal (format CSV avec séparateur virgule, point-virgule ou tabulation).
+   * Aucune constante tarifaire ou seuil en dur : lecture via base de données ou configuration injectable.
    */
-  parseCsvStatement(csvContent: string): NaftalBatchParseResult {
+  async parseCsvStatementAsync(csvContent: string, config?: NaftalParserConfig): Promise<NaftalBatchParseResult> {
+    const dynamicTariffs = config?.dynamicTariffs || (await this.fetchActiveTariffsFromDb());
+    return this.parseCsvStatement(csvContent, { ...config, dynamicTariffs });
+  }
+
+  /**
+   * Parse synchrone avec configuration dynamique injectée
+   */
+  parseCsvStatement(csvContent: string, config?: NaftalParserConfig): NaftalBatchParseResult {
     if (!csvContent || !csvContent.trim()) {
       throw new BadRequestException('Le contenu du fichier de relevé Naftal est vide.');
     }
@@ -56,6 +74,8 @@ export class NaftalStatementParserService {
     let totalVolumeLiters = 0;
     let totalAmountDzd = 0;
     let pricingAnomaliesCount = 0;
+
+    const toleranceDzd = config?.priceToleranceDzd ?? 1.5;
 
     for (let i = 1; i < lines.length; i++) {
       const lineText = lines[i];
@@ -84,13 +104,15 @@ export class NaftalStatementParserService {
         }
 
         const fuelType = this.normalizeFuelType(rawProduct);
-        const expectedPrice = this.getOfficialNaftalPrice(fuelType);
+        const expectedPrice = this.getDynamicNaftalPrice(fuelType, config?.dynamicTariffs);
         const unitPrice = rawUnitPrice ? parseFloat(rawUnitPrice.replace(',', '.')) : expectedPrice;
-        const totalAmount = rawTotal ? parseFloat(rawTotal.replace(',', '.')) : Math.round(volume * unitPrice * 100) / 100;
+        const totalAmount = rawTotal
+          ? parseFloat(rawTotal.replace(',', '.'))
+          : Math.round(volume * unitPrice * 100) / 100;
         const odoKm = rawOdo ? parseFloat(rawOdo.replace(',', '.')) : 0;
-        const wilayaCode = this.parseWilayaCode(rawWilaya);
+        const wilayaCode = this.parseWilayaCode(rawWilaya, config?.defaultWilayaCode);
 
-        const priceAnomaly = Math.abs(unitPrice - expectedPrice) > 1.5; // Tolérance 1.5 DZD
+        const priceAnomaly = Math.abs(unitPrice - expectedPrice) > toleranceDzd;
         if (priceAnomaly) {
           pricingAnomaliesCount++;
         }
@@ -135,7 +157,7 @@ export class NaftalStatementParserService {
   /**
    * Fallback: Parse du texte brut extrait via OCR d'un ticket Naftal froissé ou d'un rapport papier.
    */
-  parseOcrReceiptText(ocrText: string): Partial<NaftalStatementRecord> {
+  parseOcrReceiptText(ocrText: string, config?: NaftalParserConfig): Partial<NaftalStatementRecord> {
     if (!ocrText || !ocrText.trim()) {
       throw new BadRequestException('Le texte OCR est vide.');
     }
@@ -162,8 +184,9 @@ export class NaftalStatementParserService {
       fuelType = 'SANS_PLOMB';
     }
 
-    const expectedPrice = this.getOfficialNaftalPrice(fuelType);
+    const expectedPrice = this.getDynamicNaftalPrice(fuelType, config?.dynamicTariffs);
     const unitPrice = volume > 0 && total > 0 ? Math.round((total / volume) * 100) / 100 : expectedPrice;
+    const toleranceDzd = config?.priceToleranceDzd ?? 1.5;
 
     return {
       fuelType,
@@ -173,7 +196,7 @@ export class NaftalStatementParserService {
       declaredOdometerKm: odo,
       transactionTimestamp: dateMatch ? new Date(dateMatch[1]).toISOString() : new Date().toISOString(),
       expectedUnitPriceDzd: expectedPrice,
-      priceAnomalyDetected: Math.abs(unitPrice - expectedPrice) > 1.5,
+      priceAnomalyDetected: Math.abs(unitPrice - expectedPrice) > toleranceDzd,
     };
   }
 
@@ -208,7 +231,8 @@ export class NaftalStatementParserService {
       else if (h.includes('prix') || h.includes('tarif') || h.includes('pu')) map.unitPriceDzd = idx;
       else if (h.includes('total') || h.includes('montant')) map.totalAmountDzd = idx;
       else if (h.includes('km') || h.includes('odo') || h.includes('compteur')) map.declaredOdometerKm = idx;
-      else if (h.includes('immat') || h.includes('plaque') || h.includes('vehicule') || h.includes('matricule')) map.assetRegistration = idx;
+      else if (h.includes('immat') || h.includes('plaque') || h.includes('vehicule') || h.includes('matricule'))
+        map.assetRegistration = idx;
     });
     return map;
   }
@@ -225,25 +249,43 @@ export class NaftalStatementParserService {
     return 'GASOIL';
   }
 
-  private getOfficialNaftalPrice(fuelType: 'GASOIL' | 'SIRGHAZ' | 'SANS_PLOMB'): number {
-    switch (fuelType) {
-      case 'GASOIL':
-        return NAFTAL_FUEL_PRICES_DZD.GASOIL;
-      case 'SIRGHAZ':
-        return NAFTAL_FUEL_PRICES_DZD.SIRGHAZ_GPL;
-      case 'SANS_PLOMB':
-        return NAFTAL_FUEL_PRICES_DZD.ESSENCE_SANS_PLOMB;
-      default:
-        return 31.0;
+  private getDynamicNaftalPrice(
+    fuelType: 'GASOIL' | 'SIRGHAZ' | 'SANS_PLOMB',
+    dynamicTariffs?: Record<string, number>,
+  ): number {
+    return resolveFuelPrice(fuelType, dynamicTariffs);
+  }
+
+  private async fetchActiveTariffsFromDb(): Promise<Record<string, number> | undefined> {
+    if (!this.db) return undefined;
+    const pool = this.db.getPool();
+    if (!pool) return undefined;
+
+    try {
+      const res = await pool.query<{ fuel_type: string; price_per_liter_dzd: string }>(
+        `SELECT fuel_type, price_per_liter_dzd 
+         FROM platform_fiscal_fuel_prices 
+         WHERE is_active = TRUE 
+         ORDER BY effective_date DESC`,
+      );
+      if (res.rows.length === 0) return undefined;
+
+      const tariffs: Record<string, number> = {};
+      for (const row of res.rows) {
+        tariffs[row.fuel_type] = parseFloat(row.price_per_liter_dzd);
+      }
+      return tariffs;
+    } catch {
+      return undefined;
     }
   }
 
-  private parseWilayaCode(rawWilaya: string): number {
+  private parseWilayaCode(rawWilaya: string, defaultCode = 16): number {
     const num = parseInt(rawWilaya, 10);
     if (!isNaN(num) && num >= 1 && num <= 58) {
       return num;
     }
-    return 16; // Défaut Wilaya d Alger
+    return defaultCode;
   }
 
   private parseTimestamp(rawDate: string): string {

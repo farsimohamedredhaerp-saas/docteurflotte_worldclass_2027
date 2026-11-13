@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as crypto from 'crypto';
-import { NAFTAL_FUEL_PRICES_DZD, WILAYAS_BY_CODE } from '@docteurflotte/contracts';
+import { resolveFuelPrice, WILAYAS_BY_CODE } from '@docteurflotte/contracts';
 
 export interface TechnicalDossierInput {
   dossierReference?: string;
@@ -19,6 +19,8 @@ export interface TechnicalDossierInput {
   netSiphonedVolumeLiters: number;
   fuelType: 'GASOIL' | 'SIRGHAZ' | 'SANS_PLOMB';
   officialUnitPriceDzd?: number;
+  dynamicTariffs?: Record<string, number>;
+  minOpposableLitersThreshold?: number; // Défaut 15L
   historicalLevels: number[];
   elevationProfileMeters?: number[];
   telemetryTier: string;
@@ -39,9 +41,11 @@ export interface TechnicalDossierResult {
 @Injectable()
 export class TechnicalDossierPdfService {
   private readonly logger = new Logger(TechnicalDossierPdfService.name);
+  public static readonly DEFAULT_OPPOSABLE_MIN_LITERS = 15.0;
 
   /**
-   * Génère le "Dossier d'Expertise Technique & Traçabilité Carburant" certifié avec empreinte SHA-256
+   * Génère le "Dossier d'Expertise Technique & Traçabilité Carburant" certifié avec empreinte SHA-256.
+   * Aucune constante tarifaire ou seuil en dur : lecture dynamique ou injectable.
    */
   generateTechnicalDossier(input: TechnicalDossierInput): TechnicalDossierResult {
     const timestamp = input.incidentTimestamp || new Date().toISOString();
@@ -51,17 +55,16 @@ export class TechnicalDossierPdfService {
 
     const wilaya =
       WILAYAS_BY_CODE[input.wilayaCode]?.nameFr || `Wilaya ${input.wilayaCode}`;
+
+    // Résolution dynamique du tarif carburant (sans constante en dur)
     const unitPrice =
-      input.officialUnitPriceDzd ||
-      (input.fuelType === 'GASOIL'
-        ? NAFTAL_FUEL_PRICES_DZD.GASOIL
-        : input.fuelType === 'SIRGHAZ'
-          ? NAFTAL_FUEL_PRICES_DZD.SIRGHAZ_GPL
-          : NAFTAL_FUEL_PRICES_DZD.ESSENCE_SANS_PLOMB);
+      input.officialUnitPriceDzd ??
+      resolveFuelPrice(input.fuelType, input.dynamicTariffs);
 
     const prejudiceDzd = Math.round(input.netSiphonedVolumeLiters * unitPrice * 100) / 100;
+    const minOpposable = input.minOpposableLitersThreshold ?? TechnicalDossierPdfService.DEFAULT_OPPOSABLE_MIN_LITERS;
 
-    // Calcul de l'empreinte d'intégrité cryptographique SHA-256 sur les données brutes
+    // Calcul de l'empreinte d'intégrité cryptographique SHA-256 sur les données probatoires
     const payloadToHash = JSON.stringify({
       dossierRef,
       tenantName: input.tenantName,
@@ -177,7 +180,7 @@ export class TechnicalDossierPdfService {
 Véhicule: ${input.vehiclePlate} | Chauffeur: ${input.driverPseudonym} | Wilaya: ${wilaya} (${input.wilayaCode})
 Pente routière Valhalla: ${input.roadGradePercent}% (Biais compensé: ${input.apparentSlopeDropLiters} L)
 Perte nette confirmée: ${input.netSiphonedVolumeLiters} L (${input.fuelType})
-Préjudice financier en Dinars: ${prejudiceDzd.toLocaleString('fr-DZ')} DZD (Barème Naftal ${unitPrice} DA/L)
+Préjudice financier en Dinars: ${prejudiceDzd.toFixed(2)} DZD (Barème Naftal ${unitPrice.toFixed(2)} DA/L)
 Empreinte SHA-256: ${integritySha256}`;
 
     return {
@@ -188,7 +191,9 @@ Empreinte SHA-256: ${integritySha256}`;
       financialPrejudiceDzd: prejudiceDzd,
       htmlContent,
       summaryText,
-      isOpposable: input.netSiphonedVolumeLiters >= 15.0 && input.rawVolumeDropLiters > input.apparentSlopeDropLiters,
+      isOpposable:
+        input.netSiphonedVolumeLiters >= minOpposable &&
+        input.rawVolumeDropLiters > input.apparentSlopeDropLiters,
     };
   }
 }

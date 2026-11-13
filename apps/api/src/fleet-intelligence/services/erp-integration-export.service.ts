@@ -4,33 +4,53 @@ import {
   ErpExportFormat,
   ErpWorkOrderExportPayload,
   ErpExportResult,
-  ErpWorkOrderLine,
+  ALGERIA_FISCAL_RATES,
 } from '@docteurflotte/contracts';
+
+export interface ErpExportAccountConfig {
+  defaultTvaRatePercent?: number;
+  pcComptaAccounts?: {
+    maintenanceExpenseAccount?: string; // Défaut '615200' (Entretien matériel roulant)
+    tvaDeductibleAccount?: string;      // Défaut '445660' (TVA déductible)
+    supplierAccount?: string;           // Défaut '401100' (Fournisseurs)
+    journalCode?: string;               // Défaut 'ACH'
+  };
+  sageAccounts?: {
+    journalCode?: string;               // Défaut 'HA'
+    expenseAccount?: string;            // Défaut '615000'
+    tvaAccount?: string;                // Défaut '445660'
+    supplierAccount?: string;           // Défaut '401000'
+  };
+}
 
 @Injectable()
 export class ErpIntegrationExportService {
   private readonly logger = new Logger(ErpIntegrationExportService.name);
 
   /**
-   * Construit et formate un export standardisé d'Ordre de Travail pour les ERPs du marché algérien
+   * Construit et formate un export standardisé d'Ordre de Travail pour les ERPs du marché algérien.
+   * Aucune constante fiscale en dur : taux de TVA et comptes SCF configurables.
    */
   exportWorkOrder(
     payload: Omit<ErpWorkOrderExportPayload, 'subtotalDzd' | 'taxAmountDzd' | 'totalDzd' | 'integritySha256'>,
+    accountConfig?: ErpExportAccountConfig,
   ): ErpExportResult {
-    // Calcul des totaux financiers en DZD
+    const defaultTva =
+      accountConfig?.defaultTvaRatePercent ?? ALGERIA_FISCAL_RATES.STANDARD_VAT_RATE * 100;
+
     let subtotalDzd = 0;
     let taxAmountDzd = 0;
 
     payload.lines.forEach((l) => {
       subtotalDzd += l.totalLineDzd;
-      taxAmountDzd += Math.round(((l.totalLineDzd * (l.taxRatePercent ?? 19.0)) / 100) * 100) / 100;
+      const rate = l.taxRatePercent ?? defaultTva;
+      taxAmountDzd += Math.round(((l.totalLineDzd * rate) / 100) * 100) / 100;
     });
 
     subtotalDzd = Math.round(subtotalDzd * 100) / 100;
     taxAmountDzd = Math.round(taxAmountDzd * 100) / 100;
     const totalDzd = Math.round((subtotalDzd + taxAmountDzd) * 100) / 100;
 
-    // Empreinte SHA-256 de traçabilité
     const hashData = `${payload.workOrderNumber}|${payload.assetCode}|${payload.exportedAt}|${totalDzd}|${payload.tenantId}`;
     const integritySha256 = crypto.createHash('sha256').update(hashData).digest('hex');
 
@@ -44,9 +64,9 @@ export class ErpIntegrationExportService {
 
     switch (payload.exportFormat) {
       case ErpExportFormat.PC_COMPTA_CSV:
-        return this.formatPcComptaCsv(fullPayload);
+        return this.formatPcComptaCsv(fullPayload, accountConfig);
       case ErpExportFormat.SAGE_CSV:
-        return this.formatSageCsv(fullPayload);
+        return this.formatSageCsv(fullPayload, accountConfig);
       case ErpExportFormat.ODOO_JSON:
         return this.formatOdooJson(fullPayload);
       case ErpExportFormat.SAP_REST_JSON:
@@ -56,10 +76,9 @@ export class ErpIntegrationExportService {
   }
 
   /**
-   * Format PC Compta (Logiciel DGI de comptabilité le plus répandu en Algérie)
-   * Journal OD / Achats pièces avec ventilation compte 615 (Entretien et réparations) et 4456 (TVA déductible 19%)
+   * Format PC Compta (Journal SCF Algérie)
    */
-  private formatPcComptaCsv(p: ErpWorkOrderExportPayload): ErpExportResult {
+  private formatPcComptaCsv(p: ErpWorkOrderExportPayload, cfg?: ErpExportAccountConfig): ErpExportResult {
     const headers = [
       'Date',
       'Journal',
@@ -73,14 +92,19 @@ export class ErpIntegrationExportService {
     ];
 
     const dateFormatted = p.exportedAt.substring(0, 10).replace(/-/g, '/');
+    const journal = cfg?.pcComptaAccounts?.journalCode ?? 'ACH';
+    const expenseAcc = cfg?.pcComptaAccounts?.maintenanceExpenseAccount ?? '615200';
+    const tvaAcc = cfg?.pcComptaAccounts?.tvaDeductibleAccount ?? '445660';
+    const supplierAcc = cfg?.pcComptaAccounts?.supplierAccount ?? '401100';
+
     const rows: string[] = [];
 
-    // Ligne Débit HT : Entretien véhicule (Compte 615200)
+    // Débit HT : Entretien véhicule
     rows.push(
       [
         dateFormatted,
-        'ACH',
-        '615200',
+        journal,
+        expenseAcc,
         `Entretien ${p.assetCode} - ${p.workOrderNumber}`,
         p.subtotalDzd.toFixed(2),
         '0.00',
@@ -90,13 +114,13 @@ export class ErpIntegrationExportService {
       ].join(';'),
     );
 
-    // Ligne Débit TVA : TVA Récupérable 19% (Compte 445660)
+    // Débit TVA : TVA Récupérable
     rows.push(
       [
         dateFormatted,
-        'ACH',
-        '445660',
-        `TVA 19% ${p.workOrderNumber}`,
+        journal,
+        tvaAcc,
+        `TVA ${p.workOrderNumber}`,
         p.taxAmountDzd.toFixed(2),
         '0.00',
         p.workOrderNumber,
@@ -105,12 +129,12 @@ export class ErpIntegrationExportService {
       ].join(';'),
     );
 
-    // Ligne Crédit TTC : Fournisseur pièces / Compte tiers (Compte 401100)
+    // Crédit TTC : Fournisseur
     rows.push(
       [
         dateFormatted,
-        'ACH',
-        '401100',
+        journal,
+        supplierAcc,
         `Facture Atelier ${p.workOrderNumber}`,
         '0.00',
         p.totalDzd.toFixed(2),
@@ -135,9 +159,9 @@ export class ErpIntegrationExportService {
   }
 
   /**
-   * Format Sage 100 Algérie (Format CSV paramétrable)
+   * Format Sage 100 Algérie
    */
-  private formatSageCsv(p: ErpWorkOrderExportPayload): ErpExportResult {
+  private formatSageCsv(p: ErpWorkOrderExportPayload, cfg?: ErpExportAccountConfig): ErpExportResult {
     const headers = [
       'CODE_JOURNAL',
       'DATE_PIECE',
@@ -150,11 +174,16 @@ export class ErpIntegrationExportService {
     ];
 
     const dateFormatted = p.exportedAt.substring(0, 10).replace(/-/g, '');
+    const journal = cfg?.sageAccounts?.journalCode ?? 'HA';
+    const expenseAcc = cfg?.sageAccounts?.expenseAccount ?? '615000';
+    const tvaAcc = cfg?.sageAccounts?.tvaAccount ?? '445660';
+    const supplierAcc = cfg?.sageAccounts?.supplierAccount ?? '401000';
+
     const rows = [
       [
-        'HA',
+        journal,
         dateFormatted,
-        '615000',
+        expenseAcc,
         p.workOrderNumber,
         `MAINTENANCE ${p.assetCode}`,
         p.subtotalDzd.toFixed(2),
@@ -162,19 +191,19 @@ export class ErpIntegrationExportService {
         p.assetCode,
       ].join(';'),
       [
-        'HA',
+        journal,
         dateFormatted,
-        '445660',
+        tvaAcc,
         p.workOrderNumber,
-        `TVA 19% ${p.workOrderNumber}`,
+        `TVA ${p.workOrderNumber}`,
         p.taxAmountDzd.toFixed(2),
         '0.00',
         p.assetCode,
       ].join(';'),
       [
-        'HA',
+        journal,
         dateFormatted,
-        '401000',
+        supplierAcc,
         p.workOrderNumber,
         `FOURNISSEUR ATELIER ${p.workOrderNumber}`,
         '0.00',
@@ -198,8 +227,7 @@ export class ErpIntegrationExportService {
   }
 
   /**
-   * Format Odoo (Payload JSON pour endpoints xmlrpc ou controllers REST)
-   * Modèles Odoo cibles: fleet.vehicle.log.services et mrp.workorder
+   * Format Odoo
    */
   private formatOdooJson(p: ErpWorkOrderExportPayload): ErpExportResult {
     const odooPayload = {
@@ -278,4 +306,3 @@ export class ErpIntegrationExportService {
     };
   }
 }
-
