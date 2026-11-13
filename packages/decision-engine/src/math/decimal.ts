@@ -7,12 +7,12 @@
  * DIV exige une politique onZero explicite.
  */
 
-import Decimal from 'decimal.js';
+import DecimalLib from 'decimal.js';
 
 // Clone isolé avec précision de calcul à 28 chiffres significatifs
-export const EngineDecimal = Decimal.clone({
+export const EngineDecimal = DecimalLib.clone({
   precision: 28,
-  rounding: Decimal.ROUND_HALF_UP,
+  rounding: DecimalLib.ROUND_HALF_UP,
   toExpNeg: -20,
   toExpPos: 40,
 });
@@ -109,4 +109,22 @@ export class EngineMath {
     return val.toDecimalPlaces(scale, roundModes[mode]);
   }
 }
+
+/**
+ * Façade ergonomique standard pour instanciation rapide
+ */
+export class Decimal {
+  static from(val: number | string | DecimalValue): DecimalValue {
+    return EngineMath.from(String(val));
+  }
+}
+
+/**
+ * Arrondi monétaire en Dinars Algériens (DZD) à 2 décimales
+ */
+export function roundDzd(val: number | string | DecimalValue): number {
+  const d = EngineMath.asAmount(val instanceof EngineDecimal ? val : String(val));
+  return Number(d.toFixed(2));
+}
+
 

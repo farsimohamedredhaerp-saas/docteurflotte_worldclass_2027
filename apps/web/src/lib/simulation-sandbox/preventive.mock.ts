@@ -66,3 +66,4 @@ export const MOCK_SANDBOX_PREVENTIVE_DUES: UpcomingPreventiveDue[] = [
     assignedSite: 'Oran (31)',
   },
 ];
+

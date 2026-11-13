@@ -98,3 +98,4 @@ export const MOCK_SANDBOX_GATEWAY_HEALTH: TraccarGatewayHealth = {
   queueSize: 0,
   errorRate: 0.0,
 };
+

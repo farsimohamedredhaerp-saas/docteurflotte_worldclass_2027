@@ -4,6 +4,7 @@ import {
   DecisionUrgency,
   MeterType,
 } from '@docteurflotte/contracts';
+import { Decimal, roundDzd } from '@docteurflotte/decision-engine';
 
 export interface EvaluatedRecommendation {
   ruleId: string;
@@ -50,15 +51,27 @@ export class DecisionRulesEngine {
       const isOdometer = asset.primaryMeterType === MeterType.ODOMETER_KM;
       const unit = isOdometer ? 'km' : 'heures';
 
-      // Chiffrage de l'intervention préventive programmée
+      // Chiffrage de l'intervention préventive programmée avec arithmétique exacte
       const estimatedLaborHours = asset.category === AssetCategory.HEAVY_TRUCK ? 4 : 2.5;
       const estimatedPartsCost = asset.category === AssetCategory.HEAVY_TRUCK ? 45000 : 25000;
-      const estimatedActionCost = Math.round(estimatedPartsCost + estimatedLaborHours * hourlyRate);
+      const estimatedActionCost = roundDzd(
+        Decimal.from(estimatedPartsCost)
+          .add(Decimal.from(estimatedLaborHours).mul(Decimal.from(hourlyRate)))
+          .toNumber(),
+      );
 
       // Évaluation du risque économique de l'inaction (panne en ligne)
       // Panne sur autoroute/chantier = Remorquage (40k) + Casse mécanique majeure (180k) + Perte exploitation (2j * 60k)
-      const costInactionRisk = Math.round(estimatedActionCost * riskMultiplier + (asset.category === AssetCategory.HEAVY_TRUCK ? 120000 : 60000));
-      const netExpectedSavings = costInactionRisk - estimatedActionCost;
+      const penaltyCost = asset.category === AssetCategory.HEAVY_TRUCK ? 120000 : 60000;
+      const costInactionRisk = roundDzd(
+        Decimal.from(estimatedActionCost)
+          .mul(Decimal.from(riskMultiplier))
+          .add(Decimal.from(penaltyCost))
+          .toNumber(),
+      );
+      const netExpectedSavings = roundDzd(
+        Decimal.from(costInactionRisk).sub(Decimal.from(estimatedActionCost)).toNumber(),
+      );
 
       return {
         ruleId: 'RULE-DEC-001',
@@ -100,8 +113,15 @@ export class DecisionRulesEngine {
 
     if (progressPercent >= 85) {
       const remaining = nextVal - currentVal;
-      const estimatedActionCost = Math.round(22000 + 2 * hourlyRate);
-      const costInactionRisk = Math.round(estimatedActionCost * 2.2);
+      const estimatedActionCost = roundDzd(
+        Decimal.from(22000).add(Decimal.from(2).mul(Decimal.from(hourlyRate))).toNumber(),
+      );
+      const costInactionRisk = roundDzd(
+        Decimal.from(estimatedActionCost).mul(Decimal.from(2.2)).toNumber(),
+      );
+      const netExpectedSavings = roundDzd(
+        Decimal.from(costInactionRisk).sub(Decimal.from(estimatedActionCost)).toNumber(),
+      );
 
       return {
         ruleId: 'RULE-DEC-002',
@@ -111,7 +131,7 @@ export class DecisionRulesEngine {
         description: `Il reste ${remaining.toLocaleString()} unités avant l'échéance de maintenance. Approvisionnement des pièces conseillé sous 7 jours ouvrés pour éviter l'arrêt imprévu.`,
         estimatedActionCost,
         costInactionRisk,
-        netExpectedSavings: costInactionRisk - estimatedActionCost,
+        netExpectedSavings,
         confidenceScore: 94,
         explanationDossier: {
           inputMetrics: {

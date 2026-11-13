@@ -37,6 +37,11 @@ export default function RootLayout({
                 document.documentElement.classList.add(activeTheme);
                 document.documentElement.setAttribute('data-theme', activeTheme);
               } catch (e) {}
+              if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
+                });
+              }
             `,
           }}
         />

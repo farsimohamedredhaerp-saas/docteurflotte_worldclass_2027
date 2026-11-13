@@ -4,6 +4,8 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
+import * as crypto from 'crypto';
+import { sha256Hex, canonicalJson } from '@docteurflotte/decision-engine';
 import { DatabaseService } from '../database/database.service';
 import { DecisionRulesEngine } from './decision-rules.engine';
 import {
@@ -219,6 +221,40 @@ export class DecisionsService {
          RETURNING *`,
         [DecisionStatus.APPROVED, workOrderId, decisionId, tenantId],
       );
+
+      // Enregistrement de l'événement dans le Data Plane Ledger (business_event)
+      try {
+        const payload = {
+          decisionId,
+          workOrderId,
+          assetId: dec.asset_id,
+          ruleId: dec.rule_id,
+          title: dec.title,
+          estimatedActionCost: Number(dec.estimated_action_cost),
+          costInactionRisk: Number(dec.cost_inaction_risk),
+          netExpectedSavings: Number(dec.net_expected_savings),
+        };
+        const sourceEventHash = sha256Hex(canonicalJson(payload));
+        await client.query(
+          `INSERT INTO business_event (
+             id, tenant_id, event_id, event_type, source_event_hash,
+             occurred_at, local_date, payload, status
+           ) VALUES (
+             $1::uuid, $2::uuid, $3, $4, $5,
+             NOW(), CURRENT_DATE, $6::jsonb, 'PROCESSED'
+           ) ON CONFLICT (tenant_id, event_id) DO NOTHING`,
+          [
+            crypto.randomUUID(),
+            tenantId,
+            `EVT-DEC-${decisionId}`,
+            'MAINTENANCE_DECISION_APPROVED',
+            sourceEventHash,
+            JSON.stringify(payload),
+          ],
+        );
+      } catch {
+        // Enregistrement tolérant si schéma business_event en cours d'initialisation
+      }
 
       return {
         decision: this.mapDecision({

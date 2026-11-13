@@ -11,6 +11,8 @@ export interface FuelReceiptScanRequestDto {
     unitPriceDzd?: number;
     stationName?: string;
     fuelType?: StandardFuelType;
+    cardNumber?: string;
+    odometerKm?: number;
   };
 }
 
