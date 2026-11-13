@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDemoMode } from '../../context/DemoModeContext';
 import { Navbar } from '../../components/navigation/Navbar';
 import { Card } from '../../components/Card';
 import { Badge } from '../../components/Badge';
@@ -59,121 +60,6 @@ interface WilayaRestriction {
   activeStatus: 'STRICT_PEAK' | 'NIGHT_EXEMPT' | 'SPECIAL_PERMIT';
 }
 
-const INITIAL_ENACTA: EnactaRecord[] = [
-  {
-    id: 'EN-01',
-    registrationNumber: '00421-116-16',
-    makeModel: 'Renault Trucks K 480',
-    category: 'PL',
-    lastInspectionDate: '2025-10-14',
-    expiryDate: '2026-04-14',
-    daysRemaining: 168,
-    centerName: 'Centre ENACTA Rouiba (16)',
-    wilaya: 'Alger (16)',
-    status: 'VALID',
-    defectCount: 0,
-  },
-  {
-    id: 'EN-02',
-    registrationNumber: '01892-116-16',
-    makeModel: 'Mercedes-Benz Actros 3340',
-    category: 'PL',
-    lastInspectionDate: '2025-05-12',
-    expiryDate: '2025-11-12',
-    daysRemaining: 15,
-    centerName: 'Centre ENACTA Bab Ezzouar',
-    wilaya: 'Alger (16)',
-    status: 'WARNING',
-    defectCount: 1,
-  },
-  {
-    id: 'EN-03',
-    registrationNumber: '08341-118-30',
-    makeModel: 'Shacman F3000 Benne',
-    category: 'PL',
-    lastInspectionDate: '2025-03-20',
-    expiryDate: '2025-09-20',
-    daysRemaining: -38,
-    centerName: 'Centre ENACTA Hassi Messaoud',
-    wilaya: 'Ouargla (30)',
-    status: 'EXPIRED',
-    defectCount: 3,
-  },
-  {
-    id: 'EN-04',
-    registrationNumber: 'ENG-23-018-DZ',
-    makeModel: 'Caterpillar 320D (Pelle)',
-    category: 'BTP',
-    lastInspectionDate: '2025-07-15',
-    expiryDate: '2026-07-15',
-    daysRemaining: 260,
-    centerName: 'Inspection Conformité Chantier',
-    wilaya: 'Annaba (23)',
-    status: 'VALID',
-    defectCount: 0,
-  },
-  {
-    id: 'EN-05',
-    registrationNumber: '00912-120-31',
-    makeModel: 'Toyota Hilux 2.4 D-4D',
-    category: 'VL',
-    lastInspectionDate: '2025-01-10',
-    expiryDate: '2026-01-10',
-    daysRemaining: 74,
-    centerName: 'Centre ENACTA Es Senia',
-    wilaya: 'Oran (31)',
-    status: 'VALID',
-    defectCount: 0,
-  },
-];
-
-const INITIAL_INSURANCE: InsuranceRecord[] = [
-  {
-    id: 'INS-01',
-    registrationNumber: '00421-116-16',
-    makeModel: 'Renault Trucks K 480',
-    insurer: 'CAAT',
-    policyNumber: 'CAAT-FLT-2026-00481',
-    expiryDate: '2026-12-31',
-    daysRemaining: 429,
-    coverageType: 'TOUS_RISQUES',
-    status: 'VALID',
-  },
-  {
-    id: 'INS-02',
-    registrationNumber: '01892-116-16',
-    makeModel: 'Mercedes-Benz Actros 3340',
-    insurer: 'SAA',
-    policyNumber: 'SAA-EXP-889102-DZ',
-    expiryDate: '2025-11-20',
-    daysRemaining: 23,
-    coverageType: 'TOUS_RISQUES',
-    status: 'WARNING',
-  },
-  {
-    id: 'INS-03',
-    registrationNumber: '08341-118-30',
-    makeModel: 'Shacman F3000 Benne',
-    insurer: 'CASH',
-    policyNumber: 'CASH-CORP-992314-HMD',
-    expiryDate: '2026-06-30',
-    daysRemaining: 245,
-    coverageType: 'TIERS_COLLISION',
-    status: 'VALID',
-  },
-  {
-    id: 'INS-04',
-    registrationNumber: '00912-120-31',
-    makeModel: 'Toyota Hilux 2.4 D-4D',
-    insurer: 'MACIR_VIE',
-    policyNumber: 'MACIR-FLT-110294-ORN',
-    expiryDate: '2025-11-05',
-    daysRemaining: 8,
-    coverageType: 'TOUS_RISQUES',
-    status: 'WARNING',
-  },
-];
-
 const WILAYA_RESTRICTIONS: WilayaRestriction[] = [
   {
     wilayaCode: 16,
@@ -214,10 +100,23 @@ const WILAYA_RESTRICTIONS: WilayaRestriction[] = [
 ];
 
 export default function CompliancePage() {
+  const { isDemoMode } = useDemoMode();
   const [activeTab, setActiveTab] = useState<'ENACTA' | 'INSURANCE' | 'WILAYAS' | 'TAXES'>('ENACTA');
-  const [enactaList, setEnactaList] = useState<EnactaRecord[]>(INITIAL_ENACTA);
-  const [insuranceList, setInsuranceList] = useState<InsuranceRecord[]>(INITIAL_INSURANCE);
+  const [enactaList, setEnactaList] = useState<EnactaRecord[]>([]);
+  const [insuranceList, setInsuranceList] = useState<InsuranceRecord[]>([]);
   const [notification, setNotification] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isDemoMode) {
+      import('@/lib/simulation-sandbox').then((sandbox) => {
+        setEnactaList(sandbox.MOCK_SANDBOX_ENACTA);
+        setInsuranceList(sandbox.MOCK_SANDBOX_INSURANCE);
+      });
+    } else {
+      setEnactaList([]);
+      setInsuranceList([]);
+    }
+  }, [isDemoMode]);
 
   // États pour les modales CRUD
   const [isEnactaModalOpen, setIsEnactaModalOpen] = useState(false);
@@ -566,7 +465,23 @@ export default function CompliancePage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {enactaList.map((item) => (
+                      {enactaList.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} style={{ padding: '3rem 1rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>🛡️</div>
+                            <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.25rem' }}>
+                              Aucun contrôle technique ENACTA enregistré
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--df-text-muted)', marginBottom: '1rem' }}>
+                              Enregistrez une première visite ou activez le mode démo pour explorer la simulation.
+                            </div>
+                            <Button variant="primary" size="sm" onClick={handleOpenAddEnacta}>
+                              + Ajouter un contrôle ENACTA
+                            </Button>
+                          </td>
+                        </tr>
+                      ) : (
+                        enactaList.map((item) => (
                         <tr key={item.id} style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                           <td style={{ padding: '0.85rem 1rem' }}>
                             <div style={{ fontWeight: 700, fontFamily: 'var(--df-font-mono)', color: 'var(--df-text-main)' }}>
@@ -638,7 +553,7 @@ export default function CompliancePage() {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                      )))}
                     </tbody>
                   </table>
                 </div>
@@ -670,7 +585,23 @@ export default function CompliancePage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {insuranceList.map((ins) => (
+                      {insuranceList.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} style={{ padding: '3rem 1rem', textAlign: 'center' }}>
+                            <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>📜</div>
+                            <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.25rem' }}>
+                              Aucune police d&apos;assurance enregistrée
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--df-text-muted)', marginBottom: '1rem' }}>
+                              Enregistrez une première police (CAAT, SAA, CASH, etc.) ou activez le mode démo pour explorer la simulation.
+                            </div>
+                            <Button variant="primary" size="sm" onClick={handleOpenAddInsurance}>
+                              + Ajouter une police d&apos;assurance
+                            </Button>
+                          </td>
+                        </tr>
+                      ) : (
+                        insuranceList.map((ins) => (
                         <tr key={ins.id} style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                           <td style={{ padding: '0.85rem 1rem', fontWeight: 700, fontFamily: 'var(--df-font-mono)' }}>
                             {ins.registrationNumber}
@@ -720,7 +651,7 @@ export default function CompliancePage() {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                      )))}
                     </tbody>
                   </table>
                 </div>

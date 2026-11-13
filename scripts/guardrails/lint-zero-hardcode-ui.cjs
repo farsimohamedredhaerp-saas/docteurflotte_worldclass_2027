@@ -22,6 +22,14 @@ const VIOLATION_PATTERNS = [
     name: 'Déclaration de tableau MOCK_* inline dans une page',
     regex: /(const|let|var)\s+MOCK_[A-Z0-9_]+\s*:\s*[A-Za-z0-9_]+\[\]\s*=/,
   },
+  {
+    name: 'Déclaration de tableau SAMPLE_* inline dans une page',
+    regex: /(const|let|var)\s+SAMPLE_[A-Z0-9_]+\s*:\s*[A-Za-z0-9_]+\[\]\s*=/,
+  },
+  {
+    name: 'Déclaration de tableau d\'actifs ou données INITIAL_* inline dans une page',
+    regex: /(const|let|var)\s+INITIAL_(DRIVERS|UPCOMING|TCO|ENACTA|INSURANCE|RECEIPTS|WORK_ORDERS|ASSETS|VEHICLES)[A-Z0-9_]*\s*(=|:)/,
+  },
 ];
 
 const SCAN_DIR = path.resolve(__dirname, '../../apps/web/src/app');

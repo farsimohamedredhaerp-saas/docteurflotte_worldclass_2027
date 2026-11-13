@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDemoMode } from '../../context/DemoModeContext';
 import { Navbar } from '../../components/navigation/Navbar';
 import { Card } from '../../components/Card';
 import { Badge } from '../../components/Badge';
@@ -40,104 +41,27 @@ export interface AssetTcoRecord {
   status: 'OPTIMAL' | 'ON_TRACK' | 'OVER_BUDGET';
 }
 
-const INITIAL_TCO_DATA: AssetTcoRecord[] = [
-  {
-    id: 'tco-01',
-    registrationNumber: '00421-116-16',
-    makeModel: 'Renault Trucks K 480 6x4',
-    category: 'PL_BENNE',
-    categoryLabel: 'PL Benne Chantier',
-    kmOrHoursPeriod: 6400,
-    unitType: 'km',
-    fuelCostDzd: 220000,
-    maintenanceCostDzd: 85000,
-    driverCostDzd: 110000,
-    tiresAndOtherDzd: 42000,
-    totalCostDzd: 457000,
-    costPerUnitDzd: 71.4,
-    targetBudgetPerUnitDzd: 78.0,
-    variancePercent: -8.5,
-    status: 'OPTIMAL',
-  },
-  {
-    id: 'tco-02',
-    registrationNumber: '01892-116-16',
-    makeModel: 'Mercedes-Benz Actros 3340 S',
-    category: 'PL_TRACTEUR',
-    categoryLabel: 'PL Tracteur Routier',
-    kmOrHoursPeriod: 8900,
-    unitType: 'km',
-    fuelCostDzd: 340000,
-    maintenanceCostDzd: 210000,
-    driverCostDzd: 125000,
-    tiresAndOtherDzd: 68000,
-    totalCostDzd: 743000,
-    costPerUnitDzd: 83.5,
-    targetBudgetPerUnitDzd: 80.0,
-    variancePercent: 4.4,
-    status: 'OVER_BUDGET',
-  },
-  {
-    id: 'tco-03',
-    registrationNumber: 'ENG-23-018-DZ',
-    makeModel: 'Caterpillar 320D',
-    category: 'ENGIN_BTP',
-    categoryLabel: 'Pelle Hydraulique BTP',
-    kmOrHoursPeriod: 165,
-    unitType: 'h',
-    fuelCostDzd: 290000,
-    maintenanceCostDzd: 145000,
-    driverCostDzd: 95000,
-    tiresAndOtherDzd: 32000,
-    totalCostDzd: 562000,
-    costPerUnitDzd: 3406.0,
-    targetBudgetPerUnitDzd: 3600.0,
-    variancePercent: -5.4,
-    status: 'OPTIMAL',
-  },
-  {
-    id: 'tco-04',
-    registrationNumber: '08341-118-30',
-    makeModel: 'Shacman F3000',
-    category: 'PL_BENNE',
-    categoryLabel: 'PL Benne Lourde',
-    kmOrHoursPeriod: 5200,
-    unitType: 'km',
-    fuelCostDzd: 195000,
-    maintenanceCostDzd: 98000,
-    driverCostDzd: 105000,
-    tiresAndOtherDzd: 38000,
-    totalCostDzd: 436000,
-    costPerUnitDzd: 83.8,
-    targetBudgetPerUnitDzd: 85.0,
-    variancePercent: -1.4,
-    status: 'ON_TRACK',
-  },
-  {
-    id: 'tco-05',
-    registrationNumber: '00912-120-31',
-    makeModel: 'Toyota Hilux 2.4 D-4D',
-    category: 'VUL_UTILITAIRE',
-    categoryLabel: 'Pick-up Utilitare 4x4',
-    kmOrHoursPeriod: 4100,
-    unitType: 'km',
-    fuelCostDzd: 68000,
-    maintenanceCostDzd: 24000,
-    driverCostDzd: 75000,
-    tiresAndOtherDzd: 18000,
-    totalCostDzd: 185000,
-    costPerUnitDzd: 45.1,
-    targetBudgetPerUnitDzd: 48.0,
-    variancePercent: -6.0,
-    status: 'OPTIMAL',
-  },
-];
-
 export default function TcoPage() {
-  const [tcoRecords, setTcoRecords] = useState<AssetTcoRecord[]>(INITIAL_TCO_DATA);
+  const { isDemoMode } = useDemoMode();
+  const [tcoRecords, setTcoRecords] = useState<AssetTcoRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [notification, setNotification] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isDemoMode) {
+      setIsLoading(true);
+      import('@/lib/simulation-sandbox')
+        .then((sandbox) => {
+          setTcoRecords(sandbox.MOCK_SANDBOX_TCO);
+        })
+        .finally(() => setIsLoading(false));
+    } else {
+      setTcoRecords([]);
+      setIsLoading(false);
+    }
+  }, [isDemoMode]);
 
   // Modal CRUD state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -494,7 +418,27 @@ export default function TcoPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredData.map((row) => (
+                    {filteredData.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} style={{ padding: '3rem 1rem', textAlign: 'center' }}>
+                          <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>📊</div>
+                          <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.25rem' }}>
+                            {tcoRecords.length === 0 ? 'Aucune fiche TCO enregistrée' : 'Aucun actif ne correspond à ce filtre'}
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--df-text-muted)', marginBottom: '1rem' }}>
+                            {tcoRecords.length === 0
+                              ? 'Créez une première entrée analytique ou activez le mode démo pour visualiser les coûts complets.'
+                              : 'Sélectionnez une autre catégorie.'}
+                          </div>
+                          {tcoRecords.length === 0 && (
+                            <Button variant="primary" size="sm" onClick={handleOpenAdd}>
+                              + Nouvelle Fiche TCO
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredData.map((row) => (
                       <tr key={row.id} style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                         <td style={{ padding: '0.85rem 1rem' }}>
                           <div style={{ fontWeight: 700, color: 'var(--df-text-main)', fontFamily: 'var(--df-font-mono)' }}>
@@ -555,7 +499,7 @@ export default function TcoPage() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    )))}
                   </tbody>
                 </table>
               </div>

@@ -86,70 +86,23 @@ export default function TelematicsPage() {
     const session = AuthClient.getSession();
     setToken(session.token);
 
-    if (isDemoMode || !session.token) {
-      // Données de démonstration télématique simulées
-      setGatewayHealth({
-        connected: true,
-        serverUrl: 'http://localhost:8085 (Traccar Souverain)',
-        deviceCount: 7,
-        activeBindingsCount: 7,
-        lastSyncAt: new Date().toISOString(),
-        queueSize: 0,
-        errorRate: 0.0,
-      });
-      setDevices([
-        {
-          id: 'dev-001',
-          tenantId: 'tenant-demo',
-          uniqueId: '862410051234567',
-          name: 'Teltonika FMC130 (SNVI K480)',
-          model: 'Teltonika FMC130',
-          status: DeviceStatus.ONLINE,
-          lastUpdate: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 'dev-002',
-          tenantId: 'tenant-demo',
-          uniqueId: '865890049876543',
-          name: 'Teltonika FMB920 (Actros 3340)',
-          model: 'Teltonika FMB920',
-          status: DeviceStatus.ONLINE,
-          lastUpdate: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 'dev-003',
-          tenantId: 'tenant-demo',
-          uniqueId: '357890123456789',
-          name: 'Ruptela HCV5 CAN (Hilux 4x4)',
-          model: 'Ruptela HCV5',
-          status: DeviceStatus.ONLINE,
-          lastUpdate: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-        },
-      ]);
-      setFleetLive([
-        {
-          assetId: 'unit-001',
-          assetName: 'Renault Trucks K 480 6x4',
-          assetCode: '00421-116-16',
-          assetCategory: 'HEAVY_TRUCK',
-          currentMeterValue: 284150,
-          deviceId: 'dev-001',
-          deviceUniqueId: '862410051234567',
-          deviceStatus: DeviceStatus.ONLINE,
-          latitude: 36.738,
-          longitude: 3.284,
-          speed: 68,
-          ignition: true,
-          lastRecordedAt: new Date().toISOString(),
-          maintenanceDue: false,
-        },
-      ]);
-      setIsLoading(false);
-    } else {
+    if (isDemoMode) {
+      import('@/lib/simulation-sandbox')
+        .then((sandbox) => {
+          setGatewayHealth(sandbox.MOCK_SANDBOX_GATEWAY_HEALTH);
+          setDevices(sandbox.MOCK_SANDBOX_TELEMATICS_DEVICES);
+          setFleetLive(sandbox.MOCK_SANDBOX_FLEET_LIVE);
+        })
+        .finally(() => setIsLoading(false));
+    } else if (session.token) {
       loadData(session.token);
+    } else {
+      setDevices([]);
+      setFleetLive([]);
+      setBindings([]);
+      setAssets([]);
+      setGatewayHealth(null);
+      setIsLoading(false);
     }
   }, [isDemoMode]);
 

@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useDemoMode } from '../../context/DemoModeContext';
 import { Navbar } from '../../components/navigation/Navbar';
 import { Card } from '../../components/Card';
 import { Badge } from '../../components/Badge';
@@ -122,69 +123,30 @@ const INITIAL_OEM_TEMPLATES: OemMaintenanceTemplate[] = [
   },
 ];
 
-const INITIAL_UPCOMING_PREVENTIVE: UpcomingPreventiveDue[] = [
-  {
-    id: 'due-01',
-    registrationNumber: '01892-116-16',
-    makeModel: 'Mercedes-Benz Actros 3340',
-    templateName: 'Plan Poids Lourds Sévère (25 000 km)',
-    currentCounter: 342900,
-    dueCounter: 342450,
-    remainingCounter: -450,
-    unit: 'km',
-    progressPercent: 101.8,
-    urgency: 'URGENT',
-    assignedSite: 'Rouiba (16)',
-  },
-  {
-    id: 'due-02',
-    registrationNumber: 'ENG-23-018-DZ',
-    makeModel: 'Caterpillar 320D',
-    templateName: 'Cycle BTP PM2 Filtration (350 h)',
-    currentCounter: 512,
-    dueCounter: 500,
-    remainingCounter: -12,
-    unit: 'h',
-    progressPercent: 102.4,
-    urgency: 'URGENT',
-    assignedSite: 'Chantier Annaba (23)',
-  },
-  {
-    id: 'due-03',
-    registrationNumber: '00421-116-16',
-    makeModel: 'Renault Trucks K 480',
-    templateName: 'Plan Poids Lourds Sévère (26 000 km)',
-    currentCounter: 284150,
-    dueCounter: 286000,
-    remainingCounter: 1850,
-    unit: 'km',
-    progressPercent: 92.8,
-    urgency: 'WARNING',
-    assignedSite: 'Ghardaïa (47)',
-  },
-  {
-    id: 'due-04',
-    registrationNumber: '00912-120-31',
-    makeModel: 'Toyota Hilux 2.4 D-4D',
-    templateName: 'Plan Utilitaires 4x4 (7 500 km)',
-    currentCounter: 42100,
-    dueCounter: 45000,
-    remainingCounter: 2900,
-    unit: 'km',
-    progressPercent: 61.3,
-    urgency: 'NOMINAL',
-    assignedSite: 'Oran (31)',
-  },
-];
-
 export default function PreventivePage() {
+  const { isDemoMode } = useDemoMode();
   const [templates, setTemplates] = useState<OemMaintenanceTemplate[]>(INITIAL_OEM_TEMPLATES);
-  const [upcoming, setUpcoming] = useState<UpcomingPreventiveDue[]>(INITIAL_UPCOMING_PREVENTIVE);
+  const [upcoming, setUpcoming] = useState<UpcomingPreventiveDue[]>([]);
+  const [isLoadingUpcoming, setIsLoadingUpcoming] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedUrgency, setSelectedUrgency] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [climateZone, setClimateZone] = useState<'TELL' | 'PLATEAUS' | 'SAHARA'>('SAHARA');
   const [notification, setNotification] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isDemoMode) {
+      setIsLoadingUpcoming(true);
+      import('@/lib/simulation-sandbox')
+        .then((sandbox) => {
+          setUpcoming(sandbox.MOCK_SANDBOX_PREVENTIVE_DUES);
+        })
+        .finally(() => setIsLoadingUpcoming(false));
+    } else {
+      setUpcoming([]);
+      setIsLoadingUpcoming(false);
+    }
+  }, [isDemoMode]);
 
   // État de modal CRUD Plan OEM
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
@@ -711,7 +673,23 @@ export default function PreventivePage() {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                {filteredUpcoming.map((item) => (
+                {filteredUpcoming.length === 0 ? (
+                  <div style={{ gridColumn: '1 / -1', padding: '3rem 1rem', textAlign: 'center', background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: 'var(--df-radius-md)' }}>
+                    <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>🔧</div>
+                    <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.25rem' }}>
+                      {upcoming.length === 0 ? 'Aucune échéance préventive enregistrée' : 'Aucune échéance ne correspond à ce filtre'}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--df-text-muted)', marginBottom: '1rem' }}>
+                      {upcoming.length === 0 ? 'Votre flotte est à jour ou activez le mode démo pour explorer la simulation.' : 'Sélectionnez un autre niveau d\'urgence.'}
+                    </div>
+                    {upcoming.length === 0 && (
+                      <Button variant="primary" size="sm" onClick={() => handleOpenDueModal()}>
+                        + Planifier une première échéance
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  filteredUpcoming.map((item) => (
                   <Card key={item.id}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                       <div>
@@ -808,7 +786,7 @@ export default function PreventivePage() {
                       </button>
                     </div>
                   </Card>
-                ))}
+                )))}
               </div>
             </section>
 

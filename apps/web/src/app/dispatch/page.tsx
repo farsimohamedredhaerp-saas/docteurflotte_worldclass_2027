@@ -20,161 +20,15 @@ import {
 } from '@/lib/api-fleet-intelligence';
 import { PrintableMissionOrder } from '@/components/dispatch/PrintableMissionOrder';
 
-// Jeu de données démo ultra-réaliste conforme Algérie (SNVI, Renault Kerax, Shacman, Mercedes Actros)
-const SAMPLE_VEHICLES: VehicleStateDto[] = [
-  {
-    vehicleId: 'veh-kerax-440',
-    registrationPlate: '01492-319-16',
-    makeModel: 'Renault Kerax 440 DXi 6x4',
-    category: AssetCategory.TRACTOR_TRAILER,
-    maxPayloadTons: 32.0,
-    grossVehicleWeightTons: 44.0,
-    fuelType: 'DIESEL',
-    refConsumptionL100Km: 34.5,
-    hasWorkingReefer: false,
-    hasWorkingPto: true,
-    currentWilayaCode: 16, // Alger
-    currentLat: 36.7538,
-    currentLon: 3.0588,
-    currentOdometerKm: 214500,
-    currentEngineHours: 6820,
-    annualTargetKm: 90000,
-    ytdDrivenKm: 68000,
-    vehicleHealthIndex: 88.5,
-    batterySohPct: 91.0,
-    coolingEwmaResidualC: 3.2,
-    dispatchStatus: DispatchStatus.AVAILABLE,
-    documents: [
-      {
-        docType: DocumentTypeDZ.CONTROLE_TECHNIQUE_ENACTA,
-        docNumber: 'ENACTA-16-2026-9912',
-        issuedAt: '2026-01-15',
-        expiresAt: '2026-12-31',
-      },
-      {
-        docType: DocumentTypeDZ.ASSURANCE_RC_CATNAT,
-        docNumber: 'SAA-POL-2026-8841',
-        issuedAt: '2026-01-01',
-        expiresAt: '2026-12-31',
-      },
-    ],
-    subsystemRuls: [],
-    activeDtcs: [],
-  },
-  {
-    vehicleId: 'veh-actros-3340',
-    registrationPlate: '09812-114-30',
-    makeModel: 'Mercedes-Benz Actros 3340 6x4',
-    category: AssetCategory.TRACTOR_TRAILER,
-    maxPayloadTons: 30.0,
-    grossVehicleWeightTons: 40.0,
-    fuelType: 'DIESEL',
-    refConsumptionL100Km: 32.0,
-    hasWorkingReefer: false,
-    hasWorkingPto: true,
-    currentWilayaCode: 30, // Ouargla
-    currentLat: 31.9522,
-    currentLon: 5.3283,
-    currentOdometerKm: 184000,
-    currentEngineHours: 5410,
-    annualTargetKm: 85000,
-    ytdDrivenKm: 59000,
-    vehicleHealthIndex: 92.0,
-    batterySohPct: 94.0,
-    coolingEwmaResidualC: 2.1,
-    dispatchStatus: DispatchStatus.AVAILABLE,
-    documents: [
-      {
-        docType: DocumentTypeDZ.CONTROLE_TECHNIQUE_ENACTA,
-        docNumber: 'ENACTA-30-2026-4412',
-        issuedAt: '2026-03-01',
-        expiresAt: '2026-12-31',
-      },
-      {
-        docType: DocumentTypeDZ.ASSURANCE_RC_CATNAT,
-        docNumber: 'CAAT-POL-2026-1190',
-        issuedAt: '2026-01-01',
-        expiresAt: '2026-12-31',
-      },
-    ],
-    subsystemRuls: [],
-    activeDtcs: [],
-  },
-  {
-    vehicleId: 'veh-shacman-f3000-blocked',
-    registrationPlate: '04512-120-19',
-    makeModel: 'Shacman F3000 Benne 8x4 (Bloqué)',
-    category: AssetCategory.HEAVY_TRUCK_RIGID,
-    maxPayloadTons: 28.0,
-    grossVehicleWeightTons: 38.0,
-    fuelType: 'DIESEL',
-    refConsumptionL100Km: 38.0,
-    hasWorkingReefer: false,
-    hasWorkingPto: true,
-    currentWilayaCode: 19, // Sétif
-    currentLat: 36.1911,
-    currentLon: 5.4137,
-    currentOdometerKm: 289000,
-    currentEngineHours: 8940,
-    annualTargetKm: 95000,
-    ytdDrivenKm: 82000,
-    vehicleHealthIndex: 44.0, // VHI CRITIQUE
-    batterySohPct: 62.0,
-    coolingEwmaResidualC: 13.5, // SURCHAUFFE
-    dispatchStatus: DispatchStatus.BLOCKED_SAFETY,
-    documents: [
-      {
-        docType: DocumentTypeDZ.CONTROLE_TECHNIQUE_ENACTA,
-        docNumber: 'ENACTA-19-2025-0012',
-        issuedAt: '2025-06-01',
-        expiresAt: '2025-12-31', // EXPIRÉ
-      },
-    ],
-    subsystemRuls: [],
-    activeDtcs: [{ code: 'SPN 110 FMI 0', severity: 'CRITICAL_STOP', description: 'Surchauffe culasse EWMA >= 11°C' }],
-  },
-];
-
-const SAMPLE_DRIVERS: DriverStateDto[] = [
-  {
-    driverId: 'drv-karim-b',
-    fullName: 'Karim Benali',
-    phoneDz: '+213 550 12 34 56',
-    licenseCategories: [LicenseCategoryDZ.C2, LicenseCategoryDZ.E],
-    hasBrevetProfessionnel: true,
-    hasAdrHazmatCert: true,
-    currentWilayaCode: 16,
-    continuousDrivingHours: 1.5,
-    dailyDrivingHoursToday: 3.5,
-    restHoursLast24h: 11.0,
-    safetyScore: 94.0,
-    isAvailable: true,
-  },
-  {
-    driverId: 'drv-mourad-z',
-    fullName: 'Mourad Ziani',
-    phoneDz: '+213 661 98 76 54',
-    licenseCategories: [LicenseCategoryDZ.C2, LicenseCategoryDZ.E],
-    hasBrevetProfessionnel: true,
-    hasAdrHazmatCert: false,
-    currentWilayaCode: 30,
-    continuousDrivingHours: 0.5,
-    dailyDrivingHoursToday: 2.0,
-    restHoursLast24h: 12.0,
-    safetyScore: 91.0,
-    isAvailable: true,
-  },
-];
-
 export default function DispatchPage() {
   const { isDemoMode, isGuest, session } = useDemoMode();
-  const [vehicles, setVehicles] = useState<VehicleStateDto[]>(SAMPLE_VEHICLES);
-  const [drivers, setDrivers] = useState<DriverStateDto[]>(SAMPLE_DRIVERS);
+  const [vehicles, setVehicles] = useState<VehicleStateDto[]>([]);
+  const [drivers, setDrivers] = useState<DriverStateDto[]>([]);
   const [loadingFleet, setLoadingFleet] = useState<boolean>(false);
 
   const [selectedSector, setSelectedSector] = useState<IndustrySector>(IndustrySector.TRANSPORT);
-  const [selectedVehicleId, setSelectedVehicleId] = useState<string>('veh-kerax-440');
-  const [selectedDriverId, setSelectedDriverId] = useState<string>('drv-karim-b');
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string>('');
+  const [selectedDriverId, setSelectedDriverId] = useState<string>('');
 
   const [originName, setOriginName] = useState<string>('Plateforme Logistique Rouïba (Zone Industrielle)');
   const [originWilaya, setOriginWilaya] = useState<number>(16);
@@ -201,11 +55,26 @@ export default function DispatchPage() {
   const [verificationOutput, setVerificationOutput] = useState<any>(null);
 
   useEffect(() => {
-    if (isDemoMode || !session.token) {
-      setVehicles(SAMPLE_VEHICLES);
-      setDrivers(SAMPLE_DRIVERS);
-      setSelectedVehicleId(SAMPLE_VEHICLES[0].vehicleId);
-      setSelectedDriverId(SAMPLE_DRIVERS[0].driverId);
+    if (isDemoMode) {
+      setLoadingFleet(true);
+      import('@/lib/simulation-sandbox')
+        .then((sandbox) => {
+          const mockVehicles = sandbox.getMockSandboxDispatchVehicles() as unknown as VehicleStateDto[];
+          const mockDrivers = sandbox.MOCK_SANDBOX_DISPATCH_DRIVERS as unknown as DriverStateDto[];
+          setVehicles(mockVehicles);
+          setDrivers(mockDrivers);
+          setSelectedVehicleId(mockVehicles[0]?.vehicleId || '');
+          setSelectedDriverId(mockDrivers[0]?.driverId || '');
+        })
+        .finally(() => setLoadingFleet(false));
+      return;
+    }
+
+    if (!session.token) {
+      setVehicles([]);
+      setDrivers([]);
+      setSelectedVehicleId('');
+      setSelectedDriverId('');
       return;
     }
 
@@ -240,7 +109,7 @@ export default function DispatchPage() {
             activeDtcs: [],
           }));
           setVehicles(mapped);
-          setSelectedVehicleId(mapped[0].vehicleId);
+          setSelectedVehicleId(mapped[0]?.vehicleId || '');
         } else {
           setVehicles([]);
           setSelectedVehicleId('');
@@ -257,6 +126,11 @@ export default function DispatchPage() {
   const selectedDriver = drivers.find((d) => d.driverId === selectedDriverId) || drivers[0];
 
   const handleEvaluateDispatch = async () => {
+    if (vehicles.length === 0 || !selectedVehicle) {
+      alert("Aucun véhicule d'exploitation disponible pour l'évaluation de mission.");
+      return;
+    }
+
     setIsEvaluating(true);
     setDecisionResult(null);
     setActiveMissionOrder(null);
@@ -429,6 +303,56 @@ export default function DispatchPage() {
       {activeMissionOrder && (
         <div style={{ marginBottom: '32px' }}>
           <PrintableMissionOrder order={activeMissionOrder} onClose={() => setActiveMissionOrder(null)} />
+        </div>
+      )}
+
+      {/* BANNIÈRE PARC VIERGE */}
+      {vehicles.length === 0 && !loadingFleet && (
+        <div
+          style={{
+            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, var(--df-bg-surface-1) 100%)',
+            border: '1px solid var(--df-accent-cyan)',
+            borderRadius: '14px',
+            padding: '24px 28px',
+            marginBottom: '24px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '16px',
+            boxShadow: 'var(--df-shadow-sm)',
+          }}
+        >
+          <div style={{ maxWidth: '640px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+              <span style={{ fontSize: '1.4rem' }}>🚛</span>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
+                Votre parc est vierge
+              </h3>
+            </div>
+            <p style={{ fontSize: '0.825rem', color: 'var(--df-text-muted)', margin: 0, lineHeight: 1.5 }}>
+              Aucun véhicule d&apos;exploitation n&apos;est enregistré dans votre organisation. Pour planifier un ordre de mission réglementaire, ajoutez un véhicule dans l&apos;inventaire ou basculez en mode démo.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <Link href="/assets" style={{ textDecoration: 'none' }}>
+              <button
+                type="button"
+                style={{
+                  padding: '9px 16px',
+                  borderRadius: '8px',
+                  background: 'var(--df-accent-cyan)',
+                  color: '#000',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                + Ajouter un véhicule
+              </button>
+            </Link>
+          </div>
         </div>
       )}
 
@@ -651,17 +575,17 @@ export default function DispatchPage() {
             {/* BOUTON D'ÉVALUATION */}
             <button
               onClick={handleEvaluateDispatch}
-              disabled={isEvaluating}
+              disabled={isEvaluating || vehicles.length === 0 || !selectedVehicle}
               style={{
                 width: '100%',
                 padding: '12px 18px',
                 borderRadius: '8px',
                 border: 'none',
-                background: isEvaluating ? '#64748b' : 'var(--df-accent-blue)',
+                background: isEvaluating || vehicles.length === 0 || !selectedVehicle ? '#64748b' : 'var(--df-accent-blue)',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '14px',
-                cursor: isEvaluating ? 'not-allowed' : 'pointer',
+                cursor: isEvaluating || vehicles.length === 0 || !selectedVehicle ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -670,8 +594,14 @@ export default function DispatchPage() {
                 transition: 'all 0.15s ease',
               }}
             >
-              <span>{isEvaluating ? '⏳' : '⚡'}</span>
-              <span>{isEvaluating ? 'Évaluation des 4 Portes Réglementaires...' : 'Évaluer Éligibilité Réglementaire (Gate DZ)'}</span>
+              <span>{isEvaluating ? '⏳' : vehicles.length === 0 ? '🚫' : '⚡'}</span>
+              <span>
+                {isEvaluating
+                  ? 'Évaluation des 4 Portes Réglementaires...'
+                  : vehicles.length === 0
+                  ? 'Aucun véhicule disponible'
+                  : 'Évaluer Éligibilité Réglementaire (Gate DZ)'}
+              </span>
             </button>
           </div>
         </div>

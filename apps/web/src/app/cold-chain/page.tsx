@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useDemoMode } from '../../context/DemoModeContext';
 import { Navbar } from '../../components/navigation/Navbar';
 import { Card } from '../../components/Card';
 import { Badge } from '../../components/Badge';
@@ -15,28 +16,29 @@ import {
 } from '../../lib/api-fleet-intelligence';
 
 export default function ColdChainPage() {
+  const { isDemoMode, session } = useDemoMode();
   const [reefers, setReefers] = useState<ReeferLiveStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterCargo, setFilterCargo] = useState<string>('ALL');
 
-  useEffect(() => {
-    loadReefers();
-    // Rafraîchissement automatique toutes les 30 secondes
-    const interval = setInterval(loadReefers, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadReefers = async () => {
+  const loadReefers = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await FleetIntelligenceClient.getColdChainLive();
+      const data = await FleetIntelligenceClient.getColdChainLive(session.token || undefined, isDemoMode);
       setReefers(data);
     } catch (err) {
       console.error('Erreur télémétrie chaîne du froid:', err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session.token, isDemoMode]);
+
+  useEffect(() => {
+    loadReefers();
+    // Rafraîchissement automatique toutes les 30 secondes
+    const interval = setInterval(loadReefers, 30000);
+    return () => clearInterval(interval);
+  }, [loadReefers]);
 
   const filteredReefers = reefers.filter((r) => {
     if (filterCargo === 'ALL') return true;
@@ -251,8 +253,36 @@ export default function ColdChainPage() {
           }}
         >
           {filteredReefers.length === 0 ? (
-            <div style={{ gridColumn: '1 / -1', padding: '3rem', textAlign: 'center', color: 'var(--df-text-muted)' }}>
-              Aucun groupe frigorifique correspondant à la sélection.
+            <div
+              style={{
+                gridColumn: '1 / -1',
+                padding: '3.5rem 1.5rem',
+                textAlign: 'center',
+                background: 'var(--df-bg-surface-1)',
+                border: '1px solid var(--df-border-subtle)',
+                borderRadius: 'var(--df-radius-md)',
+              }}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>❄️</div>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--df-text-main)', margin: '0 0 0.5rem 0' }}>
+                {reefers.length === 0
+                  ? 'Aucun groupe frigorifique surveillé'
+                  : 'Aucun groupe ne correspond à cette denrée'}
+              </h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--df-text-muted)', margin: '0 0 1.25rem 0', maxWidth: '520px', marginLeft: 'auto', marginRight: 'auto' }}>
+                {reefers.length === 0
+                  ? 'Votre parc ne comporte aucun groupe frigorifique actif. Pour tester la surveillance ATP et HACCP, basculez en mode démo ou déclarez un groupe frigorifique dans vos actifs.'
+                  : 'Modifiez le filtre de cargaison sélectionné.'}
+              </p>
+              {reefers.length === 0 && (
+                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                  <Link href="/assets" style={{ textDecoration: 'none' }}>
+                    <Button variant="primary" size="sm">
+                      + Déclarer un Actif Frigorifique
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
           ) : (
             filteredReefers.map((reefer) => {

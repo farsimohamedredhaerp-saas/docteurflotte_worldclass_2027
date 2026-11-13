@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useDemoMode } from '../../context/DemoModeContext';
 import { Navbar } from '../../components/navigation/Navbar';
 import { Card } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
 import { MetricCard } from '../../components/MetricCard';
-import { AuthClient } from '../../lib/api-auth';
 import {
   FleetIntelligenceClient,
   FleetEcoSummary,
@@ -21,6 +21,7 @@ import {
 } from '../../components/decisions';
 
 export default function EcoDrivingPage() {
+  const { isDemoMode, session } = useDemoMode();
   const [summary, setSummary] = useState<FleetEcoSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [filterSeverity, setFilterSeverity] = useState<string>('ALL');
@@ -30,22 +31,21 @@ export default function EcoDrivingPage() {
   const [proofModalData, setProofModalData] = useState<CalculationProofData | null>(null);
   const [isProofModalOpen, setIsProofModalOpen] = useState(false);
 
-  useEffect(() => {
-    loadSummary();
-  }, []);
-
-  const loadSummary = async () => {
+  const loadSummary = useCallback(async () => {
     setIsLoading(true);
     try {
-      const session = AuthClient.getSession();
-      const data = await FleetIntelligenceClient.getEcoDrivingSummary(session.token || undefined);
+      const data = await FleetIntelligenceClient.getEcoDrivingSummary(session.token || undefined, isDemoMode);
       setSummary(data);
     } catch (err) {
       console.error('Erreur chargement éco-conduite:', err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session.token, isDemoMode]);
+
+  useEffect(() => {
+    loadSummary();
+  }, [loadSummary]);
 
   const activeDieselPrice = summary?.activeFuelPriceDzd ?? 0;
 
