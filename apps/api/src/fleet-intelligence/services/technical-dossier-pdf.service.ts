@@ -49,13 +49,14 @@ export class TechnicalDossierPdfService {
       input.dossierReference ||
       `DET-CARB-${input.vehiclePlate.replace(/[^A-Z0-9]/gi, '')}-${Date.now().toString().slice(-6)}`;
 
-    const wilaya = WILAYAS_BY_CODE[input.wilayaCode]?.name || `Wilaya ${input.wilayaCode}`;
+    const wilaya =
+      WILAYAS_BY_CODE[input.wilayaCode]?.nameFr || `Wilaya ${input.wilayaCode}`;
     const unitPrice =
       input.officialUnitPriceDzd ||
       (input.fuelType === 'GASOIL'
         ? NAFTAL_FUEL_PRICES_DZD.GASOIL
         : input.fuelType === 'SIRGHAZ'
-          ? NAFTAL_FUEL_PRICES_DZD.SIRGHAZ
+          ? NAFTAL_FUEL_PRICES_DZD.SIRGHAZ_GPL
           : NAFTAL_FUEL_PRICES_DZD.ESSENCE_SANS_PLOMB);
 
     const prejudiceDzd = Math.round(input.netSiphonedVolumeLiters * unitPrice * 100) / 100;
