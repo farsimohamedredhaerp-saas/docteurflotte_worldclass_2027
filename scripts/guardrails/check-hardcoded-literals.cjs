@@ -27,6 +27,8 @@ const IGNORED_PATHS = [
   'test',
   '.spec.ts',
   '.test.ts',
+  '.mock.ts',
+  'simulation-sandbox',
   'demoFallbackData.ts',
   'useTelemetryStream.ts',
   'FleetHighDensityTable.tsx',

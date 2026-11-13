@@ -28,141 +28,7 @@ import {
   IconAlertTriangle,
   IconTruck,
 } from '../../components/navigation/TechIcons';
-
-const DEMO_FUEL_ASSETS: Asset[] = [
-  {
-    id: 'unit-001',
-    tenantId: 'tenant-demo',
-    name: 'Renault Trucks K 480 6x4 Heavy Tipper',
-    code: '00421-116-16',
-    category: AssetCategory.HEAVY_TRUCK,
-    brand: 'Renault Trucks',
-    model: 'K 480 6x4',
-    status: AssetStatus.OPERATIONAL,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ODOMETER_KM,
-    currentMeterValue: 284150,
-    createdAt: '2026-01-15T08:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-  {
-    id: 'unit-002',
-    tenantId: 'tenant-demo',
-    name: 'Mercedes-Benz Actros 3340 6x4',
-    code: '00812-109-09',
-    category: AssetCategory.HEAVY_TRUCK,
-    brand: 'Mercedes-Benz',
-    model: 'Actros 3340',
-    status: AssetStatus.MAINTENANCE_REQUIRED,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ODOMETER_KM,
-    currentMeterValue: 342900,
-    createdAt: '2026-02-10T09:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-  {
-    id: 'unit-004',
-    tenantId: 'tenant-demo',
-    name: 'Toyota Hilux 2.4 D-4D 4x4 Double Cabine',
-    code: '00543-118-16',
-    category: AssetCategory.ROAD_VEHICLE,
-    brand: 'Toyota',
-    model: 'Hilux 2.4 D-4D',
-    status: AssetStatus.OPERATIONAL,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ODOMETER_KM,
-    currentMeterValue: 68400,
-    createdAt: '2026-04-12T11:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-];
-
-const DEMO_RECEIPTS: FuelReceiptScanResult[] = [
-  {
-    receiptId: 'REC-DEMO-001',
-    assetId: 'unit-001',
-    assetName: 'Renault Trucks K 480 6x4 Heavy Tipper',
-    assetCode: '00421-116-16',
-    stationName: 'Station Naftal Chéraga (RN41)',
-    stationWilaya: '16 - Alger',
-    fuelType: 'Gasoil',
-    liters: 140.0,
-    unitPriceDzd: 31.00,
-    totalAmountDzd: 4340.0,
-    dateTime: '28/10/2026 11:45',
-    receiptConfidence: 99,
-    status: 'APPROVED',
-    createdAt: '2026-10-28T11:50:00Z',
-    reconciliation: {
-      reconciliationStatus: 'VERIFIED',
-      distanceToStationMeters: 28,
-      isLocationVerified: true,
-      tankLevelBeforeLiters: 60.0,
-      tankLevelAfterLiters: 198.5,
-      telematicsLevelDeltaLiters: 138.5,
-      varianceLiters: 1.5,
-      confidenceScore: 99,
-      fraudRiskProbability: 0.01,
-      explanation: 'Plein certifié conforme. Présence vérifiée en station Naftal et hausse jauge équivalente au ticket.',
-    },
-  },
-  {
-    receiptId: 'REC-DEMO-002',
-    assetId: 'unit-002',
-    assetName: 'Mercedes-Benz Actros 3340 6x4',
-    assetCode: '00812-109-09',
-    stationName: 'Station Naftal Rouiba (ZI SNVI)',
-    stationWilaya: '16 - Alger',
-    fuelType: 'Gasoil',
-    liters: 220.0,
-    unitPriceDzd: 31.00,
-    totalAmountDzd: 6820.0,
-    dateTime: '27/10/2026 16:30',
-    receiptConfidence: 98,
-    status: 'APPROVED',
-    createdAt: '2026-10-27T16:35:00Z',
-    reconciliation: {
-      reconciliationStatus: 'VERIFIED',
-      distanceToStationMeters: 45,
-      isLocationVerified: true,
-      tankLevelBeforeLiters: 40.0,
-      tankLevelAfterLiters: 257.0,
-      telematicsLevelDeltaLiters: 217.0,
-      varianceLiters: 3.0,
-      confidenceScore: 98,
-      fraudRiskProbability: 0.02,
-      explanation: 'Plein vérifié avec succès.',
-    },
-  },
-  {
-    receiptId: 'REC-DEMO-003',
-    assetId: 'unit-001',
-    assetName: 'Renault Trucks K 480 6x4 Heavy Tipper',
-    assetCode: '00421-116-16',
-    stationName: 'Station Naftal Relais RN1 Ghardaïa',
-    stationWilaya: '47 - Ghardaïa',
-    fuelType: 'Gasoil',
-    liters: 250.0,
-    unitPriceDzd: 31.00,
-    totalAmountDzd: 7750.0,
-    dateTime: '28/10/2026 08:15',
-    receiptConfidence: 96,
-    status: 'PENDING_APPROVAL',
-    createdAt: '2026-10-28T08:20:00Z',
-    reconciliation: {
-      reconciliationStatus: 'POTENTIAL_FRAUD',
-      distanceToStationMeters: 62,
-      isLocationVerified: true,
-      tankLevelBeforeLiters: 50.0,
-      tankLevelAfterLiters: 215.0,
-      telematicsLevelDeltaLiters: 165.0,
-      varianceLiters: 85.0,
-      confidenceScore: 45,
-      fraudRiskProbability: 0.88,
-      explanation: 'Écart de 85.0 L entre le ticket Naftal et la jauge CAN Traccar (Seuil tolérance 5.0 L dépassé - CUSUM)',
-    },
-  },
-];
+import { getSimulationAssets, getSimulationReceipts } from '@/lib/simulation-sandbox';
 
 export default function FuelScannerPage() {
   const { isDemoMode, isGuest } = useDemoMode();
@@ -315,17 +181,44 @@ export default function FuelScannerPage() {
   };
 
   useEffect(() => {
+    let isCancelled = false;
     const s = AuthClient.getSession();
     setSessionToken(s.token);
 
-    if (isDemoMode || !s.token) {
-      setAssets(DEMO_FUEL_ASSETS);
-      setSelectedAssetId(DEMO_FUEL_ASSETS[0].id);
-      setManualForm((prev) => ({ ...prev, assetId: DEMO_FUEL_ASSETS[0].id }));
-      setRecentReceipts(DEMO_RECEIPTS);
-    } else {
-      loadData(s.token);
+    async function initData() {
+      if (isDemoMode) {
+        try {
+          const [sandboxAssets, sandboxReceipts] = await Promise.all([
+            getSimulationAssets(),
+            getSimulationReceipts(),
+          ]);
+          if (!isCancelled) {
+            setAssets(sandboxAssets);
+            if (sandboxAssets.length > 0) {
+              setSelectedAssetId(sandboxAssets[0].id);
+              setManualForm((prev) => ({ ...prev, assetId: sandboxAssets[0].id }));
+            }
+            setRecentReceipts(sandboxReceipts);
+          }
+        } catch {
+          if (!isCancelled) {
+            setAssets([]);
+            setRecentReceipts([]);
+          }
+        }
+      } else if (s.token) {
+        await loadData(s.token);
+      } else {
+        setAssets([]);
+        setRecentReceipts([]);
+        setSelectedAssetId('');
+      }
     }
+
+    initData();
+    return () => {
+      isCancelled = true;
+    };
   }, [isDemoMode]);
 
   const loadData = async (token: string) => {
@@ -1013,7 +906,24 @@ export default function FuelScannerPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredReceipts.map((rcpt) => (
+                    {filteredReceipts.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--df-text-muted)' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '1.5rem' }}>⛽</span>
+                            <span style={{ fontWeight: 600 }}>
+                              {isDemoMode
+                                ? 'Aucun reçu de simulation ne correspond à ce filtre.'
+                                : 'Aucun ticket Naftal enregistré dans votre parc.'}
+                            </span>
+                            <span style={{ fontSize: '0.78rem' }}>
+                              Scannez un ticket Naftal ou importez un relevé pour déclencher la réconciliation CUSUM.
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredReceipts.map((rcpt) => (
                       <tr key={rcpt.receiptId} style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                         <td style={{ padding: '0.65rem 0.85rem', fontWeight: 700, color: 'var(--df-text-main)' }}>
                           {rcpt.assetName}
@@ -1083,7 +993,7 @@ export default function FuelScannerPage() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    )))}
                   </tbody>
                 </table>
               </div>

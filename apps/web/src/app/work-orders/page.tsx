@@ -38,133 +38,7 @@ import {
   IconCheck,
   IconClock,
 } from '../../components/navigation/TechIcons';
-
-const DEMO_WO_ASSETS: Asset[] = [
-  {
-    id: 'unit-001',
-    tenantId: 'tenant-demo',
-    name: 'Renault Trucks K 480 6x4 Heavy Tipper',
-    code: '00421-116-16',
-    category: AssetCategory.HEAVY_TRUCK,
-    brand: 'Renault Trucks',
-    model: 'K 480 6x4',
-    status: AssetStatus.OPERATIONAL,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ODOMETER_KM,
-    currentMeterValue: 284150,
-    createdAt: '2026-01-15T08:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-  {
-    id: 'unit-002',
-    tenantId: 'tenant-demo',
-    name: 'Mercedes-Benz Actros 3340 6x4',
-    code: '00812-109-09',
-    category: AssetCategory.HEAVY_TRUCK,
-    brand: 'Mercedes-Benz',
-    model: 'Actros 3340',
-    status: AssetStatus.MAINTENANCE_REQUIRED,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ODOMETER_KM,
-    currentMeterValue: 342900,
-    createdAt: '2026-02-10T09:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-  {
-    id: 'unit-003',
-    tenantId: 'tenant-demo',
-    name: 'Caterpillar 320D Pelle Hydraulique',
-    code: 'CAT-DZ-320D-47',
-    category: AssetCategory.CONSTRUCTION_EQUIPMENT,
-    brand: 'Caterpillar',
-    model: '320D Hydraulic Excavator',
-    status: AssetStatus.OPERATIONAL,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ENGINE_HOURS,
-    currentMeterValue: 6420,
-    createdAt: '2026-03-01T10:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-];
-
-const DEMO_WORK_ORDERS: WorkOrder[] = [
-  {
-    id: 'wo-demo-01',
-    tenantId: 'tenant-demo',
-    assetId: 'unit-001',
-    assetName: 'Renault Trucks K 480 6x4 Heavy Tipper',
-    assetCode: '00421-116-16',
-    title: 'Vidange moteur intégrale & Remplacement cartouches filtres',
-    description: 'Remplacement huile 15W40 conforme Renault RLD-3 et filtre à gazole après stress saharien.',
-    priority: WorkOrderPriority.HIGH,
-    status: WorkOrderStatus.COMPLETED,
-    triggerMeterValue: 280000,
-    actualLaborHours: 3.5,
-    partsCost: 38000,
-    totalCost: 43250,
-    downtimeHours: 4.0,
-    assignedTo: 'Mourad Atelier Rouiba',
-    resetAlgorithmKey: 'OIL_ARRHENIUS',
-    oemPartReference: 'RT-7421561278',
-    mathematicalResetCertified: true,
-    recalculatedVhi: 96,
-    completedAt: '2026-10-28T10:15:00Z',
-    createdAt: '2026-10-27T08:00:00Z',
-    updatedAt: '2026-10-28T10:15:00Z',
-  },
-  {
-    id: 'wo-demo-02',
-    tenantId: 'tenant-demo',
-    assetId: 'unit-002',
-    assetName: 'Mercedes-Benz Actros 3340 6x4',
-    assetCode: '00812-109-09',
-    title: 'Remplacement plaquettes de freins train arrière & Purge',
-    description: 'Modèle physique Archard indiquant résiduel < 2.5 mm. Intervention préventive avant mission.',
-    priority: WorkOrderPriority.CRITICAL,
-    status: WorkOrderStatus.IN_PROGRESS,
-    triggerMeterValue: 341500,
-    estimatedLaborHours: 4.0,
-    assignedTo: 'Karim Ziani (Mécanicien)',
-    resetAlgorithmKey: 'BRAKE_ARCHARD',
-    oemPartReference: 'MB-A0064201120',
-    createdAt: '2026-10-28T07:30:00Z',
-    updatedAt: '2026-10-28T09:00:00Z',
-  },
-  {
-    id: 'wo-demo-03',
-    tenantId: 'tenant-demo',
-    assetId: 'unit-003',
-    assetName: 'Caterpillar 320D Pelle Hydraulique',
-    assetCode: 'CAT-DZ-320D-47',
-    title: 'Inspection 500h & Remplacement cartouche filtration hydraulique',
-    description: 'Prévention colmatage pompe principale sur chantier terrassement.',
-    priority: WorkOrderPriority.MEDIUM,
-    status: WorkOrderStatus.SCHEDULED,
-    triggerMeterValue: 6500,
-    estimatedLaborHours: 2.5,
-    assignedTo: 'Atelier Mobile Sud',
-    createdAt: '2026-10-28T11:00:00Z',
-    updatedAt: '2026-10-28T11:00:00Z',
-  },
-  {
-    id: 'ot-dvir-99104',
-    tenantId: 'tenant-demo',
-    assetId: 'unit-002',
-    assetName: 'Mercedes-Benz Actros 3340 6x4',
-    assetCode: '00812-109-09',
-    title: '🛑 CONSIGNATION DVIR : Hernie Pneu AVG & Chute Pression Air',
-    description: 'Ordre de travail automatique généré suite échec critique inspection DVIR mobile (#dvir-demo-02). Véhicule sous interdiction formelle de départ (HARD BLOCK dispatch). Remplacement pneu 315/80R22.5 et cartouche déshydratante sécheur requis.',
-    priority: WorkOrderPriority.CRITICAL,
-    status: WorkOrderStatus.SCHEDULED,
-    triggerMeterValue: 342900,
-    estimatedLaborHours: 3.5,
-    assignedTo: 'Équipe Pneumatique & Freinage Rouiba',
-    resetAlgorithmKey: 'BRAKE_ARCHARD',
-    oemPartReference: 'MICHELIN-315-80-X-WORKS',
-    createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-  },
-];
+import { getSimulationWorkOrders, getSimulationAssets } from '@/lib/simulation-sandbox';
 
 export default function WorkOrdersPage() {
   const router = useRouter();
@@ -311,16 +185,46 @@ export default function WorkOrdersPage() {
   };
 
   useEffect(() => {
+    let isCancelled = false;
     const session = AuthClient.getSession();
     setToken(session.token);
 
-    if (isDemoMode || !session.token) {
-      setWorkOrders(DEMO_WORK_ORDERS);
-      setAssets(DEMO_WO_ASSETS);
-      setIsLoading(false);
-    } else {
+    if (isDemoMode) {
+      (async () => {
+        try {
+          const [sandboxWos, sandboxAssets] = await Promise.all([
+            getSimulationWorkOrders(),
+            getSimulationAssets(),
+          ]);
+          if (!isCancelled) {
+            setWorkOrders(sandboxWos);
+            setAssets(sandboxAssets);
+            if (sandboxAssets.length > 0 && !newWo.assetId) {
+              setNewWo((prev) => ({ ...prev, assetId: sandboxAssets[0].id }));
+            }
+          }
+        } catch {
+          if (!isCancelled) {
+            setWorkOrders([]);
+            setAssets([]);
+          }
+        } finally {
+          if (!isCancelled) {
+            setIsLoading(false);
+          }
+        }
+      })();
+    } else if (session.token) {
       loadData(session.token);
+    } else {
+      setWorkOrders([]);
+      setAssets([]);
+      setIsLoading(false);
     }
+
+    return () => {
+      isCancelled = true;
+    };
   }, [isDemoMode]);
 
   const handleCreateWo = async (e: React.FormEvent) => {

@@ -95,6 +95,7 @@ export class FleetIntelligenceClient {
   static async evaluateAndAssign(
     payload: DispatchEvaluationPayloadDto,
     token?: string,
+    isDemo = false,
   ): Promise<DispatchDecisionResult> {
     try {
       const headers: Record<string, string> = {
@@ -115,6 +116,10 @@ export class FleetIntelligenceClient {
       }
     } catch {
       // Repli sur le simulateur ADS autonome local si le backend NestJS n'est pas joignable
+    }
+
+    if (!isDemo) {
+      throw new Error('Échec de la communication avec le moteur décisionnel ADS.');
     }
 
     return this.simulateLocalDispatch(payload);
@@ -163,7 +168,7 @@ export class FleetIntelligenceClient {
   /**
    * Étape 1 : Récupération du résumé Éco-Conduite & Gaspillage Naftal
    */
-  static async getEcoDrivingSummary(token?: string): Promise<FleetEcoSummary> {
+  static async getEcoDrivingSummary(token?: string, isDemo = false): Promise<FleetEcoSummary> {
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -178,6 +183,23 @@ export class FleetIntelligenceClient {
       }
     } catch {
       // Repli simulateur local déterministe
+    }
+
+    if (!isDemo) {
+      return {
+        tenantId: '',
+        period: 'MONTH',
+        totalFleetDistanceKm: 0,
+        totalIdlingHours: 0,
+        totalWastedFuelLiters: 0,
+        totalFinancialLossDzd: 0,
+        averageFleetScore: 0,
+        potentialSavingsDzd: 0,
+        activeFuelPriceDzd: 0,
+        fuelPriceReference: 'Aucune donnée télématique',
+        topDrivers: [],
+        bottomDrivers: [],
+      };
     }
 
     const fallbackPrice = Number(process.env.NEXT_PUBLIC_DEFAULT_DIESEL_PRICE_DZD) || 0;
@@ -300,57 +322,15 @@ export class FleetIntelligenceClient {
       return [];
     }
 
-    const demoOdoA = 185.4 * 1000;
-    const demoOdoB = 94.2 * 1000;
-
-    return [
-      {
-        id: 'dvir-demo-01',
-        tenantId: 'tenant-demo',
-        assetId: 'ast-t480-01',
-        assetCode: 'DZ-T480-16',
-        assetName: 'Renault Trucks T 480',
-        driverId: 'drv-01',
-        driverName: 'Mourad Belkacem',
-        inspectionType: DVIRInspectionType.PRE_TRIP,
-        isCompliant: true,
-        hasCriticalFailures: false,
-        odometerKm: demoOdoA,
-        items: [
-          { code: 'TIRES', category: 'TIRES_BRAKES', label: 'État et pression des pneumatiques', status: DVIRItemStatus.PASS },
-          { code: 'BRAKES', category: 'TIRES_BRAKES', label: 'Frein de service et stationnement', status: DVIRItemStatus.PASS },
-          { code: 'OIL_LEVEL', category: 'MECHANICAL', label: 'Niveau huile moteur', status: DVIRItemStatus.PASS },
-          { code: 'FIRE_EXT', category: 'SAFETY_EQUIPMENT', label: 'Extincteur vérifié à jour', status: DVIRItemStatus.PASS },
-          { code: 'ENACTA_DOC', category: 'REGULATORY_DOCS', label: 'PV Contrôle ENACTA en cabine', status: DVIRItemStatus.PASS },
-        ],
-        submittedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-      },
-      {
-        id: 'dvir-demo-02',
-        tenantId: 'tenant-demo',
-        assetId: 'ast-x3000-02',
-        assetCode: 'DZ-X3000-31',
-        assetName: 'Shacman X3000 6x4',
-        driverId: 'drv-03',
-        driverName: 'Sofiane Feghouli',
-        inspectionType: DVIRInspectionType.PRE_TRIP,
-        isCompliant: false,
-        hasCriticalFailures: true,
-        odometerKm: demoOdoB,
-        items: [
-          { code: 'TIRES', category: 'TIRES_BRAKES', label: 'Pneu AVG hernie profonde', status: DVIRItemStatus.FAIL_CRITICAL, comment: 'Coupure flanc pneu avant gauche' },
-          { code: 'BRAKES', category: 'TIRES_BRAKES', label: 'Freinage pneumatique', status: DVIRItemStatus.PASS },
-          { code: 'OIL_LEVEL', category: 'MECHANICAL', label: 'Niveau huile', status: DVIRItemStatus.PASS },
-          { code: 'FIRE_EXT', category: 'SAFETY_EQUIPMENT', label: 'Extincteur', status: DVIRItemStatus.PASS },
-          { code: 'ENACTA_DOC', category: 'REGULATORY_DOCS', label: 'PV Contrôle ENACTA', status: DVIRItemStatus.PASS },
-        ],
-        generatedWorkOrderId: 'ot-dvir-99104',
-        submittedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-      },
-    ];
+    const { MOCK_SANDBOX_DVIR_REPORTS } = await import('./simulation-sandbox/dvir-reports.mock');
+    return MOCK_SANDBOX_DVIR_REPORTS;
   }
 
-  static async submitDvirReport(dto: DVIRSubmissionDto, token?: string): Promise<DVIRInspectionReport> {
+  static async submitDvirReport(
+    dto: DVIRSubmissionDto,
+    token?: string,
+    isDemo = false,
+  ): Promise<DVIRInspectionReport> {
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -366,6 +346,10 @@ export class FleetIntelligenceClient {
       }
     } catch {
       // Repli local
+    }
+
+    if (!isDemo) {
+      throw new Error('Impossible de transmettre le rapport DVIR au serveur (Mode Production).');
     }
 
     const hasCritical = dto.items.some((i) => i.status === DVIRItemStatus.FAIL_CRITICAL);
@@ -491,7 +475,7 @@ export class FleetIntelligenceClient {
   /**
    * Étape 3 : Chaîne du Froid & Groupes Frigo
    */
-  static async getColdChainLive(token?: string): Promise<ReeferLiveStatus[]> {
+  static async getColdChainLive(token?: string, isDemo = false): Promise<ReeferLiveStatus[]> {
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -506,6 +490,10 @@ export class FleetIntelligenceClient {
       }
     } catch {
       // repli local
+    }
+
+    if (!isDemo) {
+      return [];
     }
 
     const kUnit = 1000;

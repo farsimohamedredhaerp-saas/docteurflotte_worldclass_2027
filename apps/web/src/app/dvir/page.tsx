@@ -21,6 +21,7 @@ import { Asset } from '@docteurflotte/contracts';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { SignaturePad, PhotoProofCapture } from '../../components/dvir';
 import { saveDvirOffline, getPendingOfflineInspections, markDvirSynced } from '../../lib/offline-dvir-storage';
+import { getSimulationDvirData } from '@/lib/simulation-sandbox';
 
 interface VehicleProfile {
   id: string;
@@ -38,107 +39,6 @@ interface VehicleProfile {
   lastInspectionNotes?: string;
   traccarDeviceId?: string;
 }
-
-// Jeux de données exclusivement réservé aux démonstrations commerciales (isDemoMode === true)
-// Zéro donnée démo ou valeur en dur en environnement de production réel.
-const DEMO_SIMULATION_VEHICLES: VehicleProfile[] = [
-  {
-    id: 'ast-t480-01',
-    name: 'Renault Trucks T 480 4x2 Optidriver',
-    plate: '16-10492-00',
-    category: 'Tracteur Routier 40T',
-    driverName: 'Mourad Belkacem',
-    driverId: 'drv-01',
-    odometerKm: 185450,
-    engineHours: 4120,
-    wilaya: '16 - Alger (Port)',
-    fuelType: 'Gazole Naftal',
-    lastInspectionDate: '24/10/2026 à 07:15',
-    lastInspectionResult: 'PASS',
-    lastInspectionNotes: 'Pression des pneus conforme (8.5 bars). PV ENACTA vérifié.',
-    traccarDeviceId: 'TK-16-10492',
-  },
-  {
-    id: 'ast-x3000-02',
-    name: 'Shacman X3000 6x4 Benne (Weichai WP12)',
-    plate: '31-08912-00',
-    category: 'Porteur Benne BTP 26T',
-    driverName: 'Karim Ziani',
-    driverId: 'drv-02',
-    odometerKm: 241800,
-    engineHours: 6850,
-    wilaya: '31 - Oran (Zone Industrielle)',
-    fuelType: 'Gazole Naftal',
-    lastInspectionDate: '23/10/2026 à 18:30',
-    lastInspectionResult: 'PASS',
-    lastInspectionNotes: 'Graissage sellette effectué en dépôt.',
-    traccarDeviceId: 'TK-31-08912',
-  },
-  {
-    id: 'ast-actros-03',
-    name: 'Mercedes-Benz Actros 3340 6x4',
-    plate: '09-00431-00',
-    category: 'Tracteur Semi Lourd 44T',
-    driverName: 'Djamel Bensalem',
-    driverId: 'drv-03',
-    odometerKm: 312500,
-    engineHours: 8940,
-    wilaya: '09 - Blida (Dépôt Sud)',
-    fuelType: 'Gazole Naftal',
-    lastInspectionDate: '24/10/2026 à 06:00',
-    lastInspectionResult: 'FAIL_CRITICAL',
-    lastInspectionNotes: 'Flexible frein pneumatique fuyard — Remplacé par l’atelier OT-ACT-991.',
-    traccarDeviceId: 'TK-09-00431',
-  },
-  {
-    id: 'ast-master-04',
-    name: 'Renault Master III 2.3 dCi 150',
-    plate: '16-07743-00',
-    category: 'Véhicule Utilitaire (VUL)',
-    driverName: 'Sofiane Hadj',
-    driverId: 'drv-04',
-    odometerKm: 78200,
-    engineHours: 1890,
-    wilaya: '16 - Alger (Messagerie)',
-    fuelType: 'Gazole Naftal',
-    lastInspectionDate: '24/10/2026 à 08:30',
-    lastInspectionResult: 'PASS',
-    lastInspectionNotes: 'Niveaux huile et liquide de refroidissement conformes.',
-    traccarDeviceId: 'TK-16-07743',
-  },
-  {
-    id: 'ast-scania-05',
-    name: 'Scania R 450 Streamline (DC13 XPI)',
-    plate: '25-01290-00',
-    category: 'Tracteur Routier 40T Frigo',
-    driverName: 'Yacine Meziane',
-    driverId: 'drv-05',
-    odometerKm: 142900,
-    engineHours: 3450,
-    wilaya: '25 - Constantine (Plateforme Est)',
-    fuelType: 'Gazole Naftal',
-    lastInspectionDate: '23/10/2026 à 20:10',
-    lastInspectionResult: 'PASS',
-    lastInspectionNotes: 'Contrôle thermomètre frigo certifié.',
-    traccarDeviceId: 'TK-25-01290',
-  },
-  {
-    id: 'ast-carrier-06',
-    name: 'Hyundai HD72 Caisse Frigorifique Carrier',
-    plate: '19-05521-00',
-    category: 'Porteur Frigorifique 7.5T',
-    driverName: 'Bilal Cherif',
-    driverId: 'drv-06',
-    odometerKm: 95100,
-    engineHours: 2640,
-    wilaya: '19 - Sétif (Agroalimentaire)',
-    fuelType: 'Gazole Naftal',
-    lastInspectionDate: '24/10/2026 à 05:45',
-    lastInspectionResult: 'PASS',
-    lastInspectionNotes: 'Groupe Carrier Supra testé à -18°C.',
-    traccarDeviceId: 'TK-19-05521',
-  },
-];
 
 const INITIAL_CHECKLIST: DVIRChecklistItem[] = [
   {
@@ -386,9 +286,10 @@ export default function DvirPage() {
       setReports(data);
 
       if (isDemoMode) {
-        setVehicles(DEMO_SIMULATION_VEHICLES);
-        if (DEMO_SIMULATION_VEHICLES.length > 0) {
-          handleAssetChange(DEMO_SIMULATION_VEHICLES[0].id, DEMO_SIMULATION_VEHICLES);
+        const { vehicles: simVehicles } = await getSimulationDvirData();
+        setVehicles(simVehicles as VehicleProfile[]);
+        if (simVehicles.length > 0) {
+          handleAssetChange(simVehicles[0].id, simVehicles as VehicleProfile[]);
         }
       } else {
         // Mode Réel Production : Strictement les données de l'organisation

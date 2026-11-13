@@ -17,6 +17,7 @@ const steps = [
   { name: '4. Littéraux et seuils économiques', script: 'check-hardcoded-literals.cjs' },
   { name: '5. Audit vulnérabilités & SBOM', script: 'audit-sbom.cjs' },
   { name: '6. Audit Sécurité & Internationalisation World-Class SaaS', script: 'check-world-class-security.cjs' },
+  { name: '7. Zéro Hardcode UI & Isolation Démo/Prod', script: 'lint-zero-hardcode-ui.cjs' },
 ];
 
 function runStep(name, cmd) {

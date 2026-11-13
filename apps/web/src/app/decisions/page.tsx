@@ -19,6 +19,8 @@ import {
 } from '../../lib/api-fleet-intelligence';
 import { CalculationProofModal, CalculationProofButton, CalculationProofData } from '../../components/decisions';
 import { CalculationProofBuilder } from '../../lib/calculation-proofs';
+import { useDemoMode } from '../../context/DemoModeContext';
+import { getSimulationDispatchCandidates, getSimulationDecisions } from '../../lib/simulation-sandbox';
 
 
 interface DecisionItem {
@@ -70,6 +72,7 @@ export default function DecisionsPage() {
   const [simScenario, setSimScenario] = useState<'ENACTA_EXPIRED' | 'WILAYA_RESTRICTION' | 'CRITICAL_VHI' | 'ALL_CLEAN'>('ENACTA_EXPIRED');
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const { isDemoMode, session } = useDemoMode();
 
   // État de la modal Preuve de Calcul
   const [proofModalData, setProofModalData] = useState<CalculationProofData | null>(null);
@@ -93,255 +96,81 @@ export default function DecisionsPage() {
     setIsEvaluatingDispatch(true);
     setNotification(null);
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') || undefined : undefined;
+    const token = session.token || (typeof window !== 'undefined' ? localStorage.getItem('token') || undefined : undefined);
 
-    // Véhicules candidats de test
-    const fleetVehicles = [
-      {
-        vehicleId: 'veh-renault-t480',
-        registrationPlate: '16-12345-00',
-        makeModel: 'Renault Trucks T480 (DTI 13)',
-        category: IntelAssetCategory.TRACTOR_TRAILER,
-        maxPayloadTons: 28.0,
-        grossVehicleWeightTons: 40.0,
-        fuelType: 'DIESEL' as const,
-        refConsumptionL100Km: 33.5,
-        hasWorkingReefer: false,
-        hasWorkingPto: false,
-        currentWilayaCode: 16,
-        currentLat: 36.73,
-        currentLon: 3.18,
-        currentOdometerKm: 185000,
-        currentEngineHours: 4200,
-        annualTargetKm: 120000,
-        ytdDrivenKm: 98000,
-        vehicleHealthIndex: sc === 'CRITICAL_VHI' ? 38 : 78,
-        batterySohPct: 88,
-        coolingEwmaResidualC: 1.2,
-        dispatchStatus: DispatchStatus.AVAILABLE,
-        documents: [
-          {
-            docType: DocumentTypeDZ.CONTROLE_TECHNIQUE_ENACTA,
-            docNumber: 'ENACTA-2025-0912',
-            issuedAt: '2025-04-10',
-            expiresAt: sc === 'ENACTA_EXPIRED' ? '2025-10-10' : '2027-04-10', // Expiré si scénario ENACTA_EXPIRED
-          },
-          {
-            docType: DocumentTypeDZ.ASSURANCE_RC_CATNAT,
-            docNumber: 'CAAR-POL-9921',
-            issuedAt: '2026-01-01',
-            expiresAt: '2027-01-01',
-          },
-          {
-            docType: DocumentTypeDZ.VIGNETTE_AUTOMOBILE,
-            docNumber: 'VIG-2026-16-092',
-            issuedAt: '2026-03-01',
-            expiresAt: '2027-03-01',
-          },
-        ],
-        subsystemRuls: [],
-        activeDtcs: sc === 'CRITICAL_VHI' ? [{ code: 'SPN 110 FMI 0', severity: 'CRITICAL_STOP' as const, description: 'Surchauffe culasse anormale' }] : [],
-      },
-      {
-        vehicleId: 'veh-scania-r450',
-        registrationPlate: '16-04218-00',
-        makeModel: 'Scania R 450 (DC13 XPI)',
-        category: IntelAssetCategory.TRACTOR_TRAILER,
-        maxPayloadTons: 30.0,
-        grossVehicleWeightTons: 40.0,
-        fuelType: 'DIESEL' as const,
-        refConsumptionL100Km: 31.5,
-        hasWorkingReefer: false,
-        hasWorkingPto: false,
-        currentWilayaCode: 16,
-        currentLat: 36.71,
-        currentLon: 3.15,
-        currentOdometerKm: 92000,
-        currentEngineHours: 2100,
-        annualTargetKm: 120000,
-        ytdDrivenKm: 85000,
-        vehicleHealthIndex: 94,
-        batterySohPct: 96,
-        coolingEwmaResidualC: 0.4,
-        dispatchStatus: DispatchStatus.AVAILABLE,
-        documents: [
-          { docType: DocumentTypeDZ.CONTROLE_TECHNIQUE_ENACTA, docNumber: 'ENACTA-2026-014', issuedAt: '2026-01-15', expiresAt: '2027-01-15' },
-          { docType: DocumentTypeDZ.ASSURANCE_RC_CATNAT, docNumber: 'SAA-2026-88', issuedAt: '2026-01-01', expiresAt: '2027-01-01' },
-          { docType: DocumentTypeDZ.VIGNETTE_AUTOMOBILE, docNumber: 'VIG-2026-16-11', issuedAt: '2026-03-01', expiresAt: '2027-03-01' },
-        ],
-        subsystemRuls: [],
-        activeDtcs: [],
-      },
-      {
-        vehicleId: 'veh-man-tgs',
-        registrationPlate: '31-08912-00',
-        makeModel: 'MAN TGS 33.440 6x4',
-        category: IntelAssetCategory.TRACTOR_TRAILER,
-        maxPayloadTons: 32.0,
-        grossVehicleWeightTons: 40.0,
-        fuelType: 'DIESEL' as const,
-        refConsumptionL100Km: 36.0,
-        hasWorkingReefer: false,
-        hasWorkingPto: false,
-        currentWilayaCode: 31,
-        currentLat: 35.69,
-        currentLon: -0.63,
-        currentOdometerKm: 140000,
-        currentEngineHours: 3500,
-        annualTargetKm: 120000,
-        ytdDrivenKm: 90000,
-        vehicleHealthIndex: 82,
-        batterySohPct: 91,
-        coolingEwmaResidualC: 0.8,
-        dispatchStatus: DispatchStatus.AVAILABLE,
-        documents: [
-          { docType: DocumentTypeDZ.CONTROLE_TECHNIQUE_ENACTA, docNumber: 'ENACTA-2026-088', issuedAt: '2026-02-10', expiresAt: '2027-02-10' },
-          { docType: DocumentTypeDZ.ASSURANCE_RC_CATNAT, docNumber: 'CASH-2026-01', issuedAt: '2026-01-01', expiresAt: '2027-01-01' },
-        ],
-        subsystemRuls: [],
-        activeDtcs: [],
-      },
-    ];
+    if (isDemoMode) {
+      const candidates = await getSimulationDispatchCandidates(sc);
+      const missionPayload = {
+        mission: candidates.mission,
+        fleetVehicles: candidates.vehicles,
+        fleetDrivers: candidates.drivers,
+      };
 
-    const fleetDrivers = [
-      {
-        driverId: 'drv-ahmed',
-        fullName: 'Ahmed Benali',
-        phoneDz: '0550123456',
-        licenseCategories: [LicenseCategoryDZ.C2, LicenseCategoryDZ.E],
-        hasBrevetProfessionnel: true,
-        hasAdrHazmatCert: false,
-        currentWilayaCode: 16,
-        continuousDrivingHours: 1.5,
-        dailyDrivingHoursToday: 3.0,
-        restHoursLast24h: 11.0,
-        safetyScore: 92,
-        isAvailable: true,
-      },
-      {
-        driverId: 'drv-karim',
-        fullName: 'Karim Ziani',
-        phoneDz: '0661987654',
-        licenseCategories: [LicenseCategoryDZ.C2, LicenseCategoryDZ.E],
-        hasBrevetProfessionnel: true,
-        hasAdrHazmatCert: false,
-        currentWilayaCode: 16,
-        continuousDrivingHours: 0.0,
-        dailyDrivingHoursToday: 0.0,
-        restHoursLast24h: 14.0,
-        safetyScore: 95,
-        isAvailable: true,
-      },
-    ];
+      try {
+        const result = await FleetIntelligenceClient.evaluateAndAssign(missionPayload as any, token, true);
+        setDispatchResult(result);
+        setNotification(`✓ Décision ADS générée (Mode Simulation) : ${result.decisionOutcome}`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Erreur d’évaluation ADS.';
+        setNotification(`❌ ${msg}`);
+      } finally {
+        setIsEvaluatingDispatch(false);
+      }
+      return;
+    }
 
-    const departureHour = sc === 'WILAYA_RESTRICTION' ? '08:00:00Z' : '22:00:00Z';
-
-    const missionPayload = {
-      mission: {
-        missionId: `MIS-DZ-${Date.now().toString().slice(-6)}`,
-        tenantId: 'tenant-default',
-        industrySector: IndustrySector.TRANSPORT,
-        requestedVehicleId: 'veh-renault-t480',
-        requestedDriverId: 'drv-ahmed',
-        originName: 'Zone Industrielle Rouiba (Alger)',
-        originWilayaCode: 16,
-        originLat: 36.73,
-        originLon: 3.18,
-        destinationName: 'Base de Vie Sud (Hassi Messaoud)',
-        destinationWilayaCode: 30,
-        transitWilayaCodes: [16, 9, 26, 17, 30],
-        plannedDepartureUtc: `2026-10-25T${departureHour}`,
-        routeDistanceKm: 850,
-        estimatedDrivingHours: 11.5,
-        requiredPayloadTons: 24.0,
-        targetClimateZone: ClimateZoneDZ.SAHARA_SOUTH,
-        requiresReeferColdChain: false,
-        requiresHazmatAdr: false,
-        requiresPtoHydraulics: false,
-      },
-      fleetVehicles,
-      fleetDrivers,
-    };
+    if (!token) {
+      setNotification('❌ Veuillez vous connecter pour évaluer une mission avec votre flotte réelle.');
+      setIsEvaluatingDispatch(false);
+      return;
+    }
 
     try {
-      const result = await FleetIntelligenceClient.evaluateAndAssign(missionPayload, token);
-      setDispatchResult(result);
-      setNotification(`✓ Décision ADS générée : ${result.decisionOutcome}`);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erreur d’évaluation ADS.';
-      setNotification(`❌ ${msg}`);
+      const res = await fetch(`${API_URL}/decisions/evaluate-dispatch`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ scenario: sc }),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setDispatchResult(result);
+        setNotification(`✓ Décision ADS générée : ${result.decisionOutcome}`);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setNotification(`❌ ${err.message || 'Votre parc ne dispose pas d’assez de véhicules qualifiés pour cette mission.'}`);
+      }
+    } catch {
+      setNotification('❌ Impossible de joindre le moteur de décision ADS.');
     } finally {
       setIsEvaluatingDispatch(false);
     }
   };
 
-
   // Charger les décisions et le rapport budgétaire
   const fetchData = async () => {
     setIsLoading(true);
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = session.token || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
+
+    if (isDemoMode) {
+      try {
+        const simData = await getSimulationDecisions();
+        setDecisions(simData.decisions as DecisionItem[]);
+        setBudgetReport(simData.budgetReport as BudgetVarianceReport);
+      } catch {
+        setDecisions([]);
+        setBudgetReport(null);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
 
     if (!token) {
-      // Données de démonstration réalistes pour l'expérience sans barrière
-      setDecisions([
-        {
-          id: 'dec-demo-01',
-          assetId: 'ast-01',
-          assetName: 'Tracteur Scania R450',
-          assetCode: 'PL-16-042-DZ',
-          assetCategory: 'HEAVY_TRUCK',
-          ruleId: 'RULE-DEC-001',
-          urgency: 'danger',
-          title: 'Échéance de révision critique dépassée (+1 500 km)',
-          description: 'Compteur actuel 121 500 km vs échéance 120 000 km. Risque immédiat de grippage paliers et casse turbo en exploitation autoroutière.',
-          estimatedActionCost: 51000,
-          costInactionRisk: 298500,
-          netExpectedSavings: 247500,
-          confidenceScore: 98,
-          status: 'PENDING',
-          dataOrigin: 'DEMO',
-          explanationDossier: {
-            inputMetrics: { currentMeterValue: 121500, nextMaintenanceMeterValue: 120000, deltaOverdue: 1500, meterType: 'ODOMETER_KM' },
-            economicHypotheses: { hourlyLaborRateApplied: 1500, estimatedLaborHours: 4, estimatedPartsCost: 45000, inactionMultiplier: 3.5 },
-            potentialFailureModes: ['Casse turbocompresseur', 'Arrêt d exploitation en mission', 'Frais de remorquage lourd'],
-            mitigationAction: 'Planifier immédiatement la vidange complète et remplacement filtres.',
-          },
-        },
-        {
-          id: 'dec-demo-02',
-          assetId: 'ast-02',
-          assetName: 'Pelle Hydraulique Cat 320D',
-          assetCode: 'ENG-23-018-DZ',
-          assetCategory: 'CONSTRUCTION_HEAVY',
-          ruleId: 'RULE-DEC-002',
-          urgency: 'warning',
-          title: 'Préavis d\'échéance hydraulique (88% de cycle atteint)',
-          description: 'Cycle de filtration à 440h sur 500h. Commande préalable recommandée pour éviter l\'arrêt de chantier.',
-          estimatedActionCost: 25000,
-          costInactionRisk: 55000,
-          netExpectedSavings: 30000,
-          confidenceScore: 94,
-          status: 'PENDING',
-          dataOrigin: 'DEMO',
-          explanationDossier: {
-            inputMetrics: { currentMeterValue: 440, nextMaintenanceMeterValue: 500, remainingUnits: 60, progressPercentage: 88 },
-            economicHypotheses: { hourlyLaborRateApplied: 1500, safetyStockDays: 7 },
-            potentialFailureModes: ['Rupture de stock consommables atelier', 'Surcoût express'],
-            mitigationAction: 'Pré-commander cartouches de filtres homologués.',
-          },
-        },
-      ]);
-
-      setBudgetReport({
-        period: '2026-Q4',
-        budgetAllocated: 1500000,
-        actualSpent: 1120000,
-        varianceAmount: -380000,
-        variancePercentage: -25.3,
-        status: 'ON_TRACK',
-        currency: 'DZD',
-      });
-
+      setDecisions([]);
+      setBudgetReport(null);
       setIsLoading(false);
       return;
     }
@@ -359,13 +188,19 @@ export default function DecisionsPage() {
       if (decRes.ok) {
         const data = await decRes.json();
         setDecisions(data);
+      } else {
+        setDecisions([]);
       }
       if (repRes.ok) {
         const report = await repRes.json();
         setBudgetReport(report);
+      } else {
+        setBudgetReport(null);
       }
     } catch (err) {
       console.error('Erreur chargement décisions:', err);
+      setDecisions([]);
+      setBudgetReport(null);
     } finally {
       setIsLoading(false);
     }
@@ -373,7 +208,7 @@ export default function DecisionsPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [isDemoMode]);
 
   // Déclencher une réévaluation décisionnelle
   const handleEvaluate = async () => {

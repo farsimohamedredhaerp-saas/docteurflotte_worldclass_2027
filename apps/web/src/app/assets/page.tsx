@@ -31,135 +31,7 @@ import {
   IconEdit,
   IconTrash,
 } from '../../components/navigation/TechIcons';
-
-const DEMO_ASSETS: Asset[] = [
-  {
-    id: 'unit-001',
-    tenantId: 'tenant-demo',
-    name: 'Renault Trucks K 480 6x4 Heavy Tipper',
-    code: '00421-116-16',
-    category: AssetCategory.HEAVY_TRUCK,
-    brand: 'Renault Trucks',
-    model: 'K 480 6x4',
-    year: 2022,
-    status: AssetStatus.OPERATIONAL,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ODOMETER_KM,
-    currentMeterValue: 284150,
-    maintenanceIntervalValue: 30000,
-    nextMaintenanceMeterValue: 300000,
-    createdAt: '2026-01-15T08:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-  {
-    id: 'unit-002',
-    tenantId: 'tenant-demo',
-    name: 'Mercedes-Benz Actros 3340 6x4',
-    code: '00812-109-09',
-    category: AssetCategory.HEAVY_TRUCK,
-    brand: 'Mercedes-Benz',
-    model: 'Actros 3340',
-    year: 2021,
-    status: AssetStatus.MAINTENANCE_REQUIRED,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ODOMETER_KM,
-    currentMeterValue: 342900,
-    maintenanceIntervalValue: 35000,
-    nextMaintenanceMeterValue: 350000,
-    createdAt: '2026-02-10T09:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-  {
-    id: 'unit-003',
-    tenantId: 'tenant-demo',
-    name: 'Caterpillar 320D Pelle Hydraulique',
-    code: 'CAT-DZ-320D-47',
-    category: AssetCategory.CONSTRUCTION_EQUIPMENT,
-    brand: 'Caterpillar',
-    model: '320D Hydraulic Excavator',
-    year: 2020,
-    status: AssetStatus.OPERATIONAL,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ENGINE_HOURS,
-    currentMeterValue: 6420,
-    maintenanceIntervalValue: 500,
-    nextMaintenanceMeterValue: 6500,
-    createdAt: '2026-03-01T10:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-  {
-    id: 'unit-004',
-    tenantId: 'tenant-demo',
-    name: 'Toyota Hilux 2.4 D-4D 4x4 Double Cabine',
-    code: '00543-118-16',
-    category: AssetCategory.ROAD_VEHICLE,
-    brand: 'Toyota',
-    model: 'Hilux 2.4 D-4D',
-    year: 2023,
-    status: AssetStatus.OPERATIONAL,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ODOMETER_KM,
-    currentMeterValue: 68400,
-    maintenanceIntervalValue: 10000,
-    nextMaintenanceMeterValue: 70000,
-    createdAt: '2026-04-12T11:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-  {
-    id: 'unit-005',
-    tenantId: 'tenant-demo',
-    name: 'Renault Trucks T 480 4x2 Optidriver',
-    code: '00194-120-31',
-    category: AssetCategory.HEAVY_TRUCK,
-    brand: 'Renault Trucks',
-    model: 'T 480 Optidriver',
-    year: 2022,
-    status: AssetStatus.OPERATIONAL,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ODOMETER_KM,
-    currentMeterValue: 215300,
-    maintenanceIntervalValue: 30000,
-    nextMaintenanceMeterValue: 220000,
-    createdAt: '2026-05-18T12:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-  {
-    id: 'unit-006',
-    tenantId: 'tenant-demo',
-    name: 'Shacman F3000 8x4 Heavy Dumper',
-    code: '00312-320-30',
-    category: AssetCategory.HEAVY_TRUCK,
-    brand: 'Shacman',
-    model: 'F3000 8x4',
-    year: 2021,
-    status: AssetStatus.OPERATIONAL,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ODOMETER_KM,
-    currentMeterValue: 189200,
-    maintenanceIntervalValue: 25000,
-    nextMaintenanceMeterValue: 190000,
-    createdAt: '2026-06-05T13:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-  {
-    id: 'unit-007',
-    tenantId: 'tenant-demo',
-    name: 'Renault Master 2.3 dCi 150 L3H2',
-    code: '00789-114-16',
-    category: AssetCategory.ROAD_VEHICLE,
-    brand: 'Renault',
-    model: 'Master 2.3 dCi',
-    year: 2020,
-    status: AssetStatus.OPERATIONAL,
-    dataOrigin: DataOrigin.DEMO,
-    primaryMeterType: MeterType.ODOMETER_KM,
-    currentMeterValue: 142100,
-    maintenanceIntervalValue: 15000,
-    nextMaintenanceMeterValue: 150000,
-    createdAt: '2026-07-22T14:00:00Z',
-    updatedAt: '2026-10-28T14:30:00Z',
-  },
-];
+import { getSimulationAssets } from '@/lib/simulation-sandbox';
 
 export default function AssetsPage() {
   const router = useRouter();
@@ -286,20 +158,37 @@ export default function AssetsPage() {
   };
 
   useEffect(() => {
+    let isCancelled = false;
     const init = async () => {
       const currentToken = AuthClient.getToken();
       setToken(currentToken);
 
-      if (isDemoMode || !currentToken) {
-        // En mode démonstration ou pour un visiteur non connecté : afficher la flotte de démo
-        setAssets(DEMO_ASSETS);
-        setIsLoading(false);
-      } else {
-        // En mode réel pour un tenant connecté : charger ses données PostgreSQL sous RLS
+      if (isDemoMode) {
+        try {
+          const sandboxAssets = await getSimulationAssets();
+          if (!isCancelled) {
+            setAssets(sandboxAssets);
+          }
+        } catch {
+          if (!isCancelled) {
+            setAssets([]);
+          }
+        } finally {
+          if (!isCancelled) {
+            setIsLoading(false);
+          }
+        }
+      } else if (currentToken) {
         loadAssets(currentToken);
+      } else {
+        setAssets([]);
+        setIsLoading(false);
       }
     };
     init();
+    return () => {
+      isCancelled = true;
+    };
   }, [isDemoMode]);
 
   const handleCreateAsset = async (e: React.FormEvent) => {
