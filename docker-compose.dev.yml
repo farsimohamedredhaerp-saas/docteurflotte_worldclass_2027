@@ -1,0 +1,54 @@
+name: dzerp_decision_engine_dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dzerp_postgres_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dzerp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dzerp_dev_secret_local_only}
+      POSTGRES_DB: ${POSTGRES_DB:-dzerp_decision_engine_dev}
+    ports:
+      # Port 5435 pour éviter les conflits avec PostgreSQL par défaut (5432) et DocteurFlotte (5434)
+      - "${POSTGRES_PORT:-5435}:5432"
+    command: >
+      postgres
+      -c shared_preload_libraries=btree_gist
+      -c max_connections=100
+      -c shared_buffers=256MB
+    volumes:
+      - dzerp_dev_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dzerp} -d ${POSTGRES_DB:-dzerp_decision_engine_dev}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  minio:
+    image: minio/minio:latest
+    container_name: dzerp_minio_dev
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin_secret_local}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - dzerp_dev_miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  dzerp_dev_pgdata:
+    name: dzerp_dev_pgdata
+  dzerp_dev_miniodata:
+    name: dzerp_dev_miniodata
+

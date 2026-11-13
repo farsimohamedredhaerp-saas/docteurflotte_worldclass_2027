@@ -1,0 +1,211 @@
+{
+  "packCode": "DZ_LF_2026_DRAFT",
+  "version": "2026.1.0-draft",
+  "descriptionFr": "Pack Réglementaire Loi de Finances 2026 (Loi 25-17 du 14/12/2025, JO n° 88 du 31/12/2025)",
+  "status": "DRAFT",
+  "authorEmail": "fiscaliste@dzerp.dz",
+  "publishedByEmail": "admin-release@dzerp.dz",
+  "validatedByExpert": "Ordre National des Experts-Comptables Algérie",
+  "createdAt": "2026-01-01T00:00:00.000Z",
+  "items": [
+    {
+      "code": "PARAM_IBS_RATE_PRODUCTION",
+      "kind": "PARAMETER",
+      "sourceHierarchy": "LF",
+      "validFrom": "2026-01-01",
+      "validTo": null,
+      "recordedAt": "2026-01-01T00:00:00.000Z",
+      "supersededAt": null,
+      "legalRef": "Art. 150 CIDTA / LF 2026",
+      "legalBasisVerified": true,
+      "verificationStatus": "SOURCED_SECONDARY",
+      "evidenceLevel": "LEGAL_TEXT",
+      "payload": {
+        "value": "0.19",
+        "scale": 8,
+        "unit": "RATIO"
+      },
+      "descriptionFr": "Taux d'IBS pour activités de production de biens"
+    },
+    {
+      "code": "PARAM_IBS_RATE_BTPH_TOURISM",
+      "kind": "PARAMETER",
+      "sourceHierarchy": "LF",
+      "validFrom": "2026-01-01",
+      "validTo": null,
+      "recordedAt": "2026-01-01T00:00:00.000Z",
+      "supersededAt": null,
+      "legalRef": "Art. 150 CIDTA / LF 2026",
+      "legalBasisVerified": true,
+      "verificationStatus": "SOURCED_SECONDARY",
+      "evidenceLevel": "LEGAL_TEXT",
+      "payload": {
+        "value": "0.23",
+        "scale": 8,
+        "unit": "RATIO"
+      },
+      "descriptionFr": "Taux d'IBS BTPH, hydraulique, tourisme et thermalisme"
+    },
+    {
+      "code": "PARAM_IBS_RATE_STANDARD",
+      "kind": "PARAMETER",
+      "sourceHierarchy": "LF",
+      "validFrom": "2026-01-01",
+      "validTo": null,
+      "recordedAt": "2026-01-01T00:00:00.000Z",
+      "supersededAt": null,
+      "legalRef": "Art. 150 CIDTA / LF 2026",
+      "legalBasisVerified": true,
+      "verificationStatus": "SOURCED_SECONDARY",
+      "evidenceLevel": "LEGAL_TEXT",
+      "payload": {
+        "value": "0.26",
+        "scale": 8,
+        "unit": "RATIO"
+      },
+      "descriptionFr": "Taux d'IBS de droit commun (autres activités)"
+    },
+    {
+      "code": "PARAM_TVA_RATE_STANDARD",
+      "kind": "PARAMETER",
+      "sourceHierarchy": "LF",
+      "validFrom": "2026-01-01",
+      "validTo": null,
+      "recordedAt": "2026-01-01T00:00:00.000Z",
+      "supersededAt": null,
+      "legalRef": "Art. 21 CTCA / LF 2026",
+      "legalBasisVerified": true,
+      "verificationStatus": "SOURCED_SECONDARY",
+      "evidenceLevel": "LEGAL_TEXT",
+      "payload": {
+        "value": "0.19",
+        "scale": 8,
+        "unit": "RATIO"
+      },
+      "descriptionFr": "Taux normal de TVA"
+    },
+    {
+      "code": "PARAM_TVA_RATE_REDUCED",
+      "kind": "PARAMETER",
+      "sourceHierarchy": "LF",
+      "validFrom": "2026-01-01",
+      "validTo": null,
+      "recordedAt": "2026-01-01T00:00:00.000Z",
+      "supersededAt": null,
+      "legalRef": "Art. 23 CTCA / LF 2026",
+      "legalBasisVerified": true,
+      "verificationStatus": "SOURCED_SECONDARY",
+      "evidenceLevel": "LEGAL_TEXT",
+      "payload": {
+        "value": "0.09",
+        "scale": 8,
+        "unit": "RATIO"
+      },
+      "descriptionFr": "Taux réduit de TVA (produits stratégiques, soins, réhabilitation)"
+    },
+    {
+      "code": "PARAM_CASH_CEILING_IBS_DEDUCTIBILITY",
+      "kind": "PARAMETER",
+      "sourceHierarchy": "LF",
+      "validFrom": "2026-01-01",
+      "validTo": null,
+      "recordedAt": "2026-01-01T00:00:00.000Z",
+      "supersededAt": null,
+      "legalRef": "Art. 169 CIDTA (LF 2018)",
+      "legalBasisVerified": true,
+      "verificationStatus": "SOURCED_SECONDARY",
+      "evidenceLevel": "LEGAL_TEXT",
+      "payload": {
+        "value": "300000.00",
+        "scale": 2,
+        "unit": "DZD"
+      },
+      "descriptionFr": "Seuil de paiement en espèces par facture pour déductibilité charge IBS"
+    },
+    {
+      "code": "PARAM_IFU_CEILING",
+      "kind": "PARAMETER",
+      "sourceHierarchy": "LF",
+      "validFrom": "2026-01-01",
+      "validTo": null,
+      "recordedAt": "2026-01-01T00:00:00.000Z",
+      "supersededAt": null,
+      "legalRef": "Art. 282 sexies CIDTA (à confirmer)",
+      "legalBasisVerified": false,
+      "verificationStatus": "UNVERIFIED",
+      "evidenceLevel": "AUDIT_PRACTICE",
+      "payload": {
+        "value": "8000000.00",
+        "scale": 2,
+        "unit": "DZD"
+      },
+      "descriptionFr": "Plafond d'éligibilité au régime IFU (UNVERIFIED)"
+    },
+    {
+      "code": "PARAM_PASSENGER_CAR_CEILING",
+      "kind": "PARAMETER",
+      "sourceHierarchy": "LF",
+      "validFrom": "2026-01-01",
+      "validTo": null,
+      "recordedAt": "2026-01-01T00:00:00.000Z",
+      "supersededAt": null,
+      "legalRef": "Art. 141 CIDTA / LF 2018 (à confirmer)",
+      "legalBasisVerified": false,
+      "verificationStatus": "UNVERIFIED",
+      "evidenceLevel": "ADMIN_DOCTRINE",
+      "payload": {
+        "value": "3000000.00",
+        "scale": 2,
+        "unit": "DZD"
+      },
+      "descriptionFr": "Plafond fiscal d'amortissement véhicule de tourisme (UNVERIFIED)"
+    },
+    {
+      "code": "RULE_IBS_MULTI_ACTIVITY",
+      "kind": "RULE",
+      "sourceHierarchy": "LF",
+      "validFrom": "2026-01-01",
+      "validTo": null,
+      "recordedAt": "2026-01-01T00:00:00.000Z",
+      "supersededAt": null,
+      "legalRef": "LFC 2015 art. 150 bis CIDTA",
+      "legalBasisVerified": true,
+      "verificationStatus": "SOURCED_SECONDARY",
+      "evidenceLevel": "LEGAL_TEXT",
+      "payload": {
+        "requiredParameters": [
+          "PARAM_IBS_RATE_PRODUCTION",
+          "PARAM_IBS_RATE_STANDARD"
+        ],
+        "fallbackRateCode": "PARAM_IBS_RATE_STANDARD"
+      },
+      "descriptionFr": "Règle de sectorisation IBS et repli sans comptabilité séparée",
+      "goldenTests": [
+        {
+          "name": "Production et standard séparés",
+          "inputs": {
+            "productionProfit": "6000000",
+            "standardProfit": "4000000"
+          },
+          "expectedOutput": {
+            "totalIbs": "2180000.00"
+          }
+        }
+      ]
+    }
+  ],
+  "approvals": [
+    {
+      "approverEmail": "relecteur1@dzerp.dz",
+      "role": "REGULATORY_ANALYST",
+      "approvedAt": "2026-01-02T10:00:00.000Z"
+    },
+    {
+      "approverEmail": "relecteur2@dzerp.dz",
+      "role": "TAX_DIRECTOR",
+      "approvedAt": "2026-01-02T11:00:00.000Z"
+    }
+  ],
+  "contentHash": "65bd31faafc0f73b79b5ddfeb21091ad5782b6cf4749c56611069c5ec79397dc",
+  "signatureEd25519": "4e0ffd10795ebd0b8cd036a02f4f6853bf013c4731e3b1676728bd1c4a7354d204f71a124c578c24c986180bd663de2a27ae12802d3c143a83508f420491970e"
+}

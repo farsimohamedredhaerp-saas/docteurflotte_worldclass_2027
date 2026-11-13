@@ -1,0 +1,353 @@
+[
+  {
+    "eventType": "SALE_INVOICED",
+    "journalCode": "VT",
+    "lines": [
+      {
+        "role": "CLIENT",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_ttc" }
+      },
+      {
+        "role": "REVENUE_SALES",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_ht" }
+      },
+      {
+        "role": "VAT_COLLECTED",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.vat_amount" },
+        "conditionExpr": {
+          "type": "AND",
+          "left": { "type": "GT", "left": { "type": "var", "path": "payload.vat_amount" }, "right": { "type": "const", "valueType": "DEC", "value": "0" } },
+          "right": { "type": "NOT", "operand": { "type": "var", "path": "payload.is_waiting_vat" } }
+        }
+      },
+      {
+        "role": "VAT_WAITING",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.vat_amount" },
+        "conditionExpr": {
+          "type": "AND",
+          "left": { "type": "GT", "left": { "type": "var", "path": "payload.vat_amount" }, "right": { "type": "const", "valueType": "DEC", "value": "0" } },
+          "right": { "type": "var", "path": "payload.is_waiting_vat" }
+        }
+      }
+    ]
+  },
+  {
+    "eventType": "SALE_COLLECTED",
+    "journalCode": "BQ",
+    "lines": [
+      {
+        "role": "BANK",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_collected" },
+        "conditionExpr": { "type": "NEQ", "left": { "type": "var", "path": "payload.payment_mode" }, "right": { "type": "const", "valueType": "STR", "value": "CASH" } }
+      },
+      {
+        "role": "CASH",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_collected" },
+        "conditionExpr": { "type": "EQ", "left": { "type": "var", "path": "payload.payment_mode" }, "right": { "type": "const", "valueType": "STR", "value": "CASH" } }
+      },
+      {
+        "role": "CLIENT",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_collected" }
+      },
+      {
+        "role": "VAT_WAITING",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.vat_to_regularize" },
+        "conditionExpr": { "type": "GT", "left": { "type": "var", "path": "payload.vat_to_regularize" }, "right": { "type": "const", "valueType": "DEC", "value": "0" } }
+      },
+      {
+        "role": "VAT_COLLECTED",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.vat_to_regularize" },
+        "conditionExpr": { "type": "GT", "left": { "type": "var", "path": "payload.vat_to_regularize" }, "right": { "type": "const", "valueType": "DEC", "value": "0" } }
+      }
+    ]
+  },
+  {
+    "eventType": "PURCHASE_INVOICED",
+    "journalCode": "AC",
+    "lines": [
+      {
+        "role": "COGS_MERCHANDISE",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_ht" }
+      },
+      {
+        "role": "VAT_DEDUCTIBLE",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.vat_amount" },
+        "conditionExpr": { "type": "GT", "left": { "type": "var", "path": "payload.vat_amount" }, "right": { "type": "const", "valueType": "DEC", "value": "0" } }
+      },
+      {
+        "role": "SUPPLIER",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_ttc" }
+      }
+    ]
+  },
+  {
+    "eventType": "PURCHASE_PAID",
+    "journalCode": "BQ",
+    "lines": [
+      {
+        "role": "SUPPLIER",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_paid" }
+      },
+      {
+        "role": "BANK",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_paid" },
+        "conditionExpr": { "type": "NEQ", "left": { "type": "var", "path": "payload.payment_mode" }, "right": { "type": "const", "valueType": "STR", "value": "CASH" } }
+      },
+      {
+        "role": "CASH",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_paid" },
+        "conditionExpr": { "type": "EQ", "left": { "type": "var", "path": "payload.payment_mode" }, "right": { "type": "const", "valueType": "STR", "value": "CASH" } }
+      }
+    ]
+  },
+  {
+    "eventType": "CASH_EXPENSE",
+    "journalCode": "CA",
+    "lines": [
+      {
+        "role": "EXPENSE_MAINTENANCE",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.amount" }
+      },
+      {
+        "role": "CASH",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.amount" }
+      }
+    ]
+  },
+  {
+    "eventType": "CASH_DEPOSIT_TO_BANK",
+    "journalCode": "CA",
+    "lines": [
+      {
+        "role": "INTERNAL_TRANSFER",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.amount" }
+      },
+      {
+        "role": "CASH",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.amount" }
+      }
+    ]
+  },
+  {
+    "eventType": "OWNER_CURRENT_ACCOUNT_CONTRIBUTION",
+    "journalCode": "BQ",
+    "lines": [
+      {
+        "role": "BANK",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.amount" },
+        "conditionExpr": { "type": "NEQ", "left": { "type": "var", "path": "payload.payment_mode" }, "right": { "type": "const", "valueType": "STR", "value": "CASH" } }
+      },
+      {
+        "role": "CASH",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.amount" },
+        "conditionExpr": { "type": "EQ", "left": { "type": "var", "path": "payload.payment_mode" }, "right": { "type": "const", "valueType": "STR", "value": "CASH" } }
+      },
+      {
+        "role": "CURRENT_ACCOUNT_PARTNERS",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.amount" }
+      }
+    ]
+  },
+  {
+    "eventType": "PAYROLL_RUN",
+    "journalCode": "PA",
+    "lines": [
+      {
+        "role": "EXPENSE_PAYROLL",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.gross_salary" }
+      },
+      {
+        "role": "EXPENSE_SOCIAL_CHARGES",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.employer_social_charges" }
+      },
+      {
+        "role": "SOCIAL_CHARGES_PAYABLE",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.total_social_charges" }
+      },
+      {
+        "role": "TAX_WITHHELD_PAYABLE",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.income_tax_withheld" }
+      },
+      {
+        "role": "NET_SALARIES_PAYABLE",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.net_salary" }
+      }
+    ]
+  },
+  {
+    "eventType": "ASSET_ACQUIRED",
+    "journalCode": "OD",
+    "lines": [
+      {
+        "role": "FIXED_ASSETS",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_ht" }
+      },
+      {
+        "role": "VAT_DEDUCTIBLE",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.vat_amount" },
+        "conditionExpr": { "type": "GT", "left": { "type": "var", "path": "payload.vat_amount" }, "right": { "type": "const", "valueType": "DEC", "value": "0" } }
+      },
+      {
+        "role": "SUPPLIER_FIXED_ASSETS",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_ttc" }
+      }
+    ]
+  },
+  {
+    "eventType": "DEPRECIATION_BOOKED",
+    "journalCode": "OD",
+    "lines": [
+      {
+        "role": "DEPRECIATION_EXPENSE",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.depreciation_amount" }
+      },
+      {
+        "role": "DEPRECIATION_ACCUMULATED",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.depreciation_amount" }
+      }
+    ]
+  },
+  {
+    "eventType": "FX_REVALUATION",
+    "journalCode": "OD",
+    "lines": [
+      {
+        "role": "BANK",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.gain_amount" },
+        "conditionExpr": { "type": "EQ", "left": { "type": "var", "path": "payload.is_gain" }, "right": { "type": "const", "valueType": "BOOL", "value": true } }
+      },
+      {
+        "role": "FX_GAIN",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.gain_amount" },
+        "conditionExpr": { "type": "EQ", "left": { "type": "var", "path": "payload.is_gain" }, "right": { "type": "const", "valueType": "BOOL", "value": true } }
+      },
+      {
+        "role": "FX_LOSS",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.loss_amount" },
+        "conditionExpr": { "type": "EQ", "left": { "type": "var", "path": "payload.is_gain" }, "right": { "type": "const", "valueType": "BOOL", "value": false } }
+      },
+      {
+        "role": "BANK",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.loss_amount" },
+        "conditionExpr": { "type": "EQ", "left": { "type": "var", "path": "payload.is_gain" }, "right": { "type": "const", "valueType": "BOOL", "value": false } }
+      }
+    ]
+  },
+  {
+    "eventType": "STOCK_RECEIPT",
+    "journalCode": "ST",
+    "lines": [
+      {
+        "role": "STOCK_MERCHANDISE",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.total_cost" }
+      },
+      {
+        "role": "COGS_MERCHANDISE",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.total_cost" }
+      }
+    ]
+  },
+  {
+    "eventType": "STOCK_ISSUE",
+    "journalCode": "ST",
+    "lines": [
+      {
+        "role": "COGS_MERCHANDISE",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.total_cost" }
+      },
+      {
+        "role": "STOCK_MERCHANDISE",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.total_cost" }
+      }
+    ]
+  },
+  {
+    "eventType": "SITUATION_ISSUED",
+    "journalCode": "VT",
+    "lines": [
+      {
+        "role": "CLIENT",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_ttc" }
+      },
+      {
+        "role": "REVENUE_SERVICES",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_ht" }
+      },
+      {
+        "role": "VAT_WAITING",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.vat_amount" }
+      }
+    ]
+  },
+  {
+    "eventType": "SITUATION_COLLECTED",
+    "journalCode": "BQ",
+    "lines": [
+      {
+        "role": "BANK",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_collected" }
+      },
+      {
+        "role": "CLIENT",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.amount_collected" }
+      },
+      {
+        "role": "VAT_WAITING",
+        "side": "DEBIT",
+        "amountExpr": { "type": "var", "path": "payload.vat_collected_prorata" },
+        "conditionExpr": { "type": "GT", "left": { "type": "var", "path": "payload.vat_collected_prorata" }, "right": { "type": "const", "valueType": "DEC", "value": "0" } }
+      },
+      {
+        "role": "VAT_COLLECTED",
+        "side": "CREDIT",
+        "amountExpr": { "type": "var", "path": "payload.vat_collected_prorata" },
+        "conditionExpr": { "type": "GT", "left": { "type": "var", "path": "payload.vat_collected_prorata" }, "right": { "type": "const", "valueType": "DEC", "value": "0" } }
+      }
+    ]
+  }
+]
