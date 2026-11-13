@@ -24,6 +24,10 @@ import { CusumLegalClerkService } from './services/cusum-legal-clerk.service';
 import { FuelTheftAuditController } from './controllers/fuel-theft-audit.controller';
 import { BreakthroughInnovationsService } from './services/breakthrough-innovations.service';
 import { BreakthroughInnovationsController } from './controllers/breakthrough-innovations.controller';
+import { NaftalStatementParserService } from './services/naftal-statement-parser.service';
+import { TopographicConsistencyService } from './services/topographic-consistency.service';
+import { TechnicalDossierPdfService } from './services/technical-dossier-pdf.service';
+import { ErpIntegrationExportService } from './services/erp-integration-export.service';
 
 @Module({
   controllers: [
@@ -54,6 +58,10 @@ import { BreakthroughInnovationsController } from './controllers/breakthrough-in
     RegulatoryMissionOrderService,
     CusumLegalClerkService,
     BreakthroughInnovationsService,
+    NaftalStatementParserService,
+    TopographicConsistencyService,
+    TechnicalDossierPdfService,
+    ErpIntegrationExportService,
   ],
   exports: [
     TelemetryNormalizerService,
@@ -72,6 +80,10 @@ import { BreakthroughInnovationsController } from './controllers/breakthrough-in
     RegulatoryMissionOrderService,
     CusumLegalClerkService,
     BreakthroughInnovationsService,
+    NaftalStatementParserService,
+    TopographicConsistencyService,
+    TechnicalDossierPdfService,
+    ErpIntegrationExportService,
   ],
 })
 export class FleetIntelligenceModule {}

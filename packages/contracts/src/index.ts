@@ -19,6 +19,9 @@ export * from './country-packs';
 export * from './dispatch';
 export * from './subscriptions';
 export * from './deterministic-physics';
+export * from './telemetry-tiers';
+export * from './oem-technical-specs';
+export * from './erp-export-schemas';
 
 // Explicit re-exports of runtime constants for bundlers (Turbopack / Webpack / Vite)
 export {
@@ -59,4 +62,26 @@ export {
   ISO_3779_YEAR_CODES,
   SEVERE_DUTY_FACTORS,
 } from './local-oem-resolver';
-
+export {
+  TelemetryTier,
+  TelemetryTierSchema,
+  TELEMETRY_TIER_CAPABILITIES,
+  getTelemetryTierCapabilities,
+  assertTierSupportsFeature,
+} from './telemetry-tiers';
+export {
+  OemMake,
+  OemComponentCode,
+  OemFluidCompartment,
+  OemDtcType,
+  DtcSeverity,
+  OFFICIAL_OEM_TORQUE_SPECS,
+  OFFICIAL_OEM_FLUID_CAPACITIES,
+  OFFICIAL_OEM_DTC_FAULTS,
+} from './oem-technical-specs';
+export {
+  ErpExportFormat,
+  ErpExportFormatSchema,
+  ErpWorkOrderLineSchema,
+  ErpWorkOrderExportPayloadSchema,
+} from './erp-export-schemas';
