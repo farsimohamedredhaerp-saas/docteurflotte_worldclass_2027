@@ -5,8 +5,6 @@
 #                         Valhalla Local, Ollama Qwen 2.5, API NestJS & PWA Next.js
 # =============================================================================
 
-version: '3.8'
-
 networks:
   sovereign_internal_net:
     driver: bridge
