@@ -78,3 +78,4 @@ describe('OEM Preventive Maintenance Templates & Due Tracking', () => {
     expect(scaniaSearch[0].id).toBe('TPL-SC-R450');
   });
 });
+

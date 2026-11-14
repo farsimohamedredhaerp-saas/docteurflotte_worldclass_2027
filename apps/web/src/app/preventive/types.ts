@@ -60,3 +60,4 @@ export interface DeleteConfirmTarget {
   id: string;
   label: string;
 }
+

@@ -32,3 +32,4 @@ export const URGENCY_OPTIONS: Array<{ id: UrgencyFilter; label: string }> = [
   { id: 'danger', label: 'Critiques' },
   { id: 'warning', label: 'Préavis' },
 ];
+

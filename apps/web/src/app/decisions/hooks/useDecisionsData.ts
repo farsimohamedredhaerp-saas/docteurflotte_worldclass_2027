@@ -360,3 +360,4 @@ export function useDecisionsData(selectedUrgency: UrgencyFilter) {
     handleOpenSavingsKpiProof,
   };
 }
+

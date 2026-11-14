@@ -108,3 +108,4 @@ export function usePreventiveFilters({ templates, upcoming }: UsePreventiveFilte
     filteredTemplates,
   };
 }
+

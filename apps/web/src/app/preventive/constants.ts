@@ -110,3 +110,4 @@ export const DEFAULT_DUE_FORM: DueFormData = {
   unit: 'km',
   assignedSite: 'Dépôt Central Alger (16)',
 };
+
