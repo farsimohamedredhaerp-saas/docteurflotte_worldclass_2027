@@ -98,81 +98,87 @@ export function BreakthroughInnovationsPanel() {
           ? {
               exhaustTempInC: 340.0,
               scrTempInC: 338.0,
-              scrTempOutC: 337.9,
-              defDosingRateGh: 620.0,
-              defTankLevelPct: 80.0,
+              scrTempOutC: 337.8, // Pas de chute endothermique
+              defDosingRateGh: 620.0, // Prétend injecter 620 g/h
+              defTankLevelPct: 60.0,
               defConcentrationPct: 32.5,
               fuelRateLh: 28.0,
               engineRpm: 1500,
               boostPressureKpa: 155.0,
-              intakeTempC: 35.0,
+              intakeTempC: 40.0,
               engineDisplacementLiters: 12.8,
-              canFrameJitterVarianceMs2: 0.01,
             }
           : {
-              exhaustTempInC: 320.0,
-              scrTempInC: 320.0,
-              scrTempOutC: 304.0, // Chute thermique excessive (eau pure)
-              defDosingRateGh: 400.0,
-              defTankLevelPct: 60.0,
-              defConcentrationPct: 32.5,
-              fuelRateLh: 22.0,
-              engineRpm: 1400,
-              boostPressureKpa: 120.0,
-              intakeTempC: 32.0,
+              // EAU PURE
+              exhaustTempInC: 330.0,
+              scrTempInC: 325.0,
+              scrTempOutC: 321.0, // Chute thermique de vaporisation d'eau sans thermolyse
+              defDosingRateGh: 580.0,
+              defTankLevelPct: 70.0,
+              defConcentrationPct: 0.0, // Eau pure
+              fuelRateLh: 27.0,
+              engineRpm: 1480,
+              boostPressureKpa: 145.0,
+              intakeTempC: 39.0,
               engineDisplacementLiters: 12.8,
             };
 
-        const res = await fetch(`${API_URL}/api/v1/fleet-intelligence/breakthrough/evaluate-scr-integrity`, {
+        const res = await fetch(`${API_URL}/api/v1/fleet-intelligence/breakthrough/evaluate-scr-adblue`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
         if (res.ok) setSesResult(await res.json());
       } else if (activeTab === 'KMSO') {
-        const payload = kmsoScenario === 'NOMINAL'
+        const payload = kmsoScenario === 'SOUS_GONFLE_CRITIQUE'
           ? {
-              wheelSpeedLeftKmh: 80.0,
-              wheelSpeedRightKmh: 80.05,
-              gnssDopplerSpeedKmh: 80.0,
-              yawRateDegS: 0.02,
-              lateralAccelMs2: 0.01,
-              engineTorquePct: 20.0,
+              wheelSpeedFrontLeftKmh: 85.0,
+              wheelSpeedFrontRightKmh: 85.0,
+              wheelSpeedRearLeftKmh: 86.4, // +1.6% de survitesse angulaire (rayon écrasé)
+              wheelSpeedRearRightKmh: 85.0,
+              yawRateDegS: 0.0, // En ligne droite
+              steeringAngleDeg: 0.0,
+              lateralAccelG: 0.0,
+              tireNominalRadiusMm: 535.0,
+              nominalPressureBar: 8.5,
             }
           : {
-              wheelSpeedLeftKmh: 81.3, // Sur-vitesse de rotation due à l'affaissement du rayon
-              wheelSpeedRightKmh: 80.0,
-              gnssDopplerSpeedKmh: 80.0,
-              yawRateDegS: 0.03,
-              lateralAccelMs2: 0.02,
-              engineTorquePct: 15.0,
+              wheelSpeedFrontLeftKmh: 85.0,
+              wheelSpeedFrontRightKmh: 85.0,
+              wheelSpeedRearLeftKmh: 85.1,
+              wheelSpeedRearRightKmh: 85.0,
+              yawRateDegS: 0.0,
+              steeringAngleDeg: 0.0,
+              lateralAccelG: 0.0,
+              tireNominalRadiusMm: 535.0,
+              nominalPressureBar: 8.5,
             };
 
-        const res = await fetch(`${API_URL}/api/v1/fleet-intelligence/breakthrough/evaluate-kinematic-tire`, {
+        const res = await fetch(`${API_URL}/api/v1/fleet-intelligence/breakthrough/evaluate-kinematic-slip`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
         if (res.ok) setKmsoResult(await res.json());
       } else if (activeTab === 'BEP_VCO') {
-        const payload = bepScenario === 'BONNE_CONDUITE_VOITH'
+        const payload = bepScenario === 'SURCHAUFFE_FREINS_PIED'
           ? {
-              vehicleTotalMassKg: 40000,
-              vehicleSpeedKmh: 60.0,
-              roadGradePercent: -5.5,
-              retarderTorquePct: 95.0,
-              retarderMaxTorqueNm: 3200,
-              brakePedalPositionPct: 0.0,
-              durationSeconds: 50,
+              totalVehicleMassKg: 44000,
+              roadSlopePct: -7.0, // Descente Chiffa
+              groundSpeedKmh: 65.0,
+              brakingDurationSeconds: 180, // 3 minutes en descente continue
+              brakePressureBar: 4.5, // Fort appui au pied continu
+              retarderTorquePct: 5.0, // Retarder quasiment inactif
+              ambientTempC: 38.0,
             }
           : {
-              vehicleTotalMassKg: 44000,
-              vehicleSpeedKmh: 65.0,
-              roadGradePercent: -7.0,
-              retarderTorquePct: 10.0, // Chauffeur n'utilise pas le Voith
-              retarderMaxTorqueNm: 3200,
-              brakePedalPositionPct: 75.0, // Freine au pied en continu
-              durationSeconds: 60,
+              totalVehicleMassKg: 44000,
+              roadSlopePct: -7.0,
+              groundSpeedKmh: 65.0,
+              brakingDurationSeconds: 180,
+              brakePressureBar: 0.0, // Pied levé des freins
+              retarderTorquePct: 85.0, // 85% d'effort sur Voith
+              ambientTempC: 38.0,
             };
 
         const res = await fetch(`${API_URL}/api/v1/fleet-intelligence/breakthrough/evaluate-brake-energy`, {
@@ -182,20 +188,23 @@ export function BreakthroughInnovationsPanel() {
         });
         if (res.ok) setBepResult(await res.json());
       } else if (activeTab === 'CSIS') {
-        const samples: number[] = [24.5, 24.5, 24.4, 24.5, 24.5];
-        for (let c = 0; c < 6; c++) {
-          const targetVoltage = csisScenario === 'MOTEUR_NEUF' ? 18.8 : c === 3 ? 22.2 : 18.5;
-          for (let s = 0; s < 15; s++) {
-            samples.push(targetVoltage);
-          }
-        }
+        // Profils de tension ADC 250 Hz (12 cylindrées échantillonnées)
+        const voltageCyl4Fault = [
+          23.5, 17.8, 22.9, 17.6, 22.8, 17.7,
+          23.2, 21.4, // Creux cylindre #4 très faible (fuite de compression)
+          22.9, 17.6, 23.0, 17.7
+        ];
+        const voltageNominal = [
+          23.5, 17.8, 23.0, 17.6, 22.8, 17.7,
+          23.1, 17.6, 22.9, 17.5, 23.0, 17.6
+        ];
 
         const payload = {
-          engineDisplacementLiters: 12.8,
-          cylinderCount: 6,
-          batteryVoltageSamples250Hz: samples,
-          coolantTempC: 20.0,
-          crankingRpm: 155,
+          crankingVoltageSamples: csisScenario === 'CYLINDRE_4_FUITE' ? voltageCyl4Fault : voltageNominal,
+          sampleRateHz: 250,
+          numberOfCylinders: 6,
+          nominalBatteryVoltage: 24.0,
+          batterySohPct: 92.0,
         };
 
         const res = await fetch(`${API_URL}/api/v1/fleet-intelligence/breakthrough/evaluate-cranking-compression`, {
@@ -206,75 +215,36 @@ export function BreakthroughInnovationsPanel() {
         if (res.ok) setCsisResult(await res.json());
       }
     } catch (err) {
-      console.error('Erreur lors du diagnostic physique:', err);
+      console.error('Erreur appel API Breakthrough :', err);
     } finally {
       setIsRunning(false);
     }
   };
 
   return (
-    <div
-      style={{
-        background: '#FFFFFF',
-        color: '#0F172A',
-        border: '1px solid #E2E8F0',
-        borderRadius: '16px',
-        padding: '24px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-      }}
-    >
+    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-6 shadow-sm flex flex-col gap-5 text-slate-900 dark:text-slate-100 transition-colors">
       {/* ── EN-TÊTE DU BLOC ── */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
-          borderBottom: '1px solid #E2E8F0',
-          paddingBottom: '16px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: '#F0FDF4',
-              border: '1px solid #BBF7D0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <IconActivity size={22} className="text-emerald-600" />
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-3.5">
+          <div className="h-11 w-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-800/80 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+            <IconActivity size={22} />
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
-                Monopole Technologique : 5 Innovations Physiques (0 DA / 0 $)
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Monopole Technologique : 5 Innovations Physiques (0 DA Matériel)
               </h3>
-              <span
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  padding: '2px 8px',
-                  borderRadius: '12px',
-                  background: '#ECFDF5',
-                  color: '#047857',
-                  border: '1px solid #A7F3D0',
-                }}
-              >
-                BREVETABLE • ZÉRO CAPTEUR RAPPORTÉ
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                </span>
+                XAI DÉTERMINISTE • ZÉRO CAPTEUR RAPPORTÉ
               </span>
             </div>
-            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
-              Diagnostic déterministe sur signaux de série natifs (J1939, ISO 11992, ADC 24V 250 Hz, IMU &amp; GNSS).
-            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Diagnostic déterministe sur signaux natifs (J1939, ISO 11992, ADC 24V 250 Hz, IMU &amp; GNSS) sans aucun matériel propriétaire.
+            </p>
           </div>
         </div>
 
@@ -282,49 +252,26 @@ export function BreakthroughInnovationsPanel() {
         <button
           onClick={handleRunDiagnostic}
           disabled={isRunning}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 22px',
-            fontSize: '13px',
-            fontWeight: 800,
-            borderRadius: '8px',
-            backgroundColor: '#047857',
-            color: '#FFFFFF',
-            border: '1px solid #065F46',
-            cursor: isRunning ? 'not-allowed' : 'pointer',
-            boxShadow: '0 2px 6px rgba(4, 120, 87, 0.3)',
-          }}
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {isRunning ? (
             <>
               <IconActivity size={14} className="inline animate-spin" />
-              <span>Analyse Physique...</span>
+              <span>Analyse Physique en cours...</span>
             </>
           ) : (
             <>
               <IconZap size={14} className="inline" />
-              <span>Évaluer l'Innovation en Direct</span>
+              <span>Évaluer l&apos;Innovation en Direct</span>
             </>
           )}
         </button>
       </div>
 
       {/* ── SÉLECTEUR D'ONGLETS ── */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '8px',
-          flexWrap: 'wrap',
-          backgroundColor: '#F8FAFC',
-          padding: '6px',
-          borderRadius: '10px',
-          border: '1px solid #E2E8F0',
-        }}
-      >
+      <div className="flex flex-wrap gap-1.5 p-1 rounded-xl bg-slate-100/80 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800">
         {[
-          { id: 'HWFA', label: '1. HWFA (Travail Hydraulique BTPH)', Icon: IconActivity },
+          { id: 'HWFA', label: '1. HWFA (Travail BTPH & Fraude)', Icon: IconActivity },
           { id: 'SES_UEB', label: '2. SES-UEB (Détection Émulateur SCR)', Icon: IconShieldCheck },
           { id: 'KMSO', label: '3. KMSO (Pneus & Éclatement 0 TPMS)', Icon: IconAlertOctagon },
           { id: 'BEP_VCO', label: '4. BEP-VCO (Freins vs Voith Retarder)', Icon: IconZap },
@@ -335,23 +282,14 @@ export function BreakthroughInnovationsPanel() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as InnovationKey)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '8px 14px',
-                fontSize: '12px',
-                fontWeight: 800,
-                borderRadius: '8px',
-                border: isSel ? '1px solid #047857' : '1px solid #CBD5E1',
-                backgroundColor: isSel ? '#047857' : '#FFFFFF',
-                color: isSel ? '#FFFFFF' : '#334155',
-                cursor: 'pointer',
-                boxShadow: isSel ? '0 2px 4px rgba(4, 120, 87, 0.25)' : 'none',
-              }}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs rounded-lg transition-all ${
+                isSel
+                  ? 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 font-bold shadow-xs border border-emerald-500/20 dark:border-emerald-500/40'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
+              }`}
             >
               <tab.Icon size={14} />
-              <span style={{ color: isSel ? '#FFFFFF' : '#0F172A', fontWeight: 800 }}>{tab.label}</span>
+              <span>{tab.label}</span>
             </button>
           );
         })}
@@ -359,75 +297,69 @@ export function BreakthroughInnovationsPanel() {
 
       {/* ── PANNEAU 1 : HWFA ── */}
       {activeTab === 'HWFA' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>
+        <div className="flex flex-col gap-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Scénario d&apos;essai sur Pelle CAT 336D / Komatsu PC390 (Taux : 6 500 DA/h) :
             </span>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setHwfaScenario('RALENTI_FORCÉ_FRAUDE')}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  borderRadius: '6px',
-                  border: hwfaScenario === 'RALENTI_FORCÉ_FRAUDE' ? '1px solid #DC2626' : '1px solid #CBD5E1',
-                  background: hwfaScenario === 'RALENTI_FORCÉ_FRAUDE' ? '#FEE2E2' : '#FFFFFF',
-                  color: hwfaScenario === 'RALENTI_FORCÉ_FRAUDE' ? '#991B1B' : '#475569',
-                  cursor: 'pointer',
-                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                  hwfaScenario === 'RALENTI_FORCÉ_FRAUDE'
+                    ? 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                }`}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconAlertTriangle size={12} className="text-rose-600" /> Fraude : 2h Ralenti Climatisation (Heures Fantômes)
+                <span className="inline-flex items-center gap-1.5">
+                  <IconAlertTriangle size={13} className="text-rose-600 dark:text-rose-400" />
+                  Fraude : 2h Ralenti Climatisation (Heures Fantômes)
                 </span>
               </button>
               <button
                 onClick={() => setHwfaScenario('EXCAVATION_REELLE')}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  borderRadius: '6px',
-                  border: hwfaScenario === 'EXCAVATION_REELLE' ? '1px solid #047857' : '1px solid #CBD5E1',
-                  background: hwfaScenario === 'EXCAVATION_REELLE' ? '#ECFDF5' : '#FFFFFF',
-                  color: hwfaScenario === 'EXCAVATION_REELLE' ? '#065F46' : '#475569',
-                  cursor: 'pointer',
-                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                  hwfaScenario === 'EXCAVATION_REELLE'
+                    ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                }`}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconCheck size={12} className="text-emerald-600" /> Nominal : 1h Excavation Rocheuse Lourde
+                <span className="inline-flex items-center gap-1.5">
+                  <IconCheck size={13} className="text-emerald-600 dark:text-emerald-400" />
+                  Nominal : 1h Excavation Rocheuse Lourde
                 </span>
               </button>
             </div>
           </div>
 
           {hwfaResult ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
-              <div style={{ background: '#F8FAFC', border: '1px solid #CBD5E1', borderRadius: '10px', padding: '14px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Classification Travail :</div>
-                <div style={{ fontSize: '15px', fontWeight: 800, color: hwfaResult.isFraudulentHoursBilled ? '#DC2626' : '#047857', marginTop: '4px' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 p-4">
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Classification Travail :
+                </div>
+                <div className={`text-base font-black mt-1 ${hwfaResult.isFraudulentHoursBilled ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                   {hwfaResult.workClassification}
                 </div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
-                  Puissance utile : <strong>{hwfaResult.hydraulicPowerKw} kW</strong> | Rendement : <strong>{(hwfaResult.caloricEfficiencyEta * 100).toFixed(1)}%</strong>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Puissance utile : <strong className="font-mono text-slate-700 dark:text-slate-300">{hwfaResult.hydraulicPowerKw} kW</strong> | Rendement : <strong className="font-mono text-slate-700 dark:text-slate-300">{(hwfaResult.caloricEfficiencyEta * 100).toFixed(1)}%</strong>
                 </div>
               </div>
 
-              <div style={{ background: hwfaResult.isFraudulentHoursBilled ? '#FEF2F2' : '#F0FDF4', border: `1px solid ${hwfaResult.isFraudulentHoursBilled ? '#FECACA' : '#BBF7D0'}`, borderRadius: '10px', padding: '14px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: hwfaResult.isFraudulentHoursBilled ? '#991B1B' : '#166534', textTransform: 'uppercase' }}>
+              <div className={`rounded-xl border p-4 ${hwfaResult.isFraudulentHoursBilled ? 'bg-rose-50/50 dark:bg-rose-950/30 border-rose-200/80 dark:border-rose-900/60' : 'bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-900/60'}`}>
+                <div className={`text-[11px] font-bold uppercase tracking-wider ${hwfaResult.isFraudulentHoursBilled ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
                   {hwfaResult.isFraudulentHoursBilled ? 'Surfacturation Arrêtée (DA) :' : 'Facturation Validée :'}
                 </div>
-                <div style={{ fontSize: '18px', fontWeight: 800, color: hwfaResult.isFraudulentHoursBilled ? '#DC2626' : '#047857', fontFamily: 'monospace', marginTop: '4px' }}>
+                <div className={`text-xl font-black font-mono mt-1 ${hwfaResult.isFraudulentHoursBilled ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                   {hwfaResult.unjustifiedBilledCostDzd.toLocaleString('fr-DZ')} DZD
                 </div>
-                <div style={{ fontSize: '11px', color: hwfaResult.isFraudulentHoursBilled ? '#B91C1C' : '#15803D', marginTop: '4px' }}>
+                <div className={`text-xs mt-1 ${hwfaResult.isFraudulentHoursBilled ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-emerald-600/80 dark:text-emerald-400/80'}`}>
                   {hwfaResult.isFraudulentHoursBilled ? 'Certificat de rejet de facture prêt à émettre' : 'Travail mécanique effectif prouvé'}
                 </div>
               </div>
             </div>
           ) : (
-            <div style={{ padding: '20px', textAlign: 'center', background: '#F8FAFC', borderRadius: '8px', color: '#64748B', fontSize: '13px' }}>
+            <div className="p-5 text-center rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 text-xs text-slate-500">
               Cliquez sur « Évaluer l&apos;Innovation en Direct » pour lancer le calcul HWFA.
             </div>
           )}
@@ -436,92 +368,82 @@ export function BreakthroughInnovationsPanel() {
 
       {/* ── PANNEAU 2 : SES_UEB ── */}
       {activeTab === 'SES_UEB' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>
+        <div className="flex flex-col gap-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Scénario d&apos;essai sur Tracteur Routier Euro 5/6 (Scania DC13 / Actros OM471) :
             </span>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setSesScenario('EMULATEUR_PIRATE')}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  borderRadius: '6px',
-                  border: sesScenario === 'EMULATEUR_PIRATE' ? '1px solid #DC2626' : '1px solid #CBD5E1',
-                  background: sesScenario === 'EMULATEUR_PIRATE' ? '#FEE2E2' : '#FFFFFF',
-                  color: sesScenario === 'EMULATEUR_PIRATE' ? '#991B1B' : '#475569',
-                  cursor: 'pointer',
-                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                  sesScenario === 'EMULATEUR_PIRATE'
+                    ? 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                }`}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconAlertOctagon size={12} className="text-rose-600" /> Boîtier Pirate : Émulateur CAN SCR Actif
+                <span className="inline-flex items-center gap-1.5">
+                  <IconAlertOctagon size={13} className="text-rose-600 dark:text-rose-400" />
+                  Boîtier Pirate : Émulateur CAN SCR Actif
                 </span>
               </button>
               <button
                 onClick={() => setSesScenario('EAU_PURE')}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  borderRadius: '6px',
-                  border: sesScenario === 'EAU_PURE' ? '1px solid #D97706' : '1px solid #CBD5E1',
-                  background: sesScenario === 'EAU_PURE' ? '#FEF3C7' : '#FFFFFF',
-                  color: sesScenario === 'EAU_PURE' ? '#92400E' : '#475569',
-                  cursor: 'pointer',
-                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                  sesScenario === 'EAU_PURE'
+                    ? 'border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                }`}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconAlertTriangle size={12} className="text-amber-600" /> Fraude : Urée Coupée à l&apos;Eau du Robinet
+                <span className="inline-flex items-center gap-1.5">
+                  <IconAlertTriangle size={13} className="text-amber-600 dark:text-amber-400" />
+                  Fraude : Urée Coupée à l&apos;Eau du Robinet
                 </span>
               </button>
               <button
                 onClick={() => setSesScenario('CONFORME')}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  borderRadius: '6px',
-                  border: sesScenario === 'CONFORME' ? '1px solid #047857' : '1px solid #CBD5E1',
-                  background: sesScenario === 'CONFORME' ? '#ECFDF5' : '#FFFFFF',
-                  color: sesScenario === 'CONFORME' ? '#065F46' : '#475569',
-                  cursor: 'pointer',
-                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                  sesScenario === 'CONFORME'
+                    ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                }`}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconCheck size={12} className="text-emerald-600" /> Nominal : AdBlue Authentique (32.5%)
+                <span className="inline-flex items-center gap-1.5">
+                  <IconCheck size={13} className="text-emerald-600 dark:text-emerald-400" />
+                  Nominal : AdBlue Authentique (32.5%)
                 </span>
               </button>
             </div>
           </div>
 
           {sesResult ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
-              <div style={{ background: '#F8FAFC', border: '1px solid #CBD5E1', borderRadius: '10px', padding: '14px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Statut Dépollution SCR :</div>
-                <div style={{ fontSize: '15px', fontWeight: 800, color: sesResult.fraudDetected ? '#DC2626' : '#047857', marginTop: '4px' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 p-4">
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Statut Dépollution SCR :
+                </div>
+                <div className={`text-base font-black mt-1 ${sesResult.fraudDetected ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                   {sesResult.systemIntegrity}
                 </div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
-                  ΔT mesuré : <strong>{sesResult.measuredTempDropC}°C</strong> vs théorique : <strong>{sesResult.theoreticalTempDropC}°C</strong>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  ΔT mesuré : <strong className="font-mono text-slate-700 dark:text-slate-300">{sesResult.measuredTempDropC}°C</strong> vs théorique : <strong className="font-mono text-slate-700 dark:text-slate-300">{sesResult.theoreticalTempDropC}°C</strong>
                 </div>
               </div>
 
-              <div style={{ background: sesResult.fraudDetected ? '#FEF2F2' : '#F0FDF4', border: `1px solid ${sesResult.fraudDetected ? '#FECACA' : '#BBF7D0'}`, borderRadius: '10px', padding: '14px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: sesResult.fraudDetected ? '#991B1B' : '#166534', textTransform: 'uppercase' }}>
+              <div className={`rounded-xl border p-4 ${sesResult.fraudDetected ? 'bg-rose-50/50 dark:bg-rose-950/30 border-rose-200/80 dark:border-rose-900/60' : 'bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-900/60'}`}>
+                <div className={`text-[11px] font-bold uppercase tracking-wider ${sesResult.fraudDetected ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
                   Risque Préservation Matériel :
                 </div>
-                <div style={{ fontSize: '18px', fontWeight: 800, color: sesResult.fraudDetected ? '#DC2626' : '#047857', fontFamily: 'monospace', marginTop: '4px' }}>
+                <div className={`text-xl font-black font-mono mt-1 ${sesResult.fraudDetected ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                   {sesResult.riskDamageCostDzd.toLocaleString('fr-DZ')} DZD
                 </div>
-                <div style={{ fontSize: '11px', color: sesResult.fraudDetected ? '#B91C1C' : '#15803D', marginTop: '4px' }}>
+                <div className={`text-xs mt-1 ${sesResult.fraudDetected ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-emerald-600/80 dark:text-emerald-400/80'}`}>
                   {sesResult.tamperingEvidence}
                 </div>
               </div>
             </div>
           ) : (
-            <div style={{ padding: '20px', textAlign: 'center', background: '#F8FAFC', borderRadius: '8px', color: '#64748B', fontSize: '13px' }}>
+            <div className="p-5 text-center rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 text-xs text-slate-500">
               Cliquez sur « Évaluer l&apos;Innovation en Direct » pour analyser le bilan d&apos;enthalpie SCR.
             </div>
           )}
@@ -530,75 +452,69 @@ export function BreakthroughInnovationsPanel() {
 
       {/* ── PANNEAU 3 : KMSO ── */}
       {activeTab === 'KMSO' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>
-              Scénario d&apos;essai sur Semi-Remorque 40t (315/80 R22.5 à 85 km/h) :
+        <div className="flex flex-col gap-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Scénario d&apos;essai sur Semi-Remorque 40T (315/80 R22.5 à 85 km/h) :
             </span>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setKmsoScenario('SOUS_GONFLE_CRITIQUE')}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  borderRadius: '6px',
-                  border: kmsoScenario === 'SOUS_GONFLE_CRITIQUE' ? '1px solid #DC2626' : '1px solid #CBD5E1',
-                  background: kmsoScenario === 'SOUS_GONFLE_CRITIQUE' ? '#FEE2E2' : '#FFFFFF',
-                  color: kmsoScenario === 'SOUS_GONFLE_CRITIQUE' ? '#991B1B' : '#475569',
-                  cursor: 'pointer',
-                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                  kmsoScenario === 'SOUS_GONFLE_CRITIQUE'
+                    ? 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                }`}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconAlertOctagon size={12} className="text-rose-600" /> Danger Éclatement : Pneu Gauche à -2.0 bar (Sur-vitesse 1.6%)
+                <span className="inline-flex items-center gap-1.5">
+                  <IconAlertOctagon size={13} className="text-rose-600 dark:text-rose-400" />
+                  Danger Éclatement : Pneu Gauche -2.0 bar (Survitesse 1.6%)
                 </span>
               </button>
               <button
                 onClick={() => setKmsoScenario('NOMINAL')}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  borderRadius: '6px',
-                  border: kmsoScenario === 'NOMINAL' ? '1px solid #047857' : '1px solid #CBD5E1',
-                  background: kmsoScenario === 'NOMINAL' ? '#ECFDF5' : '#FFFFFF',
-                  color: kmsoScenario === 'NOMINAL' ? '#065F46' : '#475569',
-                  cursor: 'pointer',
-                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                  kmsoScenario === 'NOMINAL'
+                    ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                }`}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconCheck size={12} className="text-emerald-600" /> Nominal : Pressions Équilibrées (8.5 bar)
+                <span className="inline-flex items-center gap-1.5">
+                  <IconCheck size={13} className="text-emerald-600 dark:text-emerald-400" />
+                  Nominal : Pressions Équilibrées (8.5 bar)
                 </span>
               </button>
             </div>
           </div>
 
           {kmsoResult ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
-              <div style={{ background: '#F8FAFC', border: '1px solid #CBD5E1', borderRadius: '10px', padding: '14px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Intégrité Pneumatiques :</div>
-                <div style={{ fontSize: '15px', fontWeight: 800, color: kmsoResult.burstRiskAlert ? '#DC2626' : '#047857', marginTop: '4px' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 p-4">
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Intégrité Pneumatiques :
+                </div>
+                <div className={`text-base font-black mt-1 ${kmsoResult.burstRiskAlert ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                   {kmsoResult.tireIntegrityStatus}
                 </div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
-                  Δω cinématique : <strong>{kmsoResult.relativeSpeedDeltaPct}%</strong> | Déficit estimé : <strong>-{kmsoResult.estimatedPressureDeficitBar} bar</strong>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Δω cinématique : <strong className="font-mono text-slate-700 dark:text-slate-300">{kmsoResult.relativeSpeedDeltaPct}%</strong> | Déficit estimé : <strong className="font-mono text-slate-700 dark:text-slate-300">-{kmsoResult.estimatedPressureDeficitBar} bar</strong>
                 </div>
               </div>
 
-              <div style={{ background: kmsoResult.burstRiskAlert ? '#FEF2F2' : '#F0FDF4', border: `1px solid ${kmsoResult.burstRiskAlert ? '#FECACA' : '#BBF7D0'}`, borderRadius: '10px', padding: '14px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: kmsoResult.burstRiskAlert ? '#991B1B' : '#166534', textTransform: 'uppercase' }}>
+              <div className={`rounded-xl border p-4 ${kmsoResult.burstRiskAlert ? 'bg-rose-50/50 dark:bg-rose-950/30 border-rose-200/80 dark:border-rose-900/60' : 'bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-900/60'}`}>
+                <div className={`text-[11px] font-bold uppercase tracking-wider ${kmsoResult.burstRiskAlert ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
                   Surconsommation Traînée (pour 1 000 km) :
                 </div>
-                <div style={{ fontSize: '18px', fontWeight: 800, color: kmsoResult.burstRiskAlert ? '#DC2626' : '#047857', fontFamily: 'monospace', marginTop: '4px' }}>
+                <div className={`text-xl font-black font-mono mt-1 ${kmsoResult.burstRiskAlert ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                   {kmsoResult.excessFuelLossPer1000KmDzd.toLocaleString('fr-DZ')} DZD
                 </div>
-                <div style={{ fontSize: '11px', color: kmsoResult.burstRiskAlert ? '#B91C1C' : '#15803D', marginTop: '4px' }}>
+                <div className={`text-xs mt-1 ${kmsoResult.burstRiskAlert ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-emerald-600/80 dark:text-emerald-400/80'}`}>
                   {kmsoResult.burstRiskAlert ? 'Alerte immédiate au répartiteur pour arrêt sécurisé' : 'Résistance au roulement minimale'}
                 </div>
               </div>
             </div>
           ) : (
-            <div style={{ padding: '20px', textAlign: 'center', background: '#F8FAFC', borderRadius: '8px', color: '#64748B', fontSize: '13px' }}>
+            <div className="p-5 text-center rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 text-xs text-slate-500">
               Cliquez sur « Évaluer l&apos;Innovation en Direct » pour observer les rayons dynamiques KMSO.
             </div>
           )}
@@ -607,75 +523,69 @@ export function BreakthroughInnovationsPanel() {
 
       {/* ── PANNEAU 4 : BEP_VCO ── */}
       {activeTab === 'BEP_VCO' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>
+        <div className="flex flex-col gap-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Scénario Descente des Gorges de la Chiffa (Pente -7%, 44 Tonnes à 65 km/h) :
             </span>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setBepScenario('SURCHAUFFE_FREINS_PIED')}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  borderRadius: '6px',
-                  border: bepScenario === 'SURCHAUFFE_FREINS_PIED' ? '1px solid #DC2626' : '1px solid #CBD5E1',
-                  background: bepScenario === 'SURCHAUFFE_FREINS_PIED' ? '#FEE2E2' : '#FFFFFF',
-                  color: bepScenario === 'SURCHAUFFE_FREINS_PIED' ? '#991B1B' : '#475569',
-                  cursor: 'pointer',
-                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                  bepScenario === 'SURCHAUFFE_FREINS_PIED'
+                    ? 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                }`}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconAlertOctagon size={12} className="text-rose-600" /> Mauvaise Conduite : Freinage au Pied (Disques à &gt; 400°C)
+                <span className="inline-flex items-center gap-1.5">
+                  <IconAlertOctagon size={13} className="text-rose-600 dark:text-rose-400" />
+                  Mauvaise Conduite : Freinage au Pied (Disques &gt; 400°C)
                 </span>
               </button>
               <button
                 onClick={() => setBepScenario('BONNE_CONDUITE_VOITH')}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  borderRadius: '6px',
-                  border: bepScenario === 'BONNE_CONDUITE_VOITH' ? '1px solid #047857' : '1px solid #CBD5E1',
-                  background: bepScenario === 'BONNE_CONDUITE_VOITH' ? '#ECFDF5' : '#FFFFFF',
-                  color: bepScenario === 'BONNE_CONDUITE_VOITH' ? '#065F46' : '#475569',
-                  cursor: 'pointer',
-                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                  bepScenario === 'BONNE_CONDUITE_VOITH'
+                    ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                }`}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconCheck size={12} className="text-emerald-600" /> Exemplaire : 95% Ralentisseur Voith (Disques Froids &lt; 150°C)
+                <span className="inline-flex items-center gap-1.5">
+                  <IconCheck size={13} className="text-emerald-600 dark:text-emerald-400" />
+                  Exemplaire : 95% Ralentisseur Voith (Disques Froids &lt; 150°C)
                 </span>
               </button>
             </div>
           </div>
 
           {bepResult ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
-              <div style={{ background: '#F8FAFC', border: '1px solid #CBD5E1', borderRadius: '10px', padding: '14px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Sécurité &amp; Température Disques :</div>
-                <div style={{ fontSize: '15px', fontWeight: 800, color: bepResult.fadeRiskAlert ? '#DC2626' : '#047857', marginTop: '4px' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 p-4">
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Sécurité &amp; Température Disques :
+                </div>
+                <div className={`text-base font-black mt-1 ${bepResult.fadeRiskAlert ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                   {bepResult.drivingSafetyStatus}
                 </div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
-                  T_disques estimée : <strong>{bepResult.estimatedDiscTempC}°C</strong> | Ratio Voith : <strong>{(bepResult.retarderUsageRatio * 100).toFixed(0)}%</strong>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  T_disques estimée : <strong className="font-mono text-slate-700 dark:text-slate-300">{bepResult.estimatedDiscTempC}°C</strong> | Ratio Voith : <strong className="font-mono text-slate-700 dark:text-slate-300">{(bepResult.retarderUsageRatio * 100).toFixed(0)}%</strong>
                 </div>
               </div>
 
-              <div style={{ background: bepResult.fadeRiskAlert ? '#FEF2F2' : '#F0FDF4', border: `1px solid ${bepResult.fadeRiskAlert ? '#FECACA' : '#BBF7D0'}`, borderRadius: '10px', padding: '14px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: bepResult.fadeRiskAlert ? '#991B1B' : '#166534', textTransform: 'uppercase' }}>
+              <div className={`rounded-xl border p-4 ${bepResult.fadeRiskAlert ? 'bg-rose-50/50 dark:bg-rose-950/30 border-rose-200/80 dark:border-rose-900/60' : 'bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-900/60'}`}>
+                <div className={`text-[11px] font-bold uppercase tracking-wider ${bepResult.fadeRiskAlert ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
                   Préjudice Usure / Voilage Disques (DA) :
                 </div>
-                <div style={{ fontSize: '18px', fontWeight: 800, color: bepResult.fadeRiskAlert ? '#DC2626' : '#047857', fontFamily: 'monospace', marginTop: '4px' }}>
+                <div className={`text-xl font-black font-mono mt-1 ${bepResult.fadeRiskAlert ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                   {bepResult.estimatedFinancialLossPerDescentDzd.toLocaleString('fr-DZ')} DZD
                 </div>
-                <div style={{ fontSize: '11px', color: bepResult.fadeRiskAlert ? '#B91C1C' : '#15803D', marginTop: '4px' }}>
+                <div className={`text-xs mt-1 ${bepResult.fadeRiskAlert ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-emerald-600/80 dark:text-emerald-400/80'}`}>
                   {bepResult.fadeRiskAlert ? 'Risque critique d\'évanouissement (Fade) et fêlure des disques' : 'Disques préservés pour > 120 000 km'}
                 </div>
               </div>
             </div>
           ) : (
-            <div style={{ padding: '20px', textAlign: 'center', background: '#F8FAFC', borderRadius: '8px', color: '#64748B', fontSize: '13px' }}>
+            <div className="p-5 text-center rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 text-xs text-slate-500">
               Cliquez sur « Évaluer l&apos;Innovation en Direct » pour partitionner l&apos;énergie gravitationnelle BEP-VCO.
             </div>
           )}
@@ -684,106 +594,103 @@ export function BreakthroughInnovationsPanel() {
 
       {/* ── PANNEAU 5 : CSIS ── */}
       {activeTab === 'CSIS' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>
+        <div className="flex flex-col gap-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Scénario Cranking Démarrage 24V à Froid (Échantillonnage ADC à 250 Hz) :
             </span>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setCsisScenario('CYLINDRE_4_FUITE')}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  borderRadius: '6px',
-                  border: csisScenario === 'CYLINDRE_4_FUITE' ? '1px solid #DC2626' : '1px solid #CBD5E1',
-                  background: csisScenario === 'CYLINDRE_4_FUITE' ? '#FEE2E2' : '#FFFFFF',
-                  color: csisScenario === 'CYLINDRE_4_FUITE' ? '#991B1B' : '#475569',
-                  cursor: 'pointer',
-                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                  csisScenario === 'CYLINDRE_4_FUITE'
+                    ? 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                }`}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconAlertOctagon size={12} className="text-rose-600" /> Défaut : Cylindre #4 Fuite Soupape / Segment (Creux Anormal)
+                <span className="inline-flex items-center gap-1.5">
+                  <IconAlertOctagon size={13} className="text-rose-600 dark:text-rose-400" />
+                  Défaut : Cylindre #4 Fuite Soupape / Segment (Creux Anormal)
                 </span>
               </button>
               <button
                 onClick={() => setCsisScenario('MOTEUR_NEUF')}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  borderRadius: '6px',
-                  border: csisScenario === 'MOTEUR_NEUF' ? '1px solid #047857' : '1px solid #CBD5E1',
-                  background: csisScenario === 'MOTEUR_NEUF' ? '#ECFDF5' : '#FFFFFF',
-                  color: csisScenario === 'MOTEUR_NEUF' ? '#065F46' : '#475569',
-                  cursor: 'pointer',
-                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                  csisScenario === 'MOTEUR_NEUF'
+                    ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                }`}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconCheck size={12} className="text-emerald-600" /> Nominal : Moteur Neuf (6 Cylindres Équilibrés à 100%)
+                <span className="inline-flex items-center gap-1.5">
+                  <IconCheck size={13} className="text-emerald-600 dark:text-emerald-400" />
+                  Nominal : Moteur Neuf (6 Cylindres Équilibrés à 100%)
                 </span>
               </button>
             </div>
           </div>
 
           {csisResult ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="flex flex-col gap-3">
               {/* Barre des 6 cylindres */}
-              <div style={{ background: '#F8FAFC', border: '1px solid #CBD5E1', borderRadius: '10px', padding: '16px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', marginBottom: '12px' }}>
-                  Équilibrage de Compression Relative Inter-Cylindres (Oscilloscope Virtuel) :
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 p-4">
+                <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">
+                  Équilibrage de Compression Relative Inter-Cylindres (Oscilloscope Virtuel 250 Hz) :
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px', textAlign: 'center' }}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-center">
                   {csisResult.cylinderVoltageDips.map((cyl) => {
                     const isWeak = cyl.cylinderIndex === csisResult.weakestCylinderIndex && csisResult.needsImmediateWorkshop;
                     return (
                       <div
                         key={cyl.cylinderIndex}
-                        style={{
-                          background: isWeak ? '#FEE2E2' : '#ECFDF5',
-                          border: `1px solid ${isWeak ? '#EF4444' : '#10B981'}`,
-                          borderRadius: '8px',
-                          padding: '10px 4px',
-                        }}
+                        className={`rounded-xl border p-3 ${
+                          isWeak
+                            ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300'
+                            : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
+                        }`}
                       >
-                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#475569' }}>Cyl #{cyl.cylinderIndex}</div>
-                        <div style={{ fontSize: '16px', fontWeight: 800, color: isWeak ? '#DC2626' : '#047857', marginTop: '2px' }}>
+                        <div className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                          Cyl #{cyl.cylinderIndex}
+                        </div>
+                        <div className={`text-lg font-black font-mono mt-0.5 ${isWeak ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                           {cyl.compressionBalancePct}%
                         </div>
-                        <div style={{ fontSize: '10px', color: '#64748B' }}>ΔV: {cyl.voltageDipV}V</div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">
+                          ΔV: {cyl.voltageDipV}V
+                        </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
-                <div style={{ background: '#F8FAFC', border: '1px solid #CBD5E1', borderRadius: '10px', padding: '14px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Diagnostic Santé Moteur :</div>
-                  <div style={{ fontSize: '15px', fontWeight: 800, color: csisResult.needsImmediateWorkshop ? '#DC2626' : '#047857', marginTop: '4px' }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 p-4">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Diagnostic Santé Moteur :
+                  </div>
+                  <div className={`text-base font-black mt-1 ${csisResult.needsImmediateWorkshop ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                     {csisResult.engineCompressionHealth}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
-                    Cylindre incriminé : <strong>#{csisResult.weakestCylinderIndex}</strong> ({csisResult.minCompressionRatioPct}%)
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Cylindre incriminé : <strong className="font-mono text-slate-700 dark:text-slate-300">#{csisResult.weakestCylinderIndex}</strong> ({csisResult.minCompressionRatioPct}%)
                   </div>
                 </div>
 
-                <div style={{ background: csisResult.needsImmediateWorkshop ? '#FEF2F2' : '#F0FDF4', border: `1px solid ${csisResult.needsImmediateWorkshop ? '#FECACA' : '#BBF7D0'}`, borderRadius: '10px', padding: '14px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: csisResult.needsImmediateWorkshop ? '#991B1B' : '#166534', textTransform: 'uppercase' }}>
+                <div className={`rounded-xl border p-4 ${csisResult.needsImmediateWorkshop ? 'bg-rose-50/50 dark:bg-rose-950/30 border-rose-200/80 dark:border-rose-900/60' : 'bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-900/60'}`}>
+                  <div className={`text-[11px] font-bold uppercase tracking-wider ${csisResult.needsImmediateWorkshop ? 'text-rose-700 dark:text-rose-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
                     Économie Casse Moteur Évitée (DA) :
                   </div>
-                  <div style={{ fontSize: '18px', fontWeight: 800, color: csisResult.needsImmediateWorkshop ? '#DC2626' : '#047857', fontFamily: 'monospace', marginTop: '4px' }}>
+                  <div className={`text-xl font-black font-mono mt-1 ${csisResult.needsImmediateWorkshop ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                     {csisResult.estimatedAvoidedEngineCostDzd.toLocaleString('fr-DZ')} DZD
                   </div>
-                  <div style={{ fontSize: '11px', color: csisResult.needsImmediateWorkshop ? '#B91C1C' : '#15803D', marginTop: '4px' }}>
+                  <div className={`text-xs mt-1 ${csisResult.needsImmediateWorkshop ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-emerald-600/80 dark:text-emerald-400/80'}`}>
                     {csisResult.needsImmediateWorkshop ? 'Intervention préventive planifiée avant perçage piston' : 'Compression moteur conforme'}
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div style={{ padding: '20px', textAlign: 'center', background: '#F8FAFC', borderRadius: '8px', color: '#64748B', fontSize: '13px' }}>
+            <div className="p-5 text-center rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800 text-xs text-slate-500">
               Cliquez sur « Évaluer l&apos;Innovation en Direct » pour lancer l&apos;oscilloscope 250 Hz CSIS.
             </div>
           )}
@@ -792,4 +699,3 @@ export function BreakthroughInnovationsPanel() {
     </div>
   );
 }
-

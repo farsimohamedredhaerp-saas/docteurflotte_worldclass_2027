@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { Navbar } from '../../components/navigation/Navbar';
-import { Card } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
 import {
@@ -98,53 +97,70 @@ const INITIAL_OEM_TEMPLATES: OemMaintenanceTemplate[] = [
     standardIntervalText: 'PM1 (250h) • PM2 (500h) • PM3 (1000h) • PM4 (2000h)',
     saharaIntervalText: 'PM1 (175h) • PM2 (350h) (Poussière carrière / BTP)',
     severityFactor: 0.70,
-    engineOilSpec: 'Cat DEO-ULS 15W-40 (25 Litres)',
-    transmissionSpec: 'Cat HYDO Advanced 10 (260 Litres Hydraulique)',
-    coolantSpec: 'Cat ELC Extended Life Coolant',
+    engineOilSpec: 'Cat DEO 15W-40 (30 Litres)',
+    transmissionSpec: 'Cat HYDO Advanced 10 (Hydraulique 260L)',
+    coolantSpec: 'Cat ELC (Extended Life Coolant 50/50)',
     criticalPoints: [
-      'Échantillonnage huile SOS (Spectrométrie d’usure)',
-      'Vidange réducteurs de translation et tourelle',
-      'Contrôle tension des chenilles et clapets de sécurité',
+      'Contrôle échantillon SOS huile hydraulique et réducteurs',
+      'Soufflage quotidien cartouches filtrantes primaires à air',
+      'Tension chenilles et usure barbotins / galets',
     ],
   },
   {
-    id: 'TPL-TOY-HILUX',
+    id: 'TPL-TY-HILUX',
     make: 'Toyota',
-    model: 'Hilux 2.4 / 2.8 D-4D 4x4',
+    model: 'Hilux 2.8 D-4D 4x4 (Pick-up Sahara)',
     category: 'UTILITAIRES',
-    standardIntervalText: '10 000 km / 300 h',
-    saharaIntervalText: '7 500 km / 200 h',
-    severityFactor: 0.75,
-    engineOilSpec: '5W-30 C2 / 15W-40 API CJ-4 (7.5 Litres)',
-    transmissionSpec: 'GL-5 75W-90 Ponts & Boîte transfert (4.8 Litres)',
+    standardIntervalText: '10 000 km / 6 mois',
+    saharaIntervalText: '6 500 km (Arrhenius Poussière & Piste)',
+    severityFactor: 0.65,
+    engineOilSpec: '5W-30 C2 / 15W-40 D-4D (7.5 Litres)',
+    transmissionSpec: '75W-90 GL-5 Différentiel LSD (Pont AR)',
     coolantSpec: 'Toyota Super Long Life Coolant Pink',
     criticalPoints: [
-      'Soufflage filtre à air habitacle et moteur tous les 2 500 km',
-      'Graissage croisillons d’arbres de transmission 4x4',
-      'Contrôle purge décanteur filtre à carburant',
+      'Remplacement filtre à gasoil tous les 10 000 km (protection Common Rail)',
+      'Contrôle amortisseurs renforcés grand débattement',
+      'Graissage arbres de transmission et croisillons',
+    ],
+  },
+  {
+    id: 'TPL-SH-F3000',
+    make: 'Shacman',
+    model: 'F3000 6x4 Benne Weichai WP12.430',
+    category: 'POIDS_LOURDS',
+    standardIntervalText: '30 000 km / 600 h',
+    saharaIntervalText: '18 000 km / 380 h (Facteur 0.60 Chaleur)',
+    severityFactor: 0.60,
+    engineOilSpec: '15W-40 API CI-4 Weichai Genuine (34 Litres)',
+    transmissionSpec: 'Fast Fuller 12JSD200T 85W-90 (13 Litres)',
+    coolantSpec: 'Liquide vert éthylène-glycol 50%',
+    criticalPoints: [
+      'Serrage brides de pont et ressorts de suspension à lames',
+      'Vérification jeu de boîte Fast Gear et tringlerie',
+      'Remplacement filtre décanteur Fleetguard FS19732',
     ],
   },
 ];
 
-export default function PreventivePage() {
+export default function PreventiveMaintenancePage() {
   const { isDemoMode } = useDemoMode();
+  const [climateZone, setClimateZone] = useState<'TELL' | 'PLATEAUS' | 'SAHARA'>('SAHARA');
   const [templates, setTemplates] = useState<OemMaintenanceTemplate[]>(INITIAL_OEM_TEMPLATES);
   const [upcoming, setUpcoming] = useState<UpcomingPreventiveDue[]>([]);
   const [isLoadingUpcoming, setIsLoadingUpcoming] = useState(true);
+
+  // Filtres
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedUrgency, setSelectedUrgency] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [climateZone, setClimateZone] = useState<'TELL' | 'PLATEAUS' | 'SAHARA'>('SAHARA');
   const [notification, setNotification] = useState<string | null>(null);
 
   useEffect(() => {
     if (isDemoMode) {
-      setIsLoadingUpcoming(true);
-      import('@/lib/simulation-sandbox')
-        .then((sandbox) => {
-          setUpcoming(sandbox.MOCK_SANDBOX_PREVENTIVE_DUES);
-        })
-        .finally(() => setIsLoadingUpcoming(false));
+      import('@/lib/simulation-sandbox').then((sandbox) => {
+        setUpcoming(sandbox.MOCK_SANDBOX_PREVENTIVE_DUES);
+        setIsLoadingUpcoming(false);
+      });
     } else {
       setUpcoming([]);
       setIsLoadingUpcoming(false);
@@ -386,311 +402,263 @@ export default function PreventivePage() {
   });
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)', color: 'var(--df-text-main)' }}>
-      {/* 1. BARRE HORIZONTALE UNIVERSELLE */}
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 transition-colors duration-150">
       <Navbar />
 
-      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 1.25rem 3rem 1.25rem' }}>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* BANNIÈRE DE NOTIFICATION */}
         {notification && (
           <div
             role="status"
-            style={{
-              background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-accent-blue)',
-              color: 'var(--df-text-main)',
-              padding: '0.85rem 1.25rem',
-              borderRadius: 'var(--df-radius-md)',
-              marginBottom: '1.25rem',
-              boxShadow: 'var(--df-shadow-md)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-sm font-medium shadow-sm transition-all"
           >
-            <span style={{ color: 'var(--df-status-ok)' }}>
-              <IconCheck size={16} strokeWidth={2} />
-            </span>
-            <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{notification}</span>
+            <div className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </div>
+            <IconCheck size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>{notification}</span>
           </div>
         )}
 
-        {/* 2. LAYOUT DUAL-BAR : SIDEBAR VERTICALE + CONTENU PRINCIPAL */}
-        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
+        {/* EN-TÊTE PRINCIPAL COCKPIT */}
+        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-6 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60">
+                  <IconCpu size={13} />
+                  MAINTENANCE 5.0 PRESCRIPTIVE &amp; COGNITIVE
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/60">
+                  SOUVERAIN ALGÉRIE (LOI 18-07)
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  Physique Déterministe 0 DA • DZD
+                </span>
+              </div>
+              <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                Cockpit de Maintenance 5.0 &amp; Plans Constructeur OEM
+              </h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-3xl">
+                Le décisionnel prescriptif de classe mondiale : 5 algorithmes physiques déterministes à 0 DA de coût matériel, arbitrage financier direct en Dinars Algériens (SAD $\rightarrow$ ADS), et bibliothèque de programmes d&apos;entretien constructeur calibrés pour le stress saharien.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-right">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                  Zone Climatique Active
+                </span>
+                <strong className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                  {climateZone === 'SAHARA'
+                    ? 'Grand Sud (Sahara > 45°C)'
+                    : climateZone === 'PLATEAUS'
+                      ? 'Hauts-Plateaux'
+                      : 'Tell / Littoral'}
+                </strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION MONOPOLE : 5 INNOVATIONS TECHNOLOGIQUES DE RUPTURE (0 DA) */}
+        <section>
+          <BreakthroughInnovationsPanel />
+        </section>
+
+        {/* LAYOUT DUAL-COLUMN : SIDEBAR FILTRES + CONTENU ÉCHÉANCES & CATALOGUE */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* SIDEBAR CONTEXTUELLE VERTICALE */}
-          <aside
-            style={{
-              width: '260px',
-              flexShrink: 0,
-              background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-border-subtle)',
-              borderRadius: 'var(--df-radius-lg)',
-              padding: '1rem',
-              boxShadow: 'var(--df-shadow-sm)',
-              position: 'sticky',
-              top: '90px',
-            }}
-          >
-            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
-              Actions Préventives
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => handleOpenTemplateModal()}
-                style={{ width: '100%', justifyContent: 'center', gap: '0.4rem' }}
-              >
-                <IconPlus size={14} />
-                <span>Nouveau Plan OEM</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleOpenDueModal()}
-                style={{ width: '100%', justifyContent: 'center', gap: '0.4rem' }}
-              >
-                <IconPlus size={14} />
-                <span>Ajouter Échéance</span>
-              </Button>
-            </div>
-
-            <div style={{ height: '1px', background: 'var(--df-border-subtle)', margin: '0.5rem 0 1rem 0' }} />
-
-            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
-              Filtre par Catégorie
-            </div>
-
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' }}>
-              {[
-                { id: 'ALL', label: 'Tous les Plans', count: templates.length, icon: <IconLayers size={14} /> },
-                { id: 'POIDS_LOURDS', label: 'Poids Lourds', count: templates.filter((t) => t.category === 'POIDS_LOURDS').length, icon: <IconTruck size={14} /> },
-                { id: 'ENGINS_BTP', label: 'Engins BTP', count: templates.filter((t) => t.category === 'ENGINS_BTP').length, icon: <IconHardHat size={14} /> },
-                { id: 'UTILITAIRES', label: 'Utilitaires & 4x4', count: templates.filter((t) => t.category === 'UTILITAIRES').length, icon: <IconTruck size={14} /> },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setSelectedCategory(item.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.5rem 0.65rem',
-                    borderRadius: 'var(--df-radius-md)',
-                    border: 'none',
-                    background: selectedCategory === item.id ? 'var(--df-bg-surface-2)' : 'transparent',
-                    color: selectedCategory === item.id ? 'var(--df-accent-blue)' : 'var(--df-text-secondary)',
-                    fontWeight: selectedCategory === item.id ? 700 : 500,
-                    fontSize: '0.78rem',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all var(--df-transition-fast)',
-                  }}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </span>
-                  <span
-                    style={{
-                      background: selectedCategory === item.id ? 'var(--df-accent-blue)' : 'var(--df-bg-surface-2)',
-                      color: selectedCategory === item.id ? '#FFFFFF' : 'var(--df-text-muted)',
-                      padding: '0.1rem 0.45rem',
-                      borderRadius: 'var(--df-radius-full)',
-                      fontSize: '0.70rem',
-                      fontWeight: 700,
-                    }}
+          <aside className="lg:col-span-3 space-y-4">
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-4 shadow-sm space-y-4">
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">
+                  Actions Rapides
+                </div>
+                <div className="space-y-2">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleOpenTemplateModal()}
+                    className="w-full justify-center text-xs py-2 shadow-xs"
                   >
-                    {item.count}
-                  </span>
-                </button>
-              ))}
-            </nav>
-
-            <div style={{ height: '1px', background: 'var(--df-border-subtle)', margin: '0.5rem 0 1rem 0' }} />
-
-            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
-              État des Échéances
-            </div>
-
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' }}>
-              {[
-                { id: 'ALL', label: 'Toutes les Échéances', count: upcoming.length, color: 'var(--df-text-secondary)' },
-                { id: 'URGENT', label: 'Dépassées (DANGER)', count: upcoming.filter((u) => u.urgency === 'URGENT').length, color: 'var(--df-status-danger)' },
-                { id: 'WARNING', label: 'Imminentes (< 2000)', count: upcoming.filter((u) => u.urgency === 'WARNING').length, color: 'var(--df-status-warning)' },
-                { id: 'NOMINAL', label: 'Nominales', count: upcoming.filter((u) => u.urgency === 'NOMINAL').length, color: 'var(--df-status-ok)' },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setSelectedUrgency(item.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.45rem 0.65rem',
-                    borderRadius: 'var(--df-radius-md)',
-                    border: 'none',
-                    background: selectedUrgency === item.id ? 'var(--df-bg-surface-2)' : 'transparent',
-                    color: selectedUrgency === item.id ? item.color : 'var(--df-text-secondary)',
-                    fontWeight: selectedUrgency === item.id ? 700 : 500,
-                    fontSize: '0.76rem',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                >
-                  <span>{item.label}</span>
-                  <span
-                    style={{
-                      background: 'var(--df-bg-surface-2)',
-                      color: item.color,
-                      padding: '0.1rem 0.45rem',
-                      borderRadius: 'var(--df-radius-full)',
-                      fontSize: '0.70rem',
-                      fontWeight: 700,
-                    }}
+                    <IconPlus size={13} />
+                    <span>Nouveau Plan OEM</span>
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleOpenDueModal()}
+                    className="w-full justify-center text-xs py-2"
                   >
-                    {item.count}
-                  </span>
-                </button>
-              ))}
-            </nav>
+                    <IconPlus size={13} />
+                    <span>Ajouter Échéance</span>
+                  </Button>
+                </div>
+              </div>
 
-            <div style={{ height: '1px', background: 'var(--df-border-subtle)', margin: '0.5rem 0 1rem 0' }} />
+              <div className="border-t border-slate-100 dark:border-slate-800" />
 
-            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.5rem' }}>
-              Sévérité Thermique
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">
+                  Filtre par Catégorie
+                </div>
+                <nav className="flex flex-col gap-1">
+                  {[
+                    { id: 'ALL', label: 'Tous les Plans', count: templates.length, icon: <IconLayers size={14} /> },
+                    {
+                      id: 'POIDS_LOURDS',
+                      label: 'Poids Lourds',
+                      count: templates.filter((t) => t.category === 'POIDS_LOURDS').length,
+                      icon: <IconTruck size={14} />,
+                    },
+                    {
+                      id: 'ENGINS_BTP',
+                      label: 'Engins BTP',
+                      count: templates.filter((t) => t.category === 'ENGINS_BTP').length,
+                      icon: <IconHardHat size={14} />,
+                    },
+                    {
+                      id: 'UTILITAIRES',
+                      label: 'Utilitaires & 4x4',
+                      count: templates.filter((t) => t.category === 'UTILITAIRES').length,
+                      icon: <IconTruck size={14} />,
+                    },
+                  ].map((item) => {
+                    const isSel = selectedCategory === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setSelectedCategory(item.id)}
+                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all ${
+                          isSel
+                            ? 'bg-blue-50/80 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-bold border border-blue-200/80 dark:border-blue-800/60 shadow-xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/60 font-medium'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </div>
+                        <span
+                          className={`font-mono text-[10px] px-1.5 py-0.5 rounded-full ${
+                            isSel
+                              ? 'bg-blue-600 text-white dark:bg-blue-500'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                          }`}
+                        >
+                          {item.count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              <div className="border-t border-slate-100 dark:border-slate-800" />
+
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">
+                  État des Échéances
+                </div>
+                <nav className="flex flex-col gap-1">
+                  {[
+                    { id: 'ALL', label: 'Toutes les Échéances', count: upcoming.length, color: 'text-slate-600 dark:text-slate-400' },
+                    {
+                      id: 'URGENT',
+                      label: 'Dépassées (DANGER)',
+                      count: upcoming.filter((u) => u.urgency === 'URGENT').length,
+                      color: 'text-rose-600 dark:text-rose-400',
+                    },
+                    {
+                      id: 'WARNING',
+                      label: 'Imminentes (< 2 000)',
+                      count: upcoming.filter((u) => u.urgency === 'WARNING').length,
+                      color: 'text-amber-600 dark:text-amber-400',
+                    },
+                    {
+                      id: 'NOMINAL',
+                      label: 'Nominales',
+                      count: upcoming.filter((u) => u.urgency === 'NOMINAL').length,
+                      color: 'text-emerald-600 dark:text-emerald-400',
+                    },
+                  ].map((item) => {
+                    const isSel = selectedUrgency === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setSelectedUrgency(item.id)}
+                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all ${
+                          isSel
+                            ? 'bg-slate-100 dark:bg-slate-800 font-bold'
+                            : 'hover:bg-slate-50 dark:hover:bg-slate-900/60 font-medium'
+                        } ${item.color}`}
+                      >
+                        <span>{item.label}</span>
+                        <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800">
+                          {item.count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              <div className="border-t border-slate-100 dark:border-slate-800" />
+
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">
+                  Sévérité Thermique (Wilayas)
+                </div>
+                <select
+                  value={climateZone}
+                  onChange={(e) => setClimateZone(e.target.value as 'TELL' | 'PLATEAUS' | 'SAHARA')}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                >
+                  <option value="SAHARA">Grand Sud (&gt; 45°C) • Arrhenius x0.65</option>
+                  <option value="PLATEAUS">Hauts-Plateaux • Arrhenius x0.85</option>
+                  <option value="TELL">Tell / Nord • Arrhenius x1.00</option>
+                </select>
+              </div>
             </div>
-            <select
-              value={climateZone}
-              onChange={(e) => setClimateZone(e.target.value as 'TELL' | 'PLATEAUS' | 'SAHARA')}
-              style={{
-                width: '100%',
-                padding: '0.45rem',
-                borderRadius: 'var(--df-radius-md)',
-                background: 'var(--df-bg-surface-2)',
-                color: 'var(--df-text-main)',
-                border: '1px solid var(--df-border-subtle)',
-                fontSize: '0.76rem',
-                fontWeight: 600,
-              }}
-            >
-              <option value="SAHARA">Grand Sud (&gt; 45°C) • x0.65</option>
-              <option value="PLATEAUS">Hauts-Plateaux • x0.85</option>
-              <option value="TELL">Tell / Nord • x1.00</option>
-            </select>
           </aside>
 
-          {/* CONTENU PRINCIPAL */}
-          <main style={{ flex: 1, minWidth: 0 }}>
-            {/* EN-TÊTE PRINCIPAL */}
-            <section
-              style={{
-                padding: '1.5rem',
-                marginBottom: '1.5rem',
-                background: 'var(--df-bg-surface-1)',
-                border: '1px solid var(--df-border-subtle)',
-                borderRadius: 'var(--df-radius-lg)',
-                boxShadow: 'var(--df-shadow-sm)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '1.25rem',
-              }}
-            >
-              <div>
-                <div style={{ display: 'inline-flex', gap: '0.45rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                  <span
-                    style={{
-                      background: 'rgba(5, 150, 105, 0.15)',
-                      color: '#34d399',
-                      border: '1px solid rgba(5, 150, 105, 0.35)',
-                      fontSize: '11px',
-                      fontWeight: 800,
-                      padding: '3px 10px',
-                      borderRadius: '6px',
-                      letterSpacing: '0.04em',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                    }}
-                  >
-                    <IconCpu size={12} /> MAINTENANCE 5.0 PRESCRIPTIVE &amp; COGNITIVE
-                  </span>
-                  <Badge variant="ok">SOUVERAIN ALGÉRIE (LOI 18-07)</Badge>
-                  <Badge variant="neutral">Physique Déterministe 0 DA • DZD</Badge>
-                </div>
-                <h1
-                  style={{
-                    fontSize: '1.75rem',
-                    fontWeight: 800,
-                    color: 'var(--df-text-main)',
-                    letterSpacing: '-0.025em',
-                    marginBottom: '0.35rem',
-                  }}
-                >
-                  Cockpit de Maintenance 5.0 &amp; Plans Constructeur OEM
-                </h1>
-                <p style={{ fontSize: '0.88rem', color: 'var(--df-text-secondary)', maxWidth: '780px', margin: 0 }}>
-                  Le décisionnel prescriptif de classe mondiale : 5 algorithmes physiques déterministes à 0 DA de coût matériel, arbitrage financier direct en Dinars Algériens (SAD $\rightarrow$ ADS), et bibliothèque de programmes d&apos;entretien constructeur (Renault Trucks, Scania, CAT, Toyota, Shacman) calibrés pour le stress saharien.
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                <div
-                  style={{
-                    background: 'var(--df-bg-surface-2)',
-                    padding: '0.5rem 0.85rem',
-                    borderRadius: 'var(--df-radius-md)',
-                    border: '1px solid var(--df-border-subtle)',
-                    textAlign: 'right',
-                  }}
-                >
-                  <span style={{ fontSize: '0.68rem', color: 'var(--df-text-muted)', display: 'block', textTransform: 'uppercase' }}>
-                    Zone Active
-                  </span>
-                  <strong style={{ fontSize: '0.82rem', color: 'var(--df-accent-blue)' }}>
-                    {climateZone === 'SAHARA' ? 'Grand Sud (Sahara > 45°C)' : climateZone === 'PLATEAUS' ? 'Hauts-Plateaux' : 'Tell / Littoral'}
-                  </strong>
-                </div>
-              </div>
-            </section>
-
-            {/* SECTION MONOPOLE : 5 INNOVATIONS TECHNOLOGIQUES DE RUPTURE (0 DA) */}
-            <section style={{ marginBottom: '2rem' }}>
-              <BreakthroughInnovationsPanel />
-            </section>
-
+          {/* CONTENU CENTRAL : ÉCHÉANCES & CATALOGUE OEM */}
+          <div className="lg:col-span-9 space-y-6">
             {/* SECTION 1 : ÉCHÉANCES PRÉVENTIVES DE LA FLOTTE */}
-            <section style={{ marginBottom: '2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-6 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                 <div>
-                  <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-white">
                     Échéances Préventives de la Flotte ({filteredUpcoming.length})
                   </h2>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--df-text-muted)' }}>
-                    Suivi temps réel des compteurs certifiés km &amp; heures moteur
-                  </span>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Suivi temps réel des compteurs certifiés km &amp; heures moteur selon les préconisations constructeurs.
+                  </p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => handleOpenDueModal()} style={{ gap: '0.35rem' }}>
+                <Button variant="secondary" size="sm" onClick={() => handleOpenDueModal()}>
                   <IconPlus size={13} />
                   <span>Ajouter Échéance</span>
                 </Button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredUpcoming.length === 0 ? (
-                  <div style={{ gridColumn: '1 / -1', padding: '3rem 1rem', textAlign: 'center', background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: 'var(--df-radius-md)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem', color: 'var(--df-text-muted)' }}>
-                      <IconWrench size={36} />
+                  <div className="col-span-full py-12 px-4 text-center">
+                    <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 mb-3">
+                      <IconWrench size={24} />
                     </div>
-                    <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.25rem' }}>
-                      {upcoming.length === 0 ? 'Aucune échéance préventive enregistrée' : 'Aucune échéance ne correspond à ce filtre'}
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--df-text-muted)', marginBottom: '1rem' }}>
-                      {upcoming.length === 0 ? 'Votre flotte est à jour ou activez le mode démo pour explorer la simulation.' : 'Sélectionnez un autre niveau d\'urgence.'}
-                    </div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
+                      {upcoming.length === 0
+                        ? 'Aucune échéance préventive enregistrée'
+                        : 'Aucune échéance ne correspond à ce filtre'}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-4">
+                      {upcoming.length === 0
+                        ? 'Votre flotte est à jour ou activez le mode démo pour explorer la simulation d’échéances.'
+                        : 'Sélectionnez un autre niveau d’urgence ou réinitialisez les filtres.'}
+                    </p>
                     {upcoming.length === 0 && (
                       <Button variant="primary" size="sm" onClick={() => handleOpenDueModal()}>
                         + Planifier une première échéance
@@ -698,295 +666,259 @@ export default function PreventivePage() {
                     )}
                   </div>
                 ) : (
-                  filteredUpcoming.map((item) => (
-                  <Card key={item.id}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                      <div>
-                        <span style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-text-main)', fontFamily: 'var(--df-font-mono)' }}>
-                          {item.registrationNumber}
-                        </span>
-                        <div style={{ fontSize: '0.74rem', color: 'var(--df-text-muted)' }}>{item.makeModel}</div>
-                      </div>
-                      <Badge variant={item.urgency === 'URGENT' ? 'danger' : item.urgency === 'WARNING' ? 'warning' : 'ok'}>
-                        {item.urgency === 'URGENT' ? 'DÉPASSÉ' : item.urgency === 'WARNING' ? 'IMMINENT' : 'NOMINAL'}
-                      </Badge>
-                    </div>
+                  filteredUpcoming.map((item) => {
+                    const isUrgent = item.urgency === 'URGENT';
+                    const isWarning = item.urgency === 'WARNING';
 
-                    <div style={{ fontSize: '0.76rem', color: 'var(--df-text-secondary)', marginBottom: '0.75rem', fontWeight: 600 }}>
-                      {item.templateName}
-                    </div>
-
-                    {/* Barre de progression d'échéance */}
-                    <div style={{ marginBottom: '0.85rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', marginBottom: '0.25rem' }}>
-                        <span style={{ color: 'var(--df-text-muted)' }}>
-                          Compteur : {item.currentCounter.toLocaleString('fr-DZ')} {item.unit}
-                        </span>
-                        <strong
-                          style={{
-                            color: item.remainingCounter < 0 ? 'var(--df-status-danger)' : 'var(--df-status-ok)',
-                            fontFamily: 'var(--df-font-mono)',
-                          }}
-                        >
-                          {item.remainingCounter < 0
-                            ? `Dépassement de ${Math.abs(item.remainingCounter)} ${item.unit}`
-                            : `Reste ${item.remainingCounter} ${item.unit}`}
-                        </strong>
-                      </div>
-                      <div style={{ height: '6px', borderRadius: '3px', background: 'var(--df-bg-surface-2)', overflow: 'hidden' }}>
-                        <div
-                          style={{
-                            width: `${Math.min(100, item.progressPercent)}%`,
-                            height: '100%',
-                            background:
-                              item.remainingCounter < 0
-                                ? 'var(--df-status-danger)'
-                                : item.progressPercent > 85
-                                ? 'var(--df-status-warning)'
-                                : 'var(--df-status-ok)',
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
-                      <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)' }}>Site : {item.assignedSite}</span>
-                      <Button
-                        variant={item.urgency === 'URGENT' ? 'primary' : 'secondary'}
-                        size="sm"
-                        onClick={() => handleCreateWorkOrder(item.registrationNumber, item.templateName)}
+                    return (
+                      <div
+                        key={item.id}
+                        className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/30 p-4 space-y-3 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all"
                       >
-                        Déclencher OT
-                      </Button>
-                    </div>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="font-mono font-bold text-sm text-slate-900 dark:text-white">
+                              {item.registrationNumber}
+                            </div>
+                            <div className="text-xs text-slate-400 dark:text-slate-500">
+                              {item.makeModel}
+                            </div>
+                          </div>
+                          <Badge
+                            variant={isUrgent ? 'danger' : isWarning ? 'warning' : 'ok'}
+                            pulse
+                          >
+                            {isUrgent ? 'DÉPASSÉ' : isWarning ? 'IMMINENT' : 'NOMINAL'}
+                          </Badge>
+                        </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.35rem', borderTop: '1px solid var(--df-border-subtle)', paddingTop: '0.5rem' }}>
-                      <button
-                        onClick={() => handleOpenDueModal(item)}
-                        title="Modifier l'échéance"
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: 'var(--df-text-muted)',
-                          cursor: 'pointer',
-                          padding: '0.25rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          borderRadius: 'var(--df-radius-sm)',
-                        }}
-                      >
-                        <IconEdit size={14} />
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirm({ type: 'DUE', id: item.id, label: `${item.registrationNumber} (${item.templateName})` })}
-                        title="Supprimer l'alerte d'échéance"
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: 'var(--df-status-danger)',
-                          cursor: 'pointer',
-                          padding: '0.25rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          borderRadius: 'var(--df-radius-sm)',
-                        }}
-                      >
-                        <IconTrash size={14} />
-                      </button>
-                    </div>
-                  </Card>
-                )))}
+                        <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          {item.templateName}
+                        </div>
+
+                        {/* Barre de progression d'échéance */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-slate-500 font-mono">
+                              Compteur : {item.currentCounter.toLocaleString('fr-DZ')} {item.unit}
+                            </span>
+                            <span
+                              className={`font-mono font-bold ${
+                                item.remainingCounter < 0
+                                  ? 'text-rose-600 dark:text-rose-400'
+                                  : 'text-emerald-600 dark:text-emerald-400'
+                              }`}
+                            >
+                              {item.remainingCounter < 0
+                                ? `Dépassement de ${Math.abs(item.remainingCounter)} ${item.unit}`
+                                : `Reste ${item.remainingCounter} ${item.unit}`}
+                            </span>
+                          </div>
+                          <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-500 ${
+                                item.remainingCounter < 0
+                                  ? 'bg-rose-500'
+                                  : item.progressPercent > 85
+                                    ? 'bg-amber-500'
+                                    : 'bg-emerald-500'
+                              }`}
+                              style={{ width: `${Math.min(100, item.progressPercent)}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-slate-800 text-xs">
+                          <span className="text-[11px] text-slate-400">Site : {item.assignedSite}</span>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant={isUrgent ? 'primary' : 'secondary'}
+                              size="sm"
+                              onClick={() => handleCreateWorkOrder(item.registrationNumber, item.templateName)}
+                              className="text-xs py-1"
+                            >
+                              Déclencher OT
+                            </Button>
+                            <button
+                              onClick={() => handleOpenDueModal(item)}
+                              title="Modifier l'échéance"
+                              className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                            >
+                              <IconEdit size={13} />
+                            </button>
+                            <button
+                              onClick={() =>
+                                setDeleteConfirm({
+                                  type: 'DUE',
+                                  id: item.id,
+                                  label: `${item.registrationNumber} (${item.templateName})`,
+                                })
+                              }
+                              title="Supprimer l'alerte d'échéance"
+                              className="p-1 rounded text-rose-500 hover:text-rose-700"
+                            >
+                              <IconTrash size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
-            </section>
+            </div>
 
-            {/* SECTION 2 : CATALOGUE DES PLANS OEM */}
-            <section>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            {/* SECTION 2 : CATALOGUE DES PLANS CONSTRUCTEUR OEM */}
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-6 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                 <div>
-                  <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
-                    Référentiel des Programmes d&apos;Entretien Constructeur (OEM RMI)
+                  <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                    Programmes d&apos;Entretien Constructeur (OEM RMI)
                   </h2>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--df-text-muted)', margin: '0.2rem 0 0 0' }}>
-                    Spécifications techniques des fluides, viscosités et préconisations de filtration locale.
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Spécifications techniques des fluides, viscosités et préconisations de filtration locale (Algérie-calibré).
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.45rem',
-                      background: 'var(--df-bg-surface-1)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-md)',
-                      padding: '0.35rem 0.65rem',
-                      fontSize: '0.78rem',
-                    }}
-                  >
-                    <IconSearch size={14} style={{ color: 'var(--df-text-muted)' }} />
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs">
+                    <IconSearch size={13} className="text-slate-400" />
                     <input
                       type="text"
-                      placeholder="Rechercher marque ou modèle..."
+                      placeholder="Filtrer marque ou modèle..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      style={{
-                        border: 'none',
-                        background: 'transparent',
-                        color: 'var(--df-text-main)',
-                        outline: 'none',
-                        fontSize: '0.78rem',
-                        width: '180px',
-                      }}
+                      className="bg-transparent border-none outline-none text-xs text-slate-900 dark:text-white w-40 placeholder:text-slate-400"
                     />
                   </div>
-                  <Button variant="primary" size="sm" onClick={() => handleOpenTemplateModal()} style={{ gap: '0.35rem' }}>
+                  <Button variant="primary" size="sm" onClick={() => handleOpenTemplateModal()}>
                     <IconPlus size={13} />
                     <span>Nouveau Plan OEM</span>
                   </Button>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.25rem' }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredTemplates.map((tpl) => (
-                  <Card key={tpl.id}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                  <div
+                    key={tpl.id}
+                    className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/30 p-5 space-y-3.5 shadow-xs"
+                  >
+                    <div className="flex items-start justify-between gap-3">
                       <div>
-                        <span style={{ fontSize: '1.10rem', fontWeight: 800, color: 'var(--df-text-main)' }}>
+                        <div className="text-base font-bold text-slate-900 dark:text-white">
                           {tpl.make}
-                        </span>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--df-text-secondary)', fontWeight: 600 }}>
+                        </div>
+                        <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
                           {tpl.model}
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <div className="flex items-center gap-1.5">
                         <Badge variant="neutral">{tpl.category.replace('_', ' ')}</Badge>
                         <button
                           onClick={() => handleOpenTemplateModal(tpl)}
                           title="Modifier ce plan"
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: 'var(--df-text-muted)',
-                            cursor: 'pointer',
-                            padding: '0.2rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                          }}
+                          className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                         >
-                          <IconEdit size={14} />
+                          <IconEdit size={13} />
                         </button>
                         <button
-                          onClick={() => setDeleteConfirm({ type: 'TEMPLATE', id: tpl.id, label: `${tpl.make} ${tpl.model}` })}
+                          onClick={() =>
+                            setDeleteConfirm({
+                              type: 'TEMPLATE',
+                              id: tpl.id,
+                              label: `${tpl.make} ${tpl.model}`,
+                            })
+                          }
                           title="Supprimer ce plan"
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: 'var(--df-status-danger)',
-                            cursor: 'pointer',
-                            padding: '0.2rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                          }}
+                          className="p-1 rounded text-rose-500 hover:text-rose-700"
                         >
-                          <IconTrash size={14} />
+                          <IconTrash size={13} />
                         </button>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.80rem', padding: '0.35rem 0', borderBottom: '1px solid var(--df-border-subtle)' }}>
-                        <span style={{ color: 'var(--df-text-secondary)' }}>Intervalle Standard Constructeur :</span>
-                        <strong className="df-mono" style={{ color: 'var(--df-text-main)' }}>{tpl.standardIntervalText}</strong>
+                    <div className="space-y-1.5 text-xs">
+                      <div className="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-800">
+                        <span className="text-slate-500">Intervalle Standard :</span>
+                        <span className="font-mono font-bold text-slate-900 dark:text-white">
+                          {tpl.standardIntervalText}
+                        </span>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.80rem', padding: '0.35rem 0', borderBottom: '1px solid var(--df-border-subtle)' }}>
-                        <span style={{ color: 'var(--df-text-secondary)' }}>Intervalle Sévère (Sahara / Poussière) :</span>
-                        <strong className="df-mono" style={{ color: 'var(--df-accent-blue)' }}>{tpl.saharaIntervalText}</strong>
-                      </div>
-                    </div>
-
-                    <div style={{ padding: '0.75rem', background: 'var(--df-bg-surface-2)', borderRadius: 'var(--df-radius-md)', marginBottom: '1rem', fontSize: '0.76rem' }}>
-                      <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.35rem' }}>
-                        Spécifications Fluides Homologués :
-                      </div>
-                      <div style={{ color: 'var(--df-text-secondary)', marginBottom: '0.2rem' }}>
-                        • Huile Moteur : <span className="df-mono" style={{ color: 'var(--df-text-main)' }}>{tpl.engineOilSpec}</span>
-                      </div>
-                      <div style={{ color: 'var(--df-text-secondary)', marginBottom: '0.2rem' }}>
-                        • Transmission : <span className="df-mono" style={{ color: 'var(--df-text-main)' }}>{tpl.transmissionSpec}</span>
-                      </div>
-                      <div style={{ color: 'var(--df-text-secondary)' }}>
-                        • Refroidissement : <span className="df-mono" style={{ color: 'var(--df-text-main)' }}>{tpl.coolantSpec}</span>
+                      <div className="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-800">
+                        <span className="text-slate-500">Intervalle Sévère Sahara :</span>
+                        <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                          {tpl.saharaIntervalText}
+                        </span>
                       </div>
                     </div>
 
-                    <div style={{ fontSize: '0.74rem', marginBottom: '1rem' }}>
-                      <div style={{ fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', marginBottom: '0.35rem', letterSpacing: '0.03em' }}>
+                    <div className="p-3 rounded-xl bg-slate-100/70 dark:bg-slate-800/60 space-y-1 text-xs">
+                      <div className="font-bold text-[11px] text-slate-700 dark:text-slate-300">
+                        Fluides Homologués Naftal / Constructeur :
+                      </div>
+                      <div className="text-slate-600 dark:text-slate-400">
+                        • Huile : <span className="font-mono text-slate-900 dark:text-white">{tpl.engineOilSpec}</span>
+                      </div>
+                      <div className="text-slate-600 dark:text-slate-400">
+                        • Boîte/Pont : <span className="font-mono text-slate-900 dark:text-white">{tpl.transmissionSpec}</span>
+                      </div>
+                      <div className="text-slate-600 dark:text-slate-400">
+                        • Refroidissement : <span className="font-mono text-slate-900 dark:text-white">{tpl.coolantSpec}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 text-xs">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                         Points de Contrôle Prioritaires :
                       </div>
-                      <ul style={{ margin: 0, paddingLeft: '1.1rem', color: 'var(--df-text-secondary)', lineHeight: 1.45 }}>
+                      <ul className="list-disc list-inside text-slate-600 dark:text-slate-400 space-y-0.5 text-[11px]">
                         {tpl.criticalPoints.map((pt, idx) => (
-                          <li key={idx}>{pt}</li>
+                          <li key={idx} className="truncate">
+                            {pt}
+                          </li>
                         ))}
                       </ul>
                     </div>
 
-                    <Button variant="secondary" size="sm" style={{ width: '100%' }} onClick={() => handleOpenTemplateModal(tpl)}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleOpenTemplateModal(tpl)}
+                      className="w-full justify-center text-xs"
+                    >
                       Consulter / Modifier Fiche Technique RMI
                     </Button>
-                  </Card>
+                  </div>
                 ))}
               </div>
-            </section>
-          </main>
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
 
       {/* MODAL 1 : CRÉATION / MODIFICATION PLAN OEM */}
       {isTemplateModalOpen && (
-        <div
-          role="dialog"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: '1rem',
-          }}
-        >
-          <div
-            style={{
-              background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-border-medium)',
-              borderRadius: 'var(--df-radius-lg)',
-              maxWidth: '620px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              padding: '1.75rem',
-              boxShadow: 'var(--df-shadow-lg)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
-                {editingTemplate ? `Modifier Programme OEM : ${editingTemplate.make} ${editingTemplate.model}` : 'Nouveau Programme d’Entretien Constructeur (OEM)'}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-xl rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1220] p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                {editingTemplate
+                  ? `Modifier Programme OEM : ${editingTemplate.make} ${editingTemplate.model}`
+                  : 'Nouveau Programme d’Entretien Constructeur (OEM)'}
               </h3>
               <button
                 onClick={() => setIsTemplateModalOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer' }}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
               >
                 <IconX size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveTemplate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <form onSubmit={handleSaveTemplate} className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Constructeur / Marque *
                   </label>
                   <input
@@ -995,19 +927,11 @@ export default function PreventivePage() {
                     value={templateForm.make}
                     onChange={(e) => setTemplateForm({ ...templateForm, make: e.target.value })}
                     placeholder="Ex: Renault Trucks, Scania, CAT"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Modèle / Motorisation *
                   </label>
                   <input
@@ -1016,35 +940,24 @@ export default function PreventivePage() {
                     value={templateForm.model}
                     onChange={(e) => setTemplateForm({ ...templateForm, model: e.target.value })}
                     placeholder="Ex: K 480 DTi 13 / 320D"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Catégorie d’Actif
                 </label>
                 <select
                   value={templateForm.category}
-                  onChange={(e) => setTemplateForm({ ...templateForm, category: e.target.value as 'POIDS_LOURDS' | 'ENGINS_BTP' | 'UTILITAIRES' })}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: 'var(--df-radius-sm)',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.82rem',
-                  }}
+                  onChange={(e) =>
+                    setTemplateForm({
+                      ...templateForm,
+                      category: e.target.value as 'POIDS_LOURDS' | 'ENGINS_BTP' | 'UTILITAIRES',
+                    })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                 >
                   <option value="POIDS_LOURDS">Poids Lourds (Tracteur / Porteur)</option>
                   <option value="ENGINS_BTP">Engins BTP &amp; Carrières</option>
@@ -1052,9 +965,9 @@ export default function PreventivePage() {
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Intervalle Standard *
                   </label>
                   <input
@@ -1063,19 +976,11 @@ export default function PreventivePage() {
                     value={templateForm.standardIntervalText}
                     onChange={(e) => setTemplateForm({ ...templateForm, standardIntervalText: e.target.value })}
                     placeholder="Ex: 40 000 km / 800 h"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Intervalle Sahara Sévère *
                   </label>
                   <input
@@ -1084,22 +989,14 @@ export default function PreventivePage() {
                     value={templateForm.saharaIntervalText}
                     onChange={(e) => setTemplateForm({ ...templateForm, saharaIntervalText: e.target.value })}
                     placeholder="Ex: 26 000 km / 550 h"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Huile Moteur
                   </label>
                   <input
@@ -1107,19 +1004,11 @@ export default function PreventivePage() {
                     value={templateForm.engineOilSpec}
                     onChange={(e) => setTemplateForm({ ...templateForm, engineOilSpec: e.target.value })}
                     placeholder="15W-40 VDS-4.5"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Transmission
                   </label>
                   <input
@@ -1127,19 +1016,11 @@ export default function PreventivePage() {
                     value={templateForm.transmissionSpec}
                     onChange={(e) => setTemplateForm({ ...templateForm, transmissionSpec: e.target.value })}
                     placeholder="75W-80 ZF"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Refroidissement
                   </label>
                   <input
@@ -1147,21 +1028,13 @@ export default function PreventivePage() {
                     value={templateForm.coolantSpec}
                     onChange={(e) => setTemplateForm({ ...templateForm, coolantSpec: e.target.value })}
                     placeholder="OAT 50%"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Points de Contrôle Critiques (1 par ligne)
                 </label>
                 <textarea
@@ -1169,21 +1042,12 @@ export default function PreventivePage() {
                   value={templateForm.criticalPointsText}
                   onChange={(e) => setTemplateForm({ ...templateForm, criticalPointsText: e.target.value })}
                   placeholder="Double filtration gasoil Naftal&#10;Contrôle soufflage préfiltre à bain d’huile"
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: 'var(--df-radius-sm)',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.82rem',
-                    resize: 'vertical',
-                  }}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem', marginTop: '0.75rem' }}>
-                <Button variant="outline" size="sm" type="button" onClick={() => setIsTemplateModalOpen(false)}>
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <Button variant="secondary" size="sm" type="button" onClick={() => setIsTemplateModalOpen(false)}>
                   Annuler
                 </Button>
                 <Button variant="primary" size="sm" type="submit">
@@ -1197,47 +1061,24 @@ export default function PreventivePage() {
 
       {/* MODAL 2 : CRÉATION / MODIFICATION ÉCHÉANCE PRÉVENTIVE */}
       {isDueModalOpen && (
-        <div
-          role="dialog"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: '1rem',
-          }}
-        >
-          <div
-            style={{
-              background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-border-medium)',
-              borderRadius: 'var(--df-radius-lg)',
-              maxWidth: '540px',
-              width: '100%',
-              padding: '1.75rem',
-              boxShadow: 'var(--df-shadow-lg)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1220] p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 {editingDue ? `Modifier Échéance : ${editingDue.registrationNumber}` : 'Nouvelle Échéance Préventive Flotte'}
               </h3>
               <button
                 onClick={() => setIsDueModalOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer' }}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
               >
                 <IconX size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveDue} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <form onSubmit={handleSaveDue} className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Immatriculation / Matricule *
                   </label>
                   <input
@@ -1246,19 +1087,11 @@ export default function PreventivePage() {
                     value={dueForm.registrationNumber}
                     onChange={(e) => setDueForm({ ...dueForm, registrationNumber: e.target.value })}
                     placeholder="01892-116-16"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Modèle Véhicule *
                   </label>
                   <input
@@ -1267,21 +1100,13 @@ export default function PreventivePage() {
                     value={dueForm.makeModel}
                     onChange={(e) => setDueForm({ ...dueForm, makeModel: e.target.value })}
                     placeholder="Actros 3340 / K 480"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Nom du Programme Préventif *
                 </label>
                 <input
@@ -1290,21 +1115,13 @@ export default function PreventivePage() {
                   value={dueForm.templateName}
                   onChange={(e) => setDueForm({ ...dueForm, templateName: e.target.value })}
                   placeholder="Plan Poids Lourds Sévère (25 000 km)"
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: 'var(--df-radius-sm)',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.82rem',
-                  }}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Compteur Actuel *
                   </label>
                   <input
@@ -1312,19 +1129,11 @@ export default function PreventivePage() {
                     required
                     value={dueForm.currentCounter}
                     onChange={(e) => setDueForm({ ...dueForm, currentCounter: Number(e.target.value) })}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Échéance Cible *
                   </label>
                   <input
@@ -1332,33 +1141,17 @@ export default function PreventivePage() {
                     required
                     value={dueForm.dueCounter}
                     onChange={(e) => setDueForm({ ...dueForm, dueCounter: Number(e.target.value) })}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Unité
                   </label>
                   <select
                     value={dueForm.unit}
                     onChange={(e) => setDueForm({ ...dueForm, unit: e.target.value as 'km' | 'h' })}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   >
                     <option value="km">Kilomètres (km)</option>
                     <option value="h">Heures moteur (h)</option>
@@ -1367,7 +1160,7 @@ export default function PreventivePage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.25rem' }}>
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Site / Base Opérationnelle
                 </label>
                 <input
@@ -1375,20 +1168,12 @@ export default function PreventivePage() {
                   value={dueForm.assignedSite}
                   onChange={(e) => setDueForm({ ...dueForm, assignedSite: e.target.value })}
                   placeholder="Rouiba (16), Hassi Messaoud (30)"
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: 'var(--df-radius-sm)',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.82rem',
-                  }}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem', marginTop: '0.75rem' }}>
-                <Button variant="outline" size="sm" type="button" onClick={() => setIsDueModalOpen(false)}>
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <Button variant="secondary" size="sm" type="button" onClick={() => setIsDueModalOpen(false)}>
                   Annuler
                 </Button>
                 <Button variant="primary" size="sm" type="submit">
@@ -1402,56 +1187,24 @@ export default function PreventivePage() {
 
       {/* MODAL 3 : CONFIRMATION DE SUPPRESSION */}
       {deleteConfirm && (
-        <div
-          role="dialog"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: '1rem',
-          }}
-        >
-          <div
-            style={{
-              background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-status-danger)',
-              borderRadius: 'var(--df-radius-lg)',
-              maxWidth: '440px',
-              width: '100%',
-              padding: '1.5rem',
-              boxShadow: 'var(--df-shadow-lg)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem', color: 'var(--df-status-danger)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-2xl border border-rose-300 dark:border-rose-900/80 bg-white dark:bg-[#0c1220] p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
               <IconAlertTriangle size={22} />
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0 }}>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 Confirmer la suppression
               </h3>
             </div>
-            <p style={{ fontSize: '0.85rem', color: 'var(--df-text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-              Êtes-vous certain de vouloir supprimer <strong>« {deleteConfirm.label} »</strong> ? Cette opération est immédiate.
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              Êtes-vous certain de vouloir supprimer <strong className="text-slate-900 dark:text-white">« {deleteConfirm.label} »</strong> ? Cette opération est immédiate.
             </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem' }}>
-              <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(null)}>
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(null)}>
                 Annuler
               </Button>
               <button
                 onClick={handleConfirmDelete}
-                style={{
-                  padding: '0.45rem 1rem',
-                  borderRadius: 'var(--df-radius-sm)',
-                  background: 'var(--df-status-danger)',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  fontWeight: 700,
-                  fontSize: '0.82rem',
-                  cursor: 'pointer',
-                }}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow-sm"
               >
                 Supprimer Définitivement
               </button>
