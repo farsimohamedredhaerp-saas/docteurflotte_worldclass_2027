@@ -46,7 +46,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased bg-[#080b11] text-slate-100" suppressHydrationWarning>
+      <body className="font-sans antialiased bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 min-h-screen transition-colors duration-150" suppressHydrationWarning>
         <ThemeProvider>
           <DemoModeProvider>
             <SystemConfigProvider>

@@ -405,121 +405,42 @@ export function FleetHighDensityTable({
     switch (status) {
       case 'MOTION':
         return (
-          <div
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-[11px] font-medium font-mono"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.15rem 0.5rem',
-              borderRadius: '4px',
-              background: 'var(--df-status-ok-bg)',
-              border: '1px solid var(--df-status-ok-border)',
-              color: 'var(--df-status-ok-text)',
-              fontSize: '11px',
-              fontFamily: 'var(--df-font-mono)',
-            }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"
-              style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--df-status-ok)' }}
-            />
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-[11px] font-medium font-mono">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+            </span>
             <span>EN ROUTE ({speedKmh} km/h)</span>
           </div>
         );
       case 'IDLE_WARNING':
         return (
-          <div
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-[11px] font-medium font-mono"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.15rem 0.5rem',
-              borderRadius: '4px',
-              background: 'var(--df-status-warning-bg)',
-              border: '1px solid var(--df-status-warning-border)',
-              color: 'var(--df-status-warning-text)',
-              fontSize: '11px',
-              fontFamily: 'var(--df-font-mono)',
-            }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full bg-amber-500"
-              style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--df-status-warning)' }}
-            />
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-[11px] font-medium font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
             <span>RALENTI EXCÉDENT</span>
           </div>
         );
       case 'DTC_CRITICAL':
         return (
-          <div
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 text-rose-800 dark:text-rose-300 text-[11px] font-semibold font-mono"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.15rem 0.5rem',
-              borderRadius: '4px',
-              background: 'var(--df-status-danger-bg)',
-              border: '1px solid var(--df-status-danger-border)',
-              color: 'var(--df-status-danger-text)',
-              fontSize: '11px',
-              fontWeight: 700,
-              fontFamily: 'var(--df-font-mono)',
-            }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"
-              style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--df-status-danger)' }}
-            />
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 text-rose-800 dark:text-rose-300 text-[11px] font-semibold font-mono">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500" />
+            </span>
             <span>DTC MOTEUR CRITIQUE</span>
           </div>
         );
       case 'PARKED_OFF':
         return (
-          <div
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-medium font-mono"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.15rem 0.5rem',
-              borderRadius: '4px',
-              background: 'var(--df-bg-surface-2)',
-              border: '1px solid var(--df-border-subtle)',
-              color: 'var(--df-text-secondary)',
-              fontSize: '11px',
-              fontFamily: 'var(--df-font-mono)',
-            }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full bg-slate-400"
-              style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--df-text-muted)' }}
-            />
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-medium font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
             <span>ARRÊT / STATIONNÉ</span>
           </div>
         );
       default:
         return (
-          <div
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 text-[11px] font-mono"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.15rem 0.5rem',
-              borderRadius: '4px',
-              background: 'var(--df-bg-surface-2)',
-              color: 'var(--df-text-muted)',
-              fontSize: '11px',
-              fontFamily: 'var(--df-font-mono)',
-            }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full bg-slate-400"
-              style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--df-text-muted)' }}
-            />
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-[11px] font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
             <span>HORS RÉSEAU</span>
           </div>
         );

@@ -21,7 +21,14 @@ export const Badge: React.FC<BadgeProps> = ({
 
   return (
     <span className={`df-badge df-badge-${normalizedVariant} ${className}`}>
-      <span className={`df-badge-dot ${pulse ? 'df-pulse' : ''}`} />
+      {pulse ? (
+        <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-current" />
+          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-current" />
+        </span>
+      ) : (
+        <span className="df-badge-dot" aria-hidden="true" />
+      )}
       <span>{children}</span>
     </span>
   );

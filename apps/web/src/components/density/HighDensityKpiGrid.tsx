@@ -110,34 +110,26 @@ export function HighDensityKpiGrid({ metrics = DEFAULT_KPIS }: HighDensityKpiGri
   const renderIcon = (type: KpiMetricItem['iconType']) => {
     switch (type) {
       case 'fleet':
-        return <IconTruck size={15} strokeWidth={1.75} />;
+        return <IconTruck size={14} strokeWidth={1.75} />;
       case 'activity':
-        return <IconActivity size={15} strokeWidth={1.75} />;
+        return <IconActivity size={14} strokeWidth={1.75} />;
       case 'alert':
-        return <IconAlertTriangle size={15} strokeWidth={1.75} />;
+        return <IconAlertTriangle size={14} strokeWidth={1.75} />;
       case 'fuel':
-        return <IconFuel size={15} strokeWidth={1.75} />;
+        return <IconFuel size={14} strokeWidth={1.75} />;
       case 'maintenance':
-        return <IconWrench size={15} strokeWidth={1.75} />;
+        return <IconWrench size={14} strokeWidth={1.75} />;
       case 'compliance':
-        return <IconShieldCheck size={15} strokeWidth={1.75} />;
+        return <IconShieldCheck size={14} strokeWidth={1.75} />;
       case 'clock':
-        return <IconClock size={15} strokeWidth={1.75} />;
+        return <IconClock size={14} strokeWidth={1.75} />;
       default:
-        return <IconActivity size={15} strokeWidth={1.75} />;
+        return <IconActivity size={14} strokeWidth={1.75} />;
     }
   };
 
   return (
-    <div
-      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 mb-4"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: '0.75rem',
-        marginBottom: '1.25rem',
-      }}
-    >
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-3 mb-6">
       {metrics.map((kpi) => {
         const isCritical = kpi.status === 'critical';
         const isWarning = kpi.status === 'warning';
@@ -145,85 +137,33 @@ export function HighDensityKpiGrid({ metrics = DEFAULT_KPIS }: HighDensityKpiGri
         return (
           <div
             key={kpi.id}
-            className="p-3 bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-[#1F2937] rounded-lg shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
-            style={{
-              padding: '0.85rem 1rem',
-              background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-border-subtle)',
-              borderRadius: 'var(--df-radius-md)',
-              boxShadow: 'var(--df-shadow-sm)',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }}
+            className="group relative rounded-xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-3.5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs transition-all duration-150 flex flex-col justify-between"
           >
             {/* EN-TÊTE : LABEL + ICÔNE MONOCHROME */}
-            <div
-              className="flex items-center justify-between gap-1.5 mb-1.5"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '0.35rem',
-                marginBottom: '0.35rem',
-              }}
-            >
-              <span
-                className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase"
-                style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  color: 'var(--df-text-secondary)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.02em',
-                }}
-              >
+            <div className="flex items-center justify-between gap-1.5 mb-2">
+              <span className="text-[10.5px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-wider uppercase">
                 {kpi.label}
               </span>
-              <span
-                className="text-slate-400 dark:text-slate-500 shrink-0"
-                style={{ color: 'var(--df-text-muted)', flexShrink: 0 }}
-              >
+              <span className="text-slate-400 dark:text-slate-500 shrink-0 group-hover:text-blue-500 transition-colors">
                 {renderIcon(kpi.iconType)}
               </span>
             </div>
 
             {/* VALEUR PRINCIPALE EN JETBRAINS MONO TABULAR-NUMS */}
-            <div
-              className="flex items-baseline gap-1 my-1"
-              style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', margin: '0.25rem 0' }}
-            >
+            <div className="flex items-baseline gap-1 my-1">
               <span
-                className={`text-xl font-semibold tracking-tight tabular-nums font-mono ${
+                className={`text-xl font-bold tracking-tight tabular-nums font-mono ${
                   isCritical
-                    ? 'text-rose-600 dark:text-rose-500'
+                    ? 'text-rose-600 dark:text-rose-400'
                     : isWarning
-                    ? 'text-amber-600 dark:text-amber-500'
-                    : 'text-slate-900 dark:text-slate-100'
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : 'text-slate-900 dark:text-slate-100'
                 }`}
-                style={{
-                  fontSize: '1.35rem',
-                  fontWeight: 700,
-                  fontFamily: 'var(--df-font-mono)',
-                  letterSpacing: '-0.02em',
-                  color: isCritical
-                    ? 'var(--df-status-danger)'
-                    : isWarning
-                    ? 'var(--df-status-warning)'
-                    : 'var(--df-text-main)',
-                }}
               >
                 {kpi.value}
               </span>
               {kpi.unit && (
-                <span
-                  className="text-[10.5px] font-mono text-slate-400 dark:text-slate-500"
-                  style={{
-                    fontSize: '0.75rem',
-                    fontFamily: 'var(--df-font-mono)',
-                    color: 'var(--df-text-muted)',
-                  }}
-                >
+                <span className="text-[11px] font-mono font-medium text-slate-400 dark:text-slate-500">
                   {kpi.unit}
                 </span>
               )}
@@ -231,41 +171,22 @@ export function HighDensityKpiGrid({ metrics = DEFAULT_KPIS }: HighDensityKpiGri
 
             {/* BAS : TENDANCE OU MICRO-SPARKLINE SUBTILES */}
             {kpi.trend && (
-              <div
-                className="flex items-center gap-1 mt-1 text-[10px] text-slate-500 dark:text-slate-400"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  marginTop: '0.25rem',
-                  fontSize: '0.7rem',
-                  color: 'var(--df-text-muted)',
-                }}
-              >
+              <div className="flex items-center gap-1 mt-1.5 text-[10.5px]">
                 <span
-                  className={`inline-flex items-center gap-0.5 font-medium tabular-nums ${
+                  className={`inline-flex items-center gap-0.5 font-semibold tabular-nums font-mono ${
                     kpi.trend.isPositive
-                      ? 'text-emerald-700 dark:text-emerald-400'
-                      : 'text-rose-700 dark:text-rose-400'
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-rose-600 dark:text-rose-400'
                   }`}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.15rem',
-                    fontWeight: 600,
-                    color: kpi.trend.isPositive
-                      ? 'var(--df-status-ok)'
-                      : 'var(--df-status-danger)',
-                  }}
                 >
                   {kpi.trend.isPositive ? (
-                    <IconArrowUpRight size={11} strokeWidth={2} />
+                    <IconArrowUpRight size={11} strokeWidth={2.5} />
                   ) : (
-                    <IconArrowDownRight size={11} strokeWidth={2} />
+                    <IconArrowDownRight size={11} strokeWidth={2.5} />
                   )}
                   {kpi.trend.value}
                 </span>
-                <span className="truncate text-slate-400 dark:text-slate-500">
+                <span className="truncate text-slate-400 dark:text-slate-500 font-medium">
                   {kpi.trend.label}
                 </span>
               </div>
