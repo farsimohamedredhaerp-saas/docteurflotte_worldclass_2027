@@ -4,10 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { Navbar } from '../../components/navigation/Navbar';
-import { Card } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
-import { MetricCard } from '../../components/MetricCard';
 import {
   FleetIntelligenceClient,
   ReeferLiveStatus,
@@ -47,7 +45,6 @@ export default function ColdChainPage() {
 
   useEffect(() => {
     loadReefers();
-    // Rafraîchissement automatique toutes les 30 secondes
     const interval = setInterval(loadReefers, 30000);
     return () => clearInterval(interval);
   }, [loadReefers]);
@@ -79,224 +76,194 @@ export default function ColdChainPage() {
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 transition-colors duration-150">
       <Navbar />
 
-      <main className="df-container" style={{ paddingTop: '0.5rem' }}>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* EN-TÊTE DE SECTION COCKPIT */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            marginBottom: '2rem',
-            flexWrap: 'wrap',
-            gap: '1.25rem',
-            borderBottom: '1px solid var(--df-border-subtle)',
-            paddingBottom: '1.5rem',
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <IconThermometer size={28} className="text-blue-500" />
-              <h1
-                style={{
-                  fontSize: '1.85rem',
-                  fontWeight: 800,
-                  color: 'var(--df-text-main)',
-                  letterSpacing: '-0.02em',
-                  margin: 0,
-                }}
-              >
-                Télémétrie Chaîne du Froid & Groupes Frigo (Reefers)
+        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-6 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/60">
+                  <IconThermometer size={13} />
+                  CHAÎNE DU FROID SOUVERAINE
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60">
+                  Thermo King &amp; Carrier Transicold
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  Norme ATP &amp; HACCP
+                </span>
+              </div>
+              <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                Télémétrie Chaîne du Froid &amp; Groupes Frigo
               </h1>
-              <Badge variant="ok">Thermo King & Carrier</Badge>
+              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-3xl">
+                Surveillance continue des cargaisons sensibles (viande, produits laitiers, insuline, vaccins) sous climat saharien. Détection instantanée d’excursion thermique et chiffrage du risque de dépréciation en Dinars Algériens.
+              </p>
             </div>
-            <p
-              style={{
-                fontSize: '0.875rem',
-                color: 'var(--df-text-muted)',
-                margin: 0,
-                maxWidth: '820px',
-                lineHeight: 1.55,
-              }}
-            >
-              Surveillance continue des cargaisons sensibles (viande, produits laitiers, insuline, vaccins) sous climat saharien. Détection immédiate d’excursion thermique et chiffrage du risque de dépréciation en Dinars Algériens.
-            </p>
-          </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <Button variant="outline" size="sm" onClick={loadReefers} disabled={isLoading} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <IconRefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
-              <span>{isLoading ? 'Chargement...' : 'Actualiser Flux'}</span>
-            </Button>
-            <Link href="/telematics" style={{ textDecoration: 'none' }}>
-              <Button variant="primary" size="sm">
-                Cartographie GPS Live →
+            <div className="flex items-center gap-2.5 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadReefers}
+                disabled={isLoading}
+                className="gap-2"
+              >
+                <IconRefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+                <span>{isLoading ? 'Actualisation...' : 'Actualiser Flux'}</span>
               </Button>
-            </Link>
+              <Link href="/telematics" className="no-underline">
+                <Button variant="primary" size="sm">
+                  Cartographie GPS Live →
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* MÉTRIQUES CLÉS CONSOLIDÉES */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: '1.25rem',
-            marginBottom: '2rem',
-          }}
-        >
-          <MetricCard
-            title="Caisses Frigorifiques"
-            value={reefers.length.toString()}
-            unit="Unités"
-            description="Groupes connectés télémétrie en ligne"
-            icon={<IconTruck size={18} />}
-          />
-          <MetricCard
-            title="Excursions Thermiques"
-            value={activeExcursionsCount.toString()}
-            unit="Caisses"
-            description={activeExcursionsCount > 0 ? 'Ruptures thermiques en cours !' : 'Toutes les caisses conformes'}
-            icon={<IconAlertTriangle size={18} />}
-            trend={
-              activeExcursionsCount > 0
-                ? {
-                    direction: 'down',
-                    text: `${activeExcursionsCount} dépassement(s) seuil`,
-                    isPositive: false,
-                  }
-                : {
-                    direction: 'up',
-                    text: '100% dans la plage légale',
-                    isPositive: true,
-                  }
-            }
-          />
-          <MetricCard
-            title="Valeur Fret Sous Froid"
-            value={`${(totalMonitoredCargoDzd / 1000000).toFixed(1)}`}
-            unit="M DA"
-            description="Cargaisons sensibles sous température dirigée"
-            icon={<IconBox size={18} />}
-          />
-          <MetricCard
-            title="Risque Financier Actuel"
-            value={`${totalExcursionRiskDzd.toLocaleString('fr-DZ')}`}
-            unit="DA"
-            description="Pertes potentielles estimées sur avaries"
-            icon={<IconShieldCheck size={18} />}
-            trend={
-              totalExcursionRiskDzd > 0
-                ? {
-                    direction: 'down',
-                    text: 'Dépréciation en cours',
-                    isPositive: false,
-                  }
-                : {
-                    direction: 'up',
-                    text: 'Zéro perte constatée',
-                    isPositive: true,
-                  }
-            }
-          />
+        {/* MÉTRIQUES CLÉS CONSOLIDÉES (BENTO KPIS) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-5 shadow-sm space-y-1">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="text-[11px] font-bold uppercase tracking-wider">Groupes Connectés</span>
+              <IconTruck size={16} />
+            </div>
+            <div className="text-3xl font-black font-mono text-slate-900 dark:text-white mt-1">
+              {reefers.length}
+            </div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">
+              Caisses frigorifiques télémétrie active
+            </div>
+          </div>
+
+          <div className={`rounded-2xl border p-5 shadow-sm space-y-1 ${
+            activeExcursionsCount > 0
+              ? 'border-rose-300 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/20'
+              : 'border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220]'
+          }`}>
+            <div className="flex items-center justify-between">
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                activeExcursionsCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'
+              }`}>
+                Excursions Thermiques
+              </span>
+              <IconAlertTriangle size={16} className={activeExcursionsCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'} />
+            </div>
+            <div className={`text-3xl font-black font-mono mt-1 ${
+              activeExcursionsCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+            }`}>
+              {activeExcursionsCount}
+            </div>
+            <div className={`text-xs ${
+              activeExcursionsCount > 0 ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-slate-500 dark:text-slate-400'
+            }`}>
+              {activeExcursionsCount > 0 ? 'Ruptures thermiques en cours !' : '100% dans la plage réglementaire'}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-5 shadow-sm space-y-1">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="text-[11px] font-bold uppercase tracking-wider">Valeur Fret Sous Froid</span>
+              <IconBox size={16} />
+            </div>
+            <div className="text-3xl font-black font-mono text-slate-900 dark:text-white mt-1">
+              {(totalMonitoredCargoDzd / 1_000_000).toFixed(1)} <span className="text-base font-normal text-slate-400">M DA</span>
+            </div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">
+              Cargaisons sous température dirigée
+            </div>
+          </div>
+
+          <div className={`rounded-2xl border p-5 shadow-sm space-y-1 ${
+            totalExcursionRiskDzd > 0
+              ? 'border-amber-300 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/20'
+              : 'border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220]'
+          }`}>
+            <div className="flex items-center justify-between">
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                totalExcursionRiskDzd > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'
+              }`}>
+                Risque Financier Actuel
+              </span>
+              <IconShieldCheck size={16} className={totalExcursionRiskDzd > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'} />
+            </div>
+            <div className={`text-3xl font-black font-mono mt-1 ${
+              totalExcursionRiskDzd > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'
+            }`}>
+              {totalExcursionRiskDzd.toLocaleString('fr-DZ')} <span className="text-base font-normal text-slate-400">DA</span>
+            </div>
+            <div className={`text-xs ${
+              totalExcursionRiskDzd > 0 ? 'text-amber-600/80 dark:text-amber-400/80' : 'text-slate-500 dark:text-slate-400'
+            }`}>
+              {totalExcursionRiskDzd > 0 ? 'Dépréciation financière en cours' : 'Zéro perte constatée'}
+            </div>
+          </div>
         </div>
 
         {/* BARRE DE FILTRES ET CONTRÔLES */}
-        <div
-          style={{
-            background: 'var(--df-bg-surface-1)',
-            padding: '1rem 1.5rem',
-            borderRadius: 'var(--df-radius-md)',
-            border: '1px solid var(--df-border-subtle)',
-            marginBottom: '2rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '1rem',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                color: 'var(--df-text-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
+        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
               Filtrer par Denrée :
             </span>
-            <select
-              value={filterCargo}
-              onChange={(e) => setFilterCargo(e.target.value)}
-              style={{
-                background: 'var(--df-bg-surface-2)',
-                border: '1px solid var(--df-border-subtle)',
-                borderRadius: 'var(--df-radius-sm)',
-                padding: '0.45rem 0.85rem',
-                fontSize: '0.825rem',
-                color: 'var(--df-text-main)',
-                outline: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="ALL">Toutes les cargaisons</option>
-              <option value={ReeferCargoType.DAIRY}>Lait & Produits Laitiers</option>
-              <option value={ReeferCargoType.FRESH_MEAT}>Viandes Fraîches</option>
-              <option value={ReeferCargoType.PHARMA}>Pharmacie & Vaccins</option>
-              <option value={ReeferCargoType.FROZEN}>Surgelés</option>
-            </select>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {[
+                { id: 'ALL', label: 'Toutes' },
+                { id: ReeferCargoType.DAIRY, label: 'Lait & Laitiers' },
+                { id: ReeferCargoType.FRESH_MEAT, label: 'Viandes Fraîches' },
+                { id: ReeferCargoType.PHARMA, label: 'Pharmacie' },
+                { id: ReeferCargoType.FROZEN, label: 'Surgelés' },
+              ].map((c) => {
+                const isSel = filterCargo === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setFilterCargo(c.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs transition-all ${
+                      isSel
+                        ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-800 shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent font-medium'
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div style={{ fontSize: '0.78rem', color: 'var(--df-text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <IconShieldCheck size={14} className="text-emerald-500" /> Protocole certifié HACCP & Direction des Services Vétérinaires (DSV)
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+            <IconShieldCheck size={14} className="text-emerald-500 shrink-0" />
+            <span>Protocole certifié HACCP &amp; Direction des Services Vétérinaires (DSV)</span>
           </div>
         </div>
 
         {/* GRILLE DES GROUPES FRIGORIFIQUES */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-            gap: '1.5rem',
-          }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredReefers.length === 0 ? (
-            <div
-              style={{
-                gridColumn: '1 / -1',
-                padding: '3.5rem 1.5rem',
-                textAlign: 'center',
-                background: 'var(--df-bg-surface-1)',
-                border: '1px solid var(--df-border-subtle)',
-                borderRadius: 'var(--df-radius-md)',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem', color: 'var(--df-text-muted)' }}>
-                <IconThermometer size={36} />
+            <div className="col-span-full py-16 px-4 text-center rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] shadow-sm">
+              <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 mb-3">
+                <IconThermometer size={24} />
               </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--df-text-main)', margin: '0 0 0.5rem 0' }}>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
                 {reefers.length === 0
                   ? 'Aucun groupe frigorifique surveillé'
                   : 'Aucun groupe ne correspond à cette denrée'}
               </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--df-text-muted)', margin: '0 0 1.25rem 0', maxWidth: '520px', marginLeft: 'auto', marginRight: 'auto' }}>
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-4">
                 {reefers.length === 0
                   ? 'Votre parc ne comporte aucun groupe frigorifique actif. Pour tester la surveillance ATP et HACCP, basculez en mode démo ou déclarez un groupe frigorifique dans vos actifs.'
                   : 'Modifiez le filtre de cargaison sélectionné.'}
               </p>
               {reefers.length === 0 && (
-                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-                  <Link href="/assets" style={{ textDecoration: 'none' }}>
-                    <Button variant="primary" size="sm">
-                      + Déclarer un Actif Frigorifique
-                    </Button>
-                  </Link>
-                </div>
+                <Link href="/assets" className="inline-block no-underline">
+                  <Button variant="primary" size="sm">
+                    + Déclarer un Actif Frigorifique
+                  </Button>
+                </Link>
               )}
             </div>
           ) : (
@@ -304,189 +271,118 @@ export default function ColdChainPage() {
               const isAlert = !reefer.isWithinSafeRange;
 
               return (
-                <Card
+                <div
                   key={reefer.assetId}
-                  style={{
-                    padding: '1.75rem',
-                    background: isAlert
-                      ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, var(--df-bg-surface-1) 100%)'
-                      : 'linear-gradient(135deg, var(--df-bg-surface-1) 0%, var(--df-bg-surface-2) 100%)',
-                    border: `1px solid ${isAlert ? 'var(--df-status-danger)' : 'var(--df-border-subtle)'}`,
-                    borderTop: `2px solid ${isAlert ? 'var(--df-status-danger)' : 'var(--df-accent-cyan)'}`,
-                    boxShadow: isAlert ? '0 0 20px rgba(239, 68, 68, 0.2)' : 'var(--df-shadow-md)',
-                  }}
+                  className={`rounded-2xl border p-6 shadow-sm space-y-4 transition-all ${
+                    isAlert
+                      ? 'border-rose-300 dark:border-rose-900/80 bg-rose-50/20 dark:bg-rose-950/10'
+                      : 'border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220]'
+                  }`}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.25rem' }}>
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <span
-                        className="df-mono"
-                        style={{
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                          color: 'var(--df-accent-cyan)',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.04em',
-                        }}
-                      >
+                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                         {reefer.assetCode}
                       </span>
-                      <h3
-                        style={{
-                          fontSize: '1.15rem',
-                          fontWeight: 800,
-                          color: 'var(--df-text-main)',
-                          margin: '0.2rem 0 0.35rem 0',
-                        }}
-                      >
+                      <h3 className="text-base font-black text-slate-900 dark:text-white mt-1.5">
                         {reefer.assetName}
                       </h3>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--df-text-muted)', margin: 0 }}>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         {getCargoLabel(reefer.cargoType)}
                       </p>
                     </div>
 
-                    <Badge variant={isAlert ? 'danger' : 'ok'} pulse={isAlert}>
+                    <Badge variant={isAlert ? 'danger' : 'ok'} pulse>
                       {isAlert ? 'ALERTE RUPTURE' : 'TEMP CONFORME'}
                     </Badge>
                   </div>
 
                   {/* CADRAN DIGITAL DE TEMPÉRATURE TÉLÉMÉTRIQUE */}
-                  <div
-                    style={{
-                      background: 'var(--df-bg-surface-3)',
-                      border: `1px solid ${isAlert ? 'rgba(239, 68, 68, 0.4)' : 'var(--df-border-medium)'}`,
-                      borderRadius: 'var(--df-radius-md)',
-                      padding: '1.25rem',
-                      textAlign: 'center',
-                      marginBottom: '1.25rem',
-                      boxShadow: isAlert ? '0 0 16px rgba(239, 68, 68, 0.15)' : 'none',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        color: 'var(--df-text-muted)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        display: 'block',
-                        marginBottom: '0.35rem',
-                      }}
-                    >
+                  <div className={`rounded-xl border p-5 text-center space-y-1 ${
+                    isAlert
+                      ? 'border-rose-200 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/30'
+                      : 'border-slate-200/60 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40'
+                  }`}>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                       Température de Reprise Frigo
                     </span>
-                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.35rem' }}>
-                      <span
-                        className="df-mono"
-                        style={{
-                          fontSize: '3.25rem',
-                          fontWeight: 800,
-                          lineHeight: 1,
-                          letterSpacing: '-0.02em',
-                          color: isAlert ? 'var(--df-status-danger)' : 'var(--df-status-ok)',
-                          textShadow: isAlert
-                            ? '0 0 20px rgba(239, 68, 68, 0.5)'
-                            : '0 0 20px rgba(16, 185, 129, 0.3)',
-                        }}
-                      >
+                    <div className="flex items-baseline justify-center gap-1">
+                      <span className={`text-4xl font-black font-mono tracking-tight ${
+                        isAlert ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+                      }`}>
                         {reefer.currentTempC > 0 ? `+${reefer.currentTempC}` : reefer.currentTempC}
                       </span>
-                      <span style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--df-text-muted)' }}>
-                        °C
-                      </span>
+                      <span className="text-base font-bold text-slate-400">°C</span>
                     </div>
 
-                    <div style={{ marginTop: '0.65rem', fontSize: '0.75rem', color: 'var(--df-text-muted)' }}>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 pt-1">
                       Consigne :{' '}
-                      <strong className="df-mono" style={{ color: 'var(--df-text-main)' }}>
+                      <strong className="font-mono text-slate-700 dark:text-slate-300">
                         +{reefer.setpointTempC}°C
                       </strong>{' '}
-                      (Écart Delta : <span className="df-mono">{reefer.tempDeltaC}°C</span>)
+                      (Écart : <span className="font-mono">{reefer.tempDeltaC}°C</span>)
                     </div>
                   </div>
 
                   {/* DÉTAILS TECHNIQUES & CAPTEURS IOT */}
-                  <div
-                    style={{
-                      borderTop: '1px solid var(--df-border-subtle)',
-                      paddingTop: '1rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.5rem',
-                      fontSize: '0.78rem',
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ color: 'var(--df-text-muted)' }}>Capteur Porte Caisse :</span>
-                      <span
-                        style={{
-                          fontWeight: 700,
-                          color: reefer.doorOpen ? 'var(--df-status-danger)' : 'var(--df-status-ok)',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                        }}
-                      >
+                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Capteur Porte Caisse :</span>
+                      <span className={`font-semibold inline-flex items-center gap-1.5 ${
+                        reefer.doorOpen ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+                      }`}>
                         {reefer.doorOpen ? (
                           <>
-                            <IconAlertTriangle size={12} /> Ouverte (Déperdition)
+                            <IconAlertTriangle size={12} />
+                            <span>Ouverte (Déperdition)</span>
                           </>
                         ) : (
                           <>
-                            <IconLock size={12} /> Fermée & Étanche
+                            <IconLock size={12} />
+                            <span>Fermée &amp; Étanche</span>
                           </>
                         )}
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ color: 'var(--df-text-muted)' }}>Alimentation Groupe :</span>
-                      <span style={{ fontWeight: 600, color: 'var(--df-text-main)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Alimentation Groupe :</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 inline-flex items-center gap-1.5">
                         {reefer.powerMode === ReeferPowerMode.DIESEL ? (
                           <>
-                            <IconFuel size={12} /> Moteur Diesel Autonome
+                            <IconFuel size={12} className="text-amber-500" />
+                            <span>Moteur Diesel Autonome</span>
                           </>
                         ) : reefer.powerMode === ReeferPowerMode.ELECTRIC_STANDBY ? (
                           <>
-                            <IconZap size={12} /> Prise Secteur 380V (Dépôt)
+                            <IconZap size={12} className="text-blue-500" />
+                            <span>Prise Secteur 380V (Dépôt)</span>
                           </>
                         ) : (
-                          'Arrêt'
+                          <span>Arrêt</span>
                         )}
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ color: 'var(--df-text-muted)' }}>Valeur Cargaison :</span>
-                      <span className="df-mono" style={{ fontWeight: 700, color: 'var(--df-text-main)' }}>
-                        {(reefer.estimatedCargoValueDzd / 1000000).toFixed(2)} M DA
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Valeur Cargaison :</span>
+                      <span className="font-mono font-bold text-slate-900 dark:text-white">
+                        {(reefer.estimatedCargoValueDzd / 1_000_000).toFixed(2)} M DA
                       </span>
                     </div>
 
                     {isAlert && (
-                      <div
-                        style={{
-                          marginTop: '0.5rem',
-                          padding: '0.85rem',
-                          borderRadius: 'var(--df-radius-sm)',
-                          background: 'var(--df-bg-surface-1)',
-                          border: '1px solid var(--df-status-danger)',
-                          fontSize: '0.78rem',
-                          color: 'var(--df-status-danger)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.25rem',
-                        }}
-                      >
-                        <div style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <IconAlertTriangle size={14} /> Risque financier direct de dépréciation
+                      <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 space-y-1">
+                        <div className="font-bold flex items-center gap-1.5">
+                          <IconAlertTriangle size={13} className="text-rose-600 dark:text-rose-400 shrink-0" />
+                          <span>Risque financier direct de dépréciation</span>
                         </div>
-                        <div>
-                          Excursion depuis : <strong className="df-mono">{reefer.excursionDurationMinutes} minutes</strong>
+                        <div className="text-[11px] text-rose-600/90 dark:text-rose-400/90">
+                          Excursion depuis : <strong className="font-mono">{reefer.excursionDurationMinutes} minutes</strong>
                         </div>
-                        <div>
+                        <div className="text-[11px] text-rose-600/90 dark:text-rose-400/90">
                           Pertes estimées :{' '}
-                          <strong className="df-mono" style={{ fontSize: '0.95rem' }}>
+                          <strong className="font-mono text-xs">
                             {reefer.financialRiskDzd.toLocaleString('fr-DZ')} DA
                           </strong>
                         </div>
@@ -495,45 +391,29 @@ export default function ColdChainPage() {
                   </div>
 
                   {/* PIED DE CARTE & ACTIONS */}
-                  <div
-                    style={{
-                      marginTop: '1.25rem',
-                      paddingTop: '0.85rem',
-                      borderTop: '1px solid var(--df-border-subtle)',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <span className="df-mono" style={{ fontSize: '0.7rem', color: 'var(--df-text-muted)' }}>
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                    <span className="font-mono text-[11px] text-slate-400">
                       Relevé : {new Date(reefer.lastUpdate).toLocaleTimeString()}
                     </span>
                     <button
                       type="button"
-                      onClick={() => alert(`Téléchargement de la courbe Thermotrace certifiée DSV pour ${reefer.assetCode}`)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--df-accent-cyan)',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        padding: 0,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
+                      onClick={() =>
+                        alert(
+                          `Téléchargement de la courbe Thermotrace certifiée DSV pour ${reefer.assetCode}`,
+                        )
+                      }
+                      className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
                     >
                       <IconFileText size={13} />
-                      <span>Télécharger Thermotrace</span>
+                      <span>Thermotrace PDF</span>
                     </button>
                   </div>
-                </Card>
+                </div>
               );
             })
           )}
         </div>
       </main>
-    </>
+    </div>
   );
 }
