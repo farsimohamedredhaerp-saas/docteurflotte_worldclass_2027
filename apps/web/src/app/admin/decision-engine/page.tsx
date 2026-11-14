@@ -86,11 +86,13 @@ export default function AdminDecisionEnginePage() {
       PlatformAdminClient.getPublications(session.token),
     ])
       .then(([cfgList, actPub, pubList]) => {
-        setConfigs(cfgList);
+        const uniqueConfigs = Array.from(new Map((cfgList || []).map((c) => [c.id, c])).values());
+        const uniquePubs = Array.from(new Map((pubList || []).map((p) => [p.id, p])).values());
+        setConfigs(uniqueConfigs);
         setActivePub(actPub);
-        setPublications(pubList);
-        if (cfgList.length > 0 && !selectedConfigId) {
-          const activeCfg = cfgList.find((c) => c.is_active_publication) || cfgList[0];
+        setPublications(uniquePubs);
+        if (uniqueConfigs.length > 0 && !selectedConfigId) {
+          const activeCfg = uniqueConfigs.find((c) => c.is_active_publication) || uniqueConfigs[0];
           setSelectedConfigId(activeCfg.id);
         }
       })
@@ -490,8 +492,8 @@ export default function AdminDecisionEnginePage() {
               cursor: 'pointer',
             }}
           >
-            {configs.map((c) => (
-              <option key={c.id} value={c.id}>
+            {configs.map((c, idx) => (
+              <option key={`${c.id}-${idx}`} value={c.id}>
                 {c.version} — [{c.status}] {c.is_active_publication ? '(Active en Production)' : ''}
               </option>
             ))}
@@ -904,8 +906,8 @@ export default function AdminDecisionEnginePage() {
             </tr>
           </thead>
           <tbody>
-            {publications.map((p) => (
-              <tr key={p.id} style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
+            {publications.map((p, idx) => (
+              <tr key={p.id ? `${p.id}-${idx}` : `pub-${idx}`} style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                 <td style={{ padding: '12px 16px' }}>
                   <span
                     style={{

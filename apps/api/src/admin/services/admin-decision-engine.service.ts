@@ -104,10 +104,12 @@ export class AdminDecisionEngineService {
     const res = await pool.query(`
       SELECT 
         c.*,
-        (p.id IS NOT NULL) as is_active_publication
+        EXISTS (
+          SELECT 1 
+          FROM platform_config_publications p 
+          WHERE p.config_id = c.id AND p.effective_to IS NULL
+        ) as is_active_publication
       FROM platform_decision_engine_configs c
-      LEFT JOIN platform_config_publications p 
-        ON p.config_id = c.id AND p.effective_to IS NULL
       ORDER BY c.created_at DESC
     `);
 
@@ -119,9 +121,14 @@ export class AdminDecisionEngineService {
     if (!pool) throw new Error('Database unavailable');
 
     const res = await pool.query(
-      `SELECT c.*, (p.id IS NOT NULL) as is_active_publication
+      `SELECT 
+         c.*, 
+         EXISTS (
+           SELECT 1 
+           FROM platform_config_publications p 
+           WHERE p.config_id = c.id AND p.effective_to IS NULL
+         ) as is_active_publication
        FROM platform_decision_engine_configs c
-       LEFT JOIN platform_config_publications p ON p.config_id = c.id AND p.effective_to IS NULL
        WHERE c.id = $1`,
       [id],
     );
