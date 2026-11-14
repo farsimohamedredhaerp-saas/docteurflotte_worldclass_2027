@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { Navbar } from '../../components/navigation/Navbar';
-import { Card } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
 import {
@@ -12,14 +12,13 @@ import {
   IconAlertTriangle,
   IconSearch,
   IconCheck,
-  IconActivity,
   IconClock,
-  IconDownload,
   IconPlus,
   IconEdit,
   IconTrash,
   IconX,
   IconUsers,
+  IconFilter,
 } from '../../components/navigation/TechIcons';
 
 export interface DriverRecord {
@@ -66,6 +65,7 @@ export default function DriversPage() {
   // Modal CRUD State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDriver, setEditingDriver] = useState<DriverRecord | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
   const [formState, setFormState] = useState<Partial<DriverRecord>>({
     name: '',
     matriculeNumber: '',
@@ -106,27 +106,23 @@ export default function DriversPage() {
 
   const handleSaveDriver = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formState.name || !formState.licenseNumber) {
-      alert('Veuillez renseigner le nom et le numéro de permis.');
-      return;
-    }
 
     if (editingDriver) {
       setDrivers((prev) =>
         prev.map((d) => (d.id === editingDriver.id ? ({ ...d, ...formState } as DriverRecord) : d))
       );
-      setNotification(`Fiche conducteur de ${formState.name} mise à jour.`);
+      setNotification(`Fiche conducteur de ${formState.name} mise à jour avec succès.`);
     } else {
       const newDriver: DriverRecord = {
         id: `drv-${Date.now().toString().slice(-4)}`,
-        name: formState.name || '',
-        matriculeNumber: formState.matriculeNumber || `DRV-${Date.now().toString().slice(-3)}`,
+        name: formState.name || 'Nouveau Conducteur',
+        matriculeNumber: formState.matriculeNumber || `DRV-DZ-${Date.now().toString().slice(-3)}`,
         phone: formState.phone || '0550 00 00 00',
         licenseCategory: (formState.licenseCategory as DriverRecord['licenseCategory']) || 'E',
-        licenseNumber: formState.licenseNumber || '',
-        licenseExpiry: formState.licenseExpiry || '2028-01-01',
-        medicalCheckExpiry: formState.medicalCheckExpiry || '2026-12-31',
-        assignedVehiclePlate: formState.assignedVehiclePlate || 'EN ATTENTE',
+        licenseNumber: formState.licenseNumber || 'DZ-16-000000',
+        licenseExpiry: formState.licenseExpiry || '2028-12-31',
+        medicalCheckExpiry: formState.medicalCheckExpiry || '2027-06-30',
+        assignedVehiclePlate: formState.assignedVehiclePlate || 'Non Affecté',
         assignedVehicleModel: formState.assignedVehicleModel || 'Non Affecté',
         currentSiteOrCorridor: formState.currentSiteOrCorridor || 'Base Centrale',
         ecoDrivingScore: 85,
@@ -143,11 +139,10 @@ export default function DriversPage() {
   };
 
   const handleDeleteDriver = (id: string, name: string) => {
-    if (confirm(`Confirmez-vous la suppression du conducteur ${name} ?`)) {
-      setDrivers((prev) => prev.filter((d) => d.id !== id));
-      setNotification(`ℹ Conducteur ${name} retiré de l'effectif.`);
-      setTimeout(() => setNotification(null), 4000);
-    }
+    setDrivers((prev) => prev.filter((d) => d.id !== id));
+    setNotification(`Conducteur ${name} retiré de l’effectif.`);
+    setDeleteConfirm(null);
+    setTimeout(() => setNotification(null), 4000);
   };
 
   const filteredDrivers = drivers.filter((d) => {
@@ -171,371 +166,437 @@ export default function DriversPage() {
     return true;
   });
 
+  const onDutyCount = drivers.filter((d) => d.status === 'ON_DUTY').length;
+  const availableCount = drivers.filter((d) => d.status === 'AVAILABLE').length;
+  const warningCount = drivers.filter((d) => d.status === 'LICENSE_WARNING').length;
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)', color: 'var(--df-text-main)' }}>
-      {/* 1. BARRE HORIZONTALE UNIVERSELLE */}
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 transition-colors duration-150">
+      {/* 1. BARRE DE NAVIGATION SUPÉRIEURE UNIFIÉE */}
       <Navbar />
 
-      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 1.25rem 3rem 1.25rem' }}>
+      <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-16">
         {/* BANNIÈRE DE NOTIFICATION */}
         {notification && (
           <div
             role="status"
-            style={{
-              background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-accent-blue)',
-              color: 'var(--df-text-main)',
-              padding: '0.85rem 1.25rem',
-              borderRadius: 'var(--df-radius-md)',
-              marginBottom: '1.25rem',
-              boxShadow: 'var(--df-shadow-md)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
+            className="mb-4 flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-blue-500/30 bg-blue-50/90 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 shadow-sm transition-all"
           >
-            <span style={{ color: 'var(--df-status-ok)' }}>
-              <IconCheck size={16} strokeWidth={2} />
-            </span>
-            <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{notification}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-emerald-600 dark:text-emerald-400">
+                <IconCheck size={16} strokeWidth={2.5} />
+              </span>
+              <span className="text-xs font-semibold">{notification}</span>
+            </div>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
+              aria-label="Fermer la notification"
+            >
+              <IconX size={14} />
+            </button>
           </div>
         )}
 
-        {/* 2. LAYOUT DUAL-BAR : SIDEBAR VERTICALE + TABLEAU PRINCIPAL */}
-        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
-          {/* SIDEBAR CONTEXTUELLE VERTICALE */}
-          <aside
-            style={{
-              width: '260px',
-              flexShrink: 0,
-              background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-border-subtle)',
-              borderRadius: 'var(--df-radius-lg)',
-              padding: '1rem',
-              boxShadow: 'var(--df-shadow-sm)',
-              position: 'sticky',
-              top: '90px',
-            }}
-          >
-            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
-              Filtres Effectif &amp; Missions
+        {/* 2. COMMAND CENTER HEADER BENTO */}
+        <section className="mb-6 rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 sm:p-6 shadow-2xs">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <Badge variant="ok" pulse>
+                  Ressources Humaines &amp; Équipages de Flotte
+                </Badge>
+                <span className="text-slate-300 dark:text-slate-700" aria-hidden="true">•</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Loi 18-07 ANPDP • Données Pseudonymisées • Code de la Route DZ
+                </span>
+              </div>
+
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 mb-2">
+                Conducteurs, Permis &amp; Éco-Conduite
+              </h1>
+
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                Gestion des habilitations chauffeurs, suivi de validité des visites médicales obligatoires, éco-scores de conduite et affectation en temps réel aux corridors logistiques nationaux.
+              </p>
+
+              <div className="flex gap-2 flex-wrap items-center">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleOpenAdd}
+                  className="inline-flex items-center gap-1.5"
+                >
+                  <IconPlus size={14} />
+                  <span>Nouveau Conducteur</span>
+                </Button>
+                <Link
+                  href="/dispatch"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors"
+                >
+                  <IconTruck size={13} className="text-blue-500" />
+                  <span>Dispatching TOPSIS</span>
+                </Link>
+                <Link
+                  href="/eco-driving"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors"
+                >
+                  <IconShieldCheck size={13} className="text-emerald-500" />
+                  <span>Éco-Conduite</span>
+                </Link>
+              </div>
             </div>
 
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              {[
-                { id: 'ALL', label: 'Tout l\'Effectif', count: drivers.length, icon: <IconUsers size={14} /> },
-                { id: 'ON_DUTY', label: 'En Route / Mission', count: drivers.filter((d) => d.status === 'ON_DUTY').length, icon: <IconTruck size={14} /> },
-                { id: 'AVAILABLE', label: 'Disponibles', count: drivers.filter((d) => d.status === 'AVAILABLE').length, icon: <IconCheck size={14} className="text-emerald-500" /> },
-                { id: 'LICENSE_WARNING', label: 'Alerte Permis / Visite', count: drivers.filter((d) => d.status === 'LICENSE_WARNING').length, icon: <IconAlertTriangle size={14} className="text-amber-500" /> },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setStatusFilter(item.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.60rem 0.75rem',
-                    borderRadius: 'var(--df-radius-md)',
-                    border: statusFilter === item.id ? '1px solid var(--df-accent-blue)' : '1px solid transparent',
-                    background: statusFilter === item.id ? 'var(--df-accent-blue-subtle)' : 'transparent',
-                    color: statusFilter === item.id ? 'var(--df-accent-blue)' : 'var(--df-text-secondary)',
-                    fontWeight: statusFilter === item.id ? 700 : 500,
-                    fontSize: '0.80rem',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all var(--df-transition-fast)',
-                  }}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                    <span>{item.icon}</span>
-                    <span>{item.label}</span>
-                  </span>
-                  <span
-                    className="df-mono"
-                    style={{
-                      fontSize: '0.68rem',
-                      padding: '1px 5px',
-                      borderRadius: '4px',
-                      background: statusFilter === item.id ? 'var(--df-accent-blue)' : 'var(--df-bg-surface-2)',
-                      color: statusFilter === item.id ? '#FFFFFF' : 'var(--df-text-muted)',
-                    }}
-                  >
-                    {item.count}
-                  </span>
-                </button>
-              ))}
-            </nav>
-
-            <div style={{ height: '1px', background: 'var(--df-border-subtle)', margin: '1rem 0' }} />
-
-            {/* ACTION CRUD PRINCIPALE */}
-            <Button variant="primary" size="sm" onClick={handleOpenAdd} style={{ width: '100%', justifyContent: 'center' }}>
-              <IconPlus size={14} />
-              <span>+ Nouveau Chauffeur</span>
-            </Button>
-
-            <div style={{ marginTop: '1.25rem', padding: '0.65rem', background: 'var(--df-bg-surface-2)', borderRadius: 'var(--df-radius-md)', fontSize: '0.70rem', color: 'var(--df-text-muted)' }}>
-              <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.2rem' }}>
-                Habilitations Code Route DZ
+            {/* WIDGET HUD STATUT EFFECTIF */}
+            <div className="w-full lg:w-auto min-w-[260px] p-4 rounded-xl bg-slate-50 dark:bg-[#161F30] border border-slate-200/90 dark:border-[#1F2937] flex flex-col gap-2.5">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                <span>Disponibilité Effectif</span>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
               </div>
-              Contrôle strict des permis C1, C2, E et attestations médicales obligatoires.
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-400">Total Conducteurs</span>
+                <strong className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                  {drivers.length} Actifs
+                </strong>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-400">En Mission / Route</span>
+                <strong className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                  {onDutyCount} en cours
+                </strong>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-400">Conformité Loi 18-07</span>
+                <strong className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  Pseudonymisé ANPDP
+                </strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. BENTO KPIS CONDUCTEURS */}
+        <section className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs">
+            <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Total Effectif
+            </span>
+            <div className="font-mono text-2xl font-extrabold text-slate-900 dark:text-slate-50 mt-1">
+              {drivers.length}
+            </div>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
+              Conducteurs &amp; opérateurs inscrits
+            </span>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs">
+            <span className="text-[10.5px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+              En Route / Mission
+            </span>
+            <div className="font-mono text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">
+              {onDutyCount}
+            </div>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
+              Actuellement sur les corridors
+            </span>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs">
+            <span className="text-[10.5px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              Disponibles
+            </span>
+            <div className="font-mono text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+              {availableCount}
+            </div>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
+              Prêts pour nouvel ordre de mission
+            </span>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs">
+            <span className="text-[10.5px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              Alerte Permis / Visite
+            </span>
+            <div className="font-mono text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">
+              {warningCount}
+            </div>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
+              Échéance légale imminente ou dépassée
+            </span>
+          </div>
+        </section>
+
+        {/* 4. LAYOUT DUAL : BARRE DE FILTRES LATÉRALE + TABLEAU CONDUCTEURS */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+          {/* SIDEBAR CONTEXTUELLE DE NAVIGATION & FILTRES */}
+          <aside className="lg:col-span-1 rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs sticky top-24">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Filtres Équipage
+              </span>
+              <IconFilter size={14} className="text-slate-400" />
+            </div>
+
+            {/* STATUT OPÉRATIONNEL */}
+            <div className="mb-5">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+                Statut Opérationnel
+              </div>
+              <div className="flex flex-col gap-1">
+                {[
+                  { id: 'ALL', label: 'Tout l’Effectif', count: drivers.length },
+                  { id: 'ON_DUTY', label: 'En Mission', count: onDutyCount },
+                  { id: 'AVAILABLE', label: 'Disponibles', count: availableCount },
+                  { id: 'LICENSE_WARNING', label: 'Alerte Visite / Permis', count: warningCount },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setStatusFilter(item.id)}
+                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                      statusFilter === item.id
+                        ? item.id === 'LICENSE_WARNING'
+                          ? 'bg-amber-500 text-white shadow-xs'
+                          : 'bg-blue-600 text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                    <span
+                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                        statusFilter === item.id
+                          ? 'bg-black/20 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                      }`}
+                    >
+                      {item.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="h-px bg-slate-200/80 dark:bg-slate-800 mb-5" />
+
+            {/* CATÉGORIE PERMIS */}
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+                Catégorie de Permis DZ
+              </div>
+              <div className="flex flex-col gap-1">
+                {[
+                  { id: 'ALL', label: 'Toutes Catégories' },
+                  { id: 'HEAVY', label: 'Poids Lourds (C/E)' },
+                  { id: 'BTP', label: 'Engins BTP (CACES)' },
+                  { id: 'LIGHT', label: 'Utilitaires (B)' },
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setCategoryFilter(f.id)}
+                    className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      categoryFilter === f.id
+                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                    }`}
+                  >
+                    <span>{f.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </aside>
 
-          {/* CONTENU CENTRAL PRINCIPAL */}
-          <main style={{ flex: 1, minWidth: 0 }}>
-            {/* EN-TÊTE PRINCIPAL */}
-            <div
-              style={{
-                padding: '1.25rem 1.5rem',
-                background: 'var(--df-bg-surface-1)',
-                border: '1px solid var(--df-border-subtle)',
-                borderRadius: 'var(--df-radius-lg)',
-                marginBottom: '1.25rem',
-                boxShadow: 'var(--df-shadow-sm)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '1rem',
-              }}
-            >
-              <div>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.25rem 0', color: 'var(--df-text-main)' }}>
-                  Ressources Humaines &amp; Équipages de Flotte
-                </h1>
-                <p style={{ fontSize: '0.80rem', color: 'var(--df-text-secondary)', margin: 0 }}>
-                  Suivi des conducteurs, validité des permis et gestion opérationnelle des affectations.
-                </p>
+          {/* LISTE PRINCIPALE DES CONDUCTEURS */}
+          <section className="lg:col-span-3">
+            {/* RECHERCHE ET TOTAL */}
+            <div className="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="relative flex-1">
+                <IconSearch size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Rechercher par chauffeur, matricule, véhicule affecté..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#111827] text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-2xs"
+                />
               </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 px-1 self-center whitespace-nowrap">
+                <strong className="font-mono text-slate-900 dark:text-slate-100">{filteredDrivers.length}</strong> conducteur{filteredDrivers.length > 1 ? 's' : ''} filtré{filteredDrivers.length > 1 ? 's' : ''}
+              </div>
+            </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {/* TABLEAU DES CONDUCTEURS */}
+            {isLoading ? (
+              <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-12 text-center text-slate-500 text-xs">
+                Chargement de l’effectif...
+              </div>
+            ) : filteredDrivers.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-12 text-center shadow-2xs">
+                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                  <IconUsers size={22} />
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">
+                  Aucun conducteur ne correspond à vos filtres
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-sm mx-auto">
+                  Modifiez vos critères ou enregistrez un nouveau conducteur dans cet équipage.
+                </p>
                 <Button variant="primary" size="sm" onClick={handleOpenAdd}>
-                  <IconPlus size={14} />
-                  <span>Ajouter Chauffeur</span>
+                  + Ajouter un Conducteur
                 </Button>
               </div>
-            </div>
-
-            {/* BARRE DE RECHERCHE ET FILTRES RAPIDES */}
-            <div
-              style={{
-                background: 'var(--df-bg-surface-1)',
-                border: '1px solid var(--df-border-subtle)',
-                borderRadius: 'var(--df-radius-lg)',
-                overflow: 'hidden',
-                boxShadow: 'var(--df-shadow-sm)',
-              }}
-            >
-              <div
-                style={{
-                  padding: '1rem 1.25rem',
-                  borderBottom: '1px solid var(--df-border-subtle)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '0.75rem',
-                }}
-              >
-                <div style={{ position: 'relative', width: '100%', maxWidth: '320px' }}>
-                  <input
-                    type="text"
-                    placeholder="Filtrer chauffeur, matricule, camion..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.45rem 0.85rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-md)',
-                      fontSize: '0.80rem',
-                      color: 'var(--df-text-main)',
-                      outline: 'none',
-                    }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.35rem' }}>
-                  {[
-                    { id: 'ALL', label: 'Toutes Catégories' },
-                    { id: 'HEAVY', label: 'Permis Poids Lourds (C/E)' },
-                    { id: 'BTP', label: 'Engins BTP' },
-                    { id: 'LIGHT', label: 'Utilitaires (B)' },
-                  ].map((f) => (
-                    <button
-                      key={f.id}
-                      onClick={() => setCategoryFilter(f.id)}
-                      style={{
-                        background: categoryFilter === f.id ? 'var(--df-accent-blue)' : 'var(--df-bg-surface-2)',
-                        color: categoryFilter === f.id ? '#FFFFFF' : 'var(--df-text-secondary)',
-                        border: '1px solid var(--df-border-subtle)',
-                        borderRadius: 'var(--df-radius-sm)',
-                        padding: '0.35rem 0.75rem',
-                        fontSize: '0.76rem',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
+            ) : (
+              <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] shadow-2xs overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                        <th className="py-3 px-4">Conducteur &amp; Contact</th>
+                        <th className="py-3 px-4">Permis &amp; Validité</th>
+                        <th className="py-3 px-4">Visite Médicale</th>
+                        <th className="py-3 px-4">Véhicule Affecté</th>
+                        <th className="py-3 px-4">Score Éco</th>
+                        <th className="py-3 px-4">Statut</th>
+                        <th className="py-3 px-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                      {filteredDrivers.map((d) => (
+                        <tr key={d.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="py-3 px-4">
+                            <div className="font-bold text-slate-900 dark:text-slate-100">{d.name}</div>
+                            <div className="font-mono text-[10.5px] text-slate-500">
+                              {d.matriculeNumber} • {d.phone}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-1.5">
+                              <Badge variant="neutral">Permis {d.licenseCategory}</Badge>
+                            </div>
+                            <div className="font-mono text-[10.5px] text-slate-400 mt-0.5">
+                              Exp : {d.licenseExpiry}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 font-mono">
+                            <span
+                              className={`text-xs ${
+                                d.status === 'LICENSE_WARNING'
+                                  ? 'font-bold text-amber-600 dark:text-amber-400'
+                                  : 'text-slate-700 dark:text-slate-300'
+                              }`}
+                            >
+                              {d.medicalCheckExpiry}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">
+                              {d.assignedVehiclePlate}
+                            </div>
+                            <div className="text-[10.5px] text-slate-500 truncate max-w-[140px]">
+                              {d.assignedVehicleModel}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span
+                              className={`font-mono font-bold text-xs ${
+                                d.ecoDrivingScore >= 80 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+                              }`}
+                            >
+                              {d.ecoDrivingScore} / 100
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold border ${
+                                d.status === 'AVAILABLE'
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60'
+                                  : d.status === 'ON_DUTY'
+                                  ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/60'
+                                  : d.status === 'LICENSE_WARNING'
+                                  ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/60'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  d.status === 'AVAILABLE'
+                                    ? 'bg-emerald-500'
+                                    : d.status === 'ON_DUTY'
+                                    ? 'bg-blue-500'
+                                    : d.status === 'LICENSE_WARNING'
+                                    ? 'bg-amber-500'
+                                    : 'bg-slate-400'
+                                }`}
+                              />
+                              {d.status === 'AVAILABLE'
+                                ? 'Disponible'
+                                : d.status === 'ON_DUTY'
+                                ? 'En Mission'
+                                : d.status === 'LICENSE_WARNING'
+                                ? 'Alerte Visite'
+                                : 'Repos Légal'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <div className="inline-flex items-center gap-1">
+                              <button
+                                onClick={() => handleOpenEdit(d)}
+                                title="Modifier ce conducteur"
+                                className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                              >
+                                <IconEdit size={14} />
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirm({ id: d.id, name: d.name })}
+                                title="Supprimer ce conducteur"
+                                className="p-1 rounded text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                              >
+                                <IconTrash size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-
-              {/* TABLEAU HAUTE DENSITÉ DES CONDUCTEURS AVEC ACTIONS CRUD */}
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
-                  <thead>
-                    <tr style={{ background: 'var(--df-bg-surface-2)', borderBottom: '1px solid var(--df-border-subtle)', color: 'var(--df-text-secondary)', textTransform: 'uppercase', fontSize: '0.70rem' }}>
-                      <th style={{ padding: '0.75rem 1rem' }}>Conducteur &amp; Contact</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>Catégorie &amp; Permis</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>Validité Permis</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>Visite Médicale</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>Véhicule Affecté</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>Site / Mission</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>Score Éco</th>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions CRUD</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredDrivers.length === 0 ? (
-                      <tr>
-                        <td colSpan={8} style={{ padding: '3rem 1rem', textAlign: 'center' }}>
-                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', marginBottom: '0.75rem' }}>
-                            <IconUsers size={20} />
-                          </div>
-                          <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.25rem' }}>
-                            {drivers.length === 0 ? 'Aucun chauffeur enregistré' : 'Aucun résultat correspondant aux filtres'}
-                          </div>
-                          <div style={{ fontSize: '0.8rem', color: 'var(--df-text-muted)', marginBottom: '1rem' }}>
-                            {drivers.length === 0
-                              ? 'Enregistrez votre premier chauffeur ou activez le mode démo pour explorer la simulation.'
-                              : 'Modifiez vos critères de recherche ou réinitialisez les filtres.'}
-                          </div>
-                          {drivers.length === 0 && (
-                            <Button variant="primary" size="sm" onClick={handleOpenAdd}>
-                              + Ajouter un premier chauffeur
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredDrivers.map((d) => (
-                      <tr key={d.id} style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
-                        <td style={{ padding: '0.85rem 1rem' }}>
-                          <div style={{ fontWeight: 700, color: 'var(--df-text-main)' }}>{d.name}</div>
-                          <div style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)', fontFamily: 'var(--df-font-mono)' }}>
-                            {d.matriculeNumber} • {d.phone}
-                          </div>
-                        </td>
-                        <td style={{ padding: '0.85rem 1rem' }}>
-                          <Badge variant="neutral">Permis {d.licenseCategory}</Badge>
-                          <div style={{ fontSize: '0.68rem', color: 'var(--df-text-muted)', fontFamily: 'var(--df-font-mono)', marginTop: '0.2rem' }}>
-                            {d.licenseNumber}
-                          </div>
-                        </td>
-                        <td style={{ padding: '0.85rem 1rem', fontFamily: 'var(--df-font-mono)' }}>{d.licenseExpiry}</td>
-                        <td style={{ padding: '0.85rem 1rem', fontFamily: 'var(--df-font-mono)' }}>
-                          <span style={{ color: d.status === 'LICENSE_WARNING' ? 'var(--df-status-warning)' : 'inherit', fontWeight: d.status === 'LICENSE_WARNING' ? 700 : 400 }}>
-                            {d.medicalCheckExpiry}
-                          </span>
-                        </td>
-                        <td style={{ padding: '0.85rem 1rem' }}>
-                          <div style={{ fontWeight: 700, fontFamily: 'var(--df-font-mono)', color: 'var(--df-accent-blue)' }}>
-                            {d.assignedVehiclePlate}
-                          </div>
-                          <div style={{ fontSize: '0.68rem', color: 'var(--df-text-muted)' }}>{d.assignedVehicleModel}</div>
-                        </td>
-                        <td style={{ padding: '0.85rem 1rem', fontSize: '0.76rem' }}>{d.currentSiteOrCorridor}</td>
-                        <td style={{ padding: '0.85rem 1rem' }}>
-                          <div className="df-mono" style={{ fontWeight: 800, color: d.ecoDrivingScore >= 80 ? 'var(--df-status-ok)' : 'var(--df-status-warning)' }}>
-                            {d.ecoDrivingScore}/100
-                          </div>
-                        </td>
-                        <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
-                          <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
-                            <button
-                              onClick={() => handleOpenEdit(d)}
-                              title="Modifier ce conducteur"
-                              style={{
-                                background: 'var(--df-bg-surface-2)',
-                                border: '1px solid var(--df-border-subtle)',
-                                borderRadius: 'var(--df-radius-sm)',
-                                padding: '0.35rem 0.55rem',
-                                color: 'var(--df-text-secondary)',
-                                cursor: 'pointer',
-                              }}
-                            >
-                              <IconEdit size={13} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteDriver(d.id, d.name)}
-                              title="Supprimer ce conducteur"
-                              style={{
-                                background: 'var(--df-status-danger-bg)',
-                                border: '1px solid var(--df-status-danger-border)',
-                                borderRadius: 'var(--df-radius-sm)',
-                                padding: '0.35rem 0.55rem',
-                                color: 'var(--df-status-danger-text)',
-                                cursor: 'pointer',
-                              }}
-                            >
-                              <IconTrash size={13} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </main>
+            )}
+          </section>
         </div>
-      </div>
+      </main>
 
       {/* MODAL CRUD CHAUFFEUR (CRÉER / MODIFIER) */}
       {isModalOpen && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.65)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100,
-            padding: '1rem',
-          }}
+          role="dialog"
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
         >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '540px',
-              background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-border-subtle)',
-              borderRadius: 'var(--df-radius-lg)',
-              boxShadow: 'var(--df-shadow-lg)',
-              padding: '1.5rem',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--df-text-main)' }}>
-                {editingDriver ? 'Modifier Fiche Chauffeur' : 'Nouveau Conducteur / Opérateur'}
-              </h3>
-              <button onClick={() => setIsModalOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer' }}>
-                <IconX size={18} />
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#111827] p-6 shadow-2xl my-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                  {editingDriver ? 'Modifier Fiche Conducteur' : 'Nouveau Conducteur / Opérateur'}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Enregistrement des habilitations et dates d’expiration
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+              >
+                <IconX size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveDriver} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <form onSubmit={handleSaveDriver} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--df-text-muted)', display: 'block', marginBottom: '0.25rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Nom &amp; Prénom *
                   </label>
                   <input
@@ -544,19 +605,12 @@ export default function DriversPage() {
                     placeholder="Ex: Sofiane Djebbar"
                     value={formState.name || ''}
                     onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--df-text-muted)', display: 'block', marginBottom: '0.25rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Téléphone
                   </label>
                   <input
@@ -564,34 +618,20 @@ export default function DriversPage() {
                     placeholder="0550 00 00 00"
                     value={formState.phone || ''}
                     onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--df-text-muted)', display: 'block', marginBottom: '0.25rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Catégorie Permis
                   </label>
                   <select
                     value={formState.licenseCategory || 'E'}
                     onChange={(e) => setFormState({ ...formState, licenseCategory: e.target.value as DriverRecord['licenseCategory'] })}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="E">Permis E (Semi-remorque)</option>
                     <option value="C2">Permis C2 (Poids Lourds &gt; 19t)</option>
@@ -602,7 +642,7 @@ export default function DriversPage() {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--df-text-muted)', display: 'block', marginBottom: '0.25rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     N° de Permis *
                   </label>
                   <input
@@ -611,62 +651,40 @@ export default function DriversPage() {
                     placeholder="DZ-16-..."
                     value={formState.licenseNumber || ''}
                     onChange={(e) => setFormState({ ...formState, licenseNumber: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                      fontFamily: 'var(--df-font-mono)',
-                    }}
+                    className="w-full font-mono px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--df-text-muted)', display: 'block', marginBottom: '0.25rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Date Expiration Permis
                   </label>
                   <input
                     type="date"
                     value={formState.licenseExpiry || ''}
                     onChange={(e) => setFormState({ ...formState, licenseExpiry: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--df-text-muted)', display: 'block', marginBottom: '0.25rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Validité Visite Médicale
                   </label>
                   <input
                     type="date"
                     value={formState.medicalCheckExpiry || ''}
                     onChange={(e) => setFormState({ ...formState, medicalCheckExpiry: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--df-text-muted)', display: 'block', marginBottom: '0.25rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Immatriculation Affectée
                   </label>
                   <input
@@ -674,33 +692,18 @@ export default function DriversPage() {
                     placeholder="Ex: 00421-116-16"
                     value={formState.assignedVehiclePlate || ''}
                     onChange={(e) => setFormState({ ...formState, assignedVehiclePlate: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                      fontFamily: 'var(--df-font-mono)',
-                    }}
+                    className="w-full font-mono px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--df-text-muted)', display: 'block', marginBottom: '0.25rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Statut Opérationnel
                   </label>
                   <select
                     value={formState.status || 'AVAILABLE'}
                     onChange={(e) => setFormState({ ...formState, status: e.target.value as DriverRecord['status'] })}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="AVAILABLE">Disponible</option>
                     <option value="ON_DUTY">En Route / Mission</option>
@@ -710,15 +713,46 @@ export default function DriversPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem', marginTop: '1rem' }}>
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <Button variant="secondary" size="sm" type="button" onClick={() => setIsModalOpen(false)}>
                   Annuler
                 </Button>
                 <Button variant="primary" size="sm" type="submit">
-                  {editingDriver ? 'Enregistrer Modifications' : 'Créer Chauffeur'}
+                  {editingDriver ? 'Enregistrer Modifications' : 'Créer Conducteur'}
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL SUPPRESSION */}
+      {deleteConfirm && (
+        <div
+          role="dialog"
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-rose-500/40 bg-white dark:bg-[#111827] p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-3 text-rose-600 dark:text-rose-400">
+              <IconAlertTriangle size={22} />
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                Supprimer ce Conducteur ?
+              </h2>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-5">
+              Confirmez-vous le retrait de <strong className="text-slate-900 dark:text-slate-100">« {deleteConfirm.name} »</strong> de l’effectif de la flotte ?
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(null)}>
+                Annuler
+              </Button>
+              <button
+                onClick={() => handleDeleteDriver(deleteConfirm.id, deleteConfirm.name)}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition-colors"
+              >
+                Supprimer Définitivement
+              </button>
+            </div>
           </div>
         </div>
       )}

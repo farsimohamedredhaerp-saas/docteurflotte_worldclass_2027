@@ -6,7 +6,11 @@ import { Navbar } from '../../components/navigation/Navbar';
 import { AuthClient } from '../../lib/api-auth';
 import { FuelScannerClient } from '../../lib/api-fuel-scanner';
 import { AssetClient } from '../../lib/api-assets';
-import { FuelReceiptScanResult, Asset, AssetCategory, AssetStatus, DataOrigin, MeterType, StandardFuelType } from '@docteurflotte/contracts';
+import {
+  FuelReceiptScanResult,
+  Asset,
+  StandardFuelType,
+} from '@docteurflotte/contracts';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { useSystemConfig } from '../../context/SystemConfigContext';
 import {
@@ -30,6 +34,8 @@ import {
   IconFuel,
   IconShieldCheck,
   IconDownload,
+  IconFilter,
+  IconArrowUpRight,
 } from '../../components/navigation/TechIcons';
 import { getSimulationAssets, getSimulationReceipts } from '@/lib/simulation-sandbox';
 
@@ -74,7 +80,7 @@ export default function FuelScannerPage() {
     stationName: 'Station Naftal Rouiba (ZI)',
     fuelType: 'Gasoil',
     liters: 60,
-    totalAmountDzd: 1740.6,
+    totalAmountDzd: 1860,
   });
 
   // Modale d'Édition de Reçu
@@ -123,7 +129,7 @@ export default function FuelScannerPage() {
 
   const showNotification = (msg: string) => {
     setNotification(msg);
-    setTimeout(() => setNotification(null), 4500);
+    setTimeout(() => setNotification(null), 5000);
   };
 
   const handleOpenFuelProof = (item: FuelReceiptScanResult) => {
@@ -159,7 +165,7 @@ export default function FuelScannerPage() {
         },
         {
           stepNumber: 2,
-          description: 'Calcul de l\'Écart Volumique Absolu',
+          description: "Calcul de l'Écart Volumique Absolu",
           formula: '|V_ticket - ΔV_réel|',
           calculation: `|${ticketV} L - ${deltaV.toFixed(1)} L|`,
           intermediateResult: `${variance.toFixed(1)} L`,
@@ -176,7 +182,7 @@ export default function FuelScannerPage() {
         label: 'Statut du Plein Carburant',
         value: isOk ? 'CONFORME (VERIFIED)' : 'FRAUDE SUSPECTÉE (ANOMALY)',
         conclusion: isOk
-          ? 'Le plein est certifié conforme. Le volume acheté a bien été injecté dans le réservoir de l\'actif.'
+          ? "Le plein est certifié conforme. Le volume acheté a bien été injecté dans le réservoir de l'actif."
           : 'Alerte fraude : discordance significative entre le volume facturé et la hausse réelle de la jauge.',
       },
     });
@@ -185,11 +191,11 @@ export default function FuelScannerPage() {
 
   useEffect(() => {
     let isCancelled = false;
-    const s = AuthClient.getSession();
-    setSessionToken(s.token);
+    const session = AuthClient.getSession();
+    setSessionToken(session.token);
 
-    async function initData() {
-      if (isDemoMode) {
+    if (isDemoMode) {
+      (async () => {
         try {
           const [sandboxAssets, sandboxReceipts] = await Promise.all([
             getSimulationAssets(),
@@ -197,11 +203,14 @@ export default function FuelScannerPage() {
           ]);
           if (!isCancelled) {
             setAssets(sandboxAssets);
+            setRecentReceipts(sandboxReceipts);
+            if (sandboxReceipts.length > 0) {
+              setCurrentResult(sandboxReceipts[0]);
+            }
             if (sandboxAssets.length > 0) {
               setSelectedAssetId(sandboxAssets[0].id);
               setManualForm((prev) => ({ ...prev, assetId: sandboxAssets[0].id }));
             }
-            setRecentReceipts(sandboxReceipts);
           }
         } catch {
           if (!isCancelled) {
@@ -209,63 +218,48 @@ export default function FuelScannerPage() {
             setRecentReceipts([]);
           }
         }
-      } else if (s.token) {
-        await loadData(s.token);
-      } else {
-        setAssets([]);
-        setRecentReceipts([]);
-        setSelectedAssetId('');
-      }
+      })();
+    } else if (session.token) {
+      AssetClient.listAssets(session.token)
+        .then((data) => {
+          if (!isCancelled) {
+            setAssets(data);
+            if (data.length > 0) {
+              setSelectedAssetId(data[0].id);
+              setManualForm((prev) => ({ ...prev, assetId: data[0].id }));
+            }
+          }
+        })
+        .catch(() => {});
     }
 
-    initData();
     return () => {
       isCancelled = true;
     };
   }, [isDemoMode]);
 
-  const loadData = async (token: string) => {
-    try {
-      const [assetsList, receiptsList] = await Promise.all([
-        AssetClient.listAssets(token).catch(() => []),
-        FuelScannerClient.listRecentReceipts(token).catch(() => [] as FuelReceiptScanResult[]),
-      ]);
-      setAssets(assetsList);
-      if (assetsList.length > 0) {
-        setSelectedAssetId(assetsList[0].id);
-        setManualForm((prev) => ({ ...prev, assetId: assetsList[0].id }));
-      } else {
-        setSelectedAssetId('');
-      }
-      setRecentReceipts(receiptsList);
-    } catch {
-      setAssets([]);
-      setRecentReceipts([]);
-    }
-  };
-
-  const handleApplyPreset = (type: 'valid' | 'sahara' | 'fraud') => {
-    const pGasoil = tariffs.fuelPrices.gasoil || 31.00;
-    if (type === 'valid') {
+  const handleApplyPreset = (preset: 'valid' | 'sahara' | 'fraud') => {
+    const unitPriceGasoil = tariffs.fuelPrices.gasoil;
+    if (preset === 'valid') {
+      setLitersOverride(45);
       setStationOverride('Station Naftal Chéraga (RN41)');
       setFuelTypeOverride('Gasoil');
-      setLitersOverride(45.0);
       setRawText(
-        `SOCIETE NATIONALE DE COMMERCIALISATION ET DE DISTRIBUTION DE PRODUITS PETROLIERS\nNAFTAL SPA - STATION CHERAGA RN41\nDATE: 26/10/2026 14:22\nPRODUIT: GASOIL\nQUANTITE: 45.00 L\nPRIX UNITAIRE: ${pGasoil.toFixed(2)} DZD\nTOTAL A PAYER: ${(45.0 * pGasoil).toFixed(2)} DZD\nPAIEMENT CARTE NAFTAL`
+        `NAFTAL SPA - STATION CHERAGA RN41\nDATE: ${new Date().toLocaleDateString('fr-FR')} 10:42\nCARBURANT: GASOIL\nVOLUME: 45.00 L\nPRIX UNITAIRE: ${unitPriceGasoil.toFixed(2)} DA\nTOTAL A PAYER: ${(45 * unitPriceGasoil).toFixed(2)} DA\nCARTE NAFTAL: **** 8841`
       );
-    } else if (type === 'sahara') {
-      setStationOverride('Station Naftal Hassi Messaoud Piste 18');
+    } else if (preset === 'sahara') {
+      setLitersOverride(380);
+      setStationOverride('Station Naftal Hassi Messaoud (Base)');
       setFuelTypeOverride('Gasoil');
-      setLitersOverride(380.0);
       setRawText(
-        `NAFTAL DISTRICT HASSI MESSAOUD\nSTATION SERVICE PISTE 18\nDATE: 26/10/2026 08:45\nPRODUIT: GASOIL LOURD\nQUANTITE: 380.00 L\nPRIX UNITAIRE: ${pGasoil.toFixed(2)} DZD\nTOTAL A PAYER: ${(380.0 * pGasoil).toFixed(2)} DZD\nVEHICULE: PL-030-HMD`
+        `NAFTAL DISTRIB SUD - HASSI MESSAOUD\nDATE: ${new Date().toLocaleDateString('fr-FR')} 06:15\nPOMPE PL N°4 - GASOIL\nVOLUME: 380.00 L\nPRIX: ${unitPriceGasoil.toFixed(2)} DA/L\nMONTANT TOTAL: ${(380 * unitPriceGasoil).toFixed(2)} DA\nVEHICULE: SHACMAN X3000`
       );
     } else {
+      setLitersOverride(90);
       setStationOverride('Station Naftal Blida Centre');
       setFuelTypeOverride('Gasoil');
-      setLitersOverride(65.0);
       setRawText(
-        `STATION SERVICE NAFTAL BLIDA\nDATE: 26/10/2026 21:10\nPRODUIT: GASOIL\nQUANTITE: 65.00 L\nTOTAL: ${(65.0 * pGasoil).toFixed(2)} DZD\nPAIEMENT ESPECES`
+        `TICKET NAFTAL BLIDA CENTRE\nDATE: ${new Date().toLocaleDateString('fr-FR')} 22:30\nGASOIL SPECIAL\nLITRES: 90.00 L\nTOTAL DZD: ${(90 * unitPriceGasoil).toFixed(2)} DA`
       );
     }
   };
@@ -359,11 +353,11 @@ export default function FuelScannerPage() {
       prev.map((r) =>
         r.receiptId === editingReceipt.receiptId
           ? {
-            ...r,
-            stationName: editForm.stationName,
-            liters: Number(editForm.liters),
-            totalAmountDzd: Number(editForm.totalAmountDzd),
-          }
+              ...r,
+              stationName: editForm.stationName,
+              liters: Number(editForm.liters),
+              totalAmountDzd: Number(editForm.totalAmountDzd),
+            }
           : r
       )
     );
@@ -398,188 +392,206 @@ export default function FuelScannerPage() {
   const anomalyCount = recentReceipts.filter((r) => r.reconciliation.reconciliationStatus !== 'VERIFIED').length;
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)', color: 'var(--df-text-main)' }}>
-      {/* 1. BARRE HORIZONTALE UNIVERSELLE */}
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 transition-colors duration-150">
+      {/* 1. BARRE DE NAVIGATION SUPÉRIEURE UNIFIÉE */}
       <Navbar />
 
-      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 1.25rem 3rem 1.25rem' }}>
+      <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-16">
         {/* BANNIÈRE DE NOTIFICATION */}
         {notification && (
           <div
             role="status"
-            style={{
-              background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-accent-blue)',
-              color: 'var(--df-text-main)',
-              padding: '0.85rem 1.25rem',
-              borderRadius: 'var(--df-radius-md)',
-              marginBottom: '1.25rem',
-              boxShadow: 'var(--df-shadow-md)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
+            className="mb-4 flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-blue-500/30 bg-blue-50/90 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 shadow-sm transition-all"
           >
-            <span style={{ color: 'var(--df-status-ok)' }}>
-              <IconCheck size={16} strokeWidth={2} />
-            </span>
-            <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{notification}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-emerald-600 dark:text-emerald-400">
+                <IconCheck size={16} strokeWidth={2.5} />
+              </span>
+              <span className="text-xs font-semibold">{notification}</span>
+            </div>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
+              aria-label="Fermer la notification"
+            >
+              <IconX size={14} />
+            </button>
           </div>
         )}
 
-        {/* 2. LAYOUT DUAL-BAR : SIDEBAR VERTICALE + CONTENU PRINCIPAL */}
-        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
-          {/* SIDEBAR CONTEXTUELLE VERTICALE */}
-          <aside
-            style={{
-              width: '260px',
-              flexShrink: 0,
-              background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-border-subtle)',
-              borderRadius: 'var(--df-radius-lg)',
-              padding: '1rem',
-              boxShadow: 'var(--df-shadow-sm)',
-              position: 'sticky',
-              top: '90px',
-            }}
-          >
-            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
-              Actions Pleins &amp; OCR
-            </div>
+        {/* 2. COMMAND CENTER HEADER BENTO */}
+        <section className="mb-6 rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 sm:p-6 shadow-2xs">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <Badge variant="ok" pulse>
+                  SOUVERAIN DZ • Contrôle CUSUM Anti-Fraude
+                </Badge>
+                <span className="text-slate-300 dark:text-slate-700" aria-hidden="true">•</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  OCR Reçus Naftal • Jauge Télématique Traccar • Export ERP 1-Clic
+                </span>
+              </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setIsManualModalOpen(true)}
-                style={{ width: '100%', justifyContent: 'center', gap: '0.4rem' }}
-              >
-                <IconPlus size={14} />
-                <span>+ Saisir un Plein</span>
-              </Button>
-              <Link href="/admin/fiscal" style={{ textDecoration: 'none' }}>
-                <Button variant="outline" size="sm" style={{ width: '100%', justifyContent: 'center' }}>
-                  Barèmes Fiscaux DZ
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 mb-2">
+                Scanner Intelligent Naftal &amp; Réconciliation Carburant
+              </h1>
+
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                Extraction optique des tickets de carburant et vérification croisée instantanée avec la jauge Traccar. Élimine les faux reçus, la surfacturation et certifie la présence réelle à la station au tarif officiel ({tariffs.fuelPrices.gasoil.toFixed(2)} DA/L).
+              </p>
+
+              <div className="flex gap-2 flex-wrap items-center">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setIsManualModalOpen(true)}
+                  className="inline-flex items-center gap-1.5"
+                >
+                  <IconPlus size={14} />
+                  <span>Saisir un Plein</span>
                 </Button>
-              </Link>
+                <Link
+                  href="/admin/fiscal"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors"
+                >
+                  <IconFuel size={13} className="text-amber-500" />
+                  <span>Barèmes Fiscaux DZ</span>
+                </Link>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsLegalReportOpen(true)}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold"
+                >
+                  <IconShieldCheck size={14} className="text-emerald-500" />
+                  <span>Procès-Verbal Opposable</span>
+                </Button>
+              </div>
             </div>
 
-            <div style={{ height: '1px', background: 'var(--df-border-subtle)', margin: '0.5rem 0 1rem 0' }} />
+            {/* WIDGET HUD BARÈMES NAFTAL */}
+            <div className="w-full lg:w-auto min-w-[260px] p-4 rounded-xl bg-slate-50 dark:bg-[#161F30] border border-slate-200/90 dark:border-[#1F2937] flex flex-col gap-2.5">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                <span>Barème Carburant Naftal</span>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-400">Gasoil Officiel</span>
+                <strong className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                  {tariffs.fuelPrices.gasoil.toFixed(2)} DA / L
+                </strong>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-400">Sans Plomb</span>
+                <strong className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                  {tariffs.fuelPrices.sansPlomb.toFixed(2)} DA / L
+                </strong>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-400">Sirghaz (GPL)</span>
+                <strong className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  {tariffs.fuelPrices.gpl.toFixed(2)} DA / L
+                </strong>
+              </div>
+            </div>
+          </div>
+        </section>
 
-            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
-              Préréglages Tickets Naftal
+        {/* 3. LAYOUT DUAL : BARRE LATÉRALE + CONTENU SCANNER & TABLEAU */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+          {/* SIDEBAR CONTEXTUELLE DE PRÉRÉGLAGES & FILTRES */}
+          <aside className="lg:col-span-1 rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs sticky top-24">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Tickets Naftal Types
+              </span>
+              <IconFuel size={14} className="text-slate-400" />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' }}>
+            <div className="space-y-1.5 mb-5">
               <button
                 type="button"
                 onClick={() => handleApplyPreset('valid')}
-                style={{
-                  padding: '0.45rem 0.65rem',
-                  borderRadius: 'var(--df-radius-sm)',
-                  border: '1px solid var(--df-border-subtle)',
-                  background: 'var(--df-bg-surface-2)',
-                  color: 'var(--df-text-main)',
-                  fontSize: '0.76rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition-all"
               >
-                <IconCheck size={12} style={{ color: 'var(--df-status-ok)' }} />
-                <span>Chéraga RN41 (45L Conforme)</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                    Chéraga RN41
+                  </div>
+                  <div className="text-[10.5px] text-slate-500 dark:text-slate-400">
+                    45 L • Conforme jauge
+                  </div>
+                </div>
               </button>
+
               <button
                 type="button"
                 onClick={() => handleApplyPreset('sahara')}
-                style={{
-                  padding: '0.45rem 0.65rem',
-                  borderRadius: 'var(--df-radius-sm)',
-                  border: '1px solid var(--df-border-subtle)',
-                  background: 'var(--df-bg-surface-2)',
-                  color: 'var(--df-text-main)',
-                  fontSize: '0.76rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition-all"
               >
-                <IconTruck size={12} style={{ color: 'var(--df-accent-blue)' }} />
-                <span>Hassi Messaoud (380L Lourd)</span>
+                <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                    Hassi Messaoud
+                  </div>
+                  <div className="text-[10.5px] text-slate-500 dark:text-slate-400">
+                    380 L • Plein Shacman
+                  </div>
+                </div>
               </button>
+
               <button
                 type="button"
                 onClick={() => handleApplyPreset('fraud')}
-                style={{
-                  padding: '0.45rem 0.65rem',
-                  borderRadius: 'var(--df-radius-sm)',
-                  border: '1px solid var(--df-border-subtle)',
-                  background: 'var(--df-bg-surface-2)',
-                  color: 'var(--df-status-danger)',
-                  fontSize: '0.76rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl border border-rose-300/60 dark:border-rose-900/40 bg-rose-50/40 dark:bg-rose-950/20 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-left transition-all"
               >
-                <IconAlertTriangle size={12} />
-                <span>Blida Centre (Suspect Fraude)</span>
+                <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-rose-700 dark:text-rose-300 truncate">
+                    Blida Centre
+                  </div>
+                  <div className="text-[10.5px] text-rose-500 dark:text-rose-400">
+                    90 L • Suspect CUSUM
+                  </div>
+                </div>
               </button>
             </div>
 
-            <div style={{ height: '1px', background: 'var(--df-border-subtle)', margin: '0.5rem 0 1rem 0' }} />
+            <div className="h-px bg-slate-200/80 dark:bg-slate-800 mb-5" />
 
-            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
+            <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Contrôle CUSUM Anti-Fraude
             </div>
 
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <nav className="flex flex-col gap-1">
               {[
-                { id: 'ALL', label: 'Tous les Pleins', count: recentReceipts.length, dot: 'var(--df-accent-blue)' },
-                { id: 'VERIFIED', label: 'Certifiés Conformes', count: verifiedCount, dot: 'var(--df-status-ok)' },
-                { id: 'ANOMALY', label: 'Anomalies CUSUM', count: anomalyCount, dot: 'var(--df-status-danger)' },
+                { id: 'ALL', label: 'Tous les Pleins', count: recentReceipts.length },
+                { id: 'VERIFIED', label: 'Certifiés Conformes', count: verifiedCount },
+                { id: 'ANOMALY', label: 'Anomalies CUSUM', count: anomalyCount },
               ].map((item) => (
                 <button
                   key={item.id}
                   onClick={() => setFilterStatus(item.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.5rem 0.65rem',
-                    borderRadius: 'var(--df-radius-md)',
-                    border: 'none',
-                    background: filterStatus === item.id ? 'var(--df-bg-surface-2)' : 'transparent',
-                    color: filterStatus === item.id ? 'var(--df-text-main)' : 'var(--df-text-secondary)',
-                    fontWeight: filterStatus === item.id ? 700 : 500,
-                    fontSize: '0.78rem',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all var(--df-transition-fast)',
-                  }}
+                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                    filterStatus === item.id
+                      ? item.id === 'ANOMALY'
+                        ? 'bg-rose-600 text-white shadow-xs'
+                        : 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                  }`}
                 >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.dot }} />
-                    <span>{item.label}</span>
-                  </span>
+                  <span>{item.label}</span>
                   <span
-                    style={{
-                      background: 'var(--df-bg-surface-2)',
-                      color: 'var(--df-text-muted)',
-                      padding: '0.1rem 0.45rem',
-                      borderRadius: 'var(--df-radius-full)',
-                      fontSize: '0.70rem',
-                      fontWeight: 700,
-                    }}
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                      filterStatus === item.id
+                        ? 'bg-black/20 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                    }`}
                   >
                     {item.count}
                   </span>
@@ -588,67 +600,24 @@ export default function FuelScannerPage() {
             </nav>
           </aside>
 
-          {/* CONTENU PRINCIPAL */}
-          <main style={{ flex: 1, minWidth: 0 }}>
-            {/* EN-TÊTE PRINCIPAL */}
-            <div
-              style={{
-                background: 'var(--df-bg-surface-1)',
-                border: '1px solid var(--df-border-subtle)',
-                borderRadius: 'var(--df-radius-lg)',
-                padding: '1.5rem',
-                marginBottom: '1.5rem',
-                boxShadow: 'var(--df-shadow-sm)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <IconFuel size={18} style={{ color: 'var(--df-accent-blue)' }} />
-                <Badge variant="ok">SOUVERAIN DZ</Badge>
-                <Badge variant="neutral">Contrôle CUSUM &amp; Jauge Traccar</Badge>
-              </div>
-
-              <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--df-text-main)', margin: '0 0 0.35rem 0', letterSpacing: '-0.02em' }}>
-                Scanner Intelligent de Reçus Naftal &amp; Réconciliation Télématique
-              </h1>
-              <p style={{ fontSize: '0.88rem', color: 'var(--df-text-secondary)', maxWidth: '840px', margin: 0, lineHeight: 1.55 }}>
-                Extraction optique des tickets de carburant et vérification croisée instantanée avec la jauge Traccar.
-                Élimine les faux reçus, la surfacturation et certifie la présence réelle à la station au tarif officiel ({tariffs.fuelPrices.gasoil.toFixed(2)} DA/L).
-              </p>
-            </div>
-
-            {/* DEUX COLONNES : FORMULAIRE OCR / RECONCILIATION ET RÉSULTAT */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
-              {/* COLONNE GAUCHE : FORMULAIRE SCANNER */}
-              <div
-                style={{
-                  background: 'var(--df-bg-surface-1)',
-                  border: '1px solid var(--df-border-subtle)',
-                  borderRadius: 'var(--df-radius-lg)',
-                  padding: '1.25rem',
-                  boxShadow: 'var(--df-shadow-sm)',
-                }}
-              >
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-text-main)', margin: '0 0 1rem 0' }}>
+          {/* CONTENU PRINCIPAL : FORMULAIRE OCR & CERTIFICAT COURANT */}
+          <div className="lg:col-span-3 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* COLONNE GAUCHE : FORMULAIRE OCR */}
+              <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs">
+                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-3">
                   Numérisation de Ticket Naftal
-                </h3>
+                </h2>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                <div className="space-y-3.5">
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
                       Actif Flotte Concerné :
                     </label>
                     <select
                       value={selectedAssetId}
                       onChange={(e) => setSelectedAssetId(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.5rem',
-                        borderRadius: 'var(--df-radius-sm)',
-                        background: 'var(--df-bg-surface-2)',
-                        border: '1px solid var(--df-border-subtle)',
-                        color: 'var(--df-text-main)',
-                        fontSize: '0.82rem',
-                      }}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {assets.map((a) => (
                         <option key={a.id} value={a.id}>
@@ -658,44 +627,27 @@ export default function FuelScannerPage() {
                     </select>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
-                        Volume Ticket (Litres) :
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                        Volume Ticket (L) :
                       </label>
                       <input
                         type="number"
                         step="0.1"
                         value={litersOverride}
                         onChange={(e) => setLitersOverride(Number(e.target.value))}
-                        className="df-mono"
-                        style={{
-                          width: '100%',
-                          padding: '0.5rem',
-                          borderRadius: 'var(--df-radius-sm)',
-                          background: 'var(--df-bg-surface-2)',
-                          border: '1px solid var(--df-border-subtle)',
-                          color: 'var(--df-text-main)',
-                          fontSize: '0.82rem',
-                        }}
+                        className="w-full font-mono px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
-                        Type de Carburant :
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                        Carburant :
                       </label>
                       <select
                         value={fuelTypeOverride}
                         onChange={(e) => setFuelTypeOverride(e.target.value as StandardFuelType)}
-                        style={{
-                          width: '100%',
-                          padding: '0.5rem',
-                          borderRadius: 'var(--df-radius-sm)',
-                          background: 'var(--df-bg-surface-2)',
-                          border: '1px solid var(--df-border-subtle)',
-                          color: 'var(--df-text-main)',
-                          fontSize: '0.82rem',
-                        }}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="Gasoil">Gasoil ({tariffs.fuelPrices.gasoil.toFixed(2)} DA/L)</option>
                         <option value="Super">Super ({tariffs.fuelPrices.super.toFixed(2)} DA/L)</option>
@@ -706,27 +658,19 @@ export default function FuelScannerPage() {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
                       Station Naftal Identifiée :
                     </label>
                     <input
                       type="text"
                       value={stationOverride}
                       onChange={(e) => setStationOverride(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.5rem',
-                        borderRadius: 'var(--df-radius-sm)',
-                        background: 'var(--df-bg-surface-2)',
-                        border: '1px solid var(--df-border-subtle)',
-                        color: 'var(--df-text-main)',
-                        fontSize: '0.82rem',
-                      }}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
                       Texte Brut Extrait du Reçu (OCR) :
                     </label>
                     <textarea
@@ -734,17 +678,7 @@ export default function FuelScannerPage() {
                       value={rawText}
                       onChange={(e) => setRawText(e.target.value)}
                       placeholder="Collez ici le texte du ticket ou choisissez un préréglage à gauche..."
-                      style={{
-                        width: '100%',
-                        padding: '0.5rem',
-                        borderRadius: 'var(--df-radius-sm)',
-                        background: 'var(--df-bg-surface-2)',
-                        border: '1px solid var(--df-border-subtle)',
-                        color: 'var(--df-text-main)',
-                        fontSize: '0.78rem',
-                        fontFamily: 'var(--df-font-mono)',
-                        resize: 'vertical',
-                      }}
+                      className="w-full font-mono text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
@@ -753,36 +687,31 @@ export default function FuelScannerPage() {
                     size="sm"
                     onClick={handleScan}
                     disabled={isScanning}
-                    style={{ width: '100%', justifyContent: 'center', marginTop: '0.25rem' }}
+                    className="w-full justify-center"
                   >
                     {isScanning ? 'Réconciliation en cours...' : 'Exécuter la Réconciliation Naftal'}
                   </Button>
                 </div>
               </div>
 
-              {/* COLONNE DROITE : CERTIFICAT DE RÉCONCILIATION COURANT */}
+              {/* COLONNE DROITE : CERTIFICAT COURANT */}
               <div
-                style={{
-                  background: 'var(--df-bg-surface-1)',
-                  border: `1px solid ${currentResult
+                className={`rounded-2xl border p-5 shadow-2xs transition-all ${
+                  currentResult
                     ? currentResult.reconciliation.reconciliationStatus === 'VERIFIED'
-                      ? 'var(--df-status-ok)'
-                      : 'var(--df-status-danger)'
-                    : 'var(--df-border-subtle)'
-                    }`,
-                  borderRadius: 'var(--df-radius-lg)',
-                  padding: '1.25rem',
-                  boxShadow: 'var(--df-shadow-sm)',
-                }}
+                      ? 'border-emerald-500/50 bg-emerald-50/30 dark:bg-emerald-950/20'
+                      : 'border-rose-500/50 bg-rose-50/30 dark:bg-rose-950/20'
+                    : 'border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827]'
+                }`}
               >
                 {currentResult ? (
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div className="flex items-start justify-between gap-3 mb-4">
                       <div>
-                        <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                           Certificat de Réconciliation Télématique
                         </span>
-                        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--df-text-main)', margin: '0.2rem 0 0 0' }}>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
                           {currentResult.stationName}
                         </h3>
                       </div>
@@ -791,61 +720,61 @@ export default function FuelScannerPage() {
                       </Badge>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem', marginBottom: '1rem' }}>
-                      <div style={{ background: 'var(--df-bg-surface-2)', padding: '0.65rem', borderRadius: 'var(--df-radius-md)' }}>
-                        <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)', display: 'block' }}>Volume Déclaré</span>
-                        <strong className="df-mono" style={{ fontSize: '1.05rem', color: 'var(--df-text-main)' }}>
+                    <div className="grid grid-cols-2 gap-2.5 mb-4">
+                      <div className="p-3 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60">
+                        <span className="text-[10px] font-medium text-slate-400 block">Volume Déclaré</span>
+                        <div className="font-mono text-sm font-bold text-slate-900 dark:text-slate-100">
                           {currentResult.liters} L
-                        </strong>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--df-text-secondary)' }}>
+                        </div>
+                        <div className="text-[10.5px] text-slate-500 font-mono">
                           {currentResult.totalAmountDzd.toLocaleString('fr-DZ')} DA
                         </div>
                       </div>
 
-                      <div style={{ background: 'var(--df-bg-surface-2)', padding: '0.65rem', borderRadius: 'var(--df-radius-md)' }}>
-                        <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)', display: 'block' }}>Hausse Jauge Réelle</span>
-                        <strong className="df-mono" style={{ fontSize: '1.05rem', color: 'var(--df-status-ok)' }}>
+                      <div className="p-3 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60">
+                        <span className="text-[10px] font-medium text-slate-400 block">Hausse Jauge Traccar</span>
+                        <div className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
                           +{currentResult.reconciliation.telematicsLevelDeltaLiters.toFixed(1)} L
-                        </strong>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--df-text-secondary)' }}>
+                        </div>
+                        <div className="text-[10.5px] text-slate-500 font-mono">
                           De {currentResult.reconciliation.tankLevelBeforeLiters}L à {currentResult.reconciliation.tankLevelAfterLiters}L
                         </div>
                       </div>
 
-                      <div style={{ background: 'var(--df-bg-surface-2)', padding: '0.65rem', borderRadius: 'var(--df-radius-md)' }}>
-                        <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)', display: 'block' }}>Écart Volumique</span>
-                        <strong
-                          className="df-mono"
-                          style={{
-                            fontSize: '1.05rem',
-                            color: currentResult.reconciliation.varianceLiters <= 5 ? 'var(--df-status-ok)' : 'var(--df-status-danger)',
-                          }}
+                      <div className="p-3 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60">
+                        <span className="text-[10px] font-medium text-slate-400 block">Écart Volumique</span>
+                        <div
+                          className={`font-mono text-sm font-bold ${
+                            currentResult.reconciliation.varianceLiters <= 5
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-rose-600 dark:text-rose-400'
+                          }`}
                         >
                           {currentResult.reconciliation.varianceLiters.toFixed(1)} L
-                        </strong>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--df-text-secondary)' }}>
+                        </div>
+                        <div className="text-[10.5px] text-slate-500">
                           {currentResult.reconciliation.varianceLiters <= 5 ? 'Tolérance conforme' : 'Divergence suspecte'}
                         </div>
                       </div>
 
-                      <div style={{ background: 'var(--df-bg-surface-2)', padding: '0.65rem', borderRadius: 'var(--df-radius-md)' }}>
-                        <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)', display: 'block' }}>Distance GPS Station</span>
-                        <strong className="df-mono" style={{ fontSize: '1.05rem', color: 'var(--df-accent-blue)' }}>
+                      <div className="p-3 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60">
+                        <span className="text-[10px] font-medium text-slate-400 block">Distance GPS Station</span>
+                        <div className="font-mono text-sm font-bold text-blue-600 dark:text-blue-400">
                           {currentResult.reconciliation.distanceToStationMeters} m
-                        </strong>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--df-text-secondary)' }}>
+                        </div>
+                        <div className="text-[10.5px] text-slate-500">
                           {currentResult.reconciliation.isLocationVerified ? 'Présence validée' : 'Véhicule absent'}
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ fontSize: '0.76rem', color: 'var(--df-text-secondary)', background: 'var(--df-bg-surface-2)', padding: '0.65rem', borderRadius: 'var(--df-radius-md)', marginBottom: '0.85rem' }}>
-                      <strong>Audit CUSUM :</strong> {currentResult.reconciliation.explanation}
+                    <div className="p-3 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60 text-xs text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
+                      <strong className="text-slate-900 dark:text-slate-100">Audit CUSUM :</strong> {currentResult.reconciliation.explanation}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <div className="flex gap-2 flex-wrap items-center">
                       <CalculationProofButton
-                        label="Voir Preuve de Calcul CUSUM"
+                        label="Preuve CUSUM"
                         size="sm"
                         variant={currentResult.reconciliation.reconciliationStatus === 'VERIFIED' ? 'emerald' : 'amber'}
                         onClick={() => handleOpenFuelProof(currentResult)}
@@ -855,35 +784,30 @@ export default function FuelScannerPage() {
                         size="sm"
                         onClick={() => setIsLegalReportOpen(true)}
                         leftIcon={<IconShieldCheck size={14} />}
+                        className="text-xs"
                       >
-                        Procès-Verbal Opposable
+                        PV Opposable
                       </Button>
                       <Button
                         variant="primary"
                         size="sm"
                         onClick={() => setIsTechnicalDossierOpen(true)}
                         leftIcon={<IconDownload size={14} />}
-                        style={{
-                          backgroundColor: '#4F46E5',
-                          borderColor: '#4338CA',
-                          color: '#FFFFFF',
-                          fontWeight: 600,
-                          fontSize: '0.75rem',
-                        }}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold"
                       >
-                        Dossier Technique &amp; Export ERP
+                        Dossier ERP
                       </Button>
                     </div>
                   </div>
                 ) : (
-                  <div style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--df-text-muted)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
-                      <IconFuel size={28} style={{ color: 'var(--df-text-muted)' }} />
+                  <div className="p-12 text-center text-slate-500">
+                    <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                      <IconFuel size={22} />
                     </div>
-                    <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--df-text-main)', margin: '0 0 0.25rem 0' }}>
-                      En attente d&apos;un reçu Naftal
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">
+                      En attente d’un reçu Naftal
                     </h4>
-                    <p style={{ fontSize: '0.78rem', margin: 0 }}>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
                       Sélectionnez un préréglage à gauche ou collez un texte de reçu pour visualiser la réconciliation instantanée avec la jauge Traccar.
                     </p>
                   </div>
@@ -891,194 +815,147 @@ export default function FuelScannerPage() {
               </div>
             </div>
 
-            {/* TABLEAU HISTORIQUE DES PLEINS CONTRÔLÉS */}
-            <div
-              style={{
-                background: 'var(--df-bg-surface-1)',
-                border: '1px solid var(--df-border-subtle)',
-                borderRadius: 'var(--df-radius-lg)',
-                padding: '1.25rem',
-                boxShadow: 'var(--df-shadow-sm)',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
-                  Historique des Derniers Pleins Contrôlés ({filteredReceipts.length})
-                </h3>
-                <Button variant="outline" size="sm" onClick={() => setIsManualModalOpen(true)} style={{ gap: '0.35rem' }}>
+            {/* TABLEAU HISTORIQUE DES DERNIERS PLEINS */}
+            <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                    Historique des Derniers Pleins Contrôlés ({filteredReceipts.length})
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Traçabilité cryptographique et certification CUSUM des ravitaillements Naftal
+                  </p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setIsManualModalOpen(true)} className="inline-flex items-center gap-1.5 text-xs font-semibold">
                   <IconPlus size={13} />
-                  <span>+ Nouveau Reçu</span>
+                  <span>Nouveau Reçu</span>
                 </Button>
               </div>
 
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr style={{ borderBottom: '1px solid var(--df-border-subtle)', color: 'var(--df-text-muted)', fontSize: '0.72rem', textTransform: 'uppercase' }}>
-                      <th style={{ padding: '0.65rem 0.85rem' }}>Véhicule</th>
-                      <th style={{ padding: '0.65rem 0.85rem' }}>Station Naftal</th>
-                      <th style={{ padding: '0.65rem 0.85rem' }}>Litres</th>
-                      <th style={{ padding: '0.65rem 0.85rem' }}>Montant DA</th>
-                      <th style={{ padding: '0.65rem 0.85rem' }}>Écart Jauge</th>
-                      <th style={{ padding: '0.65rem 0.85rem' }}>Statut</th>
-                      <th style={{ padding: '0.65rem 0.85rem', textAlign: 'right' }}>Actions</th>
+                    <tr className="border-b border-slate-200/80 dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                      <th className="py-2.5 px-3">Véhicule</th>
+                      <th className="py-2.5 px-3">Station Naftal</th>
+                      <th className="py-2.5 px-3">Litres</th>
+                      <th className="py-2.5 px-3">Montant DZD</th>
+                      <th className="py-2.5 px-3">Écart Jauge</th>
+                      <th className="py-2.5 px-3">Statut</th>
+                      <th className="py-2.5 px-3 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                     {filteredReceipts.length === 0 ? (
                       <tr>
-                        <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--df-text-muted)' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                            <IconFuel size={24} style={{ color: 'var(--df-text-muted)' }} />
-                            <span style={{ fontWeight: 600 }}>
-                              {isDemoMode
-                                ? 'Aucun reçu de simulation ne correspond à ce filtre.'
-                                : 'Aucun ticket Naftal enregistré dans votre parc.'}
-                            </span>
-                            <span style={{ fontSize: '0.78rem' }}>
-                              Scannez un ticket Naftal ou importez un relevé pour déclencher la réconciliation CUSUM.
-                            </span>
-                          </div>
+                        <td colSpan={7} className="text-center py-10 text-slate-500">
+                          <IconFuel size={24} className="mx-auto mb-2 text-slate-400" />
+                          <span className="font-semibold block">
+                            {isDemoMode
+                              ? 'Aucun reçu de simulation ne correspond à ce filtre.'
+                              : 'Aucun ticket Naftal enregistré dans votre parc.'}
+                          </span>
                         </td>
                       </tr>
                     ) : (
                       filteredReceipts.map((rcpt) => (
-                      <tr key={rcpt.receiptId} style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
-                        <td style={{ padding: '0.65rem 0.85rem', fontWeight: 700, color: 'var(--df-text-main)' }}>
-                          {rcpt.assetName}
-                        </td>
-                        <td style={{ padding: '0.65rem 0.85rem', color: 'var(--df-text-secondary)' }}>
-                          {rcpt.stationName}
-                        </td>
-                        <td className="df-mono" style={{ padding: '0.65rem 0.85rem', fontWeight: 700, color: 'var(--df-text-main)' }}>
-                          {rcpt.liters} L
-                        </td>
-                        <td className="df-mono" style={{ padding: '0.65rem 0.85rem', color: 'var(--df-accent-blue)', fontWeight: 600 }}>
-                          {rcpt.totalAmountDzd.toLocaleString('fr-DZ')} DA
-                        </td>
-                        <td
-                          className="df-mono"
-                          style={{
-                            padding: '0.65rem 0.85rem',
-                            color: rcpt.reconciliation.varianceLiters <= 5 ? 'var(--df-status-ok)' : 'var(--df-status-danger)',
-                            fontWeight: 700,
-                          }}
-                        >
-                          {rcpt.reconciliation.varianceLiters.toFixed(1)} L
-                        </td>
-                        <td style={{ padding: '0.65rem 0.85rem' }}>
-                          <Badge variant={rcpt.reconciliation.reconciliationStatus === 'VERIFIED' ? 'ok' : 'danger'}>
-                            {rcpt.reconciliation.reconciliationStatus === 'VERIFIED' ? 'VALIDÉ' : 'SUSPECT'}
-                          </Badge>
-                        </td>
-                        <td style={{ padding: '0.65rem 0.85rem', textAlign: 'right' }}>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                            <CalculationProofButton
-                              label="Preuve"
-                              size="xs"
-                              variant={rcpt.reconciliation.reconciliationStatus === 'VERIFIED' ? 'emerald' : 'amber'}
-                              onClick={() => handleOpenFuelProof(rcpt)}
-                            />
-                            <button
-                              onClick={() => handleOpenEdit(rcpt)}
-                              title="Modifier ce reçu"
-                              style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: 'var(--df-text-muted)',
-                                cursor: 'pointer',
-                                padding: '0.2rem',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                              }}
-                            >
-                              <IconEdit size={14} />
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirm({ id: rcpt.receiptId, label: `${rcpt.stationName} (${rcpt.liters} L)` })}
-                              title="Supprimer ce reçu"
-                              style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: 'var(--df-status-danger)',
-                                cursor: 'pointer',
-                                padding: '0.2rem',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                              }}
-                            >
-                              <IconTrash size={14} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )))}
+                        <tr key={rcpt.receiptId} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="py-3 px-3 font-bold text-slate-900 dark:text-slate-100">
+                            {rcpt.assetName}
+                          </td>
+                          <td className="py-3 px-3 text-slate-600 dark:text-slate-300">
+                            {rcpt.stationName}
+                          </td>
+                          <td className="py-3 px-3 font-mono font-bold text-slate-900 dark:text-slate-100">
+                            {rcpt.liters} L
+                          </td>
+                          <td className="py-3 px-3 font-mono font-semibold text-blue-600 dark:text-blue-400">
+                            {rcpt.totalAmountDzd.toLocaleString('fr-DZ')} DA
+                          </td>
+                          <td
+                            className={`py-3 px-3 font-mono font-bold ${
+                              rcpt.reconciliation.varianceLiters <= 5
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-rose-600 dark:text-rose-400'
+                            }`}
+                          >
+                            {rcpt.reconciliation.varianceLiters.toFixed(1)} L
+                          </td>
+                          <td className="py-3 px-3">
+                            <Badge variant={rcpt.reconciliation.reconciliationStatus === 'VERIFIED' ? 'ok' : 'danger'}>
+                              {rcpt.reconciliation.reconciliationStatus === 'VERIFIED' ? 'VALIDÉ' : 'SUSPECT'}
+                            </Badge>
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            <div className="inline-flex items-center gap-1.5">
+                              <CalculationProofButton
+                                label="Preuve"
+                                size="xs"
+                                variant={rcpt.reconciliation.reconciliationStatus === 'VERIFIED' ? 'emerald' : 'amber'}
+                                onClick={() => handleOpenFuelProof(rcpt)}
+                              />
+                              <button
+                                onClick={() => handleOpenEdit(rcpt)}
+                                title="Modifier ce reçu"
+                                className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                              >
+                                <IconEdit size={14} />
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirm({ id: rcpt.receiptId, label: `${rcpt.stationName} (${rcpt.liters} L)` })}
+                                title="Supprimer ce reçu"
+                                className="p-1 rounded text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                              >
+                                <IconTrash size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
-          </main>
+          </div>
         </div>
-      </div>
+      </main>
 
       {/* MODALE 1 : SAISIE MANUELLE DE PLEIN */}
       {isManualModalOpen && (
         <div
           role="dialog"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 1000,
-            background: 'rgba(0, 0, 0, 0.65)',
-            backdropFilter: 'blur(3px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
         >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '480px',
-              padding: '1.75rem',
-              background: 'var(--df-bg-surface-1)',
-              borderRadius: 'var(--df-radius-lg)',
-              border: '1px solid var(--df-border-subtle)',
-              boxShadow: 'var(--df-shadow-lg)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
-                Enregistrer un Plein Manuellement
-              </h3>
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#111827] p-6 shadow-2xl my-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                  Enregistrer un Plein Manuellement
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Saisie directe avec vérification automatique de la jauge
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsManualModalOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer' }}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
               >
                 <IconX size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateManualReceipt} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <form onSubmit={handleCreateManualReceipt} className="space-y-4">
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                   Véhicule *
                 </label>
                 <select
                   required
                   value={manualForm.assetId}
                   onChange={(e) => setManualForm({ ...manualForm, assetId: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: 'var(--df-radius-sm)',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.82rem',
-                  }}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {assets.map((a) => (
                     <option key={a.id} value={a.id}>
@@ -1089,7 +966,7 @@ export default function FuelScannerPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                   Type de Carburant *
                 </label>
                 <select
@@ -1103,15 +980,7 @@ export default function FuelScannerPage() {
                       totalAmountDzd: Math.round(Number(manualForm.liters) * unitP * 100) / 100,
                     });
                   }}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: 'var(--df-radius-sm)',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.82rem',
-                  }}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="Gasoil">Gasoil ({tariffs.fuelPrices.gasoil.toFixed(2)} DA)</option>
                   <option value="Sans Plomb">Sans Plomb ({tariffs.fuelPrices.sansPlomb.toFixed(2)} DA)</option>
@@ -1121,7 +990,7 @@ export default function FuelScannerPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                   Station Naftal *
                 </label>
                 <input
@@ -1129,21 +998,13 @@ export default function FuelScannerPage() {
                   required
                   value={manualForm.stationName}
                   onChange={(e) => setManualForm({ ...manualForm, stationName: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: 'var(--df-radius-sm)',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.82rem',
-                  }}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Volume (Litres) *
                   </label>
                   <input
@@ -1156,42 +1017,24 @@ export default function FuelScannerPage() {
                       const unitP = resolvePrice(manualForm.fuelType);
                       setManualForm({ ...manualForm, liters: l, totalAmountDzd: Math.round(l * unitP * 100) / 100 });
                     }}
-                    className="df-mono"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full font-mono px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Montant Calculé (DA)
                   </label>
                   <input
                     type="number"
                     value={manualForm.totalAmountDzd}
                     onChange={(e) => setManualForm({ ...manualForm, totalAmountDzd: Number(e.target.value) })}
-                    className="df-mono"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full font-mono px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.75rem' }}>
-                <Button variant="outline" size="sm" type="button" onClick={() => setIsManualModalOpen(false)}>
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <Button variant="secondary" size="sm" type="button" onClick={() => setIsManualModalOpen(false)}>
                   Annuler
                 </Button>
                 <Button variant="primary" size="sm" type="submit">
@@ -1207,45 +1050,30 @@ export default function FuelScannerPage() {
       {isEditModalOpen && editingReceipt && (
         <div
           role="dialog"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 1000,
-            background: 'rgba(0, 0, 0, 0.65)',
-            backdropFilter: 'blur(3px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
         >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '480px',
-              padding: '1.75rem',
-              background: 'var(--df-bg-surface-1)',
-              borderRadius: 'var(--df-radius-lg)',
-              border: '1px solid var(--df-border-subtle)',
-              boxShadow: 'var(--df-shadow-lg)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
-                Modifier Reçu Naftal
-              </h3>
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#111827] p-6 shadow-2xl my-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                  Modifier Reçu Naftal
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Réf : {editingReceipt.receiptId}
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer' }}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
               >
                 <IconX size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEdit} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <form onSubmit={handleSaveEdit} className="space-y-4">
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                   Station Naftal *
                 </label>
                 <input
@@ -1253,21 +1081,13 @@ export default function FuelScannerPage() {
                   required
                   value={editForm.stationName}
                   onChange={(e) => setEditForm({ ...editForm, stationName: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    borderRadius: 'var(--df-radius-sm)',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.82rem',
-                  }}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Volume (Litres) *
                   </label>
                   <input
@@ -1280,42 +1100,24 @@ export default function FuelScannerPage() {
                       const unitP = editingReceipt?.unitPriceDzd ?? resolvePrice(editingReceipt?.fuelType || 'Gasoil');
                       setEditForm({ ...editForm, liters: l, totalAmountDzd: Math.round(l * unitP * 100) / 100 });
                     }}
-                    className="df-mono"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full font-mono px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--df-text-muted)', marginBottom: '0.3rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Montant (DA)
                   </label>
                   <input
                     type="number"
                     value={editForm.totalAmountDzd}
                     onChange={(e) => setEditForm({ ...editForm, totalAmountDzd: Number(e.target.value) })}
-                    className="df-mono"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: 'var(--df-radius-sm)',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="w-full font-mono px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.75rem' }}>
-                <Button variant="outline" size="sm" type="button" onClick={() => setIsEditModalOpen(false)}>
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <Button variant="secondary" size="sm" type="button" onClick={() => setIsEditModalOpen(false)}>
                   Annuler
                 </Button>
                 <Button variant="primary" size="sm" type="submit">
@@ -1331,54 +1133,25 @@ export default function FuelScannerPage() {
       {deleteConfirm && (
         <div
           role="dialog"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 1000,
-            background: 'rgba(0, 0, 0, 0.65)',
-            backdropFilter: 'blur(3px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4"
         >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '440px',
-              padding: '1.5rem',
-              background: 'var(--df-bg-surface-1)',
-              borderRadius: 'var(--df-radius-lg)',
-              border: '1px solid var(--df-status-danger)',
-              boxShadow: 'var(--df-shadow-lg)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem', color: 'var(--df-status-danger)' }}>
+          <div className="w-full max-w-md rounded-2xl border border-rose-500/40 bg-white dark:bg-[#111827] p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-3 text-rose-600 dark:text-rose-400">
               <IconAlertTriangle size={22} />
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0 }}>
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
                 Supprimer ce Reçu ?
-              </h3>
+              </h2>
             </div>
-            <p style={{ fontSize: '0.85rem', color: 'var(--df-text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-              Confirmez-vous la suppression du reçu <strong>« {deleteConfirm.label} »</strong> ?
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-5">
+              Confirmez-vous la suppression définitive du reçu <strong className="text-slate-900 dark:text-slate-100">« {deleteConfirm.label} »</strong> ? Cette opération est irréversible.
             </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem' }}>
-              <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(null)}>
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(null)}>
                 Annuler
               </Button>
               <button
                 onClick={handleDeleteConfirm}
-                style={{
-                  padding: '0.45rem 1rem',
-                  borderRadius: 'var(--df-radius-sm)',
-                  background: 'var(--df-status-danger)',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  fontWeight: 700,
-                  fontSize: '0.82rem',
-                  cursor: 'pointer',
-                }}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition-colors"
               >
                 Supprimer Définitivement
               </button>
@@ -1396,23 +1169,8 @@ export default function FuelScannerPage() {
 
       {/* PROCÈS-VERBAL CUSUM OPPOSABLE (PILIER 1) */}
       {isLegalReportOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.75)',
-            backdropFilter: 'blur(5px)',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '24px',
-          }}
-        >
-          <div style={{ maxWidth: '1050px', width: '100%', maxHeight: '92vh', overflowY: 'auto' }}>
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="max-w-5xl w-full max-h-[92vh] overflow-y-auto">
             <CusumLegalReportViewer
               onClose={() => setIsLegalReportOpen(false)}
               token={sessionToken || undefined}

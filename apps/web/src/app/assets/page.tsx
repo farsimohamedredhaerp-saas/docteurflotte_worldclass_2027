@@ -12,7 +12,6 @@ import {
   Asset,
   AssetCategory,
   AssetStatus,
-  DataOrigin,
   MeterType,
 } from '@docteurflotte/contracts';
 import { useDemoMode } from '../../context/DemoModeContext';
@@ -30,6 +29,8 @@ import {
   IconWrench,
   IconEdit,
   IconTrash,
+  IconFilter,
+  IconCpu,
 } from '../../components/navigation/TechIcons';
 import { getSimulationAssets } from '@/lib/simulation-sandbox';
 
@@ -58,20 +59,25 @@ export default function AssetsPage() {
     maintenanceIntervalValue: 10000,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // OEM Scraper state dans la modal d'ajout
   const [oemSearchQuery, setOemSearchQuery] = useState('');
-  const [oemDetected, setOemDetected] = useState<NormalizedOEMTemplate | null>(null);
   const [isResolvingOem, setIsResolvingOem] = useState(false);
 
-  // Modale de modification d'actif
+  // Modale de relevé de compteur
+  const [activeAssetForMeter, setActiveAssetForMeter] = useState<Asset | null>(null);
+  const [newMeterValue, setNewMeterValue] = useState<number>(0);
+  const [isRecordingMeter, setIsRecordingMeter] = useState(false);
+
+  // Modale d'édition d'actif
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
   const [editForm, setEditForm] = useState({
     name: '',
     code: '',
-    category: AssetCategory.HEAVY_TRUCK,
     brand: '',
     model: '',
-    primaryMeterType: MeterType.ODOMETER_KM,
+    category: AssetCategory.HEAVY_TRUCK,
     maintenanceIntervalValue: 10000,
   });
   const [isUpdating, setIsUpdating] = useState(false);
@@ -79,15 +85,57 @@ export default function AssetsPage() {
   // Modale de suppression d'actif
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; label: string } | null>(null);
 
-  // Modale de saisie de relevé
-  const [activeAssetForMeter, setActiveAssetForMeter] = useState<Asset | null>(null);
-  const [newMeterValue, setNewMeterValue] = useState<number>(0);
-  const [isRecordingMeter, setIsRecordingMeter] = useState(false);
-
   const showNotification = (type: 'success' | 'warning' | 'error', message: string) => {
     setFeedback({ type, message });
     setTimeout(() => setFeedback(null), 5000);
   };
+
+  const loadAssets = async (authToken: string) => {
+    setIsLoading(true);
+    try {
+      const data = await AssetClient.listAssets(authToken);
+      setAssets(data);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur de chargement des actifs.';
+      showNotification('error', msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let isCancelled = false;
+    const session = AuthClient.getSession();
+    setToken(session.token);
+
+    if (isDemoMode) {
+      (async () => {
+        try {
+          const sandboxAssets = await getSimulationAssets();
+          if (!isCancelled) {
+            setAssets(sandboxAssets);
+          }
+        } catch {
+          if (!isCancelled) {
+            setAssets([]);
+          }
+        } finally {
+          if (!isCancelled) {
+            setIsLoading(false);
+          }
+        }
+      })();
+    } else if (session.token) {
+      loadAssets(session.token);
+    } else {
+      setAssets([]);
+      setIsLoading(false);
+    }
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isDemoMode]);
 
   const handleResolveOem = async (queryText?: string) => {
     const text = (queryText || oemSearchQuery).trim();
@@ -105,7 +153,6 @@ export default function AssetsPage() {
       }
 
       const oemData = await OEMScraperClient.resolveAndScrape(reqParam);
-      setOemDetected(oemData);
 
       let matchedCategory = AssetCategory.HEAVY_TRUCK;
       let matchedMeter = MeterType.ODOMETER_KM;
@@ -124,95 +171,30 @@ export default function AssetsPage() {
 
       setNewAsset((prev) => ({
         ...prev,
-        name: `${oemData.make} ${oemData.model} (${oemData.engine_code})`,
+        name: `${oemData.make} ${oemData.model} (${oemData.engine_code || 'OEM'})`.trim(),
         brand: oemData.make,
         model: oemData.model,
         category: matchedCategory,
         primaryMeterType: matchedMeter,
         maintenanceIntervalValue: intervalVal,
       }));
-
-      showNotification(
-        'success',
-        `Gabarit constructeur ${oemData.make} ${oemData.model} appliqué : Intervalle ${intervalVal} ${matchedMeter === MeterType.ENGINE_HOURS ? 'heures' : 'km'}, carter ${oemData.oil_capacity_liters}L (${oemData.oil_norm_spec}).`
-      );
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Échec de la résolution OEM.';
-      showNotification('warning', `Base RMI OEM locale : ${msg}`);
+      showNotification('success', `Données constructeur OEM trouvées pour « ${oemData.make} ${oemData.model} »`);
+    } catch {
+      showNotification('warning', "Aucune fiche constructeur correspondante n'a été trouvée. Saisie manuelle.");
     } finally {
       setIsResolvingOem(false);
     }
   };
 
-  const loadAssets = async (jwtToken: string) => {
-    setIsLoading(true);
-    try {
-      const data = await AssetClient.listAssets(jwtToken);
-      setAssets(data);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erreur de chargement des actifs.';
-      showNotification('error', msg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let isCancelled = false;
-    const init = async () => {
-      const currentToken = AuthClient.getToken();
-      setToken(currentToken);
-
-      if (isDemoMode) {
-        try {
-          const sandboxAssets = await getSimulationAssets();
-          if (!isCancelled) {
-            setAssets(sandboxAssets);
-          }
-        } catch {
-          if (!isCancelled) {
-            setAssets([]);
-          }
-        } finally {
-          if (!isCancelled) {
-            setIsLoading(false);
-          }
-        }
-      } else if (currentToken) {
-        loadAssets(currentToken);
-      } else {
-        setAssets([]);
-        setIsLoading(false);
-      }
-    };
-    init();
-    return () => {
-      isCancelled = true;
-    };
-  }, [isDemoMode]);
-
   const handleCreateAsset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token || isDemoMode) {
-      if (!token) {
-        showNotification(
-          'warning',
-          'Vous explorez en Mode Démonstration sans connexion. Créez un compte entreprise ou connectez-vous pour enregistrer vos actifs réels.'
-        );
-      } else {
-        showNotification(
-          'warning',
-          'Vous êtes en Mode Démonstration (Sandbox). Basculez sur "Parc Réel" dans la barre supérieure pour ajouter un actif à votre base de production.'
-        );
-      }
-      return;
-    }
+    if (!token) return;
     setIsSubmitting(true);
     setFeedback(null);
 
     try {
       const created = await AssetClient.createAsset(newAsset, token);
-      showNotification('success', `Actif ${newAsset.code} (${newAsset.name}) créé avec succès.`);
+      showNotification('success', `Actif « ${created.name} » (${created.code}) enregistré.`);
       setIsAddModalOpen(false);
       setNewAsset({
         name: '',
@@ -225,9 +207,10 @@ export default function AssetsPage() {
         initialMeterValue: 0,
         maintenanceIntervalValue: 10000,
       });
+      setOemSearchQuery('');
       setAssets((prev) => [created, ...prev]);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Échec de la création de l’actif.';
+      const msg = err instanceof Error ? err.message : "Échec de l'enregistrement.";
       showNotification('error', msg);
     } finally {
       setIsSubmitting(false);
@@ -239,10 +222,9 @@ export default function AssetsPage() {
     setEditForm({
       name: asset.name,
       code: asset.code,
-      category: asset.category,
       brand: asset.brand || '',
       model: asset.model || '',
-      primaryMeterType: asset.primaryMeterType,
+      category: asset.category,
       maintenanceIntervalValue: asset.maintenanceIntervalValue || 10000,
     });
     setIsEditModalOpen(true);
@@ -250,29 +232,35 @@ export default function AssetsPage() {
 
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token || !editingAsset) return;
+    if (!editingAsset) return;
     setIsUpdating(true);
 
     try {
-      await AssetClient.updateAsset(editingAsset.id, editForm, token);
-      setAssets((prev) =>
-        prev.map((a) =>
-          a.id === editingAsset.id
-            ? {
-              ...a,
-              name: editForm.name,
-              code: editForm.code,
-              category: editForm.category,
-              brand: editForm.brand,
-              model: editForm.model,
-              primaryMeterType: editForm.primaryMeterType,
-              maintenanceIntervalValue: Number(editForm.maintenanceIntervalValue),
-            }
-            : a
-        )
-      );
-      showNotification('success', `Actif ${editForm.code} mis à jour avec succès.`);
-      setIsEditModalOpen(false);
+      if (isDemoMode) {
+        setAssets((prev) =>
+          prev.map((a) =>
+            a.id === editingAsset.id
+              ? {
+                  ...a,
+                  name: editForm.name,
+                  code: editForm.code,
+                  brand: editForm.brand,
+                  model: editForm.model,
+                  category: editForm.category,
+                  maintenanceIntervalValue: editForm.maintenanceIntervalValue,
+                }
+              : a
+          )
+        );
+        showNotification('success', `Actif ${editForm.code} mis à jour.`);
+        setIsEditModalOpen(false);
+      } else {
+        if (!token) return;
+        const updated = await AssetClient.updateAsset(editingAsset.id, editForm, token);
+        setAssets((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+        showNotification('success', `Actif ${updated.code} mis à jour.`);
+        setIsEditModalOpen(false);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Échec de la mise à jour.';
       showNotification('error', msg);
@@ -282,50 +270,79 @@ export default function AssetsPage() {
   };
 
   const handleDeleteConfirm = async () => {
-    if (!token || !deleteConfirm) return;
+    if (!deleteConfirm) return;
+
     try {
-      await AssetClient.deleteAsset(deleteConfirm.id, token);
-      setAssets((prev) => prev.filter((a) => a.id !== deleteConfirm.id));
-      showNotification('success', `Actif ${deleteConfirm.label} supprimé du parc.`);
+      if (isDemoMode) {
+        setAssets((prev) => prev.filter((a) => a.id !== deleteConfirm.id));
+        showNotification('success', `Actif ${deleteConfirm.label} supprimé.`);
+        setDeleteConfirm(null);
+      } else {
+        if (!token) return;
+        await AssetClient.deleteAsset(deleteConfirm.id, token);
+        setAssets((prev) => prev.filter((a) => a.id !== deleteConfirm.id));
+        showNotification('success', `Actif ${deleteConfirm.label} supprimé.`);
+        setDeleteConfirm(null);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Échec de la suppression.';
       showNotification('error', msg);
-    } finally {
-      setDeleteConfirm(null);
     }
   };
 
   const handleRecordMeter = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token || !activeAssetForMeter) return;
+    if (!activeAssetForMeter) return;
     setIsRecordingMeter(true);
-    setFeedback(null);
 
     try {
-      const res = await AssetClient.recordMeterReading(
-        activeAssetForMeter.id,
-        {
-          meterType: activeAssetForMeter.primaryMeterType,
-          value: Number(newMeterValue),
-        },
-        token
-      );
-
-      if (res.rollbackDetected) {
-        showNotification('warning', `Relevé anormal détecté : ${res.message}`);
-      } else if (res.maintenanceTriggered) {
-        showNotification('success', `Ordre de travail déclenché : ${res.message}`);
-      } else {
+      if (isDemoMode) {
+        setAssets((prev) =>
+          prev.map((a) =>
+            a.id === activeAssetForMeter.id
+              ? {
+                  ...a,
+                  currentMeterValue: newMeterValue,
+                  status:
+                    a.nextMaintenanceMeterValue && newMeterValue >= a.nextMaintenanceMeterValue
+                      ? AssetStatus.MAINTENANCE_REQUIRED
+                      : a.status,
+                }
+              : a
+          )
+        );
         showNotification(
           'success',
-          `Compteur certifié mis à jour (${res.currentValue} ${activeAssetForMeter.primaryMeterType === MeterType.ODOMETER_KM ? 'km' : 'h'}).`
+          `Compteur relevé avec succès : ${newMeterValue.toLocaleString('fr-DZ')} (${activeAssetForMeter.code}).`
         );
-      }
+        setActiveAssetForMeter(null);
+      } else {
+        if (!token) return;
+        const res = await AssetClient.recordMeterReading(
+          activeAssetForMeter.id,
+          {
+            meterType: activeAssetForMeter.primaryMeterType,
+            value: newMeterValue,
+          },
+          token
+        );
 
-      setActiveAssetForMeter(null);
-      loadAssets(token);
+        if (res.rollbackDetected) {
+          showNotification('warning', `Relevé anormal détecté : ${res.message}`);
+        } else if (res.maintenanceTriggered) {
+          showNotification('success', `Ordre de travail déclenché : ${res.message}`);
+        } else {
+          showNotification(
+            'success',
+            `Compteur certifié mis à jour (${res.currentValue} ${activeAssetForMeter.primaryMeterType === MeterType.ODOMETER_KM ? 'km' : 'h'}).`
+          );
+        }
+
+        setActiveAssetForMeter(null);
+        loadAssets(token);
+      }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Échec de la mise à jour du compteur.';
+      const msg = err instanceof Error ? err.message : "Échec de l'enregistrement du relevé.";
       showNotification('error', msg);
     } finally {
       setIsRecordingMeter(false);
@@ -348,649 +365,462 @@ export default function AssetsPage() {
   const downCount = assets.filter((a) => a.status === AssetStatus.DOWN).length;
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)', color: 'var(--df-text-main)' }}>
-      {/* 1. BARRE HORIZONTALE UNIVERSELLE */}
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 transition-colors duration-150">
+      {/* 1. BARRE DE NAVIGATION SUPÉRIEURE UNIFIÉE */}
       <Navbar />
 
-      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 1.25rem 3rem 1.25rem' }}>
-        {/* NOTIFICATION FLOTTANTE */}
+      <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-16">
+        {/* BANNIÈRE DE NOTIFICATION FLOTTANTE */}
         {feedback && (
           <div
             role="status"
-            style={{
-              padding: '0.85rem 1.25rem',
-              borderRadius: 'var(--df-radius-md)',
-              marginBottom: '1.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background:
-                feedback.type === 'success'
-                  ? 'var(--df-status-ok-bg)'
-                  : feedback.type === 'warning'
-                    ? 'var(--df-status-warning-bg)'
-                    : 'var(--df-status-danger-bg)',
-              color:
-                feedback.type === 'success'
-                  ? 'var(--df-status-ok-text)'
-                  : feedback.type === 'warning'
-                    ? 'var(--df-status-warning-text)'
-                    : 'var(--df-status-danger-text)',
-              border: `1px solid ${feedback.type === 'success'
-                ? 'var(--df-status-ok-border)'
+            className={`mb-4 flex items-center justify-between gap-3 px-4 py-3 rounded-xl border shadow-sm transition-all ${
+              feedback.type === 'success'
+                ? 'border-emerald-500/30 bg-emerald-50/90 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
                 : feedback.type === 'warning'
-                  ? 'var(--df-status-warning-border)'
-                  : 'var(--df-status-danger-border)'
-                }`,
-            }}
+                ? 'border-amber-500/30 bg-amber-50/90 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200'
+                : 'border-rose-500/30 bg-rose-50/90 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200'
+            }`}
           >
-            <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{feedback.message}</span>
+            <div className="flex items-center gap-2">
+              <span className={feedback.type === 'success' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
+                {feedback.type === 'success' ? <IconCheck size={16} strokeWidth={2.5} /> : <IconAlertTriangle size={16} />}
+              </span>
+              <span className="text-xs font-semibold">{feedback.message}</span>
+            </div>
             <button
               onClick={() => setFeedback(null)}
-              style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', display: 'flex' }}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
+              aria-label="Fermer la notification"
             >
-              <IconX size={15} />
+              <IconX size={14} />
             </button>
           </div>
         )}
 
-        {/* 2. LAYOUT DUAL-BAR : SIDEBAR VERTICALE + CONTENU PRINCIPAL */}
-        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
-          {/* SIDEBAR CONTEXTUELLE VERTICALE */}
-          <aside
-            style={{
-              width: '260px',
-              flexShrink: 0,
-              background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-border-subtle)',
-              borderRadius: 'var(--df-radius-lg)',
-              padding: '1rem',
-              boxShadow: 'var(--df-shadow-sm)',
-              position: 'sticky',
-              top: '90px',
-            }}
-          >
-            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
-              Actions du Parc
-            </div>
+        {/* 2. COMMAND CENTER HEADER BENTO */}
+        <section className="mb-6 rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 sm:p-6 shadow-2xs">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <Badge variant="ok" pulse>
+                  Parc d’Actifs Connecté • Mode 0, 1 &amp; 2
+                </Badge>
+                <span className="text-slate-300 dark:text-slate-700" aria-hidden="true">•</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Référentiel 58 Wilayas • Scraper OEM RMI • Relevés Odométriques Certifiés
+                </span>
+              </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setIsAddModalOpen(true)}
-                style={{ width: '100%', justifyContent: 'center', gap: '0.4rem' }}
-              >
-                <IconPlus size={14} />
-                <span>+ Nouvel Actif</span>
-              </Button>
-              <Link href="/oem-scraper" style={{ textDecoration: 'none' }}>
-                <Button variant="outline" size="sm" style={{ width: '100%', justifyContent: 'center' }}>
-                  Scraper OEM RMI
-                </Button>
-              </Link>
-              <Link href="/work-orders" style={{ textDecoration: 'none' }}>
-                <Button variant="outline" size="sm" style={{ width: '100%', justifyContent: 'center' }}>
-                  Ordres de Travail
-                </Button>
-              </Link>
-            </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 mb-2">
+                Inventaire &amp; Télémétrie des Actifs de Flotte
+              </h1>
 
-            <div style={{ height: '1px', background: 'var(--df-border-subtle)', margin: '0.5rem 0 1rem 0' }} />
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                Supervision centralisée du parc roulant et des engins, contrôle continu des compteurs d’usure et déclenchement automatique des ordres de travail préventifs selon les manuels constructeurs.
+              </p>
 
-            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
-              Statut Opérationnel
-            </div>
-
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' }}>
-              {[
-                { id: 'ALL', label: 'Tous les Actifs', count: assets.length, dot: 'var(--df-accent-blue)' },
-                { id: AssetStatus.OPERATIONAL, label: 'Opérationnels', count: operationalCount, dot: 'var(--df-status-ok)' },
-                { id: AssetStatus.MAINTENANCE_REQUIRED, label: 'Révision Requise', count: maintenanceCount, dot: 'var(--df-status-warning)' },
-                { id: AssetStatus.DOWN, label: 'Immobilisés', count: downCount, dot: 'var(--df-status-danger)' },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setSelectedStatus(item.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.5rem 0.65rem',
-                    borderRadius: 'var(--df-radius-md)',
-                    border: 'none',
-                    background: selectedStatus === item.id ? 'var(--df-bg-surface-2)' : 'transparent',
-                    color: selectedStatus === item.id ? 'var(--df-text-main)' : 'var(--df-text-secondary)',
-                    fontWeight: selectedStatus === item.id ? 700 : 500,
-                    fontSize: '0.78rem',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all var(--df-transition-fast)',
-                  }}
+              <div className="flex gap-2 flex-wrap items-center">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="inline-flex items-center gap-1.5"
                 >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.dot }} />
+                  <IconPlus size={14} />
+                  <span>Enregistrer un Actif</span>
+                </Button>
+                <Link
+                  href="/oem-scraper"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors"
+                >
+                  <IconCpu size={13} className="text-indigo-500" />
+                  <span>Scraper OEM RMI</span>
+                </Link>
+                <Link
+                  href="/work-orders"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors"
+                >
+                  <IconWrench size={13} className="text-amber-500" />
+                  <span>Ordres de Travail</span>
+                </Link>
+                <Link
+                  href="/preventive"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors"
+                >
+                  <IconClock size={13} className="text-blue-500" />
+                  <span>Plans Préventifs</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* WIDGET HUD STATUT DU PARC */}
+            <div className="w-full lg:w-auto min-w-[260px] p-4 rounded-xl bg-slate-50 dark:bg-[#161F30] border border-slate-200/90 dark:border-[#1F2937] flex flex-col gap-2.5">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                <span>Disponibilité Flotte</span>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-400">Taux de Disponibilité</span>
+                <strong className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  {assets.length > 0 ? Math.round((operationalCount / assets.length) * 100) : 100}%
+                </strong>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-400">Supervision Télématique</span>
+                <strong className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                  100% Connectés
+                </strong>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-400">Isolation Multi-Tenant</span>
+                <strong className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                  PostgreSQL RLS
+                </strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. BENTO KPIS PARC */}
+        <section className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs">
+            <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Total Actifs
+            </span>
+            <div className="font-mono text-2xl font-extrabold text-slate-900 dark:text-slate-50 mt-1">
+              {assets.length}
+            </div>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
+              100% inventoriés au registre
+            </span>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs">
+            <span className="text-[10.5px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              Opérationnels
+            </span>
+            <div className="font-mono text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+              {operationalCount}
+            </div>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
+              Prêts pour mission &amp; dispatching
+            </span>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs">
+            <span className="text-[10.5px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              Révision Requise
+            </span>
+            <div className="font-mono text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">
+              {maintenanceCount}
+            </div>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
+              Seuil d’usure kilométrique franchi
+            </span>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs">
+            <span className="text-[10.5px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
+              Immobilisés
+            </span>
+            <div className="font-mono text-2xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">
+              {downCount}
+            </div>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
+              En réparation atelier ou bloqués DVIR
+            </span>
+          </div>
+        </section>
+
+        {/* 4. LAYOUT DUAL : BARRE DE FILTRES LATÉRALE + TABLEAU D'ACTIFS */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+          {/* SIDEBAR CONTEXTUELLE DE NAVIGATION & FILTRES */}
+          <aside className="lg:col-span-1 rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs sticky top-24">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Filtres du Parc
+              </span>
+              <IconFilter size={14} className="text-slate-400" />
+            </div>
+
+            {/* STATUT OPÉRATIONNEL */}
+            <div className="mb-5">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+                Statut Opérationnel
+              </div>
+              <div className="flex flex-col gap-1">
+                {[
+                  { id: 'ALL', label: 'Tous les Actifs', count: assets.length },
+                  { id: AssetStatus.OPERATIONAL, label: 'Opérationnels', count: operationalCount },
+                  { id: AssetStatus.MAINTENANCE_REQUIRED, label: 'Révision Requise', count: maintenanceCount },
+                  { id: AssetStatus.DOWN, label: 'Immobilisés', count: downCount },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setSelectedStatus(item.id)}
+                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                      selectedStatus === item.id
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                    }`}
+                  >
                     <span>{item.label}</span>
-                  </span>
-                  <span
-                    style={{
-                      background: 'var(--df-bg-surface-2)',
-                      color: 'var(--df-text-muted)',
-                      padding: '0.1rem 0.45rem',
-                      borderRadius: 'var(--df-radius-full)',
-                      fontSize: '0.70rem',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {item.count}
-                  </span>
-                </button>
-              ))}
-            </nav>
-
-            <div style={{ height: '1px', background: 'var(--df-border-subtle)', margin: '0.5rem 0 1rem 0' }} />
-
-            <div style={{ fontSize: '0.70rem', fontWeight: 700, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
-              Catégorie d’Actifs
+                    <span
+                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                        selectedStatus === item.id
+                          ? 'bg-blue-700/80 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                      }`}
+                    >
+                      {item.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              {[
-                { id: 'ALL', label: 'Toutes Catégories' },
-                { id: AssetCategory.HEAVY_TRUCK, label: 'Poids Lourds' },
-                { id: AssetCategory.CONSTRUCTION_EQUIPMENT, label: 'Engins BTP' },
-                { id: AssetCategory.ROAD_VEHICLE, label: 'Véhicules Légers' },
-              ].map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.45rem 0.65rem',
-                    borderRadius: 'var(--df-radius-md)',
-                    border: 'none',
-                    background: selectedCategory === cat.id ? 'var(--df-bg-surface-2)' : 'transparent',
-                    color: selectedCategory === cat.id ? 'var(--df-accent-blue)' : 'var(--df-text-secondary)',
-                    fontWeight: selectedCategory === cat.id ? 700 : 500,
-                    fontSize: '0.76rem',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                >
-                  <span>{cat.label}</span>
-                  <span
-                    style={{
-                      fontSize: '0.70rem',
-                      color: 'var(--df-text-muted)',
-                    }}
-                  >
-                    {cat.id === 'ALL' ? assets.length : assets.filter((a) => a.category === cat.id).length}
-                  </span>
-                </button>
-              ))}
-            </nav>
+            <div className="h-px bg-slate-200/80 dark:bg-slate-800 mb-5" />
+
+            {/* CATÉGORIE D'ACTIFS */}
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+                Catégorie d’Actifs
+              </div>
+              <div className="flex flex-col gap-1">
+                {[
+                  { id: 'ALL', label: 'Toutes Catégories' },
+                  { id: AssetCategory.HEAVY_TRUCK, label: 'Poids Lourds' },
+                  { id: AssetCategory.CONSTRUCTION_EQUIPMENT, label: 'Engins BTP' },
+                  { id: AssetCategory.ROAD_VEHICLE, label: 'Véhicules Légers' },
+                ].map((cat) => {
+                  const count = cat.id === 'ALL' ? assets.length : assets.filter((a) => a.category === cat.id).length;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        selectedCategory === cat.id
+                          ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                      }`}
+                    >
+                      <span>{cat.label}</span>
+                      <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </aside>
 
-          {/* CONTENU PRINCIPAL */}
-          <main style={{ flex: 1, minWidth: 0 }}>
-            {/* EN-TÊTE DE SECTION */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '1.5rem',
-                flexWrap: 'wrap',
-                gap: '1rem',
-              }}
-            >
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                  <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
-                    Inventaire &amp; Télémétrie des Actifs
-                  </h1>
-                  <Badge variant="ok">Parc Opérationnel</Badge>
-                </div>
-                <p style={{ fontSize: '0.875rem', color: 'var(--df-text-muted)', margin: '0.2rem 0 0 0' }}>
-                  Supervision des compteurs certifiés, calcul de charge et déclenchement automatique d&apos;ordres de travail préventifs.
-                </p>
+          {/* LISTE PRINCIPALE DES ACTIFS */}
+          <section className="lg:col-span-3">
+            {/* BARRE DE RECHERCHE ET TOTAL */}
+            <div className="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="relative flex-1">
+                <IconSearch size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Rechercher par immatriculation, désignation, marque..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#111827] text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-2xs"
+                />
               </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.45rem',
-                    background: 'var(--df-bg-surface-1)',
-                    border: '1px solid var(--df-border-subtle)',
-                    borderRadius: 'var(--df-radius-md)',
-                    padding: '0.35rem 0.65rem',
-                    fontSize: '0.78rem',
-                  }}
-                >
-                  <IconSearch size={14} style={{ color: 'var(--df-text-muted)' }} />
-                  <input
-                    type="text"
-                    placeholder="Filtrer matricule, marque..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      color: 'var(--df-text-main)',
-                      outline: 'none',
-                      fontSize: '0.78rem',
-                      width: '180px',
-                    }}
-                  />
-                </div>
-                <Button variant="primary" size="sm" onClick={() => setIsAddModalOpen(true)}>
-                  + Nouvel Actif
-                </Button>
+              <div className="text-xs text-slate-500 dark:text-slate-400 px-1 self-center whitespace-nowrap">
+                <strong className="font-mono text-slate-900 dark:text-slate-100">{filteredAssets.length}</strong> actif{filteredAssets.length > 1 ? 's' : ''} filtré{filteredAssets.length > 1 ? 's' : ''}
               </div>
             </div>
 
-            {/* CARTES RÉCAPITULATIVES D'ÉTAT DU PARC */}
-            <section
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem',
-                marginBottom: '1.5rem',
-              }}
-            >
-              <div
-                style={{
-                  background: 'var(--df-bg-surface-1)',
-                  border: '1px solid var(--df-border-subtle)',
-                  borderRadius: 'var(--df-radius-lg)',
-                  padding: '1rem 1.15rem',
-                  boxShadow: 'var(--df-shadow-sm)',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--df-text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
-                    Total Actifs
-                  </span>
-                  <span className="df-mono" style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)' }}>
-                    100% connectés
-                  </span>
-                </div>
-                <div className="df-mono" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--df-text-main)', marginTop: '0.25rem' }}>
-                  {assets.length}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'var(--df-bg-surface-1)',
-                  border: '1px solid var(--df-border-subtle)',
-                  borderRadius: 'var(--df-radius-lg)',
-                  padding: '1rem 1.15rem',
-                  boxShadow: 'var(--df-shadow-sm)',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--df-status-ok)', fontWeight: 600, textTransform: 'uppercase' }}>
-                    Opérationnels
-                  </span>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--df-status-ok)' }} />
-                </div>
-                <div className="df-mono" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--df-status-ok)', marginTop: '0.25rem' }}>
-                  {operationalCount}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'var(--df-bg-surface-1)',
-                  border: '1px solid var(--df-border-subtle)',
-                  borderRadius: 'var(--df-radius-lg)',
-                  padding: '1rem 1.15rem',
-                  boxShadow: 'var(--df-shadow-sm)',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--df-status-warning)', fontWeight: 600, textTransform: 'uppercase' }}>
-                    Révision Requise
-                  </span>
-                  <span className="df-mono" style={{ fontSize: '0.70rem', color: 'var(--df-status-warning)' }}>
-                    Seuil franchi
-                  </span>
-                </div>
-                <div className="df-mono" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--df-status-warning)', marginTop: '0.25rem' }}>
-                  {maintenanceCount}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'var(--df-bg-surface-1)',
-                  border: '1px solid var(--df-border-subtle)',
-                  borderRadius: 'var(--df-radius-lg)',
-                  padding: '1rem 1.15rem',
-                  boxShadow: 'var(--df-shadow-sm)',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--df-status-danger)', fontWeight: 600, textTransform: 'uppercase' }}>
-                    Immobilisés
-                  </span>
-                  <span className="df-mono" style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)' }}>
-                    Au garage
-                  </span>
-                </div>
-                <div className="df-mono" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--df-status-danger)', marginTop: '0.25rem' }}>
-                  {downCount}
-                </div>
-              </div>
-            </section>
-
-            {/* TABLEAU DES ACTIFS HAUTE DENSITÉ */}
+            {/* TABLEAU DES ACTIFS */}
             {isLoading ? (
-              <div
-                style={{
-                  padding: '3rem',
-                  textAlign: 'center',
-                  color: 'var(--df-text-muted)',
-                  background: 'var(--df-bg-surface-1)',
-                  border: '1px solid var(--df-border-subtle)',
-                  borderRadius: 'var(--df-radius-lg)',
-                }}
-              >
-                Chargement de la base d&apos;actifs...
+              <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-12 text-center text-slate-500 text-xs">
+                Chargement de la base d’actifs...
               </div>
             ) : filteredAssets.length === 0 ? (
-              <div
-                style={{
-                  padding: '3rem 2rem',
-                  textAlign: 'center',
-                  background: 'var(--df-bg-surface-1)',
-                  border: '1px solid var(--df-border-subtle)',
-                  borderRadius: 'var(--df-radius-lg)',
-                }}
-              >
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.5rem' }}>
+              <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-12 text-center shadow-2xs">
+                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                  <IconTruck size={22} />
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">
                   Aucun actif trouvé dans cette sélection
                 </h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--df-text-muted)', maxWidth: '420px', margin: '0 auto 1.5rem auto' }}>
-                  Enregistrez vos véhicules ou engins de chantier pour activer le suivi des compteurs et les alertes d&apos;entretien.
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-sm mx-auto">
+                  Enregistrez vos véhicules ou engins pour activer le suivi des compteurs et les alertes d’entretien.
                 </p>
                 <Button variant="primary" size="sm" onClick={() => setIsAddModalOpen(true)}>
                   + Enregistrer le Premier Actif
                 </Button>
               </div>
             ) : (
-              <div
-                style={{
-                  background: 'var(--df-bg-surface-1)',
-                  border: '1px solid var(--df-border-subtle)',
-                  borderRadius: 'var(--df-radius-lg)',
-                  overflowX: 'auto',
-                  boxShadow: 'var(--df-shadow-sm)',
-                }}
-              >
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.84rem' }}>
-                  <thead>
-                    <tr
-                      style={{
-                        background: 'var(--df-bg-surface-2)',
-                        borderBottom: '1px solid var(--df-border-subtle)',
-                        color: 'var(--df-text-muted)',
-                        fontSize: '0.74rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.04em',
-                      }}
-                    >
-                      <th style={{ padding: '0.75rem 1rem' }}>Matricule &amp; Véhicule</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>Catégorie</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>Compteur Certifié</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>Prochaine Révision</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>Statut</th>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredAssets.map((asset) => {
-                      const delta = asset.nextMaintenanceMeterValue
-                        ? asset.nextMaintenanceMeterValue - asset.currentMeterValue
-                        : null;
-                      const isOverdue = delta !== null && delta <= 0;
+              <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] shadow-2xs overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                        <th className="py-3 px-4">Matricule &amp; Actif</th>
+                        <th className="py-3 px-4">Catégorie</th>
+                        <th className="py-3 px-4">Compteur Certifié</th>
+                        <th className="py-3 px-4">Prochaine Révision</th>
+                        <th className="py-3 px-4">Statut</th>
+                        <th className="py-3 px-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                      {filteredAssets.map((asset) => {
+                        const delta = asset.nextMaintenanceMeterValue
+                          ? asset.nextMaintenanceMeterValue - asset.currentMeterValue
+                          : null;
+                        const isOverdue = delta !== null && delta <= 0;
 
-                      return (
-                        <tr
-                          key={asset.id}
-                          style={{
-                            borderBottom: '1px solid var(--df-border-subtle)',
-                            transition: 'background var(--df-transition-fast)',
-                          }}
-                        >
-                          <td style={{ padding: '0.75rem 1rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                              <span
-                                style={{
-                                  width: '32px',
-                                  height: '32px',
-                                  borderRadius: '6px',
-                                  background: 'var(--df-bg-surface-2)',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  color: 'var(--df-accent-blue)',
-                                }}
-                              >
-                                <IconTruck size={16} />
-                              </span>
-                              <div>
-                                <strong
-                                  className="df-mono"
-                                  style={{
-                                    fontSize: '0.90rem',
-                                    color: 'var(--df-text-main)',
-                                    display: 'block',
-                                    fontWeight: 700,
-                                  }}
-                                >
-                                  {asset.code}
-                                </strong>
-                                <span style={{ fontSize: '0.76rem', color: 'var(--df-text-secondary)' }}>
-                                  {asset.name}
-                                </span>
+                        return (
+                          <tr key={asset.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-200/60 dark:border-blue-800/40">
+                                  <IconTruck size={15} />
+                                </div>
+                                <div>
+                                  <div className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100">
+                                    {asset.code}
+                                  </div>
+                                  <div className="text-[11px] text-slate-500 truncate max-w-[200px]">
+                                    {asset.name}
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td style={{ padding: '0.75rem 1rem' }}>
-                            <Badge variant="neutral">
-                              {asset.category === AssetCategory.HEAVY_TRUCK
-                                ? 'Poids Lourds'
-                                : asset.category === AssetCategory.CONSTRUCTION_EQUIPMENT
+                            </td>
+                            <td className="py-3 px-4">
+                              <Badge variant="neutral">
+                                {asset.category === AssetCategory.HEAVY_TRUCK
+                                  ? 'Poids Lourds'
+                                  : asset.category === AssetCategory.CONSTRUCTION_EQUIPMENT
                                   ? 'Engin BTP'
                                   : 'Véhicule'}
-                            </Badge>
-                          </td>
-                          <td style={{ padding: '0.75rem 1rem' }}>
-                            <strong className="df-mono" style={{ color: 'var(--df-text-main)', fontSize: '0.88rem' }}>
-                              {asset.currentMeterValue.toLocaleString('fr-DZ')}
-                            </strong>{' '}
-                            <span style={{ fontSize: '0.75rem', color: 'var(--df-text-muted)' }}>
-                              {asset.primaryMeterType === MeterType.ODOMETER_KM ? 'km' : 'heures'}
-                            </span>
-                          </td>
-                          <td style={{ padding: '0.75rem 1rem' }}>
-                            {asset.nextMaintenanceMeterValue ? (
-                              <div>
-                                <span className="df-mono" style={{ fontSize: '0.82rem', color: 'var(--df-text-main)' }}>
-                                  {asset.nextMaintenanceMeterValue.toLocaleString('fr-DZ')}{' '}
-                                  {asset.primaryMeterType === MeterType.ODOMETER_KM ? 'km' : 'h'}
-                                </span>
-                                {delta !== null && (
-                                  <div
-                                    style={{
-                                      fontSize: '0.72rem',
-                                      fontWeight: 600,
-                                      color: isOverdue ? 'var(--df-status-danger)' : 'var(--df-status-ok)',
-                                    }}
-                                  >
-                                    {isOverdue ? `Dépassement de ${Math.abs(delta)}` : `Reste ${delta}`}
+                              </Badge>
+                            </td>
+                            <td className="py-3 px-4">
+                              <strong className="font-mono text-xs text-slate-900 dark:text-slate-100">
+                                {asset.currentMeterValue.toLocaleString('fr-DZ')}
+                              </strong>{' '}
+                              <span className="text-[11px] text-slate-400">
+                                {asset.primaryMeterType === MeterType.ODOMETER_KM ? 'km' : 'heures'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              {asset.nextMaintenanceMeterValue ? (
+                                <div>
+                                  <div className="font-mono text-xs text-slate-700 dark:text-slate-300">
+                                    {asset.nextMaintenanceMeterValue.toLocaleString('fr-DZ')}{' '}
+                                    {asset.primaryMeterType === MeterType.ODOMETER_KM ? 'km' : 'h'}
                                   </div>
-                                )}
-                              </div>
-                            ) : (
-                              <span style={{ color: 'var(--df-text-muted)', fontSize: '0.78rem' }}>Non définie</span>
-                            )}
-                          </td>
-                          <td style={{ padding: '0.75rem 1rem' }}>
-                            <div
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '5px',
-                                padding: '2px 7px',
-                                borderRadius: '4px',
-                                background:
-                                  asset.status === AssetStatus.OPERATIONAL
-                                    ? 'var(--df-status-ok-bg)'
-                                    : asset.status === AssetStatus.MAINTENANCE_REQUIRED
-                                      ? 'var(--df-status-warning-bg)'
-                                      : 'var(--df-status-danger-bg)',
-                                color:
-                                  asset.status === AssetStatus.OPERATIONAL
-                                    ? 'var(--df-status-ok-text)'
-                                    : asset.status === AssetStatus.MAINTENANCE_REQUIRED
-                                      ? 'var(--df-status-warning-text)'
-                                      : 'var(--df-status-danger-text)',
-                                border: `1px solid ${asset.status === AssetStatus.OPERATIONAL
-                                  ? 'var(--df-status-ok-border)'
-                                  : asset.status === AssetStatus.MAINTENANCE_REQUIRED
-                                    ? 'var(--df-status-warning-border)'
-                                    : 'var(--df-status-danger-border)'
-                                  }`,
-                                fontSize: '0.75rem',
-                                fontWeight: 600,
-                              }}
-                            >
+                                  {delta !== null && (
+                                    <div
+                                      className={`text-[10.5px] font-semibold ${
+                                        isOverdue ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+                                      }`}
+                                    >
+                                      {isOverdue ? `Dépassement de ${Math.abs(delta)}` : `Reste ${delta}`}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-slate-400 text-[11px]">Non définie</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4">
                               <span
-                                style={{
-                                  width: '5px',
-                                  height: '5px',
-                                  borderRadius: '50%',
-                                  background:
+                                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold border ${
+                                  asset.status === AssetStatus.OPERATIONAL
+                                    ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60'
+                                    : asset.status === AssetStatus.MAINTENANCE_REQUIRED
+                                    ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/60'
+                                    : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60'
+                                }`}
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${
                                     asset.status === AssetStatus.OPERATIONAL
-                                      ? 'var(--df-status-ok)'
+                                      ? 'bg-emerald-500'
                                       : asset.status === AssetStatus.MAINTENANCE_REQUIRED
-                                        ? 'var(--df-status-warning)'
-                                        : 'var(--df-status-danger)',
-                                }}
-                              />
-                              {asset.status === AssetStatus.OPERATIONAL
-                                ? 'Opérationnel'
-                                : asset.status === AssetStatus.MAINTENANCE_REQUIRED
+                                      ? 'bg-amber-500'
+                                      : 'bg-rose-500'
+                                  }`}
+                                />
+                                {asset.status === AssetStatus.OPERATIONAL
+                                  ? 'Opérationnel'
+                                  : asset.status === AssetStatus.MAINTENANCE_REQUIRED
                                   ? 'Révision Requise'
                                   : 'Immobilisé'}
-                            </div>
-                          </td>
-                          <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setActiveAssetForMeter(asset);
-                                  setNewMeterValue(asset.currentMeterValue);
-                                }}
-                              >
-                                Relever
-                              </Button>
-                              <button
-                                onClick={() => handleOpenEdit(asset)}
-                                title="Modifier l'actif"
-                                style={{
-                                  background: 'transparent',
-                                  border: 'none',
-                                  color: 'var(--df-text-muted)',
-                                  cursor: 'pointer',
-                                  padding: '0.3rem',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  borderRadius: 'var(--df-radius-sm)',
-                                }}
-                              >
-                                <IconEdit size={15} />
-                              </button>
-                              <button
-                                onClick={() => setDeleteConfirm({ id: asset.id, label: `${asset.code} (${asset.name})` })}
-                                title="Supprimer l'actif"
-                                style={{
-                                  background: 'transparent',
-                                  border: 'none',
-                                  color: 'var(--df-status-danger)',
-                                  cursor: 'pointer',
-                                  padding: '0.3rem',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  borderRadius: 'var(--df-radius-sm)',
-                                }}
-                              >
-                                <IconTrash size={15} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <div className="inline-flex items-center gap-1.5">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setActiveAssetForMeter(asset);
+                                    setNewMeterValue(asset.currentMeterValue);
+                                  }}
+                                  className="text-xs py-1 px-2.5"
+                                >
+                                  Relever
+                                </Button>
+                                <button
+                                  onClick={() => handleOpenEdit(asset)}
+                                  title="Modifier l'actif"
+                                  className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                >
+                                  <IconEdit size={14} />
+                                </button>
+                                <button
+                                  onClick={() => setDeleteConfirm({ id: asset.id, label: `${asset.code} (${asset.name})` })}
+                                  title="Supprimer l'actif"
+                                  className="p-1 rounded text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                                >
+                                  <IconTrash size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
-          </main>
+          </section>
         </div>
-      </div>
+      </main>
 
       {/* MODALE 1 : RELEVÉ COMPTEUR */}
       {activeAssetForMeter && (
         <div
           role="dialog"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 1000,
-            background: 'rgba(0, 0, 0, 0.65)',
-            backdropFilter: 'blur(3px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
         >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '440px',
-              padding: '1.75rem',
-              background: 'var(--df-bg-surface-1)',
-              borderRadius: 'var(--df-radius-lg)',
-              border: '1px solid var(--df-border-subtle)',
-              boxShadow: 'var(--df-shadow-lg)',
-            }}
-          >
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--df-text-main)', marginBottom: '0.35rem' }}>
+          <div className="w-full max-w-md rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#111827] p-6 shadow-2xl my-8">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">
               Relever Compteur : {activeAssetForMeter.name}
-            </h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--df-text-muted)', marginBottom: '1.25rem' }}>
-              Code actif : <strong>{activeAssetForMeter.code}</strong> • Compteur courant :{' '}
-              <strong className="df-mono">
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+              Code actif : <strong className="text-slate-700 dark:text-slate-300">{activeAssetForMeter.code}</strong> • Compteur courant :{' '}
+              <strong className="font-mono text-slate-700 dark:text-slate-300">
                 {activeAssetForMeter.currentMeterValue}{' '}
                 {activeAssetForMeter.primaryMeterType === MeterType.ODOMETER_KM ? 'km' : 'h'}
               </strong>
             </p>
 
-            <form onSubmit={handleRecordMeter}>
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.4rem' }}>
-                  Nouvelle Valeur Relevée ({activeAssetForMeter.primaryMeterType === MeterType.ODOMETER_KM ? 'km' : 'heures'})
+            <form onSubmit={handleRecordMeter} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                  Nouvelle Valeur Relevée ({activeAssetForMeter.primaryMeterType === MeterType.ODOMETER_KM ? 'km' : 'heures'}) *
                 </label>
                 <input
                   type="number"
@@ -998,22 +828,11 @@ export default function AssetsPage() {
                   min={0}
                   value={newMeterValue}
                   onChange={(e) => setNewMeterValue(Number(e.target.value))}
-                  className="df-mono"
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: 'var(--df-radius-sm)',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '1.05rem',
-                    fontWeight: 700,
-                    outline: 'none',
-                  }}
+                  className="w-full font-mono text-base font-bold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <Button variant="secondary" size="sm" type="button" onClick={() => setActiveAssetForMeter(null)}>
                   Annuler
                 </Button>
@@ -1030,72 +849,39 @@ export default function AssetsPage() {
       {isAddModalOpen && (
         <div
           role="dialog"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 1000,
-            background: 'rgba(0, 0, 0, 0.65)',
-            backdropFilter: 'blur(3px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
         >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '540px',
-              padding: '1.75rem',
-              background: 'var(--df-bg-surface-1)',
-              borderRadius: 'var(--df-radius-lg)',
-              border: '1px solid var(--df-border-subtle)',
-              boxShadow: 'var(--df-shadow-lg)',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
-                Enregistrer un Nouvel Actif
-              </h3>
+          <div className="w-full max-w-xl rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#111827] p-6 shadow-2xl my-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                  Enregistrer un Nouvel Actif
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Intégration d’un véhicule au registre télématique
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer' }}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
               >
                 <IconX size={16} />
               </button>
             </div>
 
             {/* RECHERCHE RAPIDE OEM */}
-            <div
-              style={{
-                background: 'var(--df-bg-surface-2)',
-                border: '1px solid var(--df-border-subtle)',
-                borderRadius: 'var(--df-radius-md)',
-                padding: '0.85rem',
-                marginBottom: '1.25rem',
-              }}
-            >
-              <div style={{ fontSize: '0.78rem', color: 'var(--df-text-muted)', marginBottom: '0.4rem', fontWeight: 600 }}>
+            <div className="mb-4 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                 Scraper VIN ou Modèle Constructeur :
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="Ex: VF624GPA... ou Renault K480"
                   value={oemSearchQuery}
                   onChange={(e) => setOemSearchQuery(e.target.value)}
-                  style={{
-                    flex: 1,
-                    padding: '0.5rem 0.75rem',
-                    background: 'var(--df-bg-surface-1)',
-                    border: '1px solid var(--df-border-subtle)',
-                    borderRadius: 'var(--df-radius-sm)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.825rem',
-                  }}
+                  className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <Button
                   variant="outline"
@@ -1103,15 +889,16 @@ export default function AssetsPage() {
                   type="button"
                   onClick={() => handleResolveOem()}
                   disabled={isResolvingOem}
+                  className="text-xs"
                 >
                   {isResolvingOem ? 'Recherche...' : 'Résoudre OEM'}
                 </Button>
               </div>
             </div>
 
-            <form onSubmit={handleCreateAsset} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <form onSubmit={handleCreateAsset} className="space-y-4">
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.3rem' }}>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                   Code Actif / Matricule *
                 </label>
                 <input
@@ -1120,21 +907,12 @@ export default function AssetsPage() {
                   value={newAsset.code}
                   onChange={(e) => setNewAsset({ ...newAsset, code: e.target.value })}
                   placeholder="00421-116-16"
-                  className="df-mono"
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem 0.75rem',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    borderRadius: 'var(--df-radius-sm)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.85rem',
-                  }}
+                  className="w-full font-mono px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.3rem' }}>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                   Désignation Actif *
                 </label>
                 <input
@@ -1143,35 +921,19 @@ export default function AssetsPage() {
                   value={newAsset.name}
                   onChange={(e) => setNewAsset({ ...newAsset, name: e.target.value })}
                   placeholder="Renault Trucks K480 6x4"
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem 0.75rem',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    borderRadius: 'var(--df-radius-sm)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.85rem',
-                  }}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.3rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Catégorie
                   </label>
                   <select
                     value={newAsset.category}
                     onChange={(e) => setNewAsset({ ...newAsset, category: e.target.value as AssetCategory })}
-                    style={{
-                      width: '100%',
-                      padding: '0.55rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.825rem',
-                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value={AssetCategory.HEAVY_TRUCK}>Poids Lourds</option>
                     <option value={AssetCategory.CONSTRUCTION_EQUIPMENT}>Engin BTP</option>
@@ -1180,21 +942,13 @@ export default function AssetsPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.3rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Type de Compteur
                   </label>
                   <select
                     value={newAsset.primaryMeterType}
                     onChange={(e) => setNewAsset({ ...newAsset, primaryMeterType: e.target.value as MeterType })}
-                    style={{
-                      width: '100%',
-                      padding: '0.55rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.825rem',
-                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value={MeterType.ODOMETER_KM}>Odomètre (km)</option>
                     <option value={MeterType.ENGINE_HOURS}>Horamètre (heures)</option>
@@ -1202,56 +956,38 @@ export default function AssetsPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.3rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Compteur Initial
                   </label>
                   <input
                     type="number"
                     value={newAsset.initialMeterValue}
                     onChange={(e) => setNewAsset({ ...newAsset, initialMeterValue: Number(e.target.value) })}
-                    className="df-mono"
-                    style={{
-                      width: '100%',
-                      padding: '0.55rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.85rem',
-                    }}
+                    className="w-full font-mono px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.3rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Intervalle Révision OEM
                   </label>
                   <input
                     type="number"
                     value={newAsset.maintenanceIntervalValue}
                     onChange={(e) => setNewAsset({ ...newAsset, maintenanceIntervalValue: Number(e.target.value) })}
-                    className="df-mono"
-                    style={{
-                      width: '100%',
-                      padding: '0.55rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.85rem',
-                    }}
+                    className="w-full font-mono px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <Button variant="secondary" size="sm" type="button" onClick={() => setIsAddModalOpen(false)}>
                   Annuler
                 </Button>
                 <Button variant="primary" size="sm" type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Enregistrement...' : 'Créer l\'Actif'}
+                  {isSubmitting ? 'Enregistrement...' : 'Créer l’Actif'}
                 </Button>
               </div>
             </form>
@@ -1263,47 +999,30 @@ export default function AssetsPage() {
       {isEditModalOpen && editingAsset && (
         <div
           role="dialog"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 1000,
-            background: 'rgba(0, 0, 0, 0.65)',
-            backdropFilter: 'blur(3px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
         >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '540px',
-              padding: '1.75rem',
-              background: 'var(--df-bg-surface-1)',
-              borderRadius: 'var(--df-radius-lg)',
-              border: '1px solid var(--df-border-subtle)',
-              boxShadow: 'var(--df-shadow-lg)',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
-                Modifier l&apos;Actif : {editingAsset.code}
-              </h3>
+          <div className="w-full max-w-xl rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#111827] p-6 shadow-2xl my-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                  Modifier l’Actif : {editingAsset.code}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Mise à jour des métadonnées et intervalle d’entretien
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer' }}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
               >
                 <IconX size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEdit} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <form onSubmit={handleSaveEdit} className="space-y-4">
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.3rem' }}>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                   Code Actif / Matricule *
                 </label>
                 <input
@@ -1311,21 +1030,12 @@ export default function AssetsPage() {
                   required
                   value={editForm.code}
                   onChange={(e) => setEditForm({ ...editForm, code: e.target.value })}
-                  className="df-mono"
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem 0.75rem',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    borderRadius: 'var(--df-radius-sm)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.85rem',
-                  }}
+                  className="w-full font-mono px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.3rem' }}>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                   Désignation Actif *
                 </label>
                 <input
@@ -1333,76 +1043,44 @@ export default function AssetsPage() {
                   required
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem 0.75rem',
-                    background: 'var(--df-bg-surface-2)',
-                    border: '1px solid var(--df-border-subtle)',
-                    borderRadius: 'var(--df-radius-sm)',
-                    color: 'var(--df-text-main)',
-                    fontSize: '0.85rem',
-                  }}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.3rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Marque
                   </label>
                   <input
                     type="text"
                     value={editForm.brand}
                     onChange={(e) => setEditForm({ ...editForm, brand: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '0.55rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.85rem',
-                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.3rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Modèle
                   </label>
                   <input
                     type="text"
                     value={editForm.model}
                     onChange={(e) => setEditForm({ ...editForm, model: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '0.55rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.85rem',
-                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.3rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Catégorie
                   </label>
                   <select
                     value={editForm.category}
                     onChange={(e) => setEditForm({ ...editForm, category: e.target.value as AssetCategory })}
-                    style={{
-                      width: '100%',
-                      padding: '0.55rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.825rem',
-                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value={AssetCategory.HEAVY_TRUCK}>Poids Lourds</option>
                     <option value={AssetCategory.CONSTRUCTION_EQUIPMENT}>Engin BTP</option>
@@ -1411,28 +1089,19 @@ export default function AssetsPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--df-text-secondary)', marginBottom: '0.3rem' }}>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Intervalle Révision OEM
                   </label>
                   <input
                     type="number"
                     value={editForm.maintenanceIntervalValue}
                     onChange={(e) => setEditForm({ ...editForm, maintenanceIntervalValue: Number(e.target.value) })}
-                    className="df-mono"
-                    style={{
-                      width: '100%',
-                      padding: '0.55rem 0.75rem',
-                      background: 'var(--df-bg-surface-2)',
-                      border: '1px solid var(--df-border-subtle)',
-                      borderRadius: 'var(--df-radius-sm)',
-                      color: 'var(--df-text-main)',
-                      fontSize: '0.85rem',
-                    }}
+                    className="w-full font-mono px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <Button variant="secondary" size="sm" type="button" onClick={() => setIsEditModalOpen(false)}>
                   Annuler
                 </Button>
@@ -1449,54 +1118,25 @@ export default function AssetsPage() {
       {deleteConfirm && (
         <div
           role="dialog"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 1000,
-            background: 'rgba(0, 0, 0, 0.65)',
-            backdropFilter: 'blur(3px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4"
         >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '440px',
-              padding: '1.5rem',
-              background: 'var(--df-bg-surface-1)',
-              borderRadius: 'var(--df-radius-lg)',
-              border: '1px solid var(--df-status-danger)',
-              boxShadow: 'var(--df-shadow-lg)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem', color: 'var(--df-status-danger)' }}>
+          <div className="w-full max-w-md rounded-2xl border border-rose-500/40 bg-white dark:bg-[#111827] p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-3 text-rose-600 dark:text-rose-400">
               <IconAlertTriangle size={22} />
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0 }}>
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
                 Supprimer cet Actif ?
-              </h3>
+              </h2>
             </div>
-            <p style={{ fontSize: '0.85rem', color: 'var(--df-text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-              Confirmez-vous la suppression de l&apos;actif <strong>« {deleteConfirm.label} »</strong> ? L&apos;ensemble de l&apos;historique de télémétrie associé sera archivé.
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-5">
+              Confirmez-vous la suppression de l’actif <strong className="text-slate-900 dark:text-slate-100">« {deleteConfirm.label} »</strong> ? L’historique télématique associé sera archivé.
             </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem' }}>
-              <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(null)}>
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(null)}>
                 Annuler
               </Button>
               <button
                 onClick={handleDeleteConfirm}
-                style={{
-                  padding: '0.45rem 1rem',
-                  borderRadius: 'var(--df-radius-sm)',
-                  background: 'var(--df-status-danger)',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  fontWeight: 700,
-                  fontSize: '0.82rem',
-                  cursor: 'pointer',
-                }}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition-colors"
               >
                 Supprimer Définitivement
               </button>
