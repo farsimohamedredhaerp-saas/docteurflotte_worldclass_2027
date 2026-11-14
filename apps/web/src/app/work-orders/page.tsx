@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { WorkOrder } from '@docteurflotte/contracts';
 import { Navbar } from '@/components/navigation/Navbar';
@@ -22,13 +22,19 @@ import { EditWorkOrderModal } from './components/modals/EditWorkOrderModal';
 import { CompleteWorkOrderModal } from './components/modals/CompleteWorkOrderModal';
 import { buildWorkOrderDgiInvoice } from './lib/buildDgiInvoice';
 
+// Fallback sécurisé vers l'écran legacy piloté par Feature Flag
+const LegacyWorkOrdersPage = dynamic(
+  () => import('@/app/_legacy/work-orders/page.legacy').then((m) => m.default),
+  { ssr: false }
+);
+
 // Modale de facture fiscale DGI chargée dynamiquement (code splitting)
 const OfficialDgiInvoiceModal = dynamic(
   () => import('@/components/finance/OfficialDgiInvoiceModal').then((m) => m.OfficialDgiInvoiceModal),
   { ssr: false }
 );
 
-export default function WorkOrdersPage() {
+function WorkOrdersContainer() {
   const { session } = useDemoMode();
   const { tariffs } = useSystemConfig();
 
@@ -186,5 +192,25 @@ export default function WorkOrdersPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function WorkOrdersPage() {
+  const isRefactorEnabled = process.env.NEXT_PUBLIC_FF_REFACTOR_WORK_ORDERS !== 'false';
+
+  if (!isRefactorEnabled) {
+    return <LegacyWorkOrdersPage />;
+  }
+
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-50 dark:bg-[#090D16] flex items-center justify-center text-xs text-slate-400">
+          Chargement de l’atelier connecté...
+        </div>
+      }
+    >
+      <WorkOrdersContainer />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -12,10 +12,11 @@ export interface SearchInputProps {
   onClear?: () => void;
   autoFocus?: boolean;
   disabled?: boolean;
+  shortcutKey?: string;
 }
 
 /**
- * Champ de recherche accessible avec icône, bouton d'effacement rapide et raccourci visuel.
+ * Champ de recherche accessible avec icône, bouton d'effacement rapide et raccourci clavier configurable.
  */
 export const SearchInput: React.FC<SearchInputProps> = ({
   value,
@@ -25,16 +26,41 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   onClear,
   autoFocus = false,
   disabled = false,
+  shortcutKey,
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!shortcutKey || disabled) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeTag = document.activeElement?.tagName.toLowerCase();
+      const isEditable =
+        activeTag === 'input' ||
+        activeTag === 'textarea' ||
+        (document.activeElement as HTMLElement)?.isContentEditable;
+
+      if (e.key === shortcutKey && !isEditable) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [shortcutKey, disabled]);
+
   const handleClear = () => {
     onChange('');
     if (onClear) onClear();
+    inputRef.current?.focus();
   };
 
   return (
     <div className={cn('relative flex items-center w-full', className)}>
       <Search className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
       <input
+        ref={inputRef}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -50,7 +76,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
           'disabled:opacity-50 disabled:cursor-not-allowed'
         )}
       />
-      {value && !disabled && (
+      {value && !disabled ? (
         <button
           type="button"
           onClick={handleClear}
@@ -59,8 +85,11 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         >
           <X className="w-3.5 h-3.5" />
         </button>
-      )}
+      ) : shortcutKey && !disabled ? (
+        <kbd className="absolute right-2.5 hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded pointer-events-none">
+          {shortcutKey}
+        </kbd>
+      ) : null}
     </div>
   );
 };
-
