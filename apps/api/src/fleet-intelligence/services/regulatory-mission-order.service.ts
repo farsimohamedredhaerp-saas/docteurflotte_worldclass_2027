@@ -233,6 +233,7 @@ export class RegulatoryMissionOrderService {
         enactaExpiryDate: enactaDoc?.expiresAt || '2026-12-31',
         insurancePolicyNumber: insuranceDoc?.docNumber || 'SAA-POL-2026-001',
         insuranceCompany: 'Société Nationale d Assurance (SAA)',
+        insuranceExpiresAt: insuranceDoc?.expiresAt || '2026-12-31',
       },
       driver: {
         driverId: driver.driverId,

@@ -51,8 +51,19 @@ export {
   REGIONAL_TOWING_RATES_DZD,
   PREDICTIVE_FAILURE_MODES_CATALOG,
   DAILY_DOWNTIME_COST_DZD,
+  resolveDailyDowntimeCostDzd,
   DEFAULT_SUBSTITUTION_WEIGHTS,
   ALGERIA_FISCAL_RATES,
+  algerianNifSchema,
+  algerianRcSchema,
+  algerianPlateSchema,
+  algerianArticleImpositionSchema,
+  ENACTA_OFFICIAL_FEES_DZD,
+  ENACTA_INTERNAL_TCO_PROVISIONS_DZD,
+  ALGERIA_TRANSBORDER_FUEL_TAX_DZD,
+  NAFTAL_LUBRICANTS_INDICATIVE_DZD,
+  resolveVehicleAgeYears,
+  resolveEnactaPeriodicity,
 } from './algeria-regulatory';
 export { GLOBAL_COUNTRY_PACKS } from './country-packs';
 export {

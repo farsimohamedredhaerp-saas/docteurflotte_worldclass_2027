@@ -45,6 +45,11 @@ export interface AlgeriaWilayaProfile {
   brakeGradientFactor: number;
   batteryEvapFactor: number;
   description: string;
+  reductionFactorOil?: number; // alpha_dz_huile = 1 / oilArrheniusFactor
+  reductionFactorFilter?: number; // alpha_dz_filtre = 1 / dustSilicaFactor
+  networkBlindspotMaxKm?: number;
+  maxSurfaceTempC?: number;
+  pisteQuality?: 'ASPHALT_HIGHWAY' | 'NATIONAL_DEGRADED' | 'CORRUGATED_TRACK' | 'SAND_DUNES' | 'VOLCANIC_ROCKS';
 }
 
 export const ALGERIA_58_WILAYAS_PROFILES: AlgeriaWilayaProfile[] = [

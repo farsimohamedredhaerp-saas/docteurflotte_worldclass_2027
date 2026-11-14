@@ -11,6 +11,7 @@ import {
   ViolationDetail,
   WorkOrderGenerated,
 } from '../dto/dispatch-decision.dto';
+import { resolveVehicleAgeYears } from '@docteurflotte/contracts';
 
 interface WilayaRestrictionRule {
   wilayaCode: number;
@@ -179,9 +180,27 @@ export class AlgerianRegulatoryGateService {
         });
       }
 
-      // Contrôle de la périodicité légale ENACTA (6 mois Poids Lourds vs 12 mois VUL)
+      // Contrôle de la périodicité légale ENACTA (6 mois Poids Lourds vs 12 ou 24 mois VUL selon l'âge)
       if (docType === DocumentTypeDZ.CONTROLE_TECHNIQUE_ENACTA) {
-        const maxLegalDays = isHeavyCommercial ? 186 : 366;
+        const vehicleAge = resolveVehicleAgeYears(
+          (vehicle as { firstRegistrationDate?: string }).firstRegistrationDate,
+          vehicle.registrationPlate,
+        );
+        let maxLegalDays = 366;
+        if (isHeavyCommercial) {
+          maxLegalDays = 186; // 6 mois pour Poids Lourds, Semi-remorques, Bus, Citernes
+        } else if (
+          vehicle.category === AssetCategory.VAN ||
+          (vehicle.category as string) === 'COMMERCIAL_VAN_VUL' ||
+          (vehicle.category as string) === 'LIGHT_COMMERCIAL'
+        ) {
+          // Décret 03-223 Art. 16 et Décret 17-255 : VUL neufs (< 4 ans) = 24 mois (732 jours)
+          maxLegalDays = vehicleAge !== undefined && vehicleAge < 4 ? 732 : 366;
+        } else if (vehicle.category === AssetCategory.LIGHT_VEHICLE) {
+          // Décret 17-255 : Véhicules particuliers < 6 ans = 24 mois (732 jours)
+          maxLegalDays = vehicleAge !== undefined && vehicleAge < 6 ? 732 : 366;
+        }
+
         const spanDays = Math.round(
           (new Date(doc.expiresAt).getTime() - new Date(doc.issuedAt).getTime()) /
             (1000 * 3600 * 24),
@@ -191,7 +210,7 @@ export class AlgerianRegulatoryGateService {
             code: 'ENACTA_INVALID_PERIODICITY',
             gate: 'REGULATORY',
             severity: 'HARD_BLOCK',
-            messageFr: `Anomalie périodicité ENACTA sur ${vehicle.registrationPlate} : validité de ${spanDays} jours alors que la réglementation algérienne impose ${Math.floor(maxLegalDays / 30)} mois pour ${vehicle.category}.`,
+            messageFr: `Anomalie périodicité ENACTA sur ${vehicle.registrationPlate} : validité de ${spanDays} jours alors que la réglementation algérienne impose ${Math.floor(maxLegalDays / 30)} mois pour ${vehicle.category}${vehicleAge !== undefined ? ` (âge: ${vehicleAge} ans)` : ''}.`,
             blockingEntityId: vehicle.vehicleId,
           });
         }
@@ -539,10 +558,37 @@ export class AlgerianRegulatoryGateService {
       AssetCategory.HAZMAT_TANKER,
     ].includes(vehicle.category);
 
-    const periodicityMonths = isHeavy ? 6 : 12;
-    const legalReference = isHeavy
+    const vehicleAge = resolveVehicleAgeYears(
+      (vehicle as { firstRegistrationDate?: string }).firstRegistrationDate,
+      vehicle.registrationPlate,
+    );
+
+    let periodicityMonths = isHeavy ? 6 : 12;
+    let legalReference = isHeavy
       ? 'Décret exécutif 03-223 Art. 7 (Poids Lourds semestriel)'
-      : 'Décret exécutif 03-223 Art. 9 (VUL commercial annuel)';
+      : 'Décret exécutif 03-223 Art. 16 (VUL commercial annuel)';
+
+    if (
+      !isHeavy &&
+      (vehicle.category === AssetCategory.VAN ||
+        (vehicle.category as string) === 'COMMERCIAL_VAN_VUL' ||
+        (vehicle.category as string) === 'LIGHT_COMMERCIAL')
+    ) {
+      if (vehicleAge !== undefined && vehicleAge < 4) {
+        periodicityMonths = 24;
+        legalReference = 'Décret exécutif 03-223 Art. 16 & Décret 17-255 (VUL neuf < 4 ans biannuel)';
+      }
+    } else if (vehicle.category === AssetCategory.LIGHT_VEHICLE) {
+      if (vehicleAge !== undefined && vehicleAge < 2) {
+        periodicityMonths = 24;
+        legalReference = 'Décret exécutif 17-255 (Véhicule particulier neuf < 2 ans exempté)';
+      } else if (vehicleAge !== undefined && vehicleAge < 6) {
+        periodicityMonths = 24;
+        legalReference = 'Décret exécutif 17-255 (Véhicule particulier 2 à 6 ans biannuel)';
+      } else {
+        legalReference = 'Décret exécutif 17-255 (Véhicule particulier > 6 ans annuel)';
+      }
+    }
 
     const enactaDoc = vehicle.documents.find(
       (d) => d.docType === DocumentTypeDZ.CONTROLE_TECHNIQUE_ENACTA,
