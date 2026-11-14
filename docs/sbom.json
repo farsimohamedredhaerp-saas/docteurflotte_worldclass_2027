@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX-lite",
   "specVersion": "1.4",
-  "serialNumber": "urn:uuid:docteurflotte-sbom-1794662635863",
+  "serialNumber": "urn:uuid:docteurflotte-sbom-1794665481915",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-14T13:23:55.863Z",
+    "timestamp": "2026-11-14T14:11:21.915Z",
     "component": {
       "type": "application",
       "name": "docteurflotte-monorepo",
