@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AuthHeader } from '../../components/auth/AuthHeader';
 import { AuthClient } from '../../lib/api-auth';
 import { Button } from '../../components/Button';
+import { IconShieldCheck, IconAlertTriangle } from '../../components/navigation/TechIcons';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -116,8 +117,9 @@ export default function LoginPage() {
           }}
         >
           <div>
-            <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, letterSpacing: '0.04em' }}>
-              👑 COMPTE SUPERADMIN PLATEFORME
+            <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <IconShieldCheck size={12} className="text-amber-400" />
+              COMPTE SUPERADMIN PLATEFORME
             </div>
             <div style={{ fontSize: '12px', color: '#38bdf8', fontWeight: 600 }}>
               admin@farsi.dz
@@ -157,7 +159,7 @@ export default function LoginPage() {
               gap: '8px',
             }}
           >
-            <span>⚠️</span>
+            <IconAlertTriangle size={16} />
             <span>{error}</span>
           </div>
         )}

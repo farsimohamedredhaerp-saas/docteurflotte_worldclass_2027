@@ -11,6 +11,7 @@ import {
   IconSlidersHorizontal,
   IconShieldCheck,
   IconChevronDown,
+  IconX,
 } from './TechIcons';
 
 interface SubFeature {
@@ -418,10 +419,10 @@ export function NavFeaturesMenu() {
                       border: 'none',
                       color: 'var(--df-text-muted)',
                       cursor: 'pointer',
-                      fontSize: '0.9rem',
+                      padding: '2px',
                     }}
                   >
-                    ✕
+                    <IconX size={14} />
                   </button>
                 </div>
 

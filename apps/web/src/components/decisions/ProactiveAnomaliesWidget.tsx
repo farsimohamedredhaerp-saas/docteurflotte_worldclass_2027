@@ -297,7 +297,7 @@ export function ProactiveAnomaliesWidget() {
                     }}
                   >
                     {card.status === 'WORK_ORDER_CREATED'
-                      ? '✓ Ordre de Travail Créé'
+                      ? 'Ordre de Travail Créé'
                       : card.status === 'SNOOZED'
                       ? 'Mise en veille 72h'
                       : 'Zero-Prompt Matinal 08h00'}
@@ -639,7 +639,7 @@ export function ProactiveAnomaliesWidget() {
                       color: delta1 <= 5 ? '#15803D' : '#64748B',
                     }}
                   >
-                    {delta1 <= 5 ? '✓ CONCORDE' : '✕ ÉCART'}
+                    {delta1 <= 5 ? 'CONCORDE' : 'ÉCART'}
                   </span>
                 </div>
 
@@ -674,7 +674,7 @@ export function ProactiveAnomaliesWidget() {
                       color: delta2 <= 5 ? '#15803D' : '#64748B',
                     }}
                   >
-                    {delta2 <= 5 ? '✓ CONCORDE' : '✕ ÉCART'}
+                    {delta2 <= 5 ? 'CONCORDE' : 'ÉCART'}
                   </span>
                 </div>
 
@@ -709,7 +709,7 @@ export function ProactiveAnomaliesWidget() {
                       color: delta3 <= 5 ? '#15803D' : '#64748B',
                     }}
                   >
-                    {delta3 <= 5 ? '✓ CONCORDE' : '✕ ÉCART'}
+                    {delta3 <= 5 ? 'CONCORDE' : 'ÉCART'}
                   </span>
                 </div>
               </div>
@@ -732,7 +732,7 @@ export function ProactiveAnomaliesWidget() {
                     color: isReconciled ? '#065F46' : '#991B1B',
                   }}
                 >
-                  {isReconciled ? '✓ STATUT : RÉCONCILIÉ AUTOMATIQUE' : '⚠ STATUT : RELECTURE MANUELLE REQUISE'}
+                  {isReconciled ? 'STATUT : RÉCONCILIÉ AUTOMATIQUE' : 'STATUT : RELECTURE MANUELLE REQUISE'}
                 </div>
                 <div style={{ fontSize: '11px', marginTop: '4px', color: isReconciled ? '#047857' : '#B91C1C' }}>
                   {isReconciled

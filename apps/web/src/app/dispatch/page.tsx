@@ -19,6 +19,23 @@ import {
   DocumentTypeDZ,
 } from '@/lib/api-fleet-intelligence';
 import { PrintableMissionOrder } from '@/components/dispatch/PrintableMissionOrder';
+import {
+  IconFileText,
+  IconCpu,
+  IconCompass,
+  IconTruck,
+  IconLayers,
+  IconAlertTriangle,
+  IconThermometer,
+  IconRefreshCw,
+  IconZap,
+  IconShieldCheck,
+  IconSearch,
+  IconCheckCircle,
+  IconAlertOctagon,
+  IconWrench,
+  IconCheck,
+} from '@/components/navigation/TechIcons';
 
 export default function DispatchPage() {
   const { isDemoMode, isGuest, session } = useDemoMode();
@@ -252,7 +269,7 @@ export default function DispatchPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.3)', borderRadius: '20px', fontSize: '12px', fontWeight: 700, color: 'var(--df-accent-blue)', marginBottom: '8px' }}>
-            <span>📜</span>
+            <IconFileText size={14} />
             <span>RÉGLEMENTATION ALGORITHMIQUE & DISPATCH (GATE DZ)</span>
           </div>
           <h1 style={{ fontSize: '26px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0, letterSpacing: '-0.02em' }}>
@@ -276,9 +293,12 @@ export default function DispatchPage() {
               fontWeight: 600,
               textDecoration: 'none',
               boxShadow: 'var(--df-shadow-sm)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            🧬 Cockpit Maintenance 5.0
+            <IconCpu size={14} /> Cockpit Maintenance 5.0
           </Link>
           <Link
             href="/guide#field-modules"
@@ -292,9 +312,12 @@ export default function DispatchPage() {
               fontWeight: 600,
               textDecoration: 'none',
               boxShadow: 'var(--df-shadow-sm)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            📖 Référentiel Réglementaire
+            <IconFileText size={14} /> Référentiel Réglementaire
           </Link>
         </div>
       </div>
@@ -325,7 +348,7 @@ export default function DispatchPage() {
         >
           <div style={{ maxWidth: '640px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <span style={{ fontSize: '1.4rem' }}>🚛</span>
+              <IconTruck size={20} className="text-blue-500" />
               <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                 Votre parc est vierge
               </h3>
@@ -361,7 +384,7 @@ export default function DispatchPage() {
         {/* COLONNE GAUCHE : FORMULAIRE INTELLIGENT */}
         <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '14px', padding: '24px', boxShadow: 'var(--df-shadow-sm)' }}>
           <h2 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--df-text-main)', margin: '0 0 18px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>📋</span> Paramètres de la Mission de Transport
+            <IconLayers size={18} /> Paramètres de la Mission de Transport
           </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -447,14 +470,14 @@ export default function DispatchPage() {
               </div>
             ) : (
               <div style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '12px', borderRadius: '8px', fontSize: '12px', color: 'var(--df-text-secondary)' }}>
-                ℹ️ Aucun véhicule assigné. En mode réel, veuillez créer vos actifs dans la section <Link href="/assets" style={{ color: 'var(--df-brand-blue)', fontWeight: 600 }}>Parc &amp; Actifs</Link> ou activer le Mode Démonstration dans la barre supérieure.
+                Aucun véhicule assigné. En mode réel, veuillez créer vos actifs dans la section <Link href="/assets" style={{ color: 'var(--df-brand-blue)', fontWeight: 600 }}>Parc &amp; Actifs</Link> ou activer le Mode Démonstration dans la barre supérieure.
               </div>
             )}
 
             {/* ITINÉRAIRE (ORIGINE / DESTINATION / TRANSIT) */}
             <div style={{ borderTop: '1px solid var(--df-border-subtle)', paddingTop: '14px' }}>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '10px' }}>
-                🗺️ Itinéraire National (58 Wilayas)
+              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <IconCompass size={16} /> Itinéraire National (58 Wilayas)
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px', marginBottom: '10px' }}>
@@ -557,7 +580,9 @@ export default function DispatchPage() {
                     onChange={(e) => setRequiresHazmat(e.target.checked)}
                     style={{ accentColor: '#dc2626' }}
                   />
-                  <span>⚠️ ADR (Matières Dangereuses)</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <IconAlertTriangle size={13} className="text-red-500" /> ADR (Matières Dangereuses)
+                  </span>
                 </label>
 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer', color: 'var(--df-text-secondary)' }}>
@@ -567,7 +592,9 @@ export default function DispatchPage() {
                     onChange={(e) => setRequiresReefer(e.target.checked)}
                     style={{ accentColor: 'var(--df-accent-blue)' }}
                   />
-                  <span>❄️ Frigo / ATP (Pharmaceutique)</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <IconThermometer size={13} className="text-blue-500" /> Frigo / ATP (Pharmaceutique)
+                  </span>
                 </label>
               </div>
             </div>
@@ -594,7 +621,13 @@ export default function DispatchPage() {
                 transition: 'all 0.15s ease',
               }}
             >
-              <span>{isEvaluating ? '⏳' : vehicles.length === 0 ? '🚫' : '⚡'}</span>
+              {isEvaluating ? (
+                <IconRefreshCw size={15} className="animate-spin" />
+              ) : vehicles.length === 0 ? (
+                <IconAlertOctagon size={15} />
+              ) : (
+                <IconZap size={15} />
+              )}
               <span>
                 {isEvaluating
                   ? 'Évaluation des 4 Portes Réglementaires...'
@@ -642,10 +675,10 @@ export default function DispatchPage() {
                     }`,
                   }}
                 >
-                  {decisionResult.decisionOutcome === 'APPROVED_AS_REQUESTED' && '✓ MISSION APPROUVÉE CONFORME'}
-                  {decisionResult.decisionOutcome === 'APPROVED_WITH_ETD_OR_ROUTE_SHIFT' && '⚠️ APPROUVÉ AVEC DÉCALAGE HORAIRE'}
-                  {decisionResult.decisionOutcome === 'SUBSTITUTED_AUTOMATICALLY' && '🔄 SUBSTITUTION AUTOMATIQUE TOPSIS'}
-                  {decisionResult.decisionOutcome === 'REJECTED_NO_ELIGIBLE_ASSET' && '🚫 MISSION REJETÉE SANS ACTIF VALIDE'}
+                  {decisionResult.decisionOutcome === 'APPROVED_AS_REQUESTED' && 'MISSION APPROUVÉE CONFORME'}
+                  {decisionResult.decisionOutcome === 'APPROVED_WITH_ETD_OR_ROUTE_SHIFT' && 'APPROUVÉ AVEC DÉCALAGE HORAIRE'}
+                  {decisionResult.decisionOutcome === 'SUBSTITUTED_AUTOMATICALLY' && 'SUBSTITUTION AUTOMATIQUE TOPSIS'}
+                  {decisionResult.decisionOutcome === 'REJECTED_NO_ELIGIBLE_ASSET' && 'MISSION REJETÉE SANS ACTIF VALIDE'}
                 </div>
               </div>
 
@@ -668,7 +701,7 @@ export default function DispatchPage() {
 
                 {decisionResult.routeAdvisoryNotes && decisionResult.routeAdvisoryNotes.length > 0 && (
                   <div style={{ marginTop: '12px', borderTop: '1px dashed var(--df-border-medium)', paddingTop: '8px', fontSize: '12px', color: '#0284c7' }}>
-                    💡 Avis Routier : {decisionResult.routeAdvisoryNotes.join(' • ')}
+                    Avis Routier : {decisionResult.routeAdvisoryNotes.join(' • ')}
                   </div>
                 )}
               </div>
@@ -676,8 +709,8 @@ export default function DispatchPage() {
               {/* VIOLATIONS & BLOCAGES DÉTECTÉS */}
               {decisionResult.violationsDetected && decisionResult.violationsDetected.length > 0 && (
                 <div style={{ marginBottom: '18px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#dc2626', marginBottom: '8px' }}>
-                    🚫 Violations Réglementaires & Techniques Bloquantes :
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#dc2626', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <IconAlertOctagon size={15} /> Violations Réglementaires & Techniques Bloquantes :
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {decisionResult.violationsDetected.map((v, i) => (
@@ -692,8 +725,8 @@ export default function DispatchPage() {
               {/* ORDRES DE TRAVAIL (OT) GÉNÉRÉS AUTOMATIQUEMENT */}
               {decisionResult.generatedWorkOrders && decisionResult.generatedWorkOrders.length > 0 && (
                 <div style={{ marginBottom: '18px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#d97706', marginBottom: '8px' }}>
-                    🔧 Ordres de Travail (OT) d&apos;Atelier Déclenchés :
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#d97706', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <IconWrench size={15} /> Ordres de Travail (OT) d&apos;Atelier Déclenchés :
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {decisionResult.generatedWorkOrders.map((ot, idx) => (
@@ -709,8 +742,8 @@ export default function DispatchPage() {
               {/* SUBSTITUTIONS TOPSIS RECOMMANDÉES */}
               {decisionResult.rankedSubstitutions && decisionResult.rankedSubstitutions.length > 0 && (
                 <div style={{ marginBottom: '18px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--df-accent-blue)', marginBottom: '8px' }}>
-                    🔄 Classement Multicritère TOPSIS des Véhicules de Remplacement :
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--df-accent-blue)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <IconRefreshCw size={15} /> Classement Multicritère TOPSIS des Véhicules de Remplacement :
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {decisionResult.rankedSubstitutions.slice(0, 2).map((sub, i) => (
@@ -755,14 +788,16 @@ export default function DispatchPage() {
                     boxShadow: 'var(--df-shadow-sm)',
                   }}
                 >
-                  <span>📜</span>
+                  <IconFileText size={16} />
                   <span>Générer l&apos;Ordre de Mission Officiel Bilingue (FR/AR) & QR HMAC</span>
                 </button>
               )}
             </div>
           ) : (
             <div style={{ background: 'var(--df-bg-surface-1)', border: '1px dashed var(--df-border-medium)', borderRadius: '14px', padding: '40px 24px', textAlign: 'center', color: 'var(--df-text-secondary)', marginBottom: '24px' }}>
-              <div style={{ fontSize: '36px', marginBottom: '10px' }}>⚖️</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px', color: 'var(--df-text-muted)' }}>
+                <IconShieldCheck size={36} />
+              </div>
               <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: '0 0 6px 0' }}>
                 En Attente d&apos;Évaluation Réglementaire
               </h3>
@@ -775,7 +810,7 @@ export default function DispatchPage() {
           {/* SIMULATEUR DE VÉRIFICATION HORS-LIGNE POUR LA GENDARMERIE / DGSN */}
           <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '14px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '18px' }}>🛡️</span>
+              <IconShieldCheck size={18} className="text-blue-500" />
               <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                 Vérificateur Hors-Ligne (Contrôle Routier Gendarmerie / DGSN)
               </h3>
@@ -825,15 +860,27 @@ export default function DispatchPage() {
                   borderWidth: '1px',
                   borderStyle: 'solid',
                   borderColor: 'var(--df-border-medium)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
                 }}
               >
-                🔍 Vérifier l&apos;Authenticité Hors-Ligne
+                <IconSearch size={14} /> Vérifier l&apos;Authenticité Hors-Ligne
               </button>
 
               {verificationOutput && (
                 <div style={{ marginTop: '8px', padding: '10px 12px', borderRadius: '6px', background: verificationOutput.isValid ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', border: `1px solid ${verificationOutput.isValid ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, fontSize: '12px' }}>
-                  <div style={{ fontWeight: 800, color: verificationOutput.isValid ? '#059669' : '#dc2626' }}>
-                    {verificationOutput.isValid ? '✓ ORDRE DE MISSION AUTHENTIQUE & VALIDE' : `✗ INVALIDITÉ : ${verificationOutput.reason}`}
+                  <div style={{ fontWeight: 800, color: verificationOutput.isValid ? '#059669' : '#dc2626', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {verificationOutput.isValid ? (
+                      <>
+                        <IconCheck size={14} /> ORDRE DE MISSION AUTHENTIQUE & VALIDE
+                      </>
+                    ) : (
+                      <>
+                        <IconAlertOctagon size={14} /> INVALIDITÉ : {verificationOutput.reason}
+                      </>
+                    )}
                   </div>
                   {verificationOutput.decodedOrder && (
                     <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--df-text-secondary)', lineHeight: 1.5 }}>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AuthClient } from '../../../lib/api-auth';
 import { PlatformAdminClient } from '../../../lib/api-platform-admin';
 import { PlatformTelematicsGateway } from '@docteurflotte/contracts';
+import { IconRadio, IconRefreshCw, IconCheck } from '../../../components/navigation/TechIcons';
 
 export default function AdminGatewaysPage() {
   const [gateways, setGateways] = useState<PlatformTelematicsGateway[]>([]);
@@ -61,7 +62,7 @@ export default function AdminGatewaysPage() {
               textDecoration: 'none',
             }}
           >
-            <span>📱</span>
+            <IconRadio size={14} />
             <span>Catalogue Matériels Compatibles</span>
           </Link>
 
@@ -76,9 +77,13 @@ export default function AdminGatewaysPage() {
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            🔄 Actualiser l'état
+            <IconRefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+            Actualiser l'état
           </button>
         </div>
       </div>
@@ -170,8 +175,15 @@ export default function AdminGatewaysPage() {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '12px', color: gw.is_active_gateway ? '#34d399' : 'var(--df-text-muted)', fontWeight: 600 }}>
-                {gw.is_active_gateway ? '✓ Passerelle Active par Défaut' : 'Mode Secours (Failover)'}
+              <span style={{ fontSize: '12px', color: gw.is_active_gateway ? '#34d399' : 'var(--df-text-muted)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                {gw.is_active_gateway ? (
+                  <>
+                    <IconCheck size={13} />
+                    Passerelle Active par Défaut
+                  </>
+                ) : (
+                  'Mode Secours (Failover)'
+                )}
               </span>
 
               <a

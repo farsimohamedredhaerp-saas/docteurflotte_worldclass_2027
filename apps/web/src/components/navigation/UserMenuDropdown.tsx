@@ -5,6 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthUser, AuthResponse } from '@docteurflotte/contracts';
 import { AuthClient } from '../../lib/api-auth';
+import {
+  IconShieldCheck,
+  IconZap,
+  IconSlidersHorizontal,
+  IconNavigation,
+  IconX,
+} from './TechIcons';
 
 interface UserMenuDropdownProps {
   user: AuthUser | null;
@@ -243,7 +250,7 @@ export function UserMenuDropdown({ user, tenant, onLogout }: UserMenuDropdownPro
                   marginBottom: '0.2rem',
                 }}
               >
-                <span>👑</span>
+                <IconShieldCheck size={14} className="text-amber-400" />
                 <span>Console SuperAdmin SaaS</span>
               </Link>
             )}
@@ -267,7 +274,7 @@ export function UserMenuDropdown({ user, tenant, onLogout }: UserMenuDropdownPro
               onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(99, 102, 241, 0.16)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(99, 102, 241, 0.08)')}
             >
-              <span>⚡</span>
+              <IconZap size={14} />
               <span>Surveillance IA Ollama (Qwen)</span>
             </Link>
             <Link
@@ -289,7 +296,7 @@ export function UserMenuDropdown({ user, tenant, onLogout }: UserMenuDropdownPro
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--df-bg-surface-2)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <span>⚙️</span>
+              <IconSlidersHorizontal size={14} />
               <span>Paramètres & Barèmes</span>
             </Link>
             <Link
@@ -311,7 +318,7 @@ export function UserMenuDropdown({ user, tenant, onLogout }: UserMenuDropdownPro
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--df-bg-surface-2)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <span>🚀</span>
+              <IconNavigation size={14} />
               <span>Assistant d&apos;Onboarding</span>
             </Link>
           </div>
@@ -346,7 +353,7 @@ export function UserMenuDropdown({ user, tenant, onLogout }: UserMenuDropdownPro
                 e.currentTarget.style.color = 'var(--df-status-danger)';
               }}
             >
-              <span>🚪</span>
+              <IconX size={14} />
               <span>Se déconnecter</span>
             </button>
           </div>

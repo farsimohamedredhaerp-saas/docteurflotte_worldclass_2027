@@ -23,6 +23,12 @@ import {
   LoadingState,
   Toast,
 } from '@/components/digital-twin';
+import {
+  IconAlertTriangle,
+  IconAlertOctagon,
+  IconCheck,
+  IconFileText,
+} from '@/components/navigation/TechIcons';
 
 // -----------------------------------------------------------------------------
 // Styles — design tokens uniquement, aucun magic number métier en dur
@@ -278,14 +284,14 @@ export default function DigitalTwinPage() {
       <>
         {isDefaultConfig && (
           <div role="status" style={{ ...styles.banner, ...styles.warningBanner }}>
-            <span aria-hidden="true">⚠</span>
+            <IconAlertTriangle size={14} />
             <span>{t('digitalTwin.config.defaultBanner')}</span>
           </div>
         )}
 
         {errorMessage && (
           <div role="alert" style={{ ...styles.banner, ...styles.errorBanner }}>
-            <span aria-hidden="true">⛔</span>
+            <IconAlertOctagon size={14} />
             <span>{errorMessage}</span>
           </div>
         )}
@@ -302,7 +308,9 @@ export default function DigitalTwinPage() {
               ...(shareCopied ? styles.toolbarButtonDisabled : {}),
             }}
           >
-            <span aria-hidden="true">{shareCopied ? '✓' : '⧉'}</span>
+            <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center' }}>
+              {shareCopied ? <IconCheck size={14} /> : <IconFileText size={14} />}
+            </span>
             <span>
               {shareCopied ? t('digitalTwin.share.copiedShort') : t('digitalTwin.share.copy')}
             </span>

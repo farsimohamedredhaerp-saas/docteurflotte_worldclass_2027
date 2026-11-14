@@ -3,6 +3,7 @@ import { DigitalTwinFinancialArbitrage } from '@docteurflotte/contracts';
 import { CalculationProofButton } from '../decisions';
 import { formatCurrency } from '../../lib/currency-formatter';
 import { useI18n } from '../../lib/i18n';
+import { IconCreditCard, IconSliders } from '../navigation/TechIcons';
 
 export interface FinancialArbitrageCardProps {
   financialArbitrage: DigitalTwinFinancialArbitrage;
@@ -42,9 +43,9 @@ export const FinancialArbitrageCard: React.FC<FinancialArbitrageCardProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '26px', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '10px', padding: '4px 10px' }}>
-            💰
-          </span>
+          <div style={{ width: '38px', height: '38px', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <IconCreditCard size={20} className="text-emerald-400" />
+          </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <h4 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: '#f8fafc' }}>
@@ -159,7 +160,7 @@ export const FinancialArbitrageCard: React.FC<FinancialArbitrageCardProps> = ({
             gap: '8px',
           }}
         >
-          <span>🛠️</span>
+          <IconSliders size={14} />
           <span>{t('digitalTwin.arbitrage.openWorkOrder', { currency })}</span>
         </button>
       </div>

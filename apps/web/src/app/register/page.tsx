@@ -7,6 +7,7 @@ import { AuthHeader } from '../../components/auth/AuthHeader';
 import { PasswordStrengthIndicator } from '../../components/auth/PasswordStrengthIndicator';
 import { AuthClient } from '../../lib/api-auth';
 import { Button } from '../../components/Button';
+import { IconAlertTriangle } from '../../components/navigation/TechIcons';
 import { ActivityPack } from '@docteurflotte/contracts';
 
 export default function RegisterPage() {
@@ -106,7 +107,7 @@ export default function RegisterPage() {
               gap: '8px',
             }}
           >
-            <span>⚠️</span>
+            <IconAlertTriangle size={16} />
             <span>{error}</span>
           </div>
         )}

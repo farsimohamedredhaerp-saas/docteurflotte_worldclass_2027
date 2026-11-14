@@ -3,29 +3,59 @@
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Navbar } from '../../components/navigation/Navbar';
+import {
+  IconActivity,
+  IconTruck,
+  IconSliders,
+  IconCpu,
+  IconZap,
+  IconSparkles,
+  IconRadio,
+  IconBox,
+  IconTerminal,
+  IconShieldCheck,
+  IconTrendingUp,
+  IconCompass,
+  IconUsers,
+  IconHelpCircle,
+  IconFuel,
+  IconNavigation,
+  IconAlertTriangle,
+  IconFileText,
+  IconAlertOctagon,
+  IconCreditCard,
+  IconCheck,
+  IconX,
+  IconThermometer,
+  IconFlame,
+  IconWrench,
+  IconLayers,
+  IconLock,
+  IconSearch,
+} from '../../components/navigation/TechIcons';
 
 interface DocSection {
   id: string;
   title: string;
   badge: string;
-  icon: string;
+  Icon: React.ComponentType<{ size?: number; className?: string }>;
 }
 
 const SECTIONS: DocSection[] = [
-  { id: 'vision', title: '1. Vision & Modèle : L\'Ère de la Maintenance 5.0', badge: 'MONOPOLE 5.0', icon: '🧬' },
-  { id: 'modes', title: '2. Les 3 Modes d’Exploitation (0 / 1 / 2)', badge: 'HARDWARE-AGNOSTIC', icon: '🚗' },
-  { id: 'decision-engine', title: '3. Le Cœur Décisionnel (SAD → ADS)', badge: 'ARBITRAGE DZD', icon: '🧠' },
-  { id: 'physics-algorithms', title: '4. Les 6 Algorithmes Physiques & VHI', badge: 'DÉTERMINISTE', icon: '🔬' },
-  { id: 'tech-innovations', title: '5. Innovations Technologiques de Rupture (Monopole 0 $ / 0 DA)', badge: 'BREVETABLE', icon: '💡' },
-  { id: 'ai-sovereign', title: '6. IA Souveraine & Les 7 Piliers d\'Observabilité', badge: '7 PILIERS IA', icon: '⚡' },
-  { id: 'digital-twin', title: '7. Jumeau Numérique & Multi-Climats', badge: 'STRESS 58 WILAYAS', icon: '🌐' },
-  { id: 'field-modules', title: '8. Télémétrie Terrain : Naftal, Froid, Dispatch', badge: 'OPÉRATIONNEL', icon: '📦' },
-  { id: 'tech-architecture', title: '9. Architecture Système & Pipeline', badge: 'FULL-STACK', icon: '🏗️' },
-  { id: 'security-compliance', title: '10. Souveraineté & Loi 18-07 ANPDP', badge: 'JORADP / RLS', icon: '🛡️' },
-  { id: 'competitive-matrix', title: '11. Benchmark Mondial vs Samsara / Geotab', badge: 'CONCURRENCE', icon: '🏆' },
-  { id: 'strategic-roadmap', title: '12. Vision Futuriste & Roadmap 2027-2030', badge: 'INNOVATION', icon: '🚀' },
-  { id: 'roles-workflows', title: '13. Guide Opérationnel par Rôle Métier', badge: 'WORKFLOWS', icon: '👥' },
-  { id: 'faq', title: '14. FAQ & Bonnes Pratiques', badge: 'SUPPORT', icon: '❓' },
+  { id: 'vision', title: '1. Vision & Modèle : L\'Ère de la Maintenance 5.0', badge: 'MONOPOLE 5.0', Icon: IconActivity },
+  { id: 'modes', title: '2. Les 3 Modes d’Exploitation (0 / 1 / 2)', badge: 'HARDWARE-AGNOSTIC', Icon: IconTruck },
+  { id: 'decision-engine', title: '3. Le Cœur Décisionnel (SAD → ADS)', badge: 'ARBITRAGE DZD', Icon: IconSliders },
+  { id: 'physics-algorithms', title: '4. Les 6 Algorithmes Physiques & VHI', badge: 'DÉTERMINISTE', Icon: IconCpu },
+  { id: 'tech-innovations', title: '5. Innovations Technologiques de Rupture (Monopole 0 $ / 0 DA)', badge: 'BREVETABLE', Icon: IconZap },
+  { id: 'ai-sovereign', title: '6. IA Souveraine & Les 7 Piliers d\'Observabilité', badge: '7 PILIERS IA', Icon: IconSparkles },
+  { id: 'digital-twin', title: '7. Jumeau Numérique & Multi-Climats', badge: 'STRESS 58 WILAYAS', Icon: IconRadio },
+  { id: 'field-modules', title: '8. Télémétrie Terrain : Naftal, Froid, Dispatch', badge: 'OPÉRATIONNEL', Icon: IconBox },
+  { id: 'tech-architecture', title: '9. Architecture Système & Pipeline', badge: 'FULL-STACK', Icon: IconTerminal },
+  { id: 'security-compliance', title: '10. Souveraineté & Loi 18-07 ANPDP', badge: 'JORADP / RLS', Icon: IconShieldCheck },
+  { id: 'competitive-matrix', title: '11. Benchmark Mondial vs Samsara / Geotab', badge: 'CONCURRENCE', Icon: IconTrendingUp },
+  { id: 'strategic-roadmap', title: '12. Vision Futuriste & Roadmap 2027-2030', badge: 'INNOVATION', Icon: IconCompass },
+  { id: 'roles-workflows', title: '13. Guide Opérationnel par Rôle Métier', badge: 'WORKFLOWS', Icon: IconUsers },
+  { id: 'faq', title: '14. FAQ & Bonnes Pratiques', badge: 'SUPPORT', Icon: IconHelpCircle },
 ];
 
 export default function GuidePage() {
@@ -108,7 +138,7 @@ export default function GuidePage() {
                 border: '1px solid var(--df-status-ok-border)',
               }}
             >
-              ✓ Conforme Loi 18-07 ANPDP • DGI • ENACTA
+              Conforme Loi 18-07 ANPDP • DGI • ENACTA
             </span>
             <span
               style={{
@@ -174,7 +204,7 @@ export default function GuidePage() {
                 }}
               />
               <span style={{ position: 'absolute', left: '12px', top: '10px', fontSize: '15px', color: 'var(--df-text-muted)' }}>
-                🔍
+                
               </span>
             </div>
 
@@ -194,7 +224,7 @@ export default function GuidePage() {
                 boxShadow: 'var(--df-shadow-sm)',
               }}
             >
-              <span>🧠</span>
+              <IconSparkles size={14} className="text-indigo-400" />
               <span>Ask DocteurFlotte Copilot</span>
             </Link>
 
@@ -214,7 +244,7 @@ export default function GuidePage() {
                 border: '1px solid var(--df-border-medium)',
               }}
             >
-              <span>⚡</span>
+              <IconCpu size={14} className="text-cyan-400" />
               <span>Observabilité IA Ollama</span>
             </Link>
 
@@ -234,7 +264,7 @@ export default function GuidePage() {
                 border: '1px solid var(--df-border-medium)',
               }}
             >
-              <span>⛽</span>
+              <IconFuel size={14} className="text-amber-400" />
               <span>Scanner Reçus Naftal (OCR)</span>
             </Link>
 
@@ -254,7 +284,7 @@ export default function GuidePage() {
                 border: '1px solid var(--df-border-medium)',
               }}
             >
-              <span>🌐</span>
+              <IconRadio size={14} className="text-emerald-400" />
               <span>Jumeau Numérique</span>
             </Link>
 
@@ -274,7 +304,7 @@ export default function GuidePage() {
                 border: '1px solid var(--df-border-medium)',
               }}
             >
-              <span>🗺️</span>
+              <IconNavigation size={14} className="text-blue-400" />
               <span>Cockpit MapLibre Corridors</span>
             </Link>
           </div>
@@ -361,7 +391,7 @@ export default function GuidePage() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                    <span style={{ fontSize: '15px' }}>{sec.icon}</span>
+                    <sec.Icon size={16} className="text-indigo-400 shrink-0" />
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {sec.title}
                     </span>
@@ -394,7 +424,7 @@ export default function GuidePage() {
           {/* SECTION 1: VISION & PHILOSOPHIE */}
           <section id="vision" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>🧬</span>
+              <IconActivity size={24} className="text-indigo-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 1. Vision &amp; Modèle : L&apos;Ère de la Maintenance 5.0 Souveraine
               </h2>
@@ -418,7 +448,7 @@ export default function GuidePage() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                <span style={{ fontSize: '18px' }}>⚡</span>
+                <IconZap size={18} className="text-amber-400" />
                 <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#065F46', margin: 0 }}>
                   L&apos;Échelle des 5 Générations de Maintenance Industrielle
                 </h3>
@@ -471,7 +501,7 @@ export default function GuidePage() {
                 }}
               >
                 <div style={{ fontSize: '15px', fontWeight: 700, color: '#dc2626', marginBottom: '10px' }}>
-                  ❌ Les Outils Traditionnels (Pistage Passif 4.0)
+                  Approche Traditionnelle (Pistage Passif 4.0)
                 </div>
                 <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.7 }}>
                   <li>Obligation d'acheter et d'installer des boîtiers GPS sur tout le parc.</li>
@@ -493,7 +523,7 @@ export default function GuidePage() {
                 }}
               >
                 <div style={{ fontSize: '15px', fontWeight: 700, color: '#059669', marginBottom: '10px' }}>
-                  ✨ Le Paradigme DocteurFlotte (Maintenance 5.0)
+                  Le Paradigme DocteurFlotte (Maintenance 5.0)
                 </div>
                 <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.7 }}>
                   <li><strong>Opérationnel dès le Jour 1 en Mode 0</strong> sans aucun investissement matériel.</li>
@@ -509,7 +539,7 @@ export default function GuidePage() {
           {/* SECTION 2: LES 3 MODES D'EXPLOITATION */}
           <section id="modes" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>🚗</span>
+              <IconTruck size={24} className="text-blue-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 2. Les 3 Modes d'Exploitation : Flexibilité Totale du Parc
               </h2>
@@ -521,9 +551,9 @@ export default function GuidePage() {
             {/* Mode Switcher Tabs */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
               {[
-                { key: 'mode0', label: 'Mode 0 : Sans Boîtier (Zero-Hardware)', icon: '📱' },
-                { key: 'mode1', label: 'Mode 1 : GPS Standard Traccar', icon: '📡' },
-                { key: 'mode2', label: 'Mode 2 : Full CAN / J1939 Haute Fréquence', icon: '⚡' },
+                { key: 'mode0', label: 'Mode 0 : Sans Boîtier (Zero-Hardware)', icon: '' },
+                { key: 'mode1', label: 'Mode 1 : GPS Standard Traccar', icon: '' },
+                { key: 'mode2', label: 'Mode 2 : Full CAN / J1939 Haute Fréquence', icon: '' },
               ].map((tab) => {
                 const isSelected = activeModeTab === tab.key;
                 return (
@@ -567,7 +597,7 @@ export default function GuidePage() {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                     <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#d97706', margin: 0 }}>
-                      📱 Mode 0 — Zero-Hardware / OEM-First
+                      Mode 0 — Zero-Hardware / OEM-First
                     </h3>
                     <span style={{ fontSize: '12px', background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', padding: '3px 8px', borderRadius: '4px', fontWeight: 600 }}>
                       0 DA d'investissement boîtier
@@ -579,25 +609,25 @@ export default function GuidePage() {
                   </p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                     <div style={{ background: 'var(--df-bg-surface-2)', padding: '14px', borderRadius: '8px', border: '1px solid var(--df-border-subtle)' }}>
-                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--df-text-main)', marginBottom: '6px' }}>⛽ Pleins Naftal & Scanner OCR</div>
+                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--df-text-main)', marginBottom: '6px' }}>Pleins Naftal & Scanner OCR</div>
                       <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)', lineHeight: 1.5 }}>
                         Intégration instantanée des reçus papier par photo mobile ou factures de cartes Naftal (Gasoil, Sans Plomb, Sirghaz). Reconstitution de la consommation et contrôle d'anomalies.
                       </div>
                     </div>
                     <div style={{ background: 'var(--df-bg-surface-2)', padding: '14px', borderRadius: '8px', border: '1px solid var(--df-border-subtle)' }}>
-                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--df-text-main)', marginBottom: '6px' }}>📋 DVIR Numérique Mobile</div>
+                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--df-text-main)', marginBottom: '6px' }}>DVIR Numérique Mobile</div>
                       <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)', lineHeight: 1.5 }}>
                         Inspections chauffeur avant/après tournée sur smartphone (kilométrage relevé, niveau d'huile, photos des défauts) avec synchronisation hors-ligne.
                       </div>
                     </div>
                     <div style={{ background: 'var(--df-bg-surface-2)', padding: '14px', borderRadius: '8px', border: '1px solid var(--df-border-subtle)' }}>
-                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--df-text-main)', marginBottom: '6px' }}>🗺️ Routage Valhalla & Topographie</div>
+                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--df-text-main)', marginBottom: '6px' }}>Routage Valhalla & Topographie</div>
                       <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)', lineHeight: 1.5 }}>
                         Calcul précis des distances entre points de livraison et intégration des profils d'élévation routiers (cols de montagne, autoroute Est-Ouest).
                       </div>
                     </div>
                     <div style={{ background: 'var(--df-bg-surface-2)', padding: '14px', borderRadius: '8px', border: '1px solid var(--df-border-subtle)' }}>
-                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--df-text-main)', marginBottom: '6px' }}>🌡️ Matrice Climatique 58 Wilayas</div>
+                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--df-text-main)', marginBottom: '6px' }}>Matrice Climatique 58 Wilayas</div>
                       <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)', lineHeight: 1.5 }}>
                         Coefficient de sévérité thermique et d'exposition aux poussières sahariennes (ex: Adrar = 1.45, Alger = 1.05).
                       </div>
@@ -610,7 +640,7 @@ export default function GuidePage() {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                     <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#0284c7', margin: 0 }}>
-                      📡 Mode 1 — Télématique GPS Standard Traccar
+                      Mode 1 — Télématique GPS Standard Traccar
                     </h3>
                     <span style={{ fontSize: '12px', background: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd', padding: '3px 8px', borderRadius: '4px', fontWeight: 600 }}>
                       Open-Source Souverain & Économique
@@ -633,7 +663,7 @@ export default function GuidePage() {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                     <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#7c3aed', margin: 0 }}>
-                      ⚡ Mode 2 — Full CAN / J1939 Haute Fréquence & IoT
+                      Mode 2 — Full CAN / J1939 Haute Fréquence & IoT
                     </h3>
                     <span style={{ fontSize: '12px', background: '#faf5ff', color: '#6b21a8', border: '1px solid #e9d5ff', padding: '3px 8px', borderRadius: '4px', fontWeight: 600 }}>
                       Télémétrie Constructeur Direct Calculateurs
@@ -657,7 +687,7 @@ export default function GuidePage() {
           {/* SECTION 3: LE CŒUR DÉCISIONNEL */}
           <section id="decision-engine" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>🧠</span>
+              <IconSliders size={24} className="text-indigo-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 3. Le Cœur Décisionnel (SAD → ADS) & Arbitrage Économique
               </h2>
@@ -710,7 +740,7 @@ export default function GuidePage() {
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
-                  🧮 Simulateur Interactif d'Arbitrage (Testez la Rentabilité d'une Décision)
+                  Simulateur d'Arbitrage Financier SAD → ADS (Testez la Rentabilité d'une Décision)
                 </h3>
                 <span style={{ fontSize: '12px', color: 'var(--df-text-muted)' }}>Montants en Dinars Algériens (DZD)</span>
               </div>
@@ -851,7 +881,7 @@ export default function GuidePage() {
                     fontSize: '13px',
                   }}
                 >
-                  {netSavings > 0 ? '✓ ACTION IMMÉDIATE APPROUVÉE' : '⚠️ INTERVENTION REPORTÉE'}
+                  {netSavings > 0 ? 'ACTION IMMÉDIATE APPROUVÉE' : 'INTERVENTION REPORTÉE'}
                 </div>
               </div>
             </div>
@@ -860,7 +890,7 @@ export default function GuidePage() {
           {/* SECTION 4: LES 6 ALGORITHMES PHYSIQUES */}
           <section id="physics-algorithms" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>🔬</span>
+              <IconCpu size={24} className="text-emerald-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 4. Les 6 Algorithmes Physiques Déterministes & Calcul du Score VHI
               </h2>
@@ -873,12 +903,12 @@ export default function GuidePage() {
             {/* Algorithm Selector Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', marginBottom: '20px' }}>
               {[
-                { id: 1, name: 'Arrhenius (Huile)', icon: '🛢️', tag: 'Thermodynamique' },
-                { id: 2, name: 'Cranking (Batterie)', icon: '🔋', tag: 'Électrochimie' },
-                { id: 3, name: 'Thermique Culasse', icon: '🌡️', tag: 'Échangeur / EWMA' },
-                { id: 4, name: 'Archard (Freins)', icon: '🛑', tag: 'Tribologie' },
-                { id: 5, name: 'Colmatage FAP', icon: '💨', tag: 'Bilan Massique' },
-                { id: 6, name: 'CUSUM Anti-Siphon', icon: '⛽', tag: 'Statistique' },
+                { id: 1, name: 'Arrhenius (Huile)', icon: 'OIL', tag: 'Thermodynamique' },
+                { id: 2, name: 'Cranking (Batterie)', icon: 'BAT', tag: 'Électrochimie' },
+                { id: 3, name: 'Thermique Culasse', icon: 'RAD', tag: 'Échangeur / EWMA' },
+                { id: 4, name: 'Archard (Freins)', icon: 'BRK', tag: 'Tribologie' },
+                { id: 5, name: 'Colmatage FAP', icon: 'DPF', tag: 'Bilan Massique' },
+                { id: 6, name: 'CUSUM Anti-Siphon', icon: 'FUEL', tag: 'Statistique' },
               ].map((algo) => {
                 const isSelected = selectedAlgo === algo.id;
                 return (
@@ -921,7 +951,7 @@ export default function GuidePage() {
               {selectedAlgo === 1 && (
                 <div>
                   <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#d97706', margin: '0 0 10px 0' }}>
-                    🛢️ Algorithme 1 : Dégradation Chimique de l'Huile (Loi d'Arrhenius)
+                    Algorithme 1 : Dégradation Chimique de l'Huile (Loi d'Arrhenius)
                   </h3>
                   <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--df-text-secondary)', marginBottom: '14px' }}>
                     L'huile moteur perd sa viscosité et ses additifs détergents de manière exponentielle en fonction de sa température de fonctionnement 
@@ -941,7 +971,7 @@ export default function GuidePage() {
               {selectedAlgo === 2 && (
                 <div>
                   <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#059669', margin: '0 0 10px 0' }}>
-                    🔋 Algorithme 2 : Cranking Health CVHI (Santé Électrochimique Batterie)
+                    Algorithme 2 : Cranking Health CVHI (Santé Électrochimique Batterie)
                   </h3>
                   <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--df-text-secondary)', marginBottom: '14px' }}>
                     Une mesure de tension au repos (12.6V) est trompeuse. La véritable santé (SOH) d'une batterie au plomb/calcium ne se révèle 
@@ -960,7 +990,7 @@ export default function GuidePage() {
               {selectedAlgo === 3 && (
                 <div>
                   <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#dc2626', margin: '0 0 10px 0' }}>
-                    🌡️ Algorithme 3 : Modèle Thermique Différentiel Culasse & Échangeur
+                    Algorithme 3 : Modèle Thermique Différentiel Culasse & Échangeur
                   </h3>
                   <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--df-text-secondary)', marginBottom: '14px' }}>
                     Surveille l'équilibre thermique entre le circuit d'huile et le circuit d'eau. Un lissage exponentiel (EWMA) filtre les pics passagers 
@@ -979,7 +1009,7 @@ export default function GuidePage() {
               {selectedAlgo === 4 && (
                 <div>
                   <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#db2777', margin: '0 0 10px 0' }}>
-                    🛑 Algorithme 4 : Usure des Garnitures de Freins (Loi Tribologique d'Archard)
+                    Algorithme 4 : Usure des Garnitures de Freins (Loi Tribologique d'Archard)
                   </h3>
                   <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--df-text-secondary)', marginBottom: '14px' }}>
                     L'usure des plaquettes et garnitures dépend de l'énergie cinétique mécanique dissipée lors des décélérations successives.
@@ -997,7 +1027,7 @@ export default function GuidePage() {
               {selectedAlgo === 5 && (
                 <div>
                   <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#0284c7', margin: '0 0 10px 0' }}>
-                    💨 Algorithme 5 : Bilan Massique de Colmatage du FAP (Filtre à Particules)
+                    Algorithme 5 : Bilan Massique de Colmatage du FAP (Filtre à Particules)
                   </h3>
                   <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--df-text-secondary)', marginBottom: '14px' }}>
                     Évalue en continu l'accumulation de suie imbrûlée selon le cycle de roulage (urbain vs autoroute) et la contre-pression d'échappement.
@@ -1015,7 +1045,7 @@ export default function GuidePage() {
               {selectedAlgo === 6 && (
                 <div>
                   <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#7c3aed', margin: '0 0 10px 0' }}>
-                    ⛽ Algorithme 6 : Détection Anti-Siphon CUSUM (Cumulative Sum Control Chart)
+                    Algorithme 6 : Détection Anti-Siphon CUSUM (Cumulative Sum Control Chart)
                   </h3>
                   <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--df-text-secondary)', marginBottom: '14px' }}>
                     Filtre mathématiquement les mouvements normaux de carburant (virages, stationnement en pente, freinages) pour détecter 
@@ -1036,7 +1066,7 @@ export default function GuidePage() {
           {/* SECTION 5: INNOVATIONS TECHNOLOGIQUES DE RUPTURE (MONOPOLE 0 DA / 0 $) */}
           <section id="tech-innovations" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '24px' }}>💡</span>
+              <IconZap size={24} className="text-amber-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 5. Innovations Technologiques de Rupture : Le Monopole « 0 DA / 0 $ »
               </h2>
@@ -1073,7 +1103,7 @@ export default function GuidePage() {
             >
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '10px', padding: '16px' }}>
                 <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--df-status-ok)', marginBottom: '4px' }}>
-                  💰 Coût Matériel Égal à Zéro (0 DA)
+                  Coût Matériel Égal à Zéro (0 DA)
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                   Zéro achat de jauges de contrainte, zéro valve TPMS à piles arrachée en carrière, zéro sonde rapportée.
@@ -1081,7 +1111,7 @@ export default function GuidePage() {
               </div>
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '10px', padding: '16px' }}>
                 <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--df-accent-blue)', marginBottom: '4px' }}>
-                  ⚙️ Physique Déterministe Opposable
+                  Physique Déterministe Opposable
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                   Rejet des boîtes noires statistiques. Lois d&apos;Arrhenius, Archard, bilans d&apos;enthalpie et micro-glissement cinématique.
@@ -1089,7 +1119,7 @@ export default function GuidePage() {
               </div>
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '10px', padding: '16px' }}>
                 <div style={{ fontSize: '14px', fontWeight: 700, color: '#f59e0b', marginBottom: '4px' }}>
-                  🏜️ Résistance aux Conditions Sahariennes
+                  Résistance aux Conditions Sahariennes
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                   Filtres d&apos;échantillonnage quasi-stationnaire isolant la poussière de silice, le dévers routier et les chaleurs extrêmes (&gt; 48°C).
@@ -1097,7 +1127,7 @@ export default function GuidePage() {
               </div>
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '10px', padding: '16px' }}>
                 <div style={{ fontSize: '14px', fontWeight: 700, color: '#ec4899', marginBottom: '4px' }}>
-                  ⚖️ Pouvoir d&apos;Arbitrage DAF / Direction
+                  Pouvoir d&apos;Arbitrage DAF / Direction
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                   Chaque anomalie génère un certificat opposable pour bloquer les paiements abusifs de sous-traitance ou de garage.
@@ -1126,11 +1156,11 @@ export default function GuidePage() {
 
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '22px' }}>
                 {[
-                  { id: 'HWFA', label: '1. HWFA (Travail Hydraulique BTPH)', icon: '🚜' },
-                  { id: 'SES_UEB', label: '2. SES-UEB (Détection Émulateur SCR)', icon: '🧪' },
-                  { id: 'KMSO', label: '3. KMSO (Pneus & Surcharge 0 TPMS)', icon: '🛞' },
-                  { id: 'BEP_VCO', label: '4. BEP-VCO (Freins vs Ralentisseur)', icon: '🏔️' },
-                  { id: 'CSIS', label: '5. CSIS (Oscilloscope Compression 24V)', icon: '⚡' },
+                  { id: 'HWFA', label: '1. HWFA (Travail Hydraulique BTPH)', icon: 'HWFA' },
+                  { id: 'SES_UEB', label: '2. SES-UEB (Détection Émulateur SCR)', icon: 'SCR' },
+                  { id: 'KMSO', label: '3. KMSO (Pneus & Surcharge 0 TPMS)', icon: 'TPMS' },
+                  { id: 'BEP_VCO', label: '4. BEP-VCO (Freins vs Ralentisseur)', icon: 'VOITH' },
+                  { id: 'CSIS', label: '5. CSIS (Oscilloscope Compression 24V)', icon: '24V' },
                 ].map((tab) => {
                   const isSel = selectedInnovation === tab.id;
                   return (
@@ -1164,7 +1194,7 @@ export default function GuidePage() {
               {selectedInnovation === 'HWFA' && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '20px' }}>🚜</span>
+                    <IconActivity size={20} className="text-emerald-500" />
                     <h4 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                       HWFA — Hydraulic-Work-Fraud-Auditor (Terrassement, Carrières & Pelles 30-50t)
                     </h4>
@@ -1209,7 +1239,7 @@ export default function GuidePage() {
               {selectedInnovation === 'SES_UEB' && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '20px' }}>🧪</span>
+                    <IconShieldCheck size={20} className="text-cyan-500" />
                     <h4 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                       SES-UEB — SCR-Emulator-Sniffer & Urea-Enthalpic-Balance (Poids Lourds & BTPH)
                     </h4>
@@ -1252,7 +1282,7 @@ export default function GuidePage() {
               {selectedInnovation === 'KMSO' && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '20px' }}>🛞</span>
+                    <IconAlertOctagon size={20} className="text-amber-500" />
                     <h4 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                       KMSO — Kinematic-Micro-Slip & Dynamic Radius Observer (Poids Lourds & Bennes)
                     </h4>
@@ -1297,7 +1327,7 @@ export default function GuidePage() {
               {selectedInnovation === 'BEP_VCO' && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '20px' }}>🏔️</span>
+                    <IconZap size={20} className="text-blue-500" />
                     <h4 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                       BEP-VCO — Brake-Energy-Partitioning & Retarder Co-Optimizer (Cols & Reliefs)
                     </h4>
@@ -1343,7 +1373,7 @@ export default function GuidePage() {
               {selectedInnovation === 'CSIS' && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '20px' }}>⚡</span>
+                    <IconActivity size={20} className="text-indigo-500" />
                     <h4 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                       CSIS — Cranking-Sub-Cycle-Impedance-Spectrometry (Oscilloscope Compression 24V)
                     </h4>
@@ -1397,7 +1427,7 @@ export default function GuidePage() {
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                 <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>🛡️</span> Rappel des Innovations Algérie-First Déjà Opérationnelles en Base
+                  <IconShieldCheck size={16} className="inline mr-1 text-emerald-500" /> Rappel des Innovations Algérie-First Déjà Opérationnelles en Base
                 </h4>
                 <Link
                   href="/preventive"
@@ -1415,8 +1445,7 @@ export default function GuidePage() {
                     textDecoration: 'none',
                   }}
                 >
-                  <span>⚡</span>
-                  <span>Tester les 5 Modèles en Live dans le Cockpit 5.0 ➔</span>
+                  <IconZap size={14} className="inline mr-1 text-emerald-400" /> <span>Tester les 5 Modèles en Live dans le Cockpit 5.0 &rarr;</span>
                 </Link>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', fontSize: '12.5px' }}>
@@ -1439,7 +1468,7 @@ export default function GuidePage() {
           {/* SECTION 6: IA SOUVERAINE & LES 7 PILIERS */}
           <section id="ai-sovereign" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>⚡</span>
+              <IconSparkles size={24} className="text-cyan-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 6. IA Souveraine & Les 7 Piliers Fondateurs d&apos;Observabilité Décisionnelle
               </h2>
@@ -1455,7 +1484,7 @@ export default function GuidePage() {
               {/* Pilier 1 */}
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid var(--df-accent-blue)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '18px' }}>⚖️</span>
+                  <IconFileText size={18} className="text-indigo-400" />
                   <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                     1. Greffier Juridique & Huissier CUSUM
                   </h4>
@@ -1469,7 +1498,7 @@ export default function GuidePage() {
               {/* Pilier 2 */}
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid var(--df-status-ok)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '18px' }}>💰</span>
+                  <IconCreditCard size={18} className="text-emerald-400" />
                   <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                     2. Copilot Décisionnel ADS en Dinar (DZD)
                   </h4>
@@ -1483,7 +1512,7 @@ export default function GuidePage() {
               {/* Pilier 3 */}
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid #f59e0b' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '18px' }}>📚</span>
+                  <IconFileText size={18} className="text-blue-400" />
                   <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                     3. RAG Hybride & Web Multi-Moteurs Auto-Ingéré
                   </h4>
@@ -1497,7 +1526,7 @@ export default function GuidePage() {
               {/* Pilier 4 */}
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid #8b5cf6' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '18px' }}>🧾</span>
+                  <IconFileText size={18} className="text-emerald-400" />
                   <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                     4. Réconciliateur Automatique de Factures DGI
                   </h4>
@@ -1511,7 +1540,7 @@ export default function GuidePage() {
               {/* Pilier 5 */}
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid #ec4899' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '18px' }}>🎙️</span>
+                  <IconActivity size={18} className="text-cyan-400" />
                   <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                     5. Assistant Vocal Chauffeur & Atelier en Darja
                   </h4>
@@ -1525,7 +1554,7 @@ export default function GuidePage() {
               {/* Pilier 6 */}
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', borderLeft: '4px solid #06b6d4' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '18px' }}>📊</span>
+                  <IconTrendingUp size={18} className="text-indigo-400" />
                   <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                     6. Arbitrage Actuariel DZD & Véhicule Relais
                   </h4>
@@ -1563,7 +1592,7 @@ export default function GuidePage() {
               }}
             >
               <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-accent-blue)', margin: '0 0 14px 0' }}>
-                🛡️ Coupe-Feu Loi 18-07 (ANPDP) & Dual-Engine Fail-Safe
+                Coupe-Feu Loi 18-07 (ANPDP) & Dual-Engine Fail-Safe
               </h3>
               <p style={{ fontSize: '13.5px', lineHeight: 1.6, color: 'var(--df-text-secondary)', marginBottom: '16px' }}>
                 Aucune donnée à caractère personnel ne pénètre dans le modèle. Avant chaque inférence, un filtre d&apos;expression régulière inspecte et purge les données sensibles :
@@ -1572,19 +1601,19 @@ export default function GuidePage() {
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid var(--df-accent-blue)' }}>
                   <div style={{ fontSize: '11px', color: 'var(--df-text-muted)', textTransform: 'uppercase' }}>Plaques d&apos;Immatriculation DZ</div>
                   <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--df-text-main)', marginTop: '4px' }}>
-                    <code>01492-319-16</code> ➔ <code>[MATRICULE_ANONYMISE]</code>
+                    <code>01492-319-16</code> &rarr; <code>[MATRICULE_ANONYMISE]</code>
                   </div>
                 </div>
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #10b981' }}>
                   <div style={{ fontSize: '11px', color: 'var(--df-text-muted)', textTransform: 'uppercase' }}>Téléphones Algériens</div>
                   <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--df-text-main)', marginTop: '4px' }}>
-                    <code>+213 550 12 34 56</code> ➔ <code>[TEL_ANONYMISE]</code>
+                    <code>+213 550 12 34 56</code> &rarr; <code>[TEL_ANONYMISE]</code>
                   </div>
                 </div>
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #f59e0b' }}>
                   <div style={{ fontSize: '11px', color: 'var(--df-text-muted)', textTransform: 'uppercase' }}>Numéro d&apos;Identification National (NIN)</div>
                   <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--df-text-main)', marginTop: '4px' }}>
-                    <code>18 chiffres d&apos;état-civil</code> ➔ <code>[NIN_ANONYMISE]</code>
+                    <code>18 chiffres d&apos;état-civil</code> &rarr; <code>[NIN_ANONYMISE]</code>
                   </div>
                 </div>
               </div>
@@ -1605,7 +1634,7 @@ export default function GuidePage() {
                     textDecoration: 'none',
                   }}
                 >
-                  <span>⚡</span>
+                  <IconZap size={14} className="text-amber-400 inline" />
                   <span>Ouvrir la Console d&apos;Observabilité & d&apos;Audit en Direct</span>
                 </Link>
 
@@ -1625,7 +1654,7 @@ export default function GuidePage() {
                     textDecoration: 'none',
                   }}
                 >
-                  <span>🔍</span>
+                  <IconSearch size={14} className="text-cyan-400 inline" />
                   <span>Explorer le Coffre RAG & Moteur Web</span>
                 </Link>
 
@@ -1639,7 +1668,7 @@ export default function GuidePage() {
           {/* SECTION 7: JUMEAU NUMÉRIQUE & MULTI-CLIMATS */}
           <section id="digital-twin" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>🌐</span>
+              <IconRadio size={24} className="text-emerald-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 7. Jumeau Numérique (Digital Twin) & Modélisation Multi-Climats 58 Wilayas
               </h2>
@@ -1652,9 +1681,9 @@ export default function GuidePage() {
             {/* Climate Zone Selector */}
             <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
               {[
-                { key: 'TELL', label: 'Littoral & Tell (Humidité / Embouteillages)', icon: '🌊', mult: 'x1.05' },
-                { key: 'STEPPE', label: 'Hauts-Plateaux (Amplitude -5°C à 40°C)', icon: '🌾', mult: 'x1.25' },
-                { key: 'SAHARA', label: 'Grand Sud & Sahara (Chaleur 50°C / Poussière Silice)', icon: '🏜️', mult: 'x1.65' },
+                { key: 'TELL', label: 'Littoral & Tell (Humidité / Embouteillages)', icon: 'TELL', mult: 'x1.05' },
+                { key: 'STEPPE', label: 'Hauts-Plateaux (Amplitude -5°C à 40°C)', icon: 'STEPPE', mult: 'x1.25' },
+                { key: 'SAHARA', label: 'Grand Sud & Sahara (Chaleur 50°C / Poussière Silice)', icon: 'SAHARA', mult: 'x1.65' },
               ].map((c) => {
                 const isSelected = selectedClimateZone === c.key;
                 return (
@@ -1749,7 +1778,7 @@ export default function GuidePage() {
               <div style={{ background: 'var(--df-bg-surface-2)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '10px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '18px' }}>💰</span>
+                    <IconCreditCard size={18} className="text-emerald-400" />
                     <strong style={{ fontSize: '14px', color: 'var(--df-text-main)' }}>Arbitrage Financier SAD → ADS Déterministe en Dinars Algériens (DZD)</strong>
                     <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#059669', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700 }}>Conforme DGI & Wilayas</span>
                   </div>
@@ -1774,8 +1803,8 @@ export default function GuidePage() {
                       boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)',
                     }}
                   >
-                    <span>🧬</span>
-                    <span>Ouvrir le Jumeau Numérique 58 Wilayas ➔</span>
+                    <IconRadio size={14} className="text-emerald-400 inline" />
+                    <span>Ouvrir le Jumeau Numérique 58 Wilayas &rarr;</span>
                   </Link>
                 </div>
               </div>
@@ -1785,7 +1814,7 @@ export default function GuidePage() {
           {/* SECTION 8: TÉLÉMÉTRIE OPÉRATIONNELLE TERRAIN */}
           <section id="field-modules" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>📦</span>
+              <IconBox size={24} className="text-blue-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 8. Télémétrie Opérationnelle Terrain : Naftal, Froid, Dispatch & DVIR
               </h2>
@@ -1797,7 +1826,7 @@ export default function GuidePage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '20px' }}>⛽</span>
+                  <IconFuel size={20} className="text-amber-500" />
                   <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                     Scanner OCR de Reçus Naftal
                   </h3>
@@ -1806,13 +1835,13 @@ export default function GuidePage() {
                   Reconnaissance intelligente des tickets de caisse Naftal froissés ou mal imprimés. Extraction automatique des litres, du type de carburant, de la station, de la Wilaya et du montant en DZD, avec réconciliation télématique immédiate.
                 </p>
                 <Link href="/fuel-scanner" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
-                  Essayer le Scanner OCR ➔
+                  Essayer le Scanner OCR &rarr;
                 </Link>
               </div>
 
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '20px' }}>❄️</span>
+                  <IconThermometer size={20} className="text-cyan-500" />
                   <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                     Surveillance Chaîne du Froid
                   </h3>
@@ -1821,13 +1850,13 @@ export default function GuidePage() {
                   Sondes de température bi-zone (-25°C à +4°C) pour remorques frigorifiques pharmaceutiques et agroalimentaires. Alertes immédiates par SMS/Notification dès dépassement de seuil critique pendant le transport.
                 </p>
                 <Link href="/cold-chain" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
-                  Voir la Chaîne du Froid ➔
+                  Voir la Chaîne du Froid &rarr;
                 </Link>
               </div>
 
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '20px' }}>📜</span>
+                  <IconFileText size={20} className="text-emerald-500" />
                   <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                     Ordres de Mission, Dispatch & TOPSIS
                   </h3>
@@ -1836,13 +1865,13 @@ export default function GuidePage() {
                   Édition d'ordres de mission réglementaires conformes au Code de la Route algérien (ENACTA, contrôle de Wilaya, taxes). Jetons cryptographiques hors-ligne (HMAC-SHA256) vérifiables par QR code lors des contrôles routiers sans 4G. <strong>Algorithme TOPSIS multicritères</strong> avec substitution autonome d'actif en cas d'invalidation réglementaire ou échec DVIR.
                 </p>
                 <Link href="/dispatch" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
-                  Accéder au Dispatch ➔
+                  Accéder au Dispatch &rarr;
                 </Link>
               </div>
 
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '20px' }}>📋</span>
+                  <IconFileText size={20} className="text-indigo-500" />
                   <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                     Inspections Mobiles DVIR (PWA Offline-First & Store-and-Forward)
                   </h3>
@@ -1851,13 +1880,13 @@ export default function GuidePage() {
                   Fiches d'inspection pré/post-tournée remplies en 60 secondes sur smartphone par les chauffeurs. <strong>Résilience Offline-First intégrale</strong> (zones blanches du Sud saharien) avec file locale <code>df_dvir_offline_queue</code> et réconciliation chronologique stricte par <code>device_timestamp</code>. Tout échec critique verrouille immédiatement le véhicule (<code>DVIR_CRITICAL_FAILURE_BLOCK</code>) et génère un Ordre de Travail atelier.
                 </p>
                 <Link href="/dvir" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
-                  Ouvrir le Module DVIR ➔
+                  Ouvrir le Module DVIR &rarr;
                 </Link>
               </div>
 
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '20px' }}>📑</span>
+                  <IconFileText size={20} className="text-blue-500" />
                   <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                     Dossier d'Expertise Technique &amp; Export ERP 1-Clic
                   </h3>
@@ -1866,13 +1895,13 @@ export default function GuidePage() {
                   Édition instantanée du <strong>Dossier d'Expertise Technique &amp; Traçabilité Carburant</strong> avec scellement SHA-256, courbe CUSUM et compensation topographique Valhalla. Export direct sans ressaisie vers les ERPs du marché algérien : <strong>PC Compta (SCF DGI)</strong>, <strong>Sage 100</strong>, <strong>Odoo</strong> et <strong>SAP PM</strong>.
                 </p>
                 <Link href="/fuel-scanner" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
-                  Voir les Dossiers Techniques ➔
+                  Voir les Dossiers Techniques &rarr;
                 </Link>
               </div>
 
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '20px' }}>🗺️</span>
+                  <IconNavigation size={20} className="text-blue-500" />
                   <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                     Cockpit MapLibre Souverain (58 Wilayas &amp; 4 Corridors)
                   </h3>
@@ -1881,13 +1910,13 @@ export default function GuidePage() {
                   Cartographie vectorielle souveraine <strong>MapLibre GL JS</strong> pointant sur les serveurs locaux (OSM Algérie) et le profil d'élévation Valhalla. Visualisation des 4 corridors majeurs (RN1, A1, RN3, RN6), des zones blanches sahariennes et filtrage par palier réel : <strong>Mode 0 (Déclaratif)</strong>, <strong>Mode 1 (GNSS)</strong>, <strong>Mode 2 (CAN/J1939)</strong>.
                 </p>
                 <Link href="/map" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
-                  Ouvrir la Carte des Corridors ➔
+                  Ouvrir la Carte des Corridors &rarr;
                 </Link>
               </div>
 
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '20px' }}>🎙️</span>
+                  <IconActivity size={20} className="text-rose-500" />
                   <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                     Routeur Vocal Atelier en Darja Phonétique &amp; Base OEM
                   </h3>
@@ -1896,7 +1925,7 @@ export default function GuidePage() {
                   Conçu pour les mécaniciens en combinaison de travail : interprétation instantanée des requêtes en dialecte algérien (<em>« choufli zit el moteur »</em>, <em>« aatini l'batterie »</em>, <em>« serrage culasse shacman »</em>) avec <strong>court-circuit déterministe sous les 50 ms sans LLM</strong> pointant vers la base officielle multi-constructeurs (Shacman, Renault Trucks, MAN, Mercedes).
                 </p>
                 <Link href="/copilot" style={{ fontSize: '12.5px', color: 'var(--df-accent-blue)', fontWeight: 700, textDecoration: 'none' }}>
-                  Tester les Commandes Vocales ➔
+                  Tester les Commandes Vocales &rarr;
                 </Link>
               </div>
             </div>
@@ -1905,7 +1934,7 @@ export default function GuidePage() {
           {/* SECTION 9: ARCHITECTURE TECHNIQUE & PIPELINE */}
           <section id="tech-architecture" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>🏗️</span>
+              <IconTerminal size={24} className="text-indigo-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 9. Architecture Système & Pipeline de Données
               </h2>
@@ -1927,7 +1956,7 @@ export default function GuidePage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '16px', borderRadius: '10px', border: '1px solid var(--df-border-subtle)' }}>
                   <div style={{ fontSize: '14px', fontWeight: 700, color: '#0284c7', marginBottom: '6px' }}>
-                    🐘 PostgreSQL 16 + TimescaleDB
+                    PostgreSQL 16 + TimescaleDB
                   </div>
                   <div style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                     Hypertables partitionnées dans le temps pour les millions de points télématiques. 
@@ -1937,7 +1966,7 @@ export default function GuidePage() {
 
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '16px', borderRadius: '10px', border: '1px solid var(--df-border-subtle)' }}>
                   <div style={{ fontSize: '14px', fontWeight: 700, color: '#dc2626', marginBottom: '6px' }}>
-                    🔴 Redis 7 (RESP3 & Streams)
+                    Redis 7 (RESP3 & Streams)
                   </div>
                   <div style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                     Cache haute vitesse, pub/sub télématique en direct vers les interfaces web, 
@@ -1947,7 +1976,7 @@ export default function GuidePage() {
 
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '16px', borderRadius: '10px', border: '1px solid var(--df-border-subtle)' }}>
                   <div style={{ fontSize: '14px', fontWeight: 700, color: '#059669', marginBottom: '6px' }}>
-                    📡 Traccar Server 6.x Self-Hosted
+                    Traccar Server 6.x Self-Hosted
                   </div>
                   <div style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                     Passerelle télématique souveraine décodant plus de 200 protocoles matériels (Teltonika, Coban, Meitrack). 
@@ -1957,7 +1986,7 @@ export default function GuidePage() {
 
                 <div style={{ background: 'var(--df-bg-surface-2)', padding: '16px', borderRadius: '10px', border: '1px solid var(--df-border-subtle)' }}>
                   <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--df-accent-blue)', marginBottom: '6px' }}>
-                    ⚡ NestJS Backend & Next.js 15
+                    NestJS Backend & Next.js 15
                   </div>
                   <div style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                     Architecture modulaire découplée en monorepo TypeScript strict. 
@@ -1971,7 +2000,7 @@ export default function GuidePage() {
           {/* SECTION 10: SOUVERAINETÉ & LOI 18-07 */}
           <section id="security-compliance" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>🛡️</span>
+              <IconShieldCheck size={24} className="text-emerald-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 10. Souveraineté Nationale, Loi 18-07 & Conformité ANPDP
               </h2>
@@ -1991,7 +2020,7 @@ export default function GuidePage() {
               }}
             >
               <div style={{ fontSize: '14px', fontWeight: 700, color: '#059669', marginBottom: '8px' }}>
-                🔒 Les 5 Piliers d'Étanchéité Multi-Tenant & de Souveraineté DocteurFlotte :
+                Les 5 Piliers d'Étanchéité Multi-Tenant & de Souveraineté DocteurFlotte :
               </div>
               <ol style={{ margin: 0, paddingLeft: '20px', fontSize: '13.5px', color: 'var(--df-text-secondary)', lineHeight: 1.7 }}>
                 <li><strong>Hébergement Souverain Local :</strong> Les bases de données sont conçues pour être déployées sur des serveurs physiques en Algérie ou chez des hébergeurs locaux agréés.</li>
@@ -2007,7 +2036,7 @@ export default function GuidePage() {
           {/* SECTION 11: BENCHMARK MONDIAL CONCURRENTIEL */}
           <section id="competitive-matrix" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>🏆</span>
+              <IconTrendingUp size={24} className="text-amber-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 11. Benchmark Mondial : DocteurFlotte vs Samsara, Geotab & Navixy
               </h2>
@@ -2039,57 +2068,57 @@ export default function GuidePage() {
                 <tbody>
                   <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>Génération de Maintenance</td>
-                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ Maintenance 5.0 (Prescriptive & Cognitive)</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Maintenance 4.0 (Statistique boîte noire)</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Maintenance 3.0 (Seuils kilométriques)</td>
+                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>Maintenance 5.0 (Prescriptive & Cognitive)</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Maintenance 4.0 (Statistique boîte noire)</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Maintenance 3.0 (Seuils kilométriques)</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>Coût Matériel & Capteurs</td>
-                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ Strictement 0 DA (Bus natif & ADC)</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Capteurs TPMS & sondes payantes</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Accessoires & sondes en sus</td>
+                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>Strictement 0 DA (Bus natif & ADC)</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Capteurs TPMS & sondes payantes</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Accessoires & sondes en sus</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>Démarrage sans boîtier</td>
-                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ Mode 0 (Zero-Hardware natif)</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Obligation d’acheter un boîtier</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Boîtier obligatoire</td>
+                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>Mode 0 (Zero-Hardware natif)</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Obligation d’acheter un boîtier</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Boîtier obligatoire</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>Facturation & Devises</td>
-                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ 100% en Dinars (DZD) avec DGI</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ En Dollars ($/mois/véhicule)</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ En Euros (€/mois)</td>
+                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>100% en Dinars (DZD) avec DGI</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>En Dollars ($/mois/véhicule)</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>En Euros (€/mois)</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>Loi 18-07 ANPDP (Souveraineté)</td>
-                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ 100% Hébergement local DZ</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Serveurs AWS US/EU (Non conforme)</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Cloud étranger</td>
+                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>100% Hébergement local DZ</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Serveurs AWS US/EU (Non conforme)</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Cloud étranger</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>Physique Saharienne & Poussière</td>
-                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ 6 Modèles physiques (Arrhenius/CUSUM)</td>
-                    <td style={{ padding: '12px 14px', color: '#d97706' }}>⚠️ Règles kilométriques génériques</td>
-                    <td style={{ padding: '12px 14px', color: '#d97706' }}>⚠️ Intervalles fixes européens</td>
+                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>6 Modèles physiques (Arrhenius/CUSUM)</td>
+                    <td style={{ padding: '12px 14px', color: '#d97706' }}>Règles kilométriques génériques</td>
+                    <td style={{ padding: '12px 14px', color: '#d97706' }}>Intervalles fixes européens</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>Carburant Naftal & Scanner OCR</td>
-                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ Intégration tickets Naftal & GPL</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Inexistant</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Inexistant</td>
+                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>Intégration tickets Naftal & GPL</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Inexistant</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Inexistant</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>IA Locale Embarquée (Offline)</td>
-                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ Qwen 2.5 local sous Ollama</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Cloud IA externe payant</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Pas d’IA locale</td>
+                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>Qwen 2.5 local sous Ollama</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Cloud IA externe payant</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Pas d’IA locale</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--df-text-main)' }}>Moteur Décisionnel Financier</td>
-                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>✓ Arbitrage ADS en DZD (Coût Action vs Inaction)</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Graphes informatifs sans chiffrage</td>
-                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>✗ Simple rapport kilométrique</td>
+                    <td style={{ padding: '12px 14px', color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)' }}>Arbitrage ADS en DZD (Coût Action vs Inaction)</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Graphes informatifs sans chiffrage</td>
+                    <td style={{ padding: '12px 14px', color: '#dc2626' }}>Simple rapport kilométrique</td>
                   </tr>
                 </tbody>
               </table>
@@ -2099,7 +2128,7 @@ export default function GuidePage() {
           {/* SECTION 12: VISION STRATÉGIQUE & ROADMAP 2027-2030 */}
           <section id="strategic-roadmap" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>🚀</span>
+              <IconCompass size={24} className="text-indigo-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 12. Vision Futuriste & Roadmap Stratégique 2027–2030
               </h2>
@@ -2111,7 +2140,7 @@ export default function GuidePage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--df-accent-blue)', marginBottom: '6px' }}>
-                  📡 1. Dongle IoT Souverain Edge (ESP32/CAN)
+                  1. Dongle IoT Souverain Edge (ESP32/CAN)
                 </div>
                 <div style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                   Développement d’un micro-matériel OBD/CAN open-source assemblable localement en Algérie à moins de <strong>5 000 DZD</strong> par véhicule, avec traitement de l'algorithme d'Arrhenius directement au niveau du microcontrôleur embarqué.
@@ -2120,7 +2149,7 @@ export default function GuidePage() {
 
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ fontSize: '14px', fontWeight: 700, color: '#059669', marginBottom: '6px' }}>
-                  ⚙️ 2. Bourse Inter-Parcs de Pièces Détachées
+                  2. Bourse Inter-Parcs de Pièces Détachées
                 </div>
                 <div style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                   Plateforme mutualisée permettant aux gestionnaires de flottes algériennes de s'échanger en DZD les pièces critiques en cas de rupture d'importation (injecteurs, filtres FAP, étriers de freins, alternateurs).
@@ -2129,7 +2158,7 @@ export default function GuidePage() {
 
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ fontSize: '14px', fontWeight: 700, color: '#d97706', marginBottom: '6px' }}>
-                  💳 3. Intégration Satim, Edahabia & DGI
+                  3. Intégration Satim, Edahabia & DGI
                 </div>
                 <div style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                   Paiement automatisé des pleins de carburant et des factures d'atelier via l'interbancarité algérienne (Satim / CIB / Edahabia), avec télétransmission automatique des factures conformes à la Direction Générale des Impôts (DGI).
@@ -2138,7 +2167,7 @@ export default function GuidePage() {
 
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ fontSize: '14px', fontWeight: 700, color: '#0284c7', marginBottom: '6px' }}>
-                  🌪️ 4. Routage Météo-Topographique Saharien
+                  4. Routage Météo-Topographique Saharien
                 </div>
                 <div style={{ fontSize: '12.5px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                   Algorithme de dispatch intégrant les prévisions météorologiques locales en direct (tempêtes de sable, pluies torrentielles d'oueds, températures caniculaires) pour dévier proactivement les convois lourds vers les corridors sécurisés.
@@ -2150,7 +2179,7 @@ export default function GuidePage() {
           {/* SECTION 13: GUIDE OPÉRATIONNEL PAR MÉTIER */}
           <section id="roles-workflows" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>👥</span>
+              <IconUsers size={24} className="text-cyan-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 13. Guide Opérationnel par Rôle Métier
               </h2>
@@ -2162,7 +2191,7 @@ export default function GuidePage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ fontSize: '15px', fontWeight: 700, color: '#0284c7', marginBottom: '6px' }}>
-                  🚗 Responsable de Parc / Directeur d'Exploitation
+                  Responsable de Parc / Directeur d'Exploitation
                 </div>
                 <div style={{ fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                   Consulte le tableau de bord décisionnel (<code>/decisions</code>), valide les arbitrages au-dessus de son seuil budgétaire, 
@@ -2172,7 +2201,7 @@ export default function GuidePage() {
 
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ fontSize: '15px', fontWeight: 700, color: '#d97706', marginBottom: '6px' }}>
-                  🔧 Chef d'Atelier & Équipe de Maintenance
+                  Chef d'Atelier & Équipe de Maintenance
                 </div>
                 <div style={{ fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                   Reçoit automatiquement les Ordres de Travail (OT) générés par le moteur décisionnel (<code>/work-orders</code>). 
@@ -2182,7 +2211,7 @@ export default function GuidePage() {
 
               <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '12px', padding: '18px', boxShadow: 'var(--df-shadow-sm)' }}>
                 <div style={{ fontSize: '15px', fontWeight: 700, color: '#059669', marginBottom: '6px' }}>
-                  📱 Chauffeurs & Conducteurs d'Engins
+                  Chauffeurs & Conducteurs d'Engins
                 </div>
                 <div style={{ fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.6 }}>
                   Remplissent en 60 secondes leur fiche DVIR sur smartphone (<code>/dvir</code>) au début de chaque vacation. 
@@ -2195,7 +2224,7 @@ export default function GuidePage() {
           {/* SECTION 14: FAQ */}
           <section id="faq" style={{ scrollMarginTop: '100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '24px' }}>❓</span>
+              <IconHelpCircle size={24} className="text-slate-400" />
               <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                 14. Questions Fréquentes & Support
               </h2>

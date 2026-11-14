@@ -8,6 +8,16 @@ import {
   BrakeEnergyPartitioningResult,
   CrankingCompressionResult,
 } from '@docteurflotte/contracts';
+import {
+  IconActivity,
+  IconZap,
+  IconShieldCheck,
+  IconAlertTriangle,
+  IconCheck,
+  IconAlertOctagon,
+  IconFuel,
+  IconFileText,
+} from '../navigation/TechIcons';
 
 type InnovationKey = 'HWFA' | 'SES_UEB' | 'KMSO' | 'BEP_VCO' | 'CSIS';
 
@@ -239,10 +249,9 @@ export function BreakthroughInnovationsPanel() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '22px',
             }}
           >
-            🔬
+            <IconActivity size={22} className="text-emerald-600" />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -288,7 +297,17 @@ export function BreakthroughInnovationsPanel() {
             boxShadow: '0 2px 6px rgba(4, 120, 87, 0.3)',
           }}
         >
-          <span>{isRunning ? '⏳ Analyse Physique...' : '⚡ Évaluer l\'Innovation en Direct'}</span>
+          {isRunning ? (
+            <>
+              <IconActivity size={14} className="inline animate-spin" />
+              <span>Analyse Physique...</span>
+            </>
+          ) : (
+            <>
+              <IconZap size={14} className="inline" />
+              <span>Évaluer l'Innovation en Direct</span>
+            </>
+          )}
         </button>
       </div>
 
@@ -305,11 +324,11 @@ export function BreakthroughInnovationsPanel() {
         }}
       >
         {[
-          { id: 'HWFA', label: '1. HWFA (Travail Hydraulique BTPH)', icon: '🚜' },
-          { id: 'SES_UEB', label: '2. SES-UEB (Détection Émulateur SCR)', icon: '🧪' },
-          { id: 'KMSO', label: '3. KMSO (Pneus & Éclatement 0 TPMS)', icon: '🛞' },
-          { id: 'BEP_VCO', label: '4. BEP-VCO (Freins vs Voith Retarder)', icon: '🏔️' },
-          { id: 'CSIS', label: '5. CSIS (Oscilloscope Compression 24V)', icon: '⚡' },
+          { id: 'HWFA', label: '1. HWFA (Travail Hydraulique BTPH)', Icon: IconActivity },
+          { id: 'SES_UEB', label: '2. SES-UEB (Détection Émulateur SCR)', Icon: IconShieldCheck },
+          { id: 'KMSO', label: '3. KMSO (Pneus & Éclatement 0 TPMS)', Icon: IconAlertOctagon },
+          { id: 'BEP_VCO', label: '4. BEP-VCO (Freins vs Voith Retarder)', Icon: IconZap },
+          { id: 'CSIS', label: '5. CSIS (Oscilloscope Compression 24V)', Icon: IconActivity },
         ].map((tab) => {
           const isSel = activeTab === tab.id;
           return (
@@ -331,7 +350,7 @@ export function BreakthroughInnovationsPanel() {
                 boxShadow: isSel ? '0 2px 4px rgba(4, 120, 87, 0.25)' : 'none',
               }}
             >
-              <span>{tab.icon}</span>
+              <tab.Icon size={14} />
               <span style={{ color: isSel ? '#FFFFFF' : '#0F172A', fontWeight: 800 }}>{tab.label}</span>
             </button>
           );
@@ -359,7 +378,9 @@ export function BreakthroughInnovationsPanel() {
                   cursor: 'pointer',
                 }}
               >
-                ⚠️ Fraude : 2h Ralenti Climatisation (Heures Fantômes)
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconAlertTriangle size={12} className="text-rose-600" /> Fraude : 2h Ralenti Climatisation (Heures Fantômes)
+                </span>
               </button>
               <button
                 onClick={() => setHwfaScenario('EXCAVATION_REELLE')}
@@ -374,7 +395,9 @@ export function BreakthroughInnovationsPanel() {
                   cursor: 'pointer',
                 }}
               >
-                ✓ Nominal : 1h Excavation Rocheuse Lourde
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconCheck size={12} className="text-emerald-600" /> Nominal : 1h Excavation Rocheuse Lourde
+                </span>
               </button>
             </div>
           </div>
@@ -432,7 +455,9 @@ export function BreakthroughInnovationsPanel() {
                   cursor: 'pointer',
                 }}
               >
-                🛑 Boîtier Pirate : Émulateur CAN SCR Actif
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconAlertOctagon size={12} className="text-rose-600" /> Boîtier Pirate : Émulateur CAN SCR Actif
+                </span>
               </button>
               <button
                 onClick={() => setSesScenario('EAU_PURE')}
@@ -447,7 +472,9 @@ export function BreakthroughInnovationsPanel() {
                   cursor: 'pointer',
                 }}
               >
-                ⚠️ Fraude : Urée Coupée à l&apos;Eau du Robinet
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconAlertTriangle size={12} className="text-amber-600" /> Fraude : Urée Coupée à l&apos;Eau du Robinet
+                </span>
               </button>
               <button
                 onClick={() => setSesScenario('CONFORME')}
@@ -462,7 +489,9 @@ export function BreakthroughInnovationsPanel() {
                   cursor: 'pointer',
                 }}
               >
-                ✓ Nominal : AdBlue Authentique (32.5%)
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconCheck size={12} className="text-emerald-600" /> Nominal : AdBlue Authentique (32.5%)
+                </span>
               </button>
             </div>
           </div>
@@ -520,7 +549,9 @@ export function BreakthroughInnovationsPanel() {
                   cursor: 'pointer',
                 }}
               >
-                🛑 Danger Éclatement : Pneu Gauche à -2.0 bar (Sur-vitesse 1.6%)
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconAlertOctagon size={12} className="text-rose-600" /> Danger Éclatement : Pneu Gauche à -2.0 bar (Sur-vitesse 1.6%)
+                </span>
               </button>
               <button
                 onClick={() => setKmsoScenario('NOMINAL')}
@@ -535,7 +566,9 @@ export function BreakthroughInnovationsPanel() {
                   cursor: 'pointer',
                 }}
               >
-                ✓ Nominal : Pressions Équilibrées (8.5 bar)
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconCheck size={12} className="text-emerald-600" /> Nominal : Pressions Équilibrées (8.5 bar)
+                </span>
               </button>
             </div>
           </div>
@@ -593,7 +626,9 @@ export function BreakthroughInnovationsPanel() {
                   cursor: 'pointer',
                 }}
               >
-                🛑 Mauvaise Conduite : Freinage au Pied (Disques à &gt; 400°C)
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconAlertOctagon size={12} className="text-rose-600" /> Mauvaise Conduite : Freinage au Pied (Disques à &gt; 400°C)
+                </span>
               </button>
               <button
                 onClick={() => setBepScenario('BONNE_CONDUITE_VOITH')}
@@ -608,7 +643,9 @@ export function BreakthroughInnovationsPanel() {
                   cursor: 'pointer',
                 }}
               >
-                ✓ Exemplaire : 95% Ralentisseur Voith (Disques Froids &lt; 150°C)
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconCheck size={12} className="text-emerald-600" /> Exemplaire : 95% Ralentisseur Voith (Disques Froids &lt; 150°C)
+                </span>
               </button>
             </div>
           </div>
@@ -666,7 +703,9 @@ export function BreakthroughInnovationsPanel() {
                   cursor: 'pointer',
                 }}
               >
-                🛑 Défaut : Cylindre #4 Fuite Soupape / Segment (Creux Anormal)
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconAlertOctagon size={12} className="text-rose-600" /> Défaut : Cylindre #4 Fuite Soupape / Segment (Creux Anormal)
+                </span>
               </button>
               <button
                 onClick={() => setCsisScenario('MOTEUR_NEUF')}
@@ -681,7 +720,9 @@ export function BreakthroughInnovationsPanel() {
                   cursor: 'pointer',
                 }}
               >
-                ✓ Nominal : Moteur Neuf (6 Cylindres Équilibrés à 100%)
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconCheck size={12} className="text-emerald-600" /> Nominal : Moteur Neuf (6 Cylindres Équilibrés à 100%)
+                </span>
               </button>
             </div>
           </div>

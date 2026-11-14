@@ -20,6 +20,7 @@ import {
   IconEdit,
   IconTrash,
   IconX,
+  IconCheck,
 } from '../../components/navigation/TechIcons';
 
 export interface AssetTcoRecord {
@@ -140,7 +141,7 @@ export default function TcoPage() {
             : r
         )
       );
-      setNotification(`✓ Fiche TCO de ${formState.registrationNumber} mise à jour.`);
+      setNotification(`Fiche TCO de ${formState.registrationNumber} mise à jour.`);
     } else {
       const newRec: AssetTcoRecord = {
         id: `tco-${Date.now().toString().slice(-4)}`,
@@ -161,7 +162,7 @@ export default function TcoPage() {
         status,
       };
       setTcoRecords((prev) => [newRec, ...prev]);
-      setNotification(`✓ Nouvelle fiche TCO créée pour ${newRec.registrationNumber}`);
+      setNotification(`Nouvelle fiche TCO créée pour ${newRec.registrationNumber}`);
     }
 
     setIsModalOpen(false);
@@ -228,10 +229,10 @@ export default function TcoPage() {
 
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               {[
-                { id: 'ALL', label: 'Toutes les Fiches', count: tcoRecords.length, icon: '📊' },
-                { id: 'OPTIMAL', label: 'Sous Budget (Gain)', count: tcoRecords.filter((r) => r.status === 'OPTIMAL').length, icon: '🟢' },
-                { id: 'ON_TRACK', label: 'En Cible Budgétaire', count: tcoRecords.filter((r) => r.status === 'ON_TRACK').length, icon: '⚖️' },
-                { id: 'OVER_BUDGET', label: 'En Dérive de Coût', count: tcoRecords.filter((r) => r.status === 'OVER_BUDGET').length, icon: '🔴' },
+                { id: 'ALL', label: 'Toutes les Fiches', count: tcoRecords.length, icon: <IconBarChart3 size={14} /> },
+                { id: 'OPTIMAL', label: 'Sous Budget (Gain)', count: tcoRecords.filter((r) => r.status === 'OPTIMAL').length, icon: <IconCheck size={14} className="text-emerald-500" /> },
+                { id: 'ON_TRACK', label: 'En Cible Budgétaire', count: tcoRecords.filter((r) => r.status === 'ON_TRACK').length, icon: <IconShieldCheck size={14} className="text-blue-500" /> },
+                { id: 'OVER_BUDGET', label: 'En Dérive de Coût', count: tcoRecords.filter((r) => r.status === 'OVER_BUDGET').length, icon: <IconAlertTriangle size={14} className="text-rose-500" /> },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -421,7 +422,9 @@ export default function TcoPage() {
                     {filteredData.length === 0 ? (
                       <tr>
                         <td colSpan={8} style={{ padding: '3rem 1rem', textAlign: 'center' }}>
-                          <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>📊</div>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', marginBottom: '0.75rem' }}>
+                            <IconBarChart3 size={20} />
+                          </div>
                           <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.25rem' }}>
                             {tcoRecords.length === 0 ? 'Aucune fiche TCO enregistrée' : 'Aucun actif ne correspond à ce filtre'}
                           </div>

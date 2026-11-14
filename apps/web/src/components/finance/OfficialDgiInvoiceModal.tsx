@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { IconFileText } from '../navigation/TechIcons';
 
 export interface DgiInvoiceItem {
   description: string;
@@ -154,7 +155,7 @@ export function OfficialDgiInvoiceModal({ data, onClose }: OfficialDgiInvoiceMod
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '20px' }}>🧾</span>
+          <IconFileText size={18} className="text-emerald-400" />
           <span style={{ fontWeight: 800, fontSize: '15px' }}>
             Facture Fiscale Algérienne DGI #{data.invoiceNumber}
           </span>
@@ -176,7 +177,7 @@ export function OfficialDgiInvoiceModal({ data, onClose }: OfficialDgiInvoiceMod
               gap: '6px',
             }}
           >
-            <span>🖨️</span>
+            <IconFileText size={14} />
             <span>Imprimer / PDF Officiel (A4)</span>
           </button>
           <button

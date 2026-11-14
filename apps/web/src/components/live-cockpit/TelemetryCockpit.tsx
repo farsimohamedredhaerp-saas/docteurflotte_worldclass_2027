@@ -17,6 +17,8 @@ import {
   IconTerminal,
   IconCpu,
   IconActivity,
+  IconAlertOctagon,
+  IconFileText,
 } from '../navigation/TechIcons';
 
 interface TelemetryCockpitProps {
@@ -677,7 +679,7 @@ export function TelemetryCockpit({
                   className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
                   style={{ color: vehicle.dvirStatus?.isBlocked ? '#EF4444' : 'var(--df-cockpit-text-title)' }}
                 >
-                  <span>{vehicle.dvirStatus?.isBlocked ? '🛑' : '📋'}</span>
+                  {vehicle.dvirStatus?.isBlocked ? <IconAlertOctagon size={12} className="text-rose-500 shrink-0" /> : <IconFileText size={12} className="shrink-0 opacity-70" />}
                   Inspection DVIR & Consignation Sécurité
                 </span>
                 <span
@@ -728,7 +730,9 @@ export function TelemetryCockpit({
                         textDecoration: 'none',
                       }}
                     >
-                      🔧 Traiter l&apos;Ordre de Travail
+                      <span className="flex items-center justify-center gap-1">
+                        <IconWrench size={11} /> Traiter l&apos;Ordre de Travail
+                      </span>
                     </Link>
                     <Link
                       href="/dvir"
@@ -740,7 +744,9 @@ export function TelemetryCockpit({
                         textDecoration: 'none',
                       }}
                     >
-                      📋 Fiches DVIR
+                      <span className="flex items-center justify-center gap-1">
+                        <IconFileText size={11} /> Fiches DVIR
+                      </span>
                     </Link>
                   </div>
                 </div>
@@ -1038,7 +1044,9 @@ export function TelemetryCockpit({
                     textDecoration: 'none',
                   }}
                 >
-                  🔧 Ouvrir Ordre de Travail (OR)
+                  <span className="flex items-center justify-center gap-1">
+                    <IconWrench size={11} /> Ouvrir Ordre de Travail (OR)
+                  </span>
                 </Link>
                 <Link
                   href={`/digital-twin?v=${vehicle.id}`}
@@ -1050,7 +1058,9 @@ export function TelemetryCockpit({
                     textDecoration: 'none',
                   }}
                 >
-                  🧬 Jumeau Numérique 58 Wilayas
+                  <span className="flex items-center justify-center gap-1">
+                    <IconActivity size={11} className="text-indigo-400" /> Jumeau Numérique 58 Wilayas
+                  </span>
                 </Link>
               </div>
             </div>

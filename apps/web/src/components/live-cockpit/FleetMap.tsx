@@ -9,6 +9,9 @@ import {
   IconCrosshair,
   IconLayers,
   IconNavigation,
+  IconAlertOctagon,
+  IconMoon,
+  IconSun,
 } from '../navigation/TechIcons';
 import { SovereignMapLibre } from './SovereignMapLibre';
 import { useTheme } from '../../context/ThemeContext';
@@ -829,7 +832,9 @@ export function FleetMap({
                     }}
                     title="Véhicule consigné suite échec critique inspection DVIR"
                   >
-                    🛑 DVIR
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                      <IconAlertOctagon size={9} /> DVIR
+                    </span>
                   </span>
                 )}
                 {v.can.fuelDropAnomalyDetected && (
@@ -1228,7 +1233,15 @@ export function FleetMap({
               }}
               title="Basculer entre Cockpit Nuit et Rues Jour"
             >
-              {mapStyle === 'DARK' ? '🌙 Nuit OSM' : '☀️ Jour OSM'}
+              {mapStyle === 'DARK' ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconMoon size={11} /> Nuit OSM
+                </span>
+              ) : (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconSun size={11} /> Jour OSM
+                </span>
+              )}
             </button>
           )}
 

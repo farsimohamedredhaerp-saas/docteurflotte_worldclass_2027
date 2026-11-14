@@ -8,6 +8,7 @@ import {
   PlatformRegulatoryEnactaRule,
   PlatformVignetteTarif,
 } from '@docteurflotte/contracts';
+import { IconRefreshCw, IconAlertTriangle, IconX } from '@/components/navigation/TechIcons';
 
 export default function AdminFiscalPage() {
   const [fuelPrices, setFuelPrices] = useState<PlatformFiscalFuelPrice[]>([]);
@@ -102,15 +103,20 @@ export default function AdminFiscalPage() {
             fontSize: '13px',
             fontWeight: 600,
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
-          🔄 Actualiser
+          <IconRefreshCw size={13} />
+          <span>Actualiser</span>
         </button>
       </div>
 
       {error && (
-        <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#fca5a5', fontSize: '14px', marginBottom: '20px' }}>
-          ⚠️ {error}
+        <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#fca5a5', fontSize: '14px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <IconAlertTriangle size={16} />
+          <span>{error}</span>
         </div>
       )}
 
@@ -284,9 +290,10 @@ export default function AdminFiscalPage() {
               </h3>
               <button
                 onClick={() => setSelectedFuel(null)}
-                style={{ background: 'none', border: 'none', color: 'var(--df-text-muted)', fontSize: '20px', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}
+                aria-label="Fermer"
               >
-                ✕
+                <IconX size={18} />
               </button>
             </div>
 

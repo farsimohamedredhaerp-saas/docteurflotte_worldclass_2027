@@ -3,6 +3,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Navbar } from '../../components/navigation/Navbar';
+import {
+  IconCpu,
+  IconSparkles,
+  IconZap,
+  IconFuel,
+  IconBarChart3,
+  IconUsers,
+  IconActivity,
+  IconCheck,
+  IconX,
+  IconArrowUpRight,
+  IconAlertTriangle,
+} from '../../components/navigation/TechIcons';
 import { AuthClient } from '../../lib/api-auth';
 import { CopilotClient } from '../../lib/api-copilot';
 import {
@@ -146,7 +159,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
       );
       action.status = 'EXECUTED';
       const codeMsg = res.confirmationCode ? ` [Code ANPDP : ${res.confirmationCode}]` : '';
-      setActionFeedback(`✓ Action validée avec succès ! ${res.message}${codeMsg} (Réf : ${res.generatedWorkOrderId})`);
+      setActionFeedback(`Action validée avec succès ! ${res.message}${codeMsg} (Réf : ${res.generatedWorkOrderId})`);
       setTimeout(() => setActionFeedback(null), 8000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -163,7 +176,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
         sessionToken
       );
       action.status = 'REJECTED';
-      setActionFeedback(`✕ Action ${action.id} rejetée avec succès et consignée dans le registre d'audit.`);
+      setActionFeedback(`Action ${action.id} rejetée avec succès et consignée dans le registre d'audit.`);
       setTimeout(() => setActionFeedback(null), 6000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -186,7 +199,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
         <div style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '22px' }}>🧠</span>
+              <IconSparkles size={22} className="text-indigo-400" />
               <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
                 Ask DocteurFlotte — Copilote Décisionnel d’Exploitation (SAD → ADS)
               </h1>
@@ -209,8 +222,8 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                 }}
               >
                 {aiStatus.available
-                  ? `🟢 OLLAMA / QWEN2.5 ACTIF (${aiStatus.model}) • LOI 18-07`
-                  : '🟡 MODE DÉTERMINISTE PUR (FALLBACK GRACIEUX • OLLAMA HORS-LIGNE)'}
+                  ? `OLLAMA / QWEN2.5 ACTIF (${aiStatus.model}) • LOI 18-07`
+                  : 'MODE DÉTERMINISTE PUR (FALLBACK GRACIEUX • OLLAMA HORS-LIGNE)'}
               </span>
             </div>
             <p style={{ fontSize: '13.5px', color: '#94a3b8', margin: 0 }}>
@@ -235,7 +248,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                 textDecoration: 'none',
               }}
             >
-              <span>⚡</span>
+              <IconZap size={13} />
               <span>Observabilité & Audit IA</span>
             </Link>
 
@@ -255,7 +268,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                 textDecoration: 'none',
               }}
             >
-              <span>⛽</span>
+              <IconFuel size={13} />
               <span>Scanner Reçus Naftal (OCR)</span>
             </Link>
 
@@ -275,7 +288,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                 textDecoration: 'none',
               }}
             >
-              <span>📊</span>
+              <IconBarChart3 size={13} />
               <span>Tableau Décisionnel</span>
             </Link>
           </div>
@@ -381,7 +394,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                       flexWrap: 'wrap',
                     }}
                   >
-                    <span>{msg.sender === 'user' ? '👤 Vous' : '🧠 DocteurFlotte Copilot'}</span>
+                    <span>{msg.sender === 'user' ? 'Vous' : 'DocteurFlotte Copilot'}</span>
                     <span style={{ color: 'rgba(255,255,255,0.4)' }}>• {msg.timestamp}</span>
                     {msg.responsePayload?.aiSource && (
                       <span
@@ -400,8 +413,8 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                         }}
                       >
                         {msg.responsePayload.aiSource === 'OLLAMA_QWEN_LOCAL'
-                          ? '⚡ Hybride : Moteur Physique + Qwen2.5 Local'
-                          : '📐 Moteur Physique Déterministe (Loi 18-07)'}
+                          ? 'Hybride : Moteur Physique + Qwen2.5 Local'
+                          : 'Moteur Physique Déterministe (Loi 18-07)'}
                       </span>
                     )}
                   </div>
@@ -423,7 +436,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                           }}
                         >
                           <div style={{ fontSize: '11px', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase', marginBottom: '8px' }}>
-                            🔬 Preuves Physiques & Métrologie Brute (Loi 18-07)
+                            Preuves Physiques & Métrologie Brute (Loi 18-07)
                           </div>
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
                             {msg.responsePayload.evidences.map((ev, i) => (
@@ -452,7 +465,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ fontSize: '11px', fontWeight: 700, color: '#34d399', textTransform: 'uppercase' }}>
-                              ⚡ Décisions & Actions Préparées (Draft & Commit)
+                              Décisions & Actions Préparées (Draft & Commit)
                             </div>
                             <span style={{ fontSize: '10px', color: '#94a3b8' }}>
                               Machine à États Souveraine • Validation Humaine Requise
@@ -493,12 +506,12 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                                     )}
                                     {act.status === 'EXECUTED' && (
                                       <span style={{ background: 'rgba(16, 185, 129, 0.25)', border: '1px solid #10b981', color: '#6ee7b7', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 800 }}>
-                                        ✓ EXÉCUTÉ & AUDITÉ
+                                        EXÉCUTÉ & AUDITÉ
                                       </span>
                                     )}
                                     {act.status === 'REJECTED' && (
                                       <span style={{ background: 'rgba(239, 68, 68, 0.25)', border: '1px solid #ef4444', color: '#fca5a5', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 800 }}>
-                                        ✕ REJETÉ
+                                        REJETÉ
                                       </span>
                                     )}
                                   </div>
@@ -533,7 +546,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                                           boxShadow: '0 2px 8px rgba(5, 150, 105, 0.3)',
                                         }}
                                       >
-                                        <span>✓</span>
+                                        <IconCheck size={13} />
                                         <span>Confirmer l&apos;Exécution</span>
                                       </button>
                                       <button
@@ -553,17 +566,17 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                                           whiteSpace: 'nowrap',
                                         }}
                                       >
-                                        <span>✕</span>
+                                        <IconX size={13} />
                                         <span>Rejeter</span>
                                       </button>
                                     </>
                                   ) : act.status === 'EXECUTED' ? (
                                     <span style={{ fontSize: '11px', color: '#6ee7b7', fontWeight: 700 }}>
-                                      ✓ Enregistré au Registre des Ordres
+                                      Enregistré au Registre des Ordres
                                     </span>
                                   ) : (
                                     <span style={{ fontSize: '11px', color: '#fca5a5', fontWeight: 600 }}>
-                                      ✕ Action Classée
+                                      Action Classée
                                     </span>
                                   )}
                                 </div>
@@ -573,7 +586,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                               {act.candidateVehicles && act.candidateVehicles.length > 0 && (
                                 <div style={{ marginTop: '6px', background: 'rgba(15, 23, 42, 0.65)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '8px', padding: '10px' }}>
                                   <div style={{ fontSize: '11px', fontWeight: 700, color: '#a78bfa', marginBottom: '6px' }}>
-                                    📊 Classement des Candidats TOPSIS (Score Multicritère Algérie) :
+                                    Classement des Candidats TOPSIS (Score Multicritère Algérie) :
                                   </div>
                                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
                                     {act.candidateVehicles.map((c) => (
@@ -638,10 +651,10 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
             }}
           >
             {[
-              { label: '🔋 Batterie Kangoo (Cranking)', prompt: 'Quel est l’état de santé de la batterie du Kangoo ?' },
-              { label: '🛢️ Huile MAN TGX (Arrhenius)', prompt: 'Faut-il vidanger l’huile du MAN TGX après la mission à Hassi Messaoud ?' },
-              { label: '⛽ Détection Vol Carburant (CUSUM)', prompt: 'Y a-t-il eu un vol de carburant ou un siphonnage Naftal récemment ?' },
-              { label: '📊 Synthèse Risques Flotte', prompt: 'Fais-moi la synthèse des risques d’inaction de la flotte pour cette semaine.' },
+              { label: 'Batterie Kangoo (Cranking)', prompt: 'Quel est l’état de santé de la batterie du Kangoo ?' },
+              { label: 'Huile MAN TGX (Arrhenius)', prompt: 'Faut-il vidanger l’huile du MAN TGX après la mission à Hassi Messaoud ?' },
+              { label: 'Détection Vol Carburant (CUSUM)', prompt: 'Y a-t-il eu un vol de carburant ou un siphonnage Naftal récemment ?' },
+              { label: 'Synthèse Risques Flotte', prompt: 'Fais-moi la synthèse des risques d’inaction de la flotte pour cette semaine.' },
             ].map((chip, idx) => (
               <button
                 key={idx}
@@ -715,7 +728,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
                 opacity: inputValue.trim() ? 1 : 0.5,
               }}
             >
-              Envoyer 🚀
+              Envoyer
             </button>
           </div>
         </div>
@@ -760,7 +773,7 @@ Que souhaitez-vous diagnostiquer ou arbitrer aujourd'hui ?`,
             }}
           >
             <div style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>🔔</span>
+              <IconAlertTriangle size={15} className="text-amber-400" />
               <span>Alertes Proactives du Copilote</span>
             </div>
 

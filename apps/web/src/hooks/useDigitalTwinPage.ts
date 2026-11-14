@@ -311,7 +311,7 @@ export function useDigitalTwinPage(): UseDigitalTwinPageReturn {
       );
       setDigitalTwin(simulated);
       showNotification(
-        `✓ Simulation validée pour la Wilaya ${currentWilayaProfile.code} - ${currentWilayaProfile.name} (VHI: ${simulated.currentVhi}/100)`
+        `Simulation validée pour la Wilaya ${currentWilayaProfile.code} - ${currentWilayaProfile.name} (VHI: ${simulated.currentVhi}/100)`
       );
     } catch (err: unknown) {
       if ((err as Error)?.name !== 'AbortError') {

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { IconSun, IconMoon } from './navigation/TechIcons';
 
 interface ThemeToggleProps {
   showLabel?: boolean;
@@ -53,8 +54,8 @@ export function ThemeToggle({ showLabel = false }: ThemeToggleProps) {
         e.currentTarget.style.transform = 'none';
       }}
     >
-      <span style={{ fontSize: '0.90rem', lineHeight: 1 }}>
-        {isDark ? '☀️' : '🌙'}
+      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        {isDark ? <IconSun size={15} className="text-amber-400" /> : <IconMoon size={15} className="text-indigo-400" />}
       </span>
       {showLabel && (
         <span style={{ fontSize: '0.75rem', color: 'var(--df-text-muted)' }}>

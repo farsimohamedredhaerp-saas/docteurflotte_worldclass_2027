@@ -3,6 +3,20 @@
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Navbar } from '../../../components/navigation/Navbar';
+import {
+  IconExternalLink,
+  IconRadio,
+  IconNavigation,
+  IconShieldCheck,
+  IconZap,
+  IconSearch,
+  IconTruck,
+  IconSliders,
+  IconFileText,
+  IconCheck,
+  IconX,
+  IconThermometer,
+} from '../../../components/navigation/TechIcons';
 
 interface DeviceItem {
   id: string;
@@ -444,10 +458,10 @@ export default function TelematicsHardwarePage() {
                 textDecoration: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '6px',
               }}
             >
-              <span>🔗</span>
+              <IconExternalLink size={13} />
               <span>Source Officielle Traccar (2 175 Appareils • 266 Protocoles)</span>
             </a>
           </div>
@@ -522,7 +536,7 @@ export default function TelematicsHardwarePage() {
                 textDecoration: 'none',
               }}
             >
-              <span>📡</span>
+              <IconRadio size={14} />
               <span>Supervision Passerelles Traccar/Flespi</span>
             </Link>
 
@@ -542,7 +556,7 @@ export default function TelematicsHardwarePage() {
                 border: '1px solid rgba(255, 255, 255, 0.15)',
               }}
             >
-              <span>🗺️</span>
+              <IconNavigation size={14} />
               <span>Console Flotte en Temps Réel</span>
             </Link>
           </div>
@@ -565,7 +579,7 @@ export default function TelematicsHardwarePage() {
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '20px' }}>🇩🇿</span>
+              <IconShieldCheck size={20} className="text-emerald-400" />
               <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#fff', margin: 0 }}>
                 1. Traccar Auto-Hébergé : Passerelle Souveraine Principale (Défaut)
               </h3>
@@ -578,7 +592,7 @@ export default function TelematicsHardwarePage() {
 
           <div style={{ borderLeft: '1px solid var(--df-border-subtle)', paddingLeft: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '20px' }}>⚡</span>
+              <IconZap size={20} className="text-sky-400" />
               <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#38bdf8', margin: 0 }}>
                 2. Flespi Cloud Failover : Passerelle de Secours à Zéro PII
               </h3>
@@ -624,8 +638,8 @@ export default function TelematicsHardwarePage() {
                 outline: 'none',
               }}
             />
-            <span style={{ position: 'absolute', left: '12px', top: '9px', fontSize: '14px', color: '#64748b' }}>
-              🔍
+            <span style={{ position: 'absolute', left: '12px', top: '9px', color: '#64748b', display: 'flex', alignItems: 'center' }}>
+              <IconSearch size={14} />
             </span>
           </div>
 
@@ -633,12 +647,12 @@ export default function TelematicsHardwarePage() {
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {[
               { id: 'all', label: 'Tous les Matériels' },
-              { id: 'heavy', label: '🚛 Poids Lourds / BTP' },
-              { id: 'light', label: '🚗 Véhicules Légers' },
-              { id: 'cold-chain', label: '❄️ Chaîne du Froid' },
-              { id: 'autonomous', label: '🔋 Autonomes / Solaire' },
-              { id: 'obd', label: '🔌 OBD-II Direct' },
-              { id: 'video', label: '📹 Caméras IA' },
+              { id: 'heavy', label: 'Poids Lourds / BTP' },
+              { id: 'light', label: 'Véhicules Légers' },
+              { id: 'cold-chain', label: 'Chaîne du Froid' },
+              { id: 'autonomous', label: 'Autonomes / Solaire' },
+              { id: 'obd', label: 'OBD-II Direct' },
+              { id: 'video', label: 'Caméras IA' },
             ].map((cat) => (
               <button
                 key={cat.id}
@@ -770,7 +784,7 @@ export default function TelematicsHardwarePage() {
                       }`,
                     }}
                   >
-                    {device.algeriaReadiness === 'EXCELLENT' ? '⭐ Recommandé Algérie' : '✓ Compatible'}
+                    {device.algeriaReadiness === 'EXCELLENT' ? 'Recommandé Algérie' : 'Compatible'}
                   </span>
                 </div>
 
@@ -882,7 +896,7 @@ export default function TelematicsHardwarePage() {
                   gap: '6px',
                 }}
               >
-                <span>⚙️</span>
+                <IconSliders size={14} />
                 <span>Générer Configuration SMS / GPRS</span>
               </button>
             </div>
@@ -902,8 +916,8 @@ export default function TelematicsHardwarePage() {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
-              <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: '0 0 4px 0' }}>
-                📋 Tableau de Référence des Ports & Protocoles Télématiques
+              <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <IconFileText size={20} /> Tableau de Référence des Ports & Protocoles Télématiques
               </h2>
               <p style={{ fontSize: '13px', color: 'var(--df-text-secondary)', margin: 0 }}>
                 Ports d’écoute configurés dans le conteneur Docker Traccar souverain et correspondance Flespi.
@@ -1022,16 +1036,20 @@ export default function TelematicsHardwarePage() {
               </div>
               <button
                 onClick={() => setSelectedDevice(null)}
+                aria-label="Fermer"
                 style={{
                   background: 'none',
                   border: 'none',
                   color: '#94a3b8',
-                  fontSize: '22px',
+                  fontSize: '18px',
                   cursor: 'pointer',
                   padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                ✕
+                <IconX size={18} />
               </button>
             </div>
 
@@ -1096,14 +1114,18 @@ export default function TelematicsHardwarePage() {
                     background: 'rgba(56, 189, 248, 0.15)',
                     border: '1px solid rgba(56, 189, 248, 0.3)',
                     color: '#7dd3fc',
-                    padding: '4px 8px',
+                    padding: '4px 10px',
                     borderRadius: '6px',
                     fontSize: '11px',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
                   }}
                 >
-                  📋 Copier la Commande
+                  <IconFileText size={12} />
+                  Copier la Commande
                 </button>
               </div>
               <pre

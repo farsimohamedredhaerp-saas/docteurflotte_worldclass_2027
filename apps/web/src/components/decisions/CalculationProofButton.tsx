@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { IconFileText } from '../navigation/TechIcons';
 
 interface CalculationProofButtonProps {
   onClick: (e: React.MouseEvent) => void;
@@ -94,7 +95,7 @@ export const CalculationProofButton: React.FC<CalculationProofButtonProps> = ({
         e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
-      <span style={{ fontSize: '1.05em' }}>🧮</span>
+      <IconFileText size={12} className="inline opacity-80" />
       <span>{label}</span>
     </button>
   );

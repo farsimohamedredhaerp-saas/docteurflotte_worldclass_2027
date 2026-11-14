@@ -6,6 +6,19 @@ import { usePathname, useRouter } from 'next/navigation';
 import { AuthClient } from '../../lib/api-auth';
 import { UserRole } from '@docteurflotte/contracts';
 import { Navbar } from '../../components/navigation/Navbar';
+import {
+  IconBarChart3,
+  IconLayers,
+  IconCreditCard,
+  IconCpu,
+  IconZap,
+  IconFuel,
+  IconRadio,
+  IconShieldCheck,
+  IconFileText,
+  IconAlertOctagon,
+  IconChevronLeft,
+} from '../../components/navigation/TechIcons';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -62,7 +75,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           textAlign: 'center',
         }}
       >
-        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🛡️ ⛔</div>
+        <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#f87171', margin: '0 auto 16px auto' }}>
+          <IconAlertOctagon size={28} />
+        </div>
         <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#fca5a5', marginBottom: '12px' }}>
           Accès Restreint — Console SuperAdmin SaaS
         </h2>
@@ -110,15 +125,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   const navLinks = [
-    { href: '/admin', label: "Vue d'Ensemble", icon: '📊' },
-    { href: '/admin/tenants', label: 'Tenants & Organisations', icon: '🏢' },
-    { href: '/admin/subscriptions', label: 'Plans & Abonnements DZ', icon: '💳' },
-    { href: '/admin/decision-engine', label: 'Moteur Décisionnel (6 Physiques)', icon: '🧠' },
-    { href: '/admin/ai-observability', label: 'Observabilité IA Ollama', icon: '⚡' },
-    { href: '/admin/fiscal', label: 'Barèmes Fiscaux & Naftal', icon: '⛽' },
-    { href: '/admin/gateways', label: 'Passerelles IoT & Traccar', icon: '📡' },
-    { href: '/admin/audit', label: 'Piste d’Audit Immuable', icon: '🛡️' },
-    { href: '/guide', label: 'Guide & Architecture Tech', icon: '📖' },
+    { href: '/admin', label: "Vue d'Ensemble", icon: <IconBarChart3 size={15} /> },
+    { href: '/admin/tenants', label: 'Tenants & Organisations', icon: <IconLayers size={15} /> },
+    { href: '/admin/subscriptions', label: 'Plans & Abonnements DZ', icon: <IconCreditCard size={15} /> },
+    { href: '/admin/decision-engine', label: 'Moteur Décisionnel (6 Physiques)', icon: <IconCpu size={15} /> },
+    { href: '/admin/ai-observability', label: 'Observabilité IA Ollama', icon: <IconZap size={15} /> },
+    { href: '/admin/fiscal', label: 'Barèmes Fiscaux & Naftal', icon: <IconFuel size={15} /> },
+    { href: '/admin/gateways', label: 'Passerelles IoT & Traccar', icon: <IconRadio size={15} /> },
+    { href: '/admin/audit', label: 'Piste d’Audit Immuable', icon: <IconShieldCheck size={15} /> },
+    { href: '/guide', label: 'Guide & Architecture Tech', icon: <IconFileText size={15} /> },
   ];
 
   return (
@@ -155,11 +170,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '22px',
                 boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)',
+                color: '#fff',
               }}
             >
-              👑
+              <IconShieldCheck size={22} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -206,7 +221,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 border: '1px solid rgba(255, 255, 255, 0.15)',
               }}
             >
-              ⬅️ Retour à l’application client
+              <IconChevronLeft size={14} />
+              Retour à l’application client
             </Link>
           </div>
         </div>

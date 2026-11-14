@@ -13,6 +13,7 @@ import {
   IconShieldCheck,
   IconChevronDown,
   IconNavigation,
+  IconX,
 } from './TechIcons';
 
 interface MobileNavDrawerProps {
@@ -210,12 +211,11 @@ export function MobileNavDrawer({ isOpen, onClose, session }: MobileNavDrawerPro
               background: 'transparent',
               border: 'none',
               color: 'var(--df-text-muted)',
-              fontSize: '1.2rem',
               cursor: 'pointer',
               padding: '0.25rem 0.5rem',
             }}
           >
-            ✕
+            <IconX size={18} />
           </button>
         </div>
 

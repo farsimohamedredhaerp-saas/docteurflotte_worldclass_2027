@@ -22,6 +22,17 @@ import { useDemoMode } from '../../context/DemoModeContext';
 import { SignaturePad, PhotoProofCapture } from '../../components/dvir';
 import { saveDvirOffline, getPendingOfflineInspections, markDvirSynced } from '../../lib/offline-dvir-storage';
 import { getSimulationDvirData } from '@/lib/simulation-sandbox';
+import {
+  IconTruck,
+  IconCheck,
+  IconAlertTriangle,
+  IconLayers,
+  IconShieldCheck,
+  IconRefreshCw,
+  IconWrench,
+  IconX,
+  IconFileText,
+} from '../../components/navigation/TechIcons';
 
 interface VehicleProfile {
   id: string;
@@ -128,8 +139,8 @@ const DVIR_I18N = {
     pageTitle: 'DVIR Numérique & Inspection Véhicule Algérien',
     badge: 'Code de la Route & ENACTA',
     subtitle: 'Digital Driver Vehicle Inspection Report avant départ et fin de tournée. Remplissage automatique des caractéristiques télématiques lors du changement d\'actif et blocage immédiat de départ en cas d\'anomalie critique.',
-    refreshBtn: '🔄 Actualiser Télémétrie',
-    workOrdersBtn: '🔧 Ordres de Travail Atelier →',
+    refreshBtn: 'Actualiser Télémétrie',
+    workOrdersBtn: 'Ordres de Travail Atelier →',
     statTotal: 'Inspections Enregistrées',
     statTotalDesc: 'Total des fiches DVIR soumises',
     statPass: 'Véhicules Conformes (Pass)',
@@ -142,9 +153,9 @@ const DVIR_I18N = {
     postTripOption: 'Post-Trip (Retour de mission / Dépôt)',
     odometerLabel: 'Relevé Odomètre au Tableau de Bord (km) *',
     checklistTitle: 'Points de Contrôle Légaux & Organes Mécaniques',
-    btnPass: '✓ Conforme',
-    btnMinor: '⚠ Mineur',
-    btnCritical: '🚨 Critique',
+    btnPass: 'Conforme',
+    btnMinor: 'Mineur',
+    btnCritical: 'Critique',
     btnSubmit: 'Certifier & Enregistrer l’Inspection DVIR',
     submitting: 'Certification et signature en cours...',
     notesLabel: 'Observations Générales du Conducteur / Atelier',
@@ -153,8 +164,8 @@ const DVIR_I18N = {
     pageTitle: 'فحص المركبة الرقمي (DVIR) ومحضر المعاينة الميدانية',
     badge: 'مطابقة قانون المرور و ENACTA',
     subtitle: 'محضر فحص المركبة الرقمي قبل الانطلاق وعند العودة. ملء تلقائي للبيانات التلغرافية ومنع فوري للمهمة في حالة وجود عطب خطير يمس بالسلامة.',
-    refreshBtn: '🔄 تحديث التليماتيكس',
-    workOrdersBtn: '🔧 أوامر العمل بالورشة ←',
+    refreshBtn: 'تحديث التليماتيكس',
+    workOrdersBtn: 'أوامر العمل بالورشة ←',
     statTotal: 'الفحوصات المسجلة',
     statTotalDesc: 'إجمالي تقارير DVIR المعتمدة',
     statPass: 'مركبات مطابقة وجاهزة',
@@ -167,9 +178,9 @@ const DVIR_I18N = {
     postTripOption: 'عند العودة إلى الحظيرة (Post-Trip)',
     odometerLabel: 'قراءة عداد الكيلومترات باللوحة (كم) *',
     checklistTitle: 'نقاط المراقبة القانونية والأعضاء الميكانيكية',
-    btnPass: '✓ سليم ومطابق',
-    btnMinor: '⚠ عطب خفيف',
-    btnCritical: '🚨 عطب خطير',
+    btnPass: 'سليم ومطابق',
+    btnMinor: 'عطب خفيف',
+    btnCritical: 'عطب خطير',
     btnSubmit: 'المصادقة وتوقيع محضر الفحص (DVIR)',
     submitting: 'جاري المصادقة والتوقيع الرقمي...',
     notesLabel: 'ملاحظات السائق أو فني الورشة',
@@ -261,7 +272,7 @@ export default function DvirPage() {
 
       setFeedbackMessage({
         type: 'ok',
-        text: `✓ Synchronisation différée réussie : ${res.syncedCount} fiche(s) transmise(s) à l'atelier (${res.criticalFailuresCount} anomalie(s) critique(s)).`,
+        text: `Synchronisation différée réussie : ${res.syncedCount} fiche(s) transmise(s) à l'atelier (${res.criticalFailuresCount} anomalie(s) critique(s)).`,
       });
 
       setSignatureDataUrl(null);
@@ -463,8 +474,8 @@ export default function DvirPage() {
       setFeedbackMessage({
         type: hasCritical ? 'danger' : 'ok',
         text: hasCritical
-          ? `🚨 Mode Hors-Ligne (Zone Blanche) : Anomalie critique enregistrée localement pour ${selectedVehicle?.name}. Véhicule consigné à l'arrêt. Fiche stockée en attente de réseau.`
-          : `📱 Mode Hors-Ligne (Zone Blanche) : Fiche d'inspection enregistrée localement avec succès sur l'appareil. Elle sera transmise automatiquement à l'atelier dès le retour de la connectivité.`,
+          ? `Mode Hors-Ligne (Zone Blanche) : Anomalie critique enregistrée localement pour ${selectedVehicle?.name}. Véhicule consigné à l'arrêt. Fiche stockée en attente de réseau.`
+          : `Mode Hors-Ligne (Zone Blanche) : Fiche d'inspection enregistrée localement avec succès sur l'appareil. Elle sera transmise automatiquement à l'atelier dès le retour de la connectivité.`,
       });
 
       setIsSubmitting(false);
@@ -479,12 +490,12 @@ export default function DvirPage() {
       if (result.hasCriticalFailures) {
         setFeedbackMessage({
           type: 'danger',
-          text: `🚨 Défaillance critique constatée pour ${selectedVehicle?.name} ! Véhicule interdit de départ. Ordre de Travail généré : ${result.generatedWorkOrderId}`,
+          text: `Défaillance critique constatée pour ${selectedVehicle?.name} ! Véhicule interdit de départ. Ordre de Travail généré : ${result.generatedWorkOrderId}`,
         });
       } else {
         setFeedbackMessage({
           type: 'ok',
-          text: `✅ Inspection validée avec succès pour ${selectedVehicle?.name} (${selectedVehicle?.plate}). Actif conforme et autorisé au départ.`,
+          text: `Inspection validée avec succès pour ${selectedVehicle?.name} (${selectedVehicle?.plate}). Actif conforme et autorisé au départ.`,
         });
       }
 
@@ -546,7 +557,21 @@ export default function DvirPage() {
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: '1.85rem' }}>📋</span>
+              <div
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  background: 'rgba(16, 185, 129, 0.12)',
+                  border: '1px solid rgba(16, 185, 129, 0.25)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#10b981',
+                }}
+              >
+                <IconFileText size={20} />
+              </div>
               <h1
                 style={{
                   fontSize: '1.85rem',
@@ -628,7 +653,7 @@ export default function DvirPage() {
                   opacity: isOnline ? 1 : 0.6,
                 }}
               >
-                <span>🔄</span>
+                <IconRefreshCw size={13} className={isSyncingOffline ? 'animate-spin' : ''} />
                 <span>
                   {isSyncingOffline
                     ? 'Synchronisation en cours...'
@@ -683,14 +708,14 @@ export default function DvirPage() {
             value={reports.length.toString()}
             unit={language === 'ar' ? 'تقارير' : 'Rapports'}
             description={t.statTotalDesc}
-            icon="📋"
+            icon={<IconLayers size={18} />}
           />
           <MetricCard
             title={t.statPass}
             value={compliantCount.toString()}
             unit={language === 'ar' ? 'مركبة' : 'Flotte'}
             description={t.statPassDesc}
-            icon="✅"
+            icon={<IconCheck size={18} style={{ color: 'var(--df-status-ok)' }} />}
             trend={{
               direction: 'up',
               text: `${Math.round((compliantCount / (reports.length || 1)) * 100)}%`,
@@ -702,7 +727,7 @@ export default function DvirPage() {
             value={criticalCount.toString()}
             unit={language === 'ar' ? 'مركبة' : 'Véhicules'}
             description={t.statCriticalDesc}
-            icon="🚨"
+            icon={<IconAlertTriangle size={18} style={{ color: 'var(--df-status-danger)' }} />}
             trend={
               criticalCount > 0
                 ? {
@@ -750,6 +775,7 @@ export default function DvirPage() {
             <span>{feedbackMessage.text}</span>
             <button
               onClick={() => setFeedbackMessage(null)}
+              aria-label="Fermer"
               style={{
                 background: 'none',
                 border: 'none',
@@ -757,9 +783,11 @@ export default function DvirPage() {
                 cursor: 'pointer',
                 fontWeight: 700,
                 fontSize: '0.85rem',
+                display: 'flex',
+                alignItems: 'center',
               }}
             >
-              ✕
+              <IconX size={14} />
             </button>
           </div>
         )}
@@ -797,7 +825,7 @@ export default function DvirPage() {
             >
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                  <span style={{ fontSize: '1.35rem' }}>📱</span>
+                  <IconTruck size={18} style={{ color: 'var(--df-accent-blue)' }} />
                   <h2
                     style={{
                       fontSize: '1.15rem',
@@ -823,21 +851,25 @@ export default function DvirPage() {
                     padding: '0.35rem 0.75rem',
                     borderRadius: 'var(--df-radius-xs)',
                     fontSize: '0.75rem',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     background: 'var(--df-status-ok-bg)',
-                    color: 'var(--df-status-ok)',
+                    color: 'var(--df-status-ok-text)',
                     border: '1px solid var(--df-status-ok-border)',
                     cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
                   }}
                   title="Marquer tous les organes conformes en 1 clic"
                 >
-                  ⚡ Tout Conforme (Pass)
+                  <IconCheck size={12} />
+                  <span>Tout Conforme</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleResetChecklist}
                   style={{
-                    padding: '0.35rem 0.65rem',
+                    padding: '0.35rem 0.55rem',
                     borderRadius: 'var(--df-radius-xs)',
                     fontSize: '0.75rem',
                     fontWeight: 600,
@@ -845,10 +877,12 @@ export default function DvirPage() {
                     color: 'var(--df-text-secondary)',
                     border: '1px solid var(--df-border-subtle)',
                     cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
                   }}
                   title="Réinitialiser"
                 >
-                  🔄
+                  <IconRefreshCw size={12} />
                 </button>
               </div>
             </div>
@@ -869,7 +903,7 @@ export default function DvirPage() {
                     Sélection du Véhicule / Matériel *
                   </label>
                   <span style={{ fontSize: '0.72rem', color: 'var(--df-accent-cyan)', fontWeight: 600 }}>
-                    ⚡ Pré-remplissage automatique
+                    Pré-remplissage télématique
                   </span>
                 </div>
 
@@ -1120,8 +1154,9 @@ export default function DvirPage() {
                       Relevé Odomètre au Tableau de Bord (km) *
                     </label>
                     {isOdometerRollback && (
-                      <span style={{ fontSize: '0.72rem', color: 'var(--df-status-warning)', fontWeight: 700 }}>
-                        ⚠️ Inversion odomètre détectée (relevé &lt; {selectedVehicle.odometerKm} km)
+                      <span style={{ fontSize: '0.72rem', color: 'var(--df-status-warning)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <IconAlertTriangle size={12} />
+                        Inversion odomètre détectée (relevé &lt; {selectedVehicle.odometerKm} km)
                       </span>
                     )}
                   </div>
@@ -1207,9 +1242,13 @@ export default function DvirPage() {
                           background: 'var(--df-status-danger-bg)',
                           color: 'var(--df-status-danger)',
                           fontWeight: 800,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
                         }}
                       >
-                        🚨 {criticalItemsCount} Critique(s)
+                        <IconAlertTriangle size={12} />
+                        {criticalItemsCount} Critique(s)
                       </span>
                     )}
                   </div>
@@ -1461,7 +1500,7 @@ export default function DvirPage() {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                  <span style={{ fontSize: '1.35rem' }}>🛡️</span>
+                  <IconShieldCheck size={18} style={{ color: 'var(--df-status-ok)' }} />
                   <h2
                     style={{
                       fontSize: '1.15rem',
@@ -1560,7 +1599,7 @@ export default function DvirPage() {
                           }}
                         >
                           <span style={{ fontSize: '0.72rem', color: 'var(--df-accent-cyan)', fontWeight: 700 }}>
-                            ✍️ Signature certifiée :
+                            Signature certifiée :
                           </span>
                           <img
                             src={report.signatureDataUrl}
@@ -1590,7 +1629,7 @@ export default function DvirPage() {
                           }}
                         >
                           <span style={{ fontSize: '0.72rem', color: 'var(--df-text-secondary)', fontWeight: 700 }}>
-                            📸 Preuves photos ({report.items.filter((i) => i.photoUrl).length}) :
+                            Preuves photographiques ({report.items.filter((i) => i.photoUrl).length}) :
                           </span>
                           <div style={{ display: 'flex', gap: '4px' }}>
                             {report.items
@@ -1627,7 +1666,10 @@ export default function DvirPage() {
                             marginTop: '0.25rem',
                           }}
                         >
-                          <div style={{ fontWeight: 800 }}>⛔ Interdiction immédiate de circulation</div>
+                          <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <IconAlertTriangle size={14} />
+                            <span>Interdiction immédiate de circulation</span>
+                          </div>
                           {report.generatedWorkOrderId && (
                             <div style={{ marginTop: '0.25rem', color: 'var(--df-text-muted)' }}>
                               Ordre de Travail Atelier :{' '}
@@ -1651,8 +1693,9 @@ export default function DvirPage() {
                             color: 'var(--df-status-ok)',
                           }}
                         >
-                          <div style={{ fontWeight: 700 }}>
-                            ✓ Consignation levée par l&apos;atelier ({report.resolvedByWorkOrderId || 'OT clôturé'})
+                          <div style={{ fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <IconCheck size={13} />
+                            Consignation levée par l&apos;atelier ({report.resolvedByWorkOrderId || 'OT clôturé'})
                           </div>
                           {report.resolutionNotes && (
                             <div style={{ color: 'var(--df-text-muted)', fontSize: '0.7rem', marginTop: '0.15rem' }}>

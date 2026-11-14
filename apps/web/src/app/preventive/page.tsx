@@ -21,6 +21,9 @@ import {
   IconTrash,
   IconX,
   IconSearch,
+  IconHardHat,
+  IconLayers,
+  IconCpu,
 } from '../../components/navigation/TechIcons';
 import { BreakthroughInnovationsPanel } from '../../components/preventive/BreakthroughInnovationsPanel';
 
@@ -190,7 +193,7 @@ export default function PreventivePage() {
   };
 
   const handleCreateWorkOrder = (plate: string, template: string) => {
-    showNotification(`✓ Ordre de Travail Préventif déclenché pour l'actif ${plate} (${template}). Transmis à l'atelier.`);
+    showNotification(`Ordre de Travail Préventif déclenché pour l'actif ${plate} (${template}). Transmis à l'atelier.`);
   };
 
   // Gestion Template OEM
@@ -254,7 +257,7 @@ export default function PreventivePage() {
             : t
         )
       );
-      showNotification(`✓ Programme d'entretien ${templateForm.make} ${templateForm.model} mis à jour avec succès.`);
+      showNotification(`Programme d'entretien ${templateForm.make} ${templateForm.model} mis à jour avec succès.`);
     } else {
       const newId = `TPL-CUSTOM-${Date.now().toString().slice(-4)}`;
       const newTpl: OemMaintenanceTemplate = {
@@ -271,7 +274,7 @@ export default function PreventivePage() {
         criticalPoints: points,
       };
       setTemplates((prev) => [newTpl, ...prev]);
-      showNotification(`✓ Nouveau gabarit OEM ${templateForm.make} ${templateForm.model} ajouté au catalogue.`);
+      showNotification(`Nouveau gabarit OEM ${templateForm.make} ${templateForm.model} ajouté au catalogue.`);
     }
     setIsTemplateModalOpen(false);
   };
@@ -333,7 +336,7 @@ export default function PreventivePage() {
             : d
         )
       );
-      showNotification(`✓ Échéance préventive de l'actif ${dueForm.registrationNumber} mise à jour.`);
+      showNotification(`Échéance préventive de l'actif ${dueForm.registrationNumber} mise à jour.`);
     } else {
       const newDue: UpcomingPreventiveDue = {
         id: `due-${Date.now().toString().slice(-4)}`,
@@ -349,7 +352,7 @@ export default function PreventivePage() {
         assignedSite: dueForm.assignedSite,
       };
       setUpcoming((prev) => [newDue, ...prev]);
-      showNotification(`✓ Nouvelle alerte d'échéance ajoutée pour l'actif ${dueForm.registrationNumber}.`);
+      showNotification(`Nouvelle alerte d'échéance ajoutée pour l'actif ${dueForm.registrationNumber}.`);
     }
     setIsDueModalOpen(false);
   };
@@ -359,10 +362,10 @@ export default function PreventivePage() {
     if (!deleteConfirm) return;
     if (deleteConfirm.type === 'TEMPLATE') {
       setTemplates((prev) => prev.filter((t) => t.id !== deleteConfirm.id));
-      showNotification(`✓ Programme OEM « ${deleteConfirm.label} » supprimé du référentiel.`);
+      showNotification(`Programme OEM « ${deleteConfirm.label} » supprimé du référentiel.`);
     } else {
       setUpcoming((prev) => prev.filter((d) => d.id !== deleteConfirm.id));
-      showNotification(`✓ Alerte d'échéance pour « ${deleteConfirm.label} » supprimée.`);
+      showNotification(`Alerte d'échéance pour « ${deleteConfirm.label} » supprimée.`);
     }
     setDeleteConfirm(null);
   };
@@ -461,10 +464,10 @@ export default function PreventivePage() {
 
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' }}>
               {[
-                { id: 'ALL', label: 'Tous les Plans', count: templates.length, icon: '📋' },
-                { id: 'POIDS_LOURDS', label: 'Poids Lourds', count: templates.filter((t) => t.category === 'POIDS_LOURDS').length, icon: '🚛' },
-                { id: 'ENGINS_BTP', label: 'Engins BTP', count: templates.filter((t) => t.category === 'ENGINS_BTP').length, icon: '🚜' },
-                { id: 'UTILITAIRES', label: 'Utilitaires & 4x4', count: templates.filter((t) => t.category === 'UTILITAIRES').length, icon: '🛻' },
+                { id: 'ALL', label: 'Tous les Plans', count: templates.length, icon: <IconLayers size={14} /> },
+                { id: 'POIDS_LOURDS', label: 'Poids Lourds', count: templates.filter((t) => t.category === 'POIDS_LOURDS').length, icon: <IconTruck size={14} /> },
+                { id: 'ENGINS_BTP', label: 'Engins BTP', count: templates.filter((t) => t.category === 'ENGINS_BTP').length, icon: <IconHardHat size={14} /> },
+                { id: 'UTILITAIRES', label: 'Utilitaires & 4x4', count: templates.filter((t) => t.category === 'UTILITAIRES').length, icon: <IconTruck size={14} /> },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -486,7 +489,7 @@ export default function PreventivePage() {
                   }}
                 >
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                    <span>{item.icon}</span>
+                    {item.icon}
                     <span>{item.label}</span>
                   </span>
                   <span
@@ -600,16 +603,20 @@ export default function PreventivePage() {
                 <div style={{ display: 'inline-flex', gap: '0.45rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                   <span
                     style={{
-                      background: '#059669',
-                      color: '#FFFFFF',
+                      background: 'rgba(5, 150, 105, 0.15)',
+                      color: '#34d399',
+                      border: '1px solid rgba(5, 150, 105, 0.35)',
                       fontSize: '11px',
                       fontWeight: 800,
                       padding: '3px 10px',
                       borderRadius: '6px',
                       letterSpacing: '0.04em',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
                     }}
                   >
-                    🧬 MAINTENANCE 5.0 PRESCRIPTIVE &amp; COGNITIVE
+                    <IconCpu size={12} /> MAINTENANCE 5.0 PRESCRIPTIVE &amp; COGNITIVE
                   </span>
                   <Badge variant="ok">SOUVERAIN ALGÉRIE (LOI 18-07)</Badge>
                   <Badge variant="neutral">Physique Déterministe 0 DA • DZD</Badge>
@@ -675,7 +682,9 @@ export default function PreventivePage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
                 {filteredUpcoming.length === 0 ? (
                   <div style={{ gridColumn: '1 / -1', padding: '3rem 1rem', textAlign: 'center', background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: 'var(--df-radius-md)' }}>
-                    <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>🔧</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem', color: 'var(--df-text-muted)' }}>
+                      <IconWrench size={36} />
+                    </div>
                     <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.25rem' }}>
                       {upcoming.length === 0 ? 'Aucune échéance préventive enregistrée' : 'Aucune échéance ne correspond à ce filtre'}
                     </div>

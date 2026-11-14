@@ -9,6 +9,22 @@ import {
   PlatformConfigPublication,
   PlatformDecisionEngineConfig,
 } from '@docteurflotte/contracts';
+import {
+  IconFuel,
+  IconZap,
+  IconThermometer,
+  IconAlertOctagon,
+  IconShieldCheck,
+  IconAlertTriangle,
+  IconCreditCard,
+  IconPlus,
+  IconFileText,
+  IconCheck,
+  IconEdit,
+  IconX,
+  IconActivity,
+  IconSliders,
+} from '../../../components/navigation/TechIcons';
 
 export default function AdminDecisionEnginePage() {
   const [configs, setConfigs] = useState<PlatformDecisionEngineConfig[]>([]);
@@ -339,13 +355,13 @@ export default function AdminDecisionEnginePage() {
   };
 
   const modalTabs = [
-    { label: '1. Arrhenius (Huile)', icon: '🛢️' },
-    { label: '2. Batterie (CVHI)', icon: '🔋' },
-    { label: '3. Refroidissement (EWMA)', icon: '🌡️' },
-    { label: '4. Freinage (Archard)', icon: '🛑' },
-    { label: '5. Colmatage (FAP)', icon: '💨' },
-    { label: '6. Anti-Fraude (CUSUM)', icon: '🚨' },
-    { label: '7. VHI & Risque Inaction', icon: '💰' },
+    { label: '1. Arrhenius (Huile)', icon: <IconFuel size={14} /> },
+    { label: '2. Batterie (CVHI)', icon: <IconZap size={14} /> },
+    { label: '3. Refroidissement (EWMA)', icon: <IconThermometer size={14} /> },
+    { label: '4. Freinage (Archard)', icon: <IconAlertOctagon size={14} /> },
+    { label: '5. Colmatage (FAP)', icon: <IconActivity size={14} /> },
+    { label: '6. Anti-Fraude (CUSUM)', icon: <IconShieldCheck size={14} /> },
+    { label: '7. VHI & Risque Inaction', icon: <IconCreditCard size={14} /> },
   ];
 
   return (
@@ -378,7 +394,8 @@ export default function AdminDecisionEnginePage() {
               gap: '6px',
             }}
           >
-            ➕ Nouvelle Version (Draft)
+            <IconPlus size={14} />
+            Nouvelle Version (Draft)
           </button>
 
           {selectedConfig && (
@@ -398,7 +415,8 @@ export default function AdminDecisionEnginePage() {
                 gap: '6px',
               }}
             >
-              📋 Dupliquer la Version
+              <IconFileText size={14} />
+              Dupliquer la Version
             </button>
           )}
 
@@ -419,20 +437,22 @@ export default function AdminDecisionEnginePage() {
               gap: '6px',
             }}
           >
-            ⏪ Rollback
+            Rollback
           </button>
         </div>
       </div>
 
       {actionSuccess && (
-        <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#34d399', fontSize: '14px', fontWeight: 600, marginBottom: '20px' }}>
-          ✅ {actionSuccess}
+        <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#34d399', fontSize: '14px', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <IconCheck size={16} />
+          <span>{actionSuccess}</span>
         </div>
       )}
 
       {error && (
-        <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#fca5a5', fontSize: '14px', marginBottom: '20px' }}>
-          ⚠️ {error}
+        <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#fca5a5', fontSize: '14px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <IconAlertTriangle size={16} />
+          <span>{error}</span>
         </div>
       )}
 
@@ -472,7 +492,7 @@ export default function AdminDecisionEnginePage() {
           >
             {configs.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.version} — [{c.status}] {c.is_active_publication ? '★ (Active en Prod)' : ''}
+                {c.version} — [{c.status}] {c.is_active_publication ? '(Active en Production)' : ''}
               </option>
             ))}
           </select>
@@ -528,7 +548,15 @@ export default function AdminDecisionEnginePage() {
                 gap: '6px',
               }}
             >
-              {isSimulating ? 'Calcul en cours...' : '🧪 Simuler sur Banc d’Essai'}
+              {isSimulating ? (
+                <>
+                  <IconActivity size={14} className="inline animate-spin" /> Calcul en cours...
+                </>
+              ) : (
+                <>
+                  <IconActivity size={14} className="inline" /> Simuler sur Banc d’Essai
+                </>
+              )}
             </button>
 
             {selectedConfig.status === 'DRAFT' && (
@@ -544,9 +572,12 @@ export default function AdminDecisionEnginePage() {
                     fontSize: '12px',
                     fontWeight: 600,
                     cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}
                 >
-                  ✏️ Modifier les Paramètres
+                  <IconEdit size={14} /> Modifier les Paramètres
                 </button>
 
                 <button
@@ -560,9 +591,12 @@ export default function AdminDecisionEnginePage() {
                     fontSize: '12px',
                     fontWeight: 700,
                     cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}
                 >
-                  ✅ Approuver (Maker-Checker)
+                  <IconCheck size={14} /> Approuver (Maker-Checker)
                 </button>
               </>
             )}
@@ -580,9 +614,12 @@ export default function AdminDecisionEnginePage() {
                   fontWeight: 800,
                   cursor: 'pointer',
                   boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
                 }}
               >
-                🚀 Activer en Production
+                <IconZap size={14} /> Activer en Production
               </button>
             )}
           </div>
@@ -628,7 +665,9 @@ export default function AdminDecisionEnginePage() {
           {/* 1. Arrhenius Oil */}
           <div style={{ padding: '20px', borderRadius: '12px', backgroundColor: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '20px' }}>🛢️</span>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(245, 158, 11, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconFuel size={18} className="text-amber-500" />
+              </div>
               <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                 1. Vieillissement Huile Moteur (Arrhenius)
               </h3>
@@ -652,7 +691,9 @@ export default function AdminDecisionEnginePage() {
           {/* 2. Battery CVHI */}
           <div style={{ padding: '20px', borderRadius: '12px', backgroundColor: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '20px' }}>🔋</span>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(16, 185, 129, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconZap size={18} className="text-emerald-500" />
+              </div>
               <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                 2. Santé Batterie Cranking SOH (CVHI)
               </h3>
@@ -676,7 +717,9 @@ export default function AdminDecisionEnginePage() {
           {/* 3. Radiator Cooling EWMA */}
           <div style={{ padding: '20px', borderRadius: '12px', backgroundColor: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '20px' }}>🌡️</span>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(6, 182, 212, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconThermometer size={18} className="text-cyan-500" />
+              </div>
               <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                 3. Refroidissement Radiateur (EWMA)
               </h3>
@@ -700,7 +743,9 @@ export default function AdminDecisionEnginePage() {
           {/* 4. Brake Wear Archard */}
           <div style={{ padding: '20px', borderRadius: '12px', backgroundColor: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '20px' }}>🛑</span>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(239, 68, 68, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconAlertOctagon size={18} className="text-rose-500" />
+              </div>
               <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                 4. Usure Plaquettes & Disques (Archard)
               </h3>
@@ -720,7 +765,9 @@ export default function AdminDecisionEnginePage() {
           {/* 5. DPF Soot */}
           <div style={{ padding: '20px', borderRadius: '12px', backgroundColor: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '20px' }}>💨</span>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(99, 102, 241, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconActivity size={18} className="text-indigo-500" />
+              </div>
               <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                 5. Colmatage Filtre à Particules (FAP)
               </h3>
@@ -740,7 +787,9 @@ export default function AdminDecisionEnginePage() {
           {/* 6. Fuel Siphon CUSUM */}
           <div style={{ padding: '20px', borderRadius: '12px', backgroundColor: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '20px' }}>🚨</span>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(245, 158, 11, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconShieldCheck size={18} className="text-amber-500" />
+              </div>
               <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--df-text-main)', margin: 0 }}>
                 6. Détection Siphon & Vol Carburant (CUSUM)
               </h3>
@@ -777,16 +826,18 @@ export default function AdminDecisionEnginePage() {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '24px' }}>🧪</span>
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', backgroundColor: 'rgba(99, 102, 241, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconActivity size={20} className="text-indigo-400" />
+              </div>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--df-text-main)' }}>
                 Résultats du Banc d'Essai Physique sur Véhicules Étalons Algérie
               </h3>
             </div>
             <button
               onClick={() => setSimulationResult(null)}
-              style={{ background: 'none', border: 'none', color: 'var(--df-text-muted)', fontSize: '18px', cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', color: 'var(--df-text-muted)', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
             >
-              ✕ Fermer
+              <IconX size={14} /> Fermer
             </button>
           </div>
 
@@ -922,18 +973,26 @@ export default function AdminDecisionEnginePage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--df-text-main)' }}>
-                  {modalMode === 'CREATE' ? '➕ Créer une Nouvelle Version Algorithmique (DRAFT)' : `✏️ Modifier la Version Brouillon : ${formData.version}`}
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--df-text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {modalMode === 'CREATE' ? (
+                    <>
+                      <IconPlus size={18} className="text-emerald-400" /> Créer une Nouvelle Version Algorithmique (DRAFT)
+                    </>
+                  ) : (
+                    <>
+                      <IconEdit size={18} className="text-blue-400" /> Modifier la Version Brouillon : {formData.version}
+                    </>
+                  )}
                 </h3>
-                <div style={{ fontSize: '12px', color: 'var(--df-text-muted)' }}>
+                <div style={{ fontSize: '12px', color: 'var(--df-text-muted)', marginTop: '4px' }}>
                   Scope : {formData.scope_key} • Mode Brouillon Immuable dès Approbation
                 </div>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--df-text-muted)', fontSize: '22px', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer', padding: '4px' }}
               >
-                ✕
+                <IconX size={18} />
               </button>
             </div>
 
@@ -1342,8 +1401,8 @@ export default function AdminDecisionEnginePage() {
               boxShadow: 'var(--df-shadow-lg)',
             }}
           >
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: 800, color: 'var(--df-text-main)' }}>
-              🚀 Activation en Production : {selectedConfig.version}
+            <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: 800, color: 'var(--df-text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <IconZap size={18} className="text-emerald-400" /> Activation en Production : {selectedConfig.version}
             </h3>
             <p style={{ fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.5, marginBottom: '16px' }}>
               Vous êtes sur le point d'activer cette configuration au statut <strong>APPROVED</strong> en tant que nouvelle baseline active. Cette opération clôturera automatiquement la publication active précédente dans le grand livre append-only et notifiera le bus Outbox pour invalidation des caches runtime.

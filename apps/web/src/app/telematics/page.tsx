@@ -18,6 +18,16 @@ import {
   TraccarGatewayHealth,
 } from '@docteurflotte/contracts';
 import { useDemoMode } from '../../context/DemoModeContext';
+import {
+  IconRadio,
+  IconCpu,
+  IconLink,
+  IconUnlink,
+  IconTruck,
+  IconX,
+  IconAlertTriangle,
+  IconPlus,
+} from '../../components/navigation/TechIcons';
 
 export default function TelematicsPage() {
   const router = useRouter();
@@ -206,14 +216,16 @@ export default function TelematicsPage() {
                 fontWeight: 700,
               }}
             >
-              <span>📱</span>
+              <IconRadio size={14} />
               <span>Matériels IoT Compatibles</span>
             </Link>
             <Button variant="outline" size="sm" onClick={() => setIsBindModalOpen(true)}>
-              🔗 Nouvel Appairage
+              <IconLink size={14} className="inline mr-1" />
+              Nouvel Appairage
             </Button>
             <Button variant="primary" size="sm" onClick={() => setIsAddDeviceModalOpen(true)}>
-              + Enregistrer Boîtier GPS
+              <IconPlus size={14} className="inline mr-1" />
+              Enregistrer Boîtier GPS
             </Button>
           </div>
         </div>
@@ -237,9 +249,10 @@ export default function TelematicsPage() {
             <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{feedback.message}</span>
             <button
               onClick={() => setFeedback(null)}
-              style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '1rem' }}
+              aria-label="Fermer"
+              style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center' }}
             >
-              ✕
+              <IconX size={16} />
             </button>
           </div>
         )}
@@ -305,9 +318,13 @@ export default function TelematicsPage() {
               color: activeTab === 'FLEET' ? '#ffffff' : 'var(--df-text-secondary)',
               cursor: 'pointer',
               transition: 'all var(--df-transition-fast)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            📡 Fleet Live — Supervision de Flotte
+            <IconRadio size={14} />
+            <span>Fleet Live — Supervision de Flotte</span>
           </button>
           <button
             onClick={() => setActiveTab('DEVICES')}
@@ -321,9 +338,13 @@ export default function TelematicsPage() {
               color: activeTab === 'DEVICES' ? '#ffffff' : 'var(--df-text-secondary)',
               cursor: 'pointer',
               transition: 'all var(--df-transition-fast)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            📟 Boîtiers GPS & Appairages ({devices.length})
+            <IconCpu size={14} />
+            <span>Boîtiers GPS & Appairages ({devices.length})</span>
           </button>
         </div>
 
@@ -336,7 +357,9 @@ export default function TelematicsPage() {
               </div>
             ) : fleetLive.length === 0 ? (
               <div className="df-glass" style={{ padding: '3.5rem 2rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📡</div>
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', marginBottom: '1rem' }}>
+                  <IconRadio size={24} />
+                </div>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.5rem' }}>
                   Aucun actif opérationnel détecté
                 </h3>
@@ -345,7 +368,8 @@ export default function TelematicsPage() {
                 </p>
                 <Link href="/assets" style={{ textDecoration: 'none' }}>
                   <Button variant="primary" size="sm">
-                    🚗 Voir les Actifs
+                    <IconTruck size={14} className="inline mr-1" />
+                    Voir les Actifs
                   </Button>
                 </Link>
               </div>
@@ -445,7 +469,7 @@ export default function TelematicsPage() {
                           </td>
                           <td style={{ padding: '1rem', textAlign: 'right' }}>
                             {asset.maintenanceDue ? (
-                              <Badge variant="danger" pulse>⚠️ Révision Requise</Badge>
+                              <Badge variant="danger" pulse>Révision Requise</Badge>
                             ) : (
                               <Badge variant="ok">Nominal</Badge>
                             )}
@@ -469,7 +493,9 @@ export default function TelematicsPage() {
               </div>
             ) : devices.length === 0 ? (
               <div className="df-glass" style={{ padding: '3.5rem 2rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📟</div>
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', marginBottom: '1rem' }}>
+                  <IconCpu size={24} />
+                </div>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.5rem' }}>
                   Aucun terminal GPS enregistré
                 </h3>
@@ -477,7 +503,8 @@ export default function TelematicsPage() {
                   Enregistrez vos boîtiers télématiques (Teltonika, Coban, Meitrack) en renseignant leur numéro IMEI unique.
                 </p>
                 <Button variant="primary" size="sm" onClick={() => setIsAddDeviceModalOpen(true)}>
-                  + Enregistrer le Premier Boîtier
+                  <IconPlus size={14} className="inline mr-1" />
+                  Enregistrer le Premier Boîtier
                 </Button>
               </div>
             ) : (
@@ -553,7 +580,8 @@ export default function TelematicsPage() {
                                 size="sm"
                                 onClick={() => handleUnbind(activeBinding.id)}
                               >
-                                ✕ Dissocier
+                                <IconUnlink size={13} className="inline mr-1 text-rose-400" />
+                                Dissocier
                               </Button>
                             ) : (
                               <Button
@@ -564,7 +592,8 @@ export default function TelematicsPage() {
                                   setIsBindModalOpen(true);
                                 }}
                               >
-                                🔗 Lier à un Actif
+                                <IconLink size={13} className="inline mr-1" />
+                                Lier à un Actif
                               </Button>
                             )}
                           </td>

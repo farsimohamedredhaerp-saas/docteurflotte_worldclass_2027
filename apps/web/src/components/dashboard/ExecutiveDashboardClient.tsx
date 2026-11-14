@@ -15,6 +15,11 @@ import {
   IconShieldCheck,
   IconActivity,
   IconWrench,
+  IconFuel,
+  IconCpu,
+  IconZap,
+  IconArrowUpRight,
+  IconLayers,
 } from '../navigation/TechIcons';
 
 interface DecisionItem {
@@ -106,21 +111,21 @@ export function ExecutiveDashboardClient() {
 
   const handleApprove = (decision: DecisionItem) => {
     setNotification(
-      `✓ Ordre de travail généré avec succès pour l'actif ${decision.assetName} (${decision.id}) ! Impact économique consigné.`
+      `Ordre de travail généré pour l'actif ${decision.assetName} (${decision.id}) — arbitrage consigné au registre.`
     );
     setDecisions((prev) => prev.filter((d) => d.id !== decision.id));
     setTimeout(() => setNotification(null), 6000);
   };
 
   const handleDismiss = (decision: DecisionItem) => {
-    setNotification(`ℹ Décision ${decision.id} différée avec motif d'exploitation.`);
+    setNotification(`Recommandation ${decision.id} différée avec motif d'exploitation.`);
     setDecisions((prev) => prev.filter((d) => d.id !== decision.id));
     setTimeout(() => setNotification(null), 5000);
   };
 
   const handleResetDemo = () => {
     setDecisions(INITIAL_DECISIONS);
-    setNotification('✓ Données de démonstration réinitialisées avec succès.');
+    setNotification('Données de démonstration réinitialisées avec succès.');
     setTimeout(() => setNotification(null), 4000);
   };
 
@@ -134,21 +139,21 @@ export function ExecutiveDashboardClient() {
 
   return (
     <>
-      {/* BARRE HORIZONTALE PRINCIPALE AVEC MEGAMENU DE NIVEAU 1 */}
+      {/* BARRE HORIZONTALE PRINCIPALE */}
       <Navbar onResetDemo={handleResetDemo} />
 
-      <div className="df-container" style={{ paddingTop: '0.5rem', paddingBottom: '3rem' }}>
+      <div className="df-container" style={{ paddingTop: '0.25rem', paddingBottom: '3.5rem' }}>
         {/* BANNIÈRE DE NOTIFICATION FLOTTANTE */}
         {notification && (
           <div
             role="status"
             style={{
               background: 'var(--df-bg-surface-1)',
-              border: '1px solid var(--df-accent-blue)',
+              border: '1px solid var(--df-border-focus)',
               color: 'var(--df-text-main)',
-              padding: '0.85rem 1.25rem',
-              borderRadius: 'var(--df-radius-md)',
-              marginBottom: '1.5rem',
+              padding: '0.75rem 1.15rem',
+              borderRadius: 'var(--df-radius-sm)',
+              marginBottom: '1.25rem',
               boxShadow: 'var(--df-shadow-md)',
               display: 'flex',
               alignItems: 'center',
@@ -159,22 +164,22 @@ export function ExecutiveDashboardClient() {
               <span style={{ color: 'var(--df-status-ok)' }}>
                 <IconCheck size={16} strokeWidth={2} />
               </span>
-              <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{notification}</span>
+              <span style={{ fontSize: '0.825rem', fontWeight: 500 }}>{notification}</span>
             </div>
             <button
               onClick={() => setNotification(null)}
               style={{ background: 'transparent', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer', display: 'flex' }}
             >
-              <IconX size={15} />
+              <IconX size={14} />
             </button>
           </div>
         )}
 
-        {/* 1. SECTION HÉROS — COCKPIT D'OPÉRATIONS CONNECTÉES */}
+        {/* 1. SECTION COMMAND CENTER HEADER */}
         <section
           style={{
-            padding: '2rem 1.75rem',
-            marginBottom: '1.75rem',
+            padding: '1.75rem 1.5rem',
+            marginBottom: '1.5rem',
             background: 'var(--df-bg-surface-1)',
             border: '1px solid var(--df-border-subtle)',
             borderRadius: 'var(--df-radius-lg)',
@@ -186,89 +191,77 @@ export function ExecutiveDashboardClient() {
             gap: '1.5rem',
           }}
         >
-          <div style={{ maxWidth: '780px' }}>
-            <div style={{ display: 'inline-flex', marginBottom: '0.75rem' }}>
-              <Badge variant="ok">
-                ✨ Plateforme Souveraine de Maintenance 5.0 • Brevets 0 DA • Arbitrage DZD (Loi 18-07)
+          <div style={{ maxWidth: '820px' }}>
+            {/* EYEBROW SÉMANTIQUE */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.65rem', flexWrap: 'wrap' }}>
+              <Badge variant="ok" pulse>
+                Maintenance 5.0 Prescriptive
               </Badge>
+              <span style={{ color: 'var(--df-border-medium)', opacity: 0.6 }} aria-hidden="true">•</span>
+              <span style={{ fontSize: '0.70rem', color: 'var(--df-text-secondary)', fontWeight: 500 }}>
+                Physique Déterministe 0 DA • Arbitrage DZD • Loi 18-07 ANPDP
+              </span>
             </div>
 
             <h1
               style={{
-                fontSize: '2rem',
-                fontWeight: 800,
-                lineHeight: 1.2,
+                fontSize: '1.65rem',
+                fontWeight: 700,
+                lineHeight: 1.25,
                 letterSpacing: '-0.025em',
-                marginBottom: '0.65rem',
+                marginBottom: '0.45rem',
                 color: 'var(--df-text-main)',
               }}
             >
-              La Maintenance 5.0 au Cœur de la Gouvernance de Vos Actifs
+              Supervision Télémetrique & Arbitrage Financier de Flotte
             </h1>
 
-            <p style={{ fontSize: '0.95rem', color: 'var(--df-text-secondary)', lineHeight: 1.55, marginBottom: '1.25rem' }}>
-              Dépassez la maintenance 4.0 statistique. DocteurFlotte fusionne la physique déterministe (coût matériel 0 DA), l&apos;arbitrage financier direct en Dinars Algériens (DZD) et un copilote d&apos;atelier souverain.
+            <p style={{ fontSize: '0.86rem', color: 'var(--df-text-secondary)', lineHeight: 1.6, marginBottom: '1.15rem' }}>
+              Chaque signal télématique est transformé en décision financière en Dinars Algériens (DZD). Modélisation continue des 6 organes d’usure sans matériel additionnel et réconciliation instantanée des pleins Naftal.
             </p>
 
-            {/* RACCOURCIS DE DÉMONSTRATION CLIENT & ESSAI 1-CLIC */}
-            <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            {/* RACCOURCIS RAPIDES D'EXPLOITATION */}
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <Link
                 href="/preventive"
                 style={{
                   textDecoration: 'none',
-                  background: '#059669',
-                  color: '#FFFFFF',
-                  padding: '0.55rem 1.15rem',
-                  borderRadius: 'var(--df-radius-md)',
-                  fontSize: '0.85rem',
-                  fontWeight: 800,
+                  background: 'var(--df-accent-blue)',
+                  color: '#ffffff',
+                  padding: '0.42rem 0.9rem',
+                  borderRadius: 'var(--df-radius-sm)',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.45rem',
-                  boxShadow: '0 2px 10px rgba(5, 150, 105, 0.35)',
+                  gap: '0.4rem',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
                 }}
               >
-                <IconWrench size={15} />
-                <span>⚡ Cockpit Maintenance 5.0</span>
+                <IconWrench size={13} />
+                <span>Cockpit Maintenance</span>
               </Link>
 
               <Link
                 href="/live-cockpit"
                 style={{
                   textDecoration: 'none',
-                  background: 'var(--df-accent-blue)',
-                  color: '#FFFFFF',
-                  padding: '0.55rem 1.15rem',
-                  borderRadius: 'var(--df-radius-md)',
-                  fontSize: '0.85rem',
-                  fontWeight: 700,
+                  background: 'var(--df-bg-surface-2)',
+                  color: 'var(--df-text-main)',
+                  border: '1px solid var(--df-border-medium)',
+                  padding: '0.42rem 0.9rem',
+                  borderRadius: 'var(--df-radius-sm)',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.45rem',
-                  boxShadow: '0 2px 10px rgba(37, 99, 235, 0.35)',
+                  gap: '0.4rem',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
                 }}
               >
-                <IconActivity size={15} />
-                <span>Tester la Démo Sans Connexion</span>
-              </Link>
-
-              <Link
-                href="/register"
-                style={{
-                  textDecoration: 'none',
-                  background: 'var(--df-status-ok-bg)',
-                  border: '1px solid var(--df-status-ok)',
-                  color: 'var(--df-status-ok-text)',
-                  padding: '0.55rem 1.05rem',
-                  borderRadius: 'var(--df-radius-md)',
-                  fontSize: '0.85rem',
-                  fontWeight: 700,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                }}
-              >
-                <span>✨ Créer mon Compte Entreprise</span>
+                <IconActivity size={13} style={{ color: 'var(--df-status-ok)' }} />
+                <span>Télématique Temps Réel</span>
               </Link>
 
               <Link
@@ -278,16 +271,17 @@ export function ExecutiveDashboardClient() {
                   background: 'var(--df-bg-surface-2)',
                   color: 'var(--df-text-main)',
                   border: '1px solid var(--df-border-subtle)',
-                  padding: '0.45rem 0.95rem',
-                  borderRadius: 'var(--df-radius-md)',
-                  fontSize: '0.80rem',
-                  fontWeight: 600,
+                  padding: '0.42rem 0.8rem',
+                  borderRadius: 'var(--df-radius-sm)',
+                  fontSize: '0.78rem',
+                  fontWeight: 500,
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.45rem',
+                  gap: '0.4rem',
                 }}
               >
-                <span>⛽ Scanner Naftal</span>
+                <IconFuel size={13} />
+                <span>Scanner Naftal</span>
               </Link>
 
               <Link
@@ -297,77 +291,80 @@ export function ExecutiveDashboardClient() {
                   background: 'var(--df-bg-surface-2)',
                   color: 'var(--df-text-main)',
                   border: '1px solid var(--df-border-subtle)',
-                  padding: '0.45rem 0.95rem',
-                  borderRadius: 'var(--df-radius-md)',
-                  fontSize: '0.80rem',
-                  fontWeight: 600,
+                  padding: '0.42rem 0.8rem',
+                  borderRadius: 'var(--df-radius-sm)',
+                  fontSize: '0.78rem',
+                  fontWeight: 500,
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.45rem',
+                  gap: '0.4rem',
                 }}
               >
-                <span>🔬 Jumeau Numérique</span>
+                <IconCpu size={13} />
+                <span>Jumeau Numérique</span>
               </Link>
 
               <Link
-                href="/admin/ai-observability"
+                href="/copilot"
                 style={{
                   textDecoration: 'none',
-                  background: 'rgba(147, 51, 234, 0.15)',
-                  color: '#c084fc',
-                  border: '1px solid rgba(168, 85, 247, 0.4)',
-                  padding: '0.45rem 0.95rem',
-                  borderRadius: 'var(--df-radius-md)',
-                  fontSize: '0.80rem',
-                  fontWeight: 600,
+                  background: 'var(--df-bg-surface-2)',
+                  color: 'var(--df-text-main)',
+                  border: '1px solid var(--df-border-subtle)',
+                  padding: '0.42rem 0.8rem',
+                  borderRadius: 'var(--df-radius-sm)',
+                  fontSize: '0.78rem',
+                  fontWeight: 500,
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.45rem',
+                  gap: '0.4rem',
                 }}
               >
-                <span>⚡ Surveillance IA Ollama</span>
+                <IconZap size={13} style={{ color: 'var(--df-accent-blue)' }} />
+                <span>Copilote IA</span>
               </Link>
             </div>
           </div>
 
+          {/* RÉSUMÉ D'ÉTAT SYSTÈME */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '0.65rem',
-              minWidth: '240px',
-              padding: '1.15rem',
+              gap: '0.6rem',
+              minWidth: '220px',
+              padding: '1rem',
               background: 'var(--df-bg-surface-2)',
               borderRadius: 'var(--df-radius-md)',
               border: '1px solid var(--df-border-subtle)',
             }}
           >
-            <div style={{ fontSize: '0.72rem', color: 'var(--df-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: '0.68rem', color: 'var(--df-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Statut Flotte Temps Réel
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-              <span style={{ color: 'var(--df-text-secondary)' }}>Véhicules Actifs</span>
-              <strong className="df-mono" style={{ color: 'var(--df-text-main)' }}>52 Unités</strong>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.80rem' }}>
+              <span style={{ color: 'var(--df-text-secondary)' }}>Actifs Supervisés</span>
+              <strong className="df-mono" style={{ color: 'var(--df-text-main)', fontWeight: 600 }}>52 Unités</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.80rem' }}>
               <span style={{ color: 'var(--df-text-secondary)' }}>Qualité Télématique</span>
-              <strong className="df-mono" style={{ color: 'var(--df-status-ok)' }}>100% Validée</strong>
+              <strong className="df-mono" style={{ color: 'var(--df-status-ok)', fontWeight: 600 }}>100% Nominale</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-              <span style={{ color: 'var(--df-text-secondary)' }}>Isolation Multi-Tenant</span>
-              <strong className="df-mono" style={{ color: 'var(--df-accent-blue)' }}>PostgreSQL RLS</strong>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.80rem' }}>
+              <span style={{ color: 'var(--df-text-secondary)' }}>Sécurité Multi-Tenant</span>
+              <strong className="df-mono" style={{ color: 'var(--df-accent-blue)', fontWeight: 600 }}>PostgreSQL RLS</strong>
             </div>
           </div>
         </section>
 
         {/* 2. RANGÉE DE KPIS DÉCISIONNELS HAUTE DENSITÉ */}
-        <section style={{ marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--df-text-main)', letterSpacing: '-0.015em' }}>
+        <section style={{ marginBottom: '1.75rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+            <h2 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--df-text-main)', letterSpacing: '-0.015em', margin: 0 }}>
               Métrologie de Flotte & Performance Opérationnelle
             </h2>
-            <span className="df-mono" style={{ fontSize: '0.75rem', color: 'var(--df-text-muted)' }}>
-              Rafraîchissement &lt; 5s • Données certifiées JORADP
+            <span className="df-mono" style={{ fontSize: '0.72rem', color: 'var(--df-text-muted)' }}>
+              Rafraîchissement &lt; 5s • Référentiel JORADP / ENACTA
             </span>
           </div>
 
@@ -377,8 +374,8 @@ export function ExecutiveDashboardClient() {
         {/* BANNIÈRE ARBITRAGE ÉCONOMIQUE & ROI CLIENT */}
         <section
           style={{
-            marginBottom: '2rem',
-            padding: '1.25rem 1.5rem',
+            marginBottom: '1.75rem',
+            padding: '1.15rem 1.35rem',
             background: 'var(--df-bg-surface-1)',
             border: '1px solid var(--df-border-subtle)',
             borderRadius: 'var(--df-radius-lg)',
@@ -390,128 +387,128 @@ export function ExecutiveDashboardClient() {
             gap: '1rem',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
             <div
               style={{
-                width: 44,
-                height: 44,
+                width: 38,
+                height: 38,
                 borderRadius: 'var(--df-radius-md)',
-                background: 'var(--df-status-ok-bg)',
-                border: '1px solid var(--df-status-ok-border)',
-                color: 'var(--df-status-ok-text)',
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.25)',
+                color: '#10b981',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
               }}
             >
-              <IconShieldCheck size={24} strokeWidth={2} />
+              <IconShieldCheck size={20} strokeWidth={1.75} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--df-text-main)' }}>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--df-text-main)' }}>
                   Arbitrage Décisionnel Mensuel : Coût d&apos;Action vs Risque d&apos;Inaction
                 </span>
                 <span
                   style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    padding: '1px 6px',
+                    fontSize: '0.64rem',
+                    fontWeight: 600,
+                    padding: '1px 5px',
                     borderRadius: 'var(--df-radius-xs)',
-                    background: 'var(--df-status-ok-bg)',
-                    color: 'var(--df-status-ok-text)',
-                    border: '1px solid var(--df-status-ok-border)',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    color: '#10b981',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
                   }}
                 >
                   ROI : 14.1x
                 </span>
               </div>
-              <p style={{ fontSize: '0.80rem', color: 'var(--df-text-secondary)', margin: '0.2rem 0 0 0' }}>
-                Algorithmes Arrhenius &amp; Archard : 2 avaries critiques anticipées (Casse turbo Scania &amp; Filtration CAT).
+              <p style={{ fontSize: '0.78rem', color: 'var(--df-text-secondary)', margin: '0.15rem 0 0 0' }}>
+                Lois physiques Arrhenius &amp; Archard : 2 avaries critiques anticipées (Turbo Scania &amp; Filtration CAT).
               </p>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
             <div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <div style={{ fontSize: '0.65rem', color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Risque Évité
               </div>
-              <div className="df-mono" style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-status-danger)' }}>
+              <div className="df-mono" style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--df-status-danger)' }}>
                 1 850 000 DA
               </div>
             </div>
-            <div style={{ width: '1px', height: '28px', background: 'var(--df-border-subtle)' }} />
+            <div style={{ width: '1px', height: '24px', background: 'var(--df-border-subtle)' }} />
             <div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <div style={{ fontSize: '0.65rem', color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Coût Préventif
               </div>
-              <div className="df-mono" style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-text-secondary)' }}>
+              <div className="df-mono" style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--df-text-secondary)' }}>
                 131 000 DA
               </div>
             </div>
-            <div style={{ width: '1px', height: '28px', background: 'var(--df-border-subtle)' }} />
+            <div style={{ width: '1px', height: '24px', background: 'var(--df-border-subtle)' }} />
             <div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <div style={{ fontSize: '0.65rem', color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Gain Net Client
               </div>
-              <div className="df-mono" style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--df-status-ok)' }}>
+              <div className="df-mono" style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--df-status-ok)' }}>
                 +1 719 000 DA
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── VITRINE COMMERCIALE CLÉ : POURQUOI DOCTEURFLOTTE EST EN MAINTENANCE 5.0 ── */}
+        {/* ── PARADIGME INDUSTRIEL : LES 5 GÉNÉRATIONS DE MAINTENANCE ── */}
         <section
           style={{
-            marginBottom: '2.5rem',
+            marginBottom: '2rem',
             background: 'var(--df-bg-surface-1)',
-            border: '2px solid #059669',
+            border: '1px solid var(--df-border-subtle)',
             borderRadius: 'var(--df-radius-lg)',
-            padding: '2rem 1.75rem',
-            boxShadow: '0 8px 30px rgba(5, 150, 105, 0.08)',
+            padding: '1.5rem',
+            boxShadow: 'var(--df-shadow-sm)',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
             <div>
-              <div style={{ display: 'inline-flex', gap: '6px', marginBottom: '0.5rem' }}>
+              <div style={{ display: 'inline-flex', gap: '6px', marginBottom: '0.4rem' }}>
                 <span
                   style={{
-                    fontSize: '0.70rem',
-                    fontWeight: 800,
+                    fontSize: '0.66rem',
+                    fontWeight: 600,
                     textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    padding: '3px 8px',
+                    letterSpacing: '0.04em',
+                    padding: '2px 7px',
                     borderRadius: '4px',
-                    background: '#ECFDF5',
-                    color: '#065F46',
-                    border: '1px solid #A7F3D0',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    color: '#10b981',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
                   }}
                 >
-                  ⚡ ÉTENDARD TECHNOLOGIQUE &amp; MONOPOLE INDUSTRIEL
+                  Paradigme de Maintenance 5.0
                 </span>
                 <span
                   style={{
-                    fontSize: '0.70rem',
-                    fontWeight: 800,
+                    fontSize: '0.66rem',
+                    fontWeight: 600,
                     textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    padding: '3px 8px',
+                    letterSpacing: '0.04em',
+                    padding: '2px 7px',
                     borderRadius: '4px',
-                    background: '#EFF6FF',
-                    color: '#1D4ED8',
-                    border: '1px solid #BFDBFE',
+                    background: 'rgba(59, 130, 246, 0.1)',
+                    color: '#3b82f6',
+                    border: '1px solid rgba(59, 130, 246, 0.25)',
                   }}
                 >
-                  COÛT MATÉRIEL STRICTEMENT 0 DA / 0 $
+                  Coût Matériel Zéro Capteur (0 DA)
                 </span>
               </div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--df-text-main)', margin: '0 0 0.4rem 0' }}>
-                Pourquoi DocteurFlotte n&apos;est pas en Maintenance 4.0, mais en Maintenance 5.0
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--df-text-main)', margin: '0 0 0.35rem 0', letterSpacing: '-0.02em' }}>
+                Pourquoi DocteurFlotte surpasse la Maintenance 4.0 Traditionnelle
               </h2>
-              <p style={{ fontSize: '0.88rem', color: 'var(--df-text-secondary)', maxWidth: '880px', margin: 0, lineHeight: 1.6 }}>
-                Alors que les acteurs mondiaux (Samsara, Geotab, Webfleet) s&apos;arrêtent à la <strong>Maintenance 4.0</strong> (statistiques boîte noire, capteurs onéreux, aucune décision financière), DocteurFlotte introduit la <strong>Maintenance 5.0</strong> : physique déterministe, arbitrage économique en Dinars Algériens (DZD) et symbiose homme-machine cognitive sur le terrain.
+              <p style={{ fontSize: '0.82rem', color: 'var(--df-text-secondary)', maxWidth: '880px', margin: 0, lineHeight: 1.55 }}>
+                Tandis que les acteurs mondiaux (Samsara, Geotab) s&apos;arrêtent à la télématique 4.0 passive (alertes kilométriques boîte noire sans arbitrage économique), DocteurFlotte introduit la <strong>Maintenance 5.0 prescriptive</strong> : physique déterministe 6 organes, arbitrage direct en Dinars Algériens (DZD) et assistant d’atelier bilingue.
               </p>
             </div>
 
@@ -519,20 +516,21 @@ export function ExecutiveDashboardClient() {
               href="/preventive"
               style={{
                 textDecoration: 'none',
-                background: '#059669',
-                color: '#FFFFFF',
-                padding: '0.65rem 1.25rem',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                fontWeight: 800,
+                background: 'var(--df-bg-surface-2)',
+                color: 'var(--df-text-main)',
+                border: '1px solid var(--df-border-medium)',
+                padding: '0.45rem 0.95rem',
+                borderRadius: 'var(--df-radius-sm)',
+                fontSize: '0.78rem',
+                fontWeight: 600,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                boxShadow: '0 2px 8px rgba(5, 150, 105, 0.4)',
+                gap: '0.4rem',
+                transition: 'all var(--df-transition-fast)',
               }}
             >
               <span>Explorer le Cockpit 5.0</span>
-              <span>→</span>
+              <IconArrowUpRight size={13} />
             </Link>
           </div>
 
@@ -540,8 +538,8 @@ export function ExecutiveDashboardClient() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-              gap: '12px',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '10px',
             }}
           >
             {/* 1.0 */}
@@ -549,22 +547,22 @@ export function ExecutiveDashboardClient() {
               style={{
                 background: 'var(--df-bg-surface-2)',
                 border: '1px solid var(--df-border-subtle)',
-                borderRadius: '10px',
-                padding: '14px',
+                borderRadius: 'var(--df-radius-md)',
+                padding: '12px',
                 opacity: 0.75,
               }}
             >
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>
-                Génération 1.0 (1970 - 1990)
+              <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                1.0 (1970 - 1990)
               </div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: '#475569', marginTop: '2px' }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--df-text-main)', marginTop: '2px' }}>
                 Réactive &amp; Curative
               </div>
-              <div style={{ fontSize: '11px', color: '#DC2626', fontWeight: 600, marginTop: '6px' }}>
+              <div style={{ fontSize: '10.5px', color: '#ef4444', fontWeight: 500, marginTop: '4px' }}>
                 « On répare quand ça casse »
               </div>
               <p style={{ fontSize: '11px', color: 'var(--df-text-secondary)', marginTop: '6px', lineHeight: 1.45 }}>
-                Casse moteur brutale sur route, immobilisation de plusieurs jours, remorquage d&apos;urgence et coûts d&apos;exploitation imprévisibles.
+                Casse mécanique sur route, immobilisation lourde, remorquage d&apos;urgence et coûts d&apos;exploitation imprévisibles.
               </p>
             </div>
 
@@ -573,22 +571,22 @@ export function ExecutiveDashboardClient() {
               style={{
                 background: 'var(--df-bg-surface-2)',
                 border: '1px solid var(--df-border-subtle)',
-                borderRadius: '10px',
-                padding: '14px',
+                borderRadius: 'var(--df-radius-md)',
+                padding: '12px',
                 opacity: 0.8,
               }}
             >
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>
-                Génération 2.0 (1990 - 2010)
+              <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                2.0 (1990 - 2010)
               </div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: '#475569', marginTop: '2px' }}>
-                Préventive Calendaire
+              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--df-text-main)', marginTop: '2px' }}>
+                Préventive Aveugle
               </div>
-              <div style={{ fontSize: '11px', color: '#D97706', fontWeight: 600, marginTop: '6px' }}>
+              <div style={{ fontSize: '10.5px', color: '#f59e0b', fontWeight: 500, marginTop: '4px' }}>
                 « Vidange fixe tous les 10 000 km »
               </div>
               <p style={{ fontSize: '11px', color: 'var(--df-text-secondary)', marginTop: '6px', lineHeight: 1.45 }}>
-                Intervalles rigides aveugles. Remplacement prématuré de 35% de lubrifiants encore viables ou casse si le camion opère en milieu saharien sévère.
+                Intervalles calendaires rigides. Remplacement prématuré de 35% d’huiles encore viables ou casse sous contrainte saharienne.
               </p>
             </div>
 
@@ -597,22 +595,22 @@ export function ExecutiveDashboardClient() {
               style={{
                 background: 'var(--df-bg-surface-2)',
                 border: '1px solid var(--df-border-subtle)',
-                borderRadius: '10px',
-                padding: '14px',
+                borderRadius: 'var(--df-radius-md)',
+                padding: '12px',
                 opacity: 0.85,
               }}
             >
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>
-                Génération 3.0 (2010 - 2018)
+              <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--df-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                3.0 (2010 - 2018)
               </div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: '#475569', marginTop: '2px' }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--df-text-main)', marginTop: '2px' }}>
                 Conditionnelle Basique
               </div>
-              <div style={{ fontSize: '11px', color: '#2563EB', fontWeight: 600, marginTop: '6px' }}>
+              <div style={{ fontSize: '10.5px', color: '#3b82f6', fontWeight: 500, marginTop: '4px' }}>
                 « Voyants et seuils simples »
               </div>
               <p style={{ fontSize: '11px', color: 'var(--df-text-secondary)', marginTop: '6px', lineHeight: 1.45 }}>
-                Voyant moteur ou capteur de température &gt; 95°C. L&apos;alerte survient souvent trop tard, quand la dégradation métallique est déjà amorcée.
+                Voyant tableau de bord ou température &gt; 95°C. L&apos;alerte survient quand l&apos;usure mécanique est déjà amorcée.
               </p>
             </div>
 
@@ -620,94 +618,94 @@ export function ExecutiveDashboardClient() {
             <div
               style={{
                 background: 'var(--df-bg-surface-2)',
-                border: '1px solid #CBD5E1',
-                borderRadius: '10px',
-                padding: '14px',
+                border: '1px solid var(--df-border-subtle)',
+                borderRadius: 'var(--df-radius-md)',
+                padding: '12px',
               }}
             >
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#2563EB', textTransform: 'uppercase' }}>
-                Génération 4.0 (2018 - 2024)
+              <div style={{ fontSize: '10px', fontWeight: 600, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                4.0 (2018 - 2024)
               </div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: '#1E293B', marginTop: '2px' }}>
-                Prédictive (Samsara / Geotab)
+              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--df-text-main)', marginTop: '2px' }}>
+                Prédictive Statistique
               </div>
-              <div style={{ fontSize: '11px', color: '#6366F1', fontWeight: 600, marginTop: '6px' }}>
-                « Capteurs IoT &amp; Machine Learning »
+              <div style={{ fontSize: '10.5px', color: '#8b5cf6', fontWeight: 500, marginTop: '4px' }}>
+                « Machine Learning boîte noire »
               </div>
               <p style={{ fontSize: '11px', color: 'var(--df-text-secondary)', marginTop: '6px', lineHeight: 1.45 }}>
-                Nécessite des boîtiers et capteurs rapportés onéreux ($$$). Algorithmes statistiques en boîte noire, fausses alertes et aucun arbitrage financier opposable.
+                Capteurs rapportés onéreux, modèles probabilistes avec faux positifs fréquents, sans chiffrage de rentabilité en DZD.
               </p>
             </div>
 
             {/* 5.0 DOCTEURFLOTTE */}
             <div
               style={{
-                background: '#F0FDF4',
-                border: '2px solid #059669',
-                borderRadius: '10px',
-                padding: '14px',
+                background: 'rgba(16, 185, 129, 0.04)',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+                borderRadius: 'var(--df-radius-md)',
+                padding: '12px',
                 position: 'relative',
-                boxShadow: '0 4px 12px rgba(5, 150, 105, 0.15)',
               }}
             >
               <div
                 style={{
                   position: 'absolute',
-                  top: '-10px',
-                  right: '12px',
-                  background: '#059669',
-                  color: '#FFFFFF',
-                  fontSize: '9px',
-                  fontWeight: 800,
-                  padding: '2px 8px',
+                  top: '-9px',
+                  right: '10px',
+                  background: '#10b981',
+                  color: '#ffffff',
+                  fontSize: '8.5px',
+                  fontWeight: 700,
+                  padding: '2px 6px',
                   borderRadius: '10px',
                   textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                 }}
               >
-                DOCTEURFLOTTE EXCLUSIF
+                DOCTEURFLOTTE
               </div>
-              <div style={{ fontSize: '11px', fontWeight: 800, color: '#047857', textTransform: 'uppercase' }}>
-                Génération 5.0 (2026 - 2030+)
+              <div style={{ fontSize: '10px', fontWeight: 700, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                5.0 (2026 - 2030+)
               </div>
-              <div style={{ fontSize: '15px', fontWeight: 800, color: '#065F46', marginTop: '2px' }}>
-                Prescriptive &amp; Cognitive
+              <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--df-text-main)', marginTop: '2px' }}>
+                Prescriptive &amp; Autonome
               </div>
-              <div style={{ fontSize: '11px', color: '#059669', fontWeight: 700, marginTop: '6px' }}>
+              <div style={{ fontSize: '10.5px', color: '#10b981', fontWeight: 600, marginTop: '4px' }}>
                 « Physique Déterministe &amp; Arbitrage DZD »
               </div>
-              <ul style={{ margin: '8px 0 0 0', paddingLeft: '14px', fontSize: '11px', color: '#1E293B', lineHeight: 1.5 }}>
+              <ul style={{ margin: '8px 0 0 0', paddingLeft: '14px', fontSize: '10.5px', color: 'var(--df-text-secondary)', lineHeight: 1.5 }}>
                 <li><strong>Coût Matériel = 0 DA :</strong> Signaux natifs J1939 + ADC 24V.</li>
-                <li><strong>Arbitrage DZD (SAD $\rightarrow$ ADS) :</strong> Coût d&apos;action vs Risque d&apos;inaction chiffré.</li>
-                <li><strong>Preuve Physique Explicable :</strong> CUSUM, Enthalpie, Arrhenius, CSIS 24V.</li>
-                <li><strong>Assistant Vocal Atelier :</strong> Diagnostic au micro en Darja &amp; Français.</li>
-                <li><strong>Souveraineté Loi 18-07 :</strong> 100% On-Premise, tolérant au Grand Sud.</li>
+                <li><strong>Arbitrage DZD (SAD → ADS) :</strong> Coût d&apos;action vs Risque d&apos;inaction.</li>
+                <li><strong>Preuves Physiques :</strong> CUSUM, Arrhenius, Archard.</li>
+                <li><strong>Assistant Vocal :</strong> Diagnostic direct en Darja &amp; Français.</li>
+                <li><strong>Souveraineté :</strong> 100% On-Premise, résilient aux 58 Wilayas.</li>
               </ul>
             </div>
           </div>
         </section>
 
-        {/* 3. TABLEAU HAUTE DENSITÉ DE SUPERVISION DE FLOTTE (50+ UNITÉS) */}
-        <section style={{ marginBottom: '2.5rem' }}>
+        {/* 3. TABLEAU HAUTE DENSITÉ DE SUPERVISION DE FLOTTE */}
+        <section style={{ marginBottom: '2rem' }}>
           <FleetHighDensityTable />
         </section>
 
-        {/* 4. SECTION DU FLUX DÉCISIONNEL INTERACTIF (SAD -> ADS) */}
+        {/* 4. FLUX DÉCISIONNEL INTERACTIF (SAD -> ADS) */}
         <section style={{ marginBottom: '2.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--df-text-main)', letterSpacing: '-0.02em' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <h2 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--df-text-main)', letterSpacing: '-0.02em', margin: 0 }}>
                   Arbitrages Décisionnels en Attente
                 </h2>
                 <Badge variant="warning">{decisions.length} Action{decisions.length > 1 ? 's' : ''}</Badge>
               </div>
-              <p style={{ fontSize: '0.825rem', color: 'var(--df-text-muted)', marginTop: '0.2rem' }}>
-                Recommandations explicables avec analyse comparative du coût de l&apos;action vs risque de panne.
+              <p style={{ fontSize: '0.78rem', color: 'var(--df-text-muted)', marginTop: '0.2rem', margin: 0 }}>
+                Recommandations explicables avec analyse comparative du coût de l&apos;action préventive vs risque de panne.
               </p>
             </div>
 
             {/* Filtres par catégorie d'actifs */}
-            <div style={{ display: 'flex', gap: '0.35rem', background: 'var(--df-bg-surface-2)', padding: '0.25rem', borderRadius: 'var(--df-radius-md)', border: '1px solid var(--df-border-subtle)' }}>
+            <div style={{ display: 'flex', gap: '0.25rem', background: 'var(--df-bg-surface-2)', padding: '0.2rem', borderRadius: 'var(--df-radius-md)', border: '1px solid var(--df-border-subtle)' }}>
               {[
                 { id: 'ALL', label: 'Tous' },
                 { id: 'PL', label: 'Poids Lourds' },
@@ -719,11 +717,11 @@ export function ExecutiveDashboardClient() {
                   onClick={() => setSelectedFilter(filter.id)}
                   style={{
                     background: selectedFilter === filter.id ? 'var(--df-accent-blue)' : 'transparent',
-                    color: selectedFilter === filter.id ? '#fff' : 'var(--df-text-secondary)',
+                    color: selectedFilter === filter.id ? '#ffffff' : 'var(--df-text-secondary)',
                     border: 'none',
                     borderRadius: 'var(--df-radius-sm)',
-                    padding: '0.35rem 0.85rem',
-                    fontSize: '0.78rem',
+                    padding: '0.3rem 0.75rem',
+                    fontSize: '0.74rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all var(--df-transition-fast)',
@@ -738,20 +736,20 @@ export function ExecutiveDashboardClient() {
           {filteredDecisions.length === 0 ? (
             <div
               style={{
-                padding: '3rem 2rem',
+                padding: '2.5rem 1.5rem',
                 textAlign: 'center',
                 background: 'var(--df-bg-surface-1)',
                 border: '1px solid var(--df-border-subtle)',
                 borderRadius: 'var(--df-radius-lg)',
               }}
             >
-              <div style={{ color: 'var(--df-status-ok)', display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                <IconCheck size={28} strokeWidth={2} />
+              <div style={{ color: 'var(--df-status-ok)', display: 'flex', justifyContent: 'center', marginBottom: '0.65rem' }}>
+                <IconCheck size={24} strokeWidth={2} />
               </div>
-              <div style={{ color: 'var(--df-text-main)', fontWeight: 700, fontSize: '1.05rem', marginBottom: '0.35rem' }}>
+              <div style={{ color: 'var(--df-text-main)', fontWeight: 600, fontSize: '0.98rem', marginBottom: '0.25rem' }}>
                 Aucune anomalie ou arbitrage en attente pour cette sélection
               </div>
-              <p style={{ color: 'var(--df-text-muted)', fontSize: '0.85rem', marginBottom: '1.25rem', maxWidth: '440px', margin: '0 auto 1.25rem auto' }}>
+              <p style={{ color: 'var(--df-text-muted)', fontSize: '0.80rem', marginBottom: '1rem', maxWidth: '440px', margin: '0 auto 1rem auto' }}>
                 Toutes les recommandations ont été traitées ou les compteurs sont nominaux.
               </p>
               <Button variant="secondary" size="sm" onClick={handleResetDemo}>
@@ -759,7 +757,7 @@ export function ExecutiveDashboardClient() {
               </Button>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1rem' }}>
               {filteredDecisions.map((decision) => (
                 <DecisionCard
                   key={decision.id}
@@ -783,20 +781,20 @@ export function ExecutiveDashboardClient() {
         </section>
 
         {/* 5. SUPERVISION TECHNIQUE & SANTÉ SYSTÈME */}
-        <section style={{ marginBottom: '2.5rem' }}>
+        <section style={{ marginBottom: '2rem' }}>
           <ApiStatusPanel />
         </section>
 
-        {/* 6. FOOTER OFFICIEL */}
+        {/* 6. PIED DE PAGE OFFICIEL */}
         <footer
           style={{
-            paddingTop: '2rem',
+            paddingTop: '1.5rem',
             borderTop: '1px solid var(--df-border-subtle)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             color: 'var(--df-text-muted)',
-            fontSize: '0.8rem',
+            fontSize: '0.74rem',
             flexWrap: 'wrap',
             gap: '1rem',
           }}
@@ -804,15 +802,14 @@ export function ExecutiveDashboardClient() {
           <div>
             DocteurFlotte © 2026-2027 — Console d&apos;Opérations et Maintenance des Actifs Connectés.
           </div>
-          <div className="df-mono" style={{ display: 'flex', gap: '1.25rem' }}>
+          <div className="df-mono" style={{ display: 'flex', gap: '1rem', fontSize: '0.70rem' }}>
             <span>PostgreSQL RLS</span>
             <span>Redis 7.2</span>
-            <span>Traccar Gateway (Port 8085)</span>
-            <span>Conformité Loi 18-07</span>
+            <span>Traccar Gateway</span>
+            <span>Loi 18-07 ANPDP</span>
           </div>
         </footer>
       </div>
     </>
   );
 }
-

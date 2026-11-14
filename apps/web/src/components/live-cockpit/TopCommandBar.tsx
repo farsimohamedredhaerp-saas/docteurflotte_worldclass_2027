@@ -14,6 +14,8 @@ import {
   IconTerminal,
   IconChevronLeft,
   IconChevronRight,
+  IconAlertOctagon,
+  IconShieldCheck,
 } from '../navigation/TechIcons';
 
 interface TopCommandBarProps {
@@ -146,7 +148,10 @@ export function TopCommandBar({
             }}
             title={onToggleDemoMode ? "Cliquer pour commuter entre Mode Démo et Flotte Réelle" : undefined}
           >
-            <span>{isDemoMode ? '🧪 DÉMO' : '🏢 RÉEL'}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              {isDemoMode ? <IconActivity size={11} className="text-amber-500" /> : <IconShieldCheck size={11} className="text-emerald-500" />}
+              {isDemoMode ? 'DÉMO' : 'RÉEL'}
+            </span>
           </button>
         </div>
 
@@ -237,7 +242,9 @@ export function TopCommandBar({
               title="Véhicules sous consignation immédiate DVIR (Interdiction de départ)"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse" />
-              <span className="uppercase tracking-wide font-bold">🚫 DVIR</span>
+              <span className="uppercase tracking-wide font-bold flex items-center gap-1">
+                <IconAlertOctagon size={11} /> DVIR
+              </span>
               <span className="font-mono tabular-nums font-bold">
                 {stats.dvirBlockedCount}
               </span>
@@ -375,7 +382,7 @@ export function TopCommandBar({
               }}
               title="Basculer l'état de consignation sécurité DVIR de l'unité sélectionnée"
             >
-              <span>🚫</span>
+              <IconAlertOctagon size={11} />
               <span>DVIR</span>
             </button>
           </div>

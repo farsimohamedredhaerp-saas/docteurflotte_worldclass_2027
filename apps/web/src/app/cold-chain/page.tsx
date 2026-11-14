@@ -14,6 +14,18 @@ import {
   ReeferCargoType,
   ReeferPowerMode,
 } from '../../lib/api-fleet-intelligence';
+import {
+  IconThermometer,
+  IconTruck,
+  IconAlertTriangle,
+  IconBox,
+  IconShieldCheck,
+  IconLock,
+  IconFileText,
+  IconRefreshCw,
+  IconZap,
+  IconFuel,
+} from '../../components/navigation/TechIcons';
 
 export default function ColdChainPage() {
   const { isDemoMode, session } = useDemoMode();
@@ -86,7 +98,7 @@ export default function ColdChainPage() {
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: '1.85rem' }}>❄️</span>
+              <IconThermometer size={28} className="text-blue-500" />
               <h1
                 style={{
                   fontSize: '1.85rem',
@@ -114,8 +126,9 @@ export default function ColdChainPage() {
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <Button variant="outline" size="sm" onClick={loadReefers} disabled={isLoading}>
-              {isLoading ? '⏳ Chargement...' : '🔄 Actualiser Flux'}
+            <Button variant="outline" size="sm" onClick={loadReefers} disabled={isLoading} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <IconRefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+              <span>{isLoading ? 'Chargement...' : 'Actualiser Flux'}</span>
             </Button>
             <Link href="/telematics" style={{ textDecoration: 'none' }}>
               <Button variant="primary" size="sm">
@@ -139,14 +152,14 @@ export default function ColdChainPage() {
             value={reefers.length.toString()}
             unit="Unités"
             description="Groupes connectés télémétrie en ligne"
-            icon="🚚"
+            icon={<IconTruck size={18} />}
           />
           <MetricCard
             title="Excursions Thermiques"
             value={activeExcursionsCount.toString()}
             unit="Caisses"
             description={activeExcursionsCount > 0 ? 'Ruptures thermiques en cours !' : 'Toutes les caisses conformes'}
-            icon="⚠️"
+            icon={<IconAlertTriangle size={18} />}
             trend={
               activeExcursionsCount > 0
                 ? {
@@ -166,14 +179,14 @@ export default function ColdChainPage() {
             value={`${(totalMonitoredCargoDzd / 1000000).toFixed(1)}`}
             unit="M DA"
             description="Cargaisons sensibles sous température dirigée"
-            icon="📦"
+            icon={<IconBox size={18} />}
           />
           <MetricCard
             title="Risque Financier Actuel"
             value={`${totalExcursionRiskDzd.toLocaleString('fr-DZ')}`}
             unit="DA"
             description="Pertes potentielles estimées sur avaries"
-            icon="💸"
+            icon={<IconShieldCheck size={18} />}
             trend={
               totalExcursionRiskDzd > 0
                 ? {
@@ -240,7 +253,7 @@ export default function ColdChainPage() {
           </div>
 
           <div style={{ fontSize: '0.78rem', color: 'var(--df-text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span>📜</span> Protocole certifié HACCP & Direction des Services Vétérinaires (DSV)
+            <IconShieldCheck size={14} className="text-emerald-500" /> Protocole certifié HACCP & Direction des Services Vétérinaires (DSV)
           </div>
         </div>
 
@@ -263,7 +276,9 @@ export default function ColdChainPage() {
                 borderRadius: 'var(--df-radius-md)',
               }}
             >
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>❄️</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem', color: 'var(--df-text-muted)' }}>
+                <IconThermometer size={36} />
+              </div>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--df-text-main)', margin: '0 0 0.5rem 0' }}>
                 {reefers.length === 0
                   ? 'Aucun groupe frigorifique surveillé'
@@ -407,20 +422,37 @@ export default function ColdChainPage() {
                         style={{
                           fontWeight: 700,
                           color: reefer.doorOpen ? 'var(--df-status-danger)' : 'var(--df-status-ok)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
                         }}
                       >
-                        {reefer.doorOpen ? '🚪 Ouverte (Déperdition)' : '🔒 Fermée & Étanche'}
+                        {reefer.doorOpen ? (
+                          <>
+                            <IconAlertTriangle size={12} /> Ouverte (Déperdition)
+                          </>
+                        ) : (
+                          <>
+                            <IconLock size={12} /> Fermée & Étanche
+                          </>
+                        )}
                       </span>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ color: 'var(--df-text-muted)' }}>Alimentation Groupe :</span>
-                      <span style={{ fontWeight: 600, color: 'var(--df-text-main)' }}>
-                        {reefer.powerMode === ReeferPowerMode.DIESEL
-                          ? '⛽ Moteur Diesel Autonome'
-                          : reefer.powerMode === ReeferPowerMode.ELECTRIC_STANDBY
-                          ? '⚡ Prise Secteur 380V (Dépôt)'
-                          : 'Arrêt'}
+                      <span style={{ fontWeight: 600, color: 'var(--df-text-main)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        {reefer.powerMode === ReeferPowerMode.DIESEL ? (
+                          <>
+                            <IconFuel size={12} /> Moteur Diesel Autonome
+                          </>
+                        ) : reefer.powerMode === ReeferPowerMode.ELECTRIC_STANDBY ? (
+                          <>
+                            <IconZap size={12} /> Prise Secteur 380V (Dépôt)
+                          </>
+                        ) : (
+                          'Arrêt'
+                        )}
                       </span>
                     </div>
 
@@ -446,7 +478,9 @@ export default function ColdChainPage() {
                           gap: '0.25rem',
                         }}
                       >
-                        <div style={{ fontWeight: 800 }}>⚠️ Risque financier direct de dépréciation</div>
+                        <div style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <IconAlertTriangle size={14} /> Risque financier direct de dépréciation
+                        </div>
                         <div>
                           Excursion depuis : <strong className="df-mono">{reefer.excursionDurationMinutes} minutes</strong>
                         </div>
@@ -485,9 +519,13 @@ export default function ColdChainPage() {
                         fontWeight: 700,
                         cursor: 'pointer',
                         padding: 0,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
                       }}
                     >
-                      📄 Télécharger Thermotrace
+                      <IconFileText size={13} />
+                      <span>Télécharger Thermotrace</span>
                     </button>
                   </div>
                 </Card>

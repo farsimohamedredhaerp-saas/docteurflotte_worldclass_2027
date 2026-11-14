@@ -19,6 +19,7 @@ import {
   IconEdit,
   IconTrash,
   IconX,
+  IconUsers,
 } from '../../components/navigation/TechIcons';
 
 export interface DriverRecord {
@@ -114,7 +115,7 @@ export default function DriversPage() {
       setDrivers((prev) =>
         prev.map((d) => (d.id === editingDriver.id ? ({ ...d, ...formState } as DriverRecord) : d))
       );
-      setNotification(`✓ Fiche conducteur de ${formState.name} mise à jour.`);
+      setNotification(`Fiche conducteur de ${formState.name} mise à jour.`);
     } else {
       const newDriver: DriverRecord = {
         id: `drv-${Date.now().toString().slice(-4)}`,
@@ -134,7 +135,7 @@ export default function DriversPage() {
         status: (formState.status as DriverRecord['status']) || 'AVAILABLE',
       };
       setDrivers((prev) => [newDriver, ...prev]);
-      setNotification(`✓ Nouveau conducteur ${newDriver.name} enregistré avec succès.`);
+      setNotification(`Nouveau conducteur ${newDriver.name} enregistré avec succès.`);
     }
 
     setIsModalOpen(false);
@@ -222,10 +223,10 @@ export default function DriversPage() {
 
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               {[
-                { id: 'ALL', label: 'Tout l\'Effectif', count: drivers.length, icon: '👥' },
-                { id: 'ON_DUTY', label: 'En Route / Mission', count: drivers.filter((d) => d.status === 'ON_DUTY').length, icon: '🚛' },
-                { id: 'AVAILABLE', label: 'Disponibles', count: drivers.filter((d) => d.status === 'AVAILABLE').length, icon: '🟢' },
-                { id: 'LICENSE_WARNING', label: 'Alerte Permis / Visite', count: drivers.filter((d) => d.status === 'LICENSE_WARNING').length, icon: '⚠️' },
+                { id: 'ALL', label: 'Tout l\'Effectif', count: drivers.length, icon: <IconUsers size={14} /> },
+                { id: 'ON_DUTY', label: 'En Route / Mission', count: drivers.filter((d) => d.status === 'ON_DUTY').length, icon: <IconTruck size={14} /> },
+                { id: 'AVAILABLE', label: 'Disponibles', count: drivers.filter((d) => d.status === 'AVAILABLE').length, icon: <IconCheck size={14} className="text-emerald-500" /> },
+                { id: 'LICENSE_WARNING', label: 'Alerte Permis / Visite', count: drivers.filter((d) => d.status === 'LICENSE_WARNING').length, icon: <IconAlertTriangle size={14} className="text-amber-500" /> },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -403,7 +404,9 @@ export default function DriversPage() {
                     {filteredDrivers.length === 0 ? (
                       <tr>
                         <td colSpan={8} style={{ padding: '3rem 1rem', textAlign: 'center' }}>
-                          <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>👨‍✈️</div>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', marginBottom: '0.75rem' }}>
+                            <IconUsers size={20} />
+                          </div>
                           <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.25rem' }}>
                             {drivers.length === 0 ? 'Aucun chauffeur enregistré' : 'Aucun résultat correspondant aux filtres'}
                           </div>

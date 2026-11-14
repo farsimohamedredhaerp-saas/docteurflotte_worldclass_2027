@@ -1,4 +1,5 @@
 import React from 'react';
+import { IconAlertTriangle } from '../navigation/TechIcons';
 
 export interface ErrorStateProps {
   title: string;
@@ -30,7 +31,9 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         margin: '48px auto',
       }}
     >
-      <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+      <div style={{ width: '64px', height: '64px', borderRadius: '16px', backgroundColor: 'rgba(239, 68, 68, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+        <IconAlertTriangle size={32} className="text-rose-500" />
+      </div>
       <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--df-status-danger)', margin: '0 0 8px' }}>
         {title}
       </h2>

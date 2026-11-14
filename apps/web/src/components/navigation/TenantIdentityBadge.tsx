@@ -2,6 +2,13 @@
 
 import React from 'react';
 import { ActivityPack, DataOrigin } from '@docteurflotte/contracts';
+import {
+  IconTruck,
+  IconHardHat,
+  IconLayers,
+  IconDatabase,
+  IconShieldCheck,
+} from './TechIcons';
 
 interface TenantIdentityBadgeProps {
   tenant: {
@@ -18,19 +25,23 @@ export function TenantIdentityBadge({ tenant }: TenantIdentityBadgeProps) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
         <span
           style={{
-            fontSize: '0.70rem',
-            fontWeight: 700,
-            padding: '0.18rem 0.5rem',
+            fontSize: '0.68rem',
+            fontWeight: 600,
+            padding: '0.15rem 0.55rem',
             borderRadius: 'var(--df-radius-full)',
-            background: 'var(--df-badge-demo-bg)',
-            color: 'var(--df-badge-demo-color)',
-            border: '1px solid var(--df-badge-demo-border)',
+            background: 'rgba(245, 158, 11, 0.1)',
+            color: '#f59e0b',
+            border: '1px solid rgba(245, 158, 11, 0.25)',
             letterSpacing: '0.04em',
             textTransform: 'uppercase',
             whiteSpace: 'nowrap',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
           }}
         >
-          ● DÉMO PUBLIQUE
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#f59e0b' }} />
+          DÉMO PUBLIQUE
         </span>
       </div>
     );
@@ -38,30 +49,44 @@ export function TenantIdentityBadge({ tenant }: TenantIdentityBadgeProps) {
 
   const isDemo = tenant.dataOrigin === DataOrigin.DEMO || tenant.dataOrigin === 'DEMO';
 
+  const getPackIcon = (pack?: string) => {
+    switch (pack) {
+      case ActivityPack.TRANSPORT:
+      case 'TRANSPORT':
+        return <IconTruck size={13} style={{ color: 'var(--df-accent-blue)' }} />;
+      case ActivityPack.CONSTRUCTION:
+      case 'CONSTRUCTION':
+        return <IconHardHat size={13} style={{ color: '#f59e0b' }} />;
+      case ActivityPack.LIGHT_VEHICLES:
+      case 'LIGHT_VEHICLES':
+        return <IconLayers size={13} style={{ color: '#10b981' }} />;
+      default:
+        return <IconDatabase size={13} style={{ color: '#8b5cf6' }} />;
+    }
+  };
+
   const getPackLabel = (pack?: string) => {
     switch (pack) {
       case ActivityPack.TRANSPORT:
       case 'TRANSPORT':
-        return { icon: '🚚', label: 'Transport / PL' };
+        return 'Transport / PL';
       case ActivityPack.CONSTRUCTION:
       case 'CONSTRUCTION':
-        return { icon: '🚜', label: 'BTP & Engins' };
+        return 'BTP & Engins';
       case ActivityPack.LIGHT_VEHICLES:
       case 'LIGHT_VEHICLES':
-        return { icon: '🚗', label: 'Flotte VL' };
+        return 'Flotte VL';
       default:
-        return { icon: '🏭', label: 'Multi-Actifs' };
+        return 'Multi-Actifs';
     }
   };
-
-  const packInfo = getPackLabel(tenant.activityPack);
 
   return (
     <div
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '0.35rem',
+        gap: '0.4rem',
         flexWrap: 'nowrap',
       }}
     >
@@ -70,24 +95,25 @@ export function TenantIdentityBadge({ tenant }: TenantIdentityBadgeProps) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.3rem',
-          padding: '0.18rem 0.45rem',
+          gap: '0.35rem',
+          padding: '0.2rem 0.55rem',
           background: 'var(--df-bg-surface-2)',
           border: '1px solid var(--df-border-subtle)',
           borderRadius: 'var(--df-radius-sm)',
         }}
         title={`Tenant actif : ${tenant.name}`}
       >
-        <span style={{ fontSize: '0.75rem' }}>🏢</span>
+        <IconShieldCheck size={13} style={{ color: 'var(--df-accent-blue)' }} />
         <span
           style={{
-            fontSize: '0.75rem',
-            fontWeight: 700,
+            fontSize: '0.74rem',
+            fontWeight: 600,
             color: 'var(--df-text-main)',
-            maxWidth: '120px',
+            maxWidth: '130px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
+            letterSpacing: '-0.01em',
           }}
         >
           {tenant.name}
@@ -100,58 +126,58 @@ export function TenantIdentityBadge({ tenant }: TenantIdentityBadgeProps) {
         style={{
           alignItems: 'center',
           gap: '0.3rem',
-          padding: '0.18rem 0.45rem',
-          background: 'var(--df-bg-surface-3)',
+          padding: '0.18rem 0.5rem',
+          background: 'var(--df-bg-surface-2)',
           border: '1px solid var(--df-border-subtle)',
-          borderRadius: 'var(--df-radius-full)',
+          borderRadius: 'var(--df-radius-sm)',
           fontSize: '0.70rem',
-          fontWeight: 600,
           color: 'var(--df-text-secondary)',
-          whiteSpace: 'nowrap',
+          fontWeight: 500,
         }}
+        title={`Pack Métier Algérie : ${getPackLabel(tenant.activityPack)}`}
       >
-        <span>{packInfo.icon}</span>
-        <span>{packInfo.label}</span>
+        {getPackIcon(tenant.activityPack)}
+        <span>{getPackLabel(tenant.activityPack)}</span>
       </div>
 
-      {/* Badge Origine des Données (Conformité AGENTS.md) */}
-      <div
+      {/* Étiquette d'Environnement (DÉMO ou PRODUCTION SOUVERAINE) */}
+      <span
         style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.25rem',
-          padding: '0.18rem 0.45rem',
+          fontSize: '0.66rem',
+          fontWeight: 600,
+          padding: '0.12rem 0.45rem',
           borderRadius: 'var(--df-radius-full)',
-          fontSize: '0.68rem',
-          fontWeight: 700,
+          background: isDemo ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+          color: isDemo ? '#f59e0b' : '#10b981',
+          border: isDemo ? '1px solid rgba(245, 158, 11, 0.25)' : '1px solid rgba(16, 185, 129, 0.25)',
           letterSpacing: '0.04em',
           textTransform: 'uppercase',
           whiteSpace: 'nowrap',
-          background: isDemo ? 'var(--df-badge-demo-bg)' : 'var(--df-status-ok-bg)',
-          color: isDemo ? 'var(--df-badge-demo-color)' : 'var(--df-status-ok)',
-          border: `1px solid ${isDemo ? 'var(--df-badge-demo-border)' : 'var(--df-status-ok-border)'}`,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.3rem',
         }}
       >
         <span
           style={{
-            width: '5px',
-            height: '5px',
+            width: 5,
+            height: 5,
             borderRadius: '50%',
-            background: 'currentColor',
-            display: 'inline-block',
+            background: isDemo ? '#f59e0b' : '#10b981',
           }}
           className={isDemo ? 'df-pulse' : ''}
         />
-        <span>{isDemo ? 'DÉMO' : 'RÉEL'}</span>
-      </div>
+        {isDemo ? 'DÉMO' : 'PRODUCTION'}
+      </span>
 
       {/* Devise */}
       {tenant.currency && (
         <span
+          className="df-mono"
           style={{
-            fontSize: '0.68rem',
-            fontWeight: 700,
-            padding: '0.18rem 0.35rem',
+            fontSize: '0.66rem',
+            fontWeight: 600,
+            padding: '0.12rem 0.35rem',
             borderRadius: 'var(--df-radius-xs)',
             background: 'var(--df-bg-surface-2)',
             color: 'var(--df-text-muted)',

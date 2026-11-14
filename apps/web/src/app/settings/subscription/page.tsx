@@ -13,6 +13,12 @@ import {
   SubscriptionBillingModel,
   SubscriptionPaymentMethod,
 } from '@docteurflotte/contracts';
+import {
+  IconCreditCard,
+  IconCheck,
+  IconAlertTriangle,
+  IconFileText,
+} from '../../../components/navigation/TechIcons';
 
 export default function ClientSubscriptionPage() {
   const [subscription, setSubscription] = useState<TenantSubscription | null>(null);
@@ -121,7 +127,9 @@ export default function ClientSubscriptionPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.35rem' }}>
-              <span style={{ fontSize: '1.75rem' }}>💳</span>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
+                <IconCreditCard size={20} />
+              </div>
               <h1 style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0 }}>
                 Mon Abonnement & Facturation Flotte
               </h1>
@@ -157,15 +165,20 @@ export default function ClientSubscriptionPage() {
               fontWeight: 700,
               cursor: 'pointer',
               boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            📞 Demander un Devis d'Ajustement
+            <IconFileText size={14} />
+            Demander un Devis d'Ajustement
           </button>
         </div>
 
         {quoteSuccess && (
-          <div style={{ padding: '0.85rem 1.15rem', borderRadius: '8px', background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)', color: '#86efac', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
-            ✓ {quoteSuccess}
+          <div style={{ padding: '0.85rem 1.15rem', borderRadius: '8px', background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)', color: '#86efac', marginBottom: '1.5rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <IconCheck size={14} className="text-emerald-400" />
+            <span>{quoteSuccess}</span>
           </div>
         )}
 
@@ -248,7 +261,7 @@ export default function ClientSubscriptionPage() {
                 </span>
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--df-text-muted)', borderTop: '1px solid var(--df-border-subtle)', paddingTop: '0.4rem' }}>
-                💡 En Algérie, un camion en panne ne doit pas peser sur votre trésorerie. Seuls vos camions roulants sont décomptés.
+                Note de doctrine : en Algérie, un camion en panne ne doit pas peser sur votre trésorerie. Seuls vos camions roulants sont décomptés.
               </div>
             </div>
           </div>
@@ -436,8 +449,9 @@ export default function ClientSubscriptionPage() {
             </p>
 
             {quoteError && (
-              <div style={{ padding: '0.5rem', background: 'rgba(239, 68, 68, 0.15)', color: '#fca5a5', fontSize: '0.78rem', borderRadius: '6px', marginBottom: '1rem' }}>
-                ⚠️ {quoteError}
+              <div style={{ padding: '0.5rem', background: 'rgba(239, 68, 68, 0.15)', color: '#fca5a5', fontSize: '0.78rem', borderRadius: '6px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <IconAlertTriangle size={14} />
+                <span>{quoteError}</span>
               </div>
             )}
 

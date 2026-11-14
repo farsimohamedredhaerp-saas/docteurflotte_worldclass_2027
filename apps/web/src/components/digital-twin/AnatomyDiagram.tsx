@@ -162,10 +162,13 @@ export const AnatomyDiagram: React.FC<AnatomyDiagramProps> = ({
                 />
                 <text
                   x={hs.x}
-                  y={hs.y + 5}
+                  y={hs.y + 3.5}
                   textAnchor="middle"
-                  fontSize="16"
-                  style={{ userSelect: 'none' }}
+                  fontSize="9"
+                  fontWeight="800"
+                  fontFamily="monospace"
+                  fill="#ffffff"
+                  style={{ userSelect: 'none', letterSpacing: '0.04em' }}
                 >
                   {hs.icon}
                 </text>

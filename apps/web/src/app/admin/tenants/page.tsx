@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { AuthClient } from '../../../lib/api-auth';
 import { PlatformAdminClient } from '../../../lib/api-platform-admin';
 import { PlatformTenant } from '@docteurflotte/contracts';
+import { IconRefreshCw, IconX } from '../../../components/navigation/TechIcons';
 
 export default function AdminTenantsPage() {
   const [tenants, setTenants] = useState<PlatformTenant[]>([]);
@@ -104,9 +105,13 @@ export default function AdminTenantsPage() {
             fontSize: '13px',
             fontWeight: 600,
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
-          🔄 Actualiser la liste
+          <IconRefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+          Actualiser la liste
         </button>
       </div>
 
@@ -320,9 +325,10 @@ export default function AdminTenantsPage() {
               </h3>
               <button
                 onClick={() => setSelectedTenant(null)}
-                style={{ background: 'none', border: 'none', color: 'var(--df-text-muted)', fontSize: '20px', cursor: 'pointer' }}
+                aria-label="Fermer"
+                style={{ background: 'none', border: 'none', color: 'var(--df-text-muted)', fontSize: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
               >
-                ✕
+                <IconX size={18} />
               </button>
             </div>
 

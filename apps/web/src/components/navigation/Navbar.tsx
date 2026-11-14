@@ -98,14 +98,19 @@ export function Navbar({ onResetDemo }: NavbarProps) {
               background: 'var(--df-bg-surface-2)',
               border: '1px solid var(--df-border-subtle)',
               color: 'var(--df-text-main)',
-              padding: '0.25rem 0.5rem',
+              padding: '0.3rem 0.45rem',
               borderRadius: 'var(--df-radius-sm)',
               cursor: 'pointer',
-              fontSize: '1rem',
-              lineHeight: 1,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            ☰
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
           </button>
 
           <Link
@@ -114,21 +119,27 @@ export function Navbar({ onResetDemo }: NavbarProps) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.55rem',
+              gap: '0.6rem',
               textDecoration: 'none',
               borderRadius: 'var(--df-radius-sm)',
             }}
           >
             <div
               style={{
-                background: 'var(--df-gradient-primary)',
-                color: '#fff',
-                fontWeight: 800,
-                fontSize: '1rem',
-                padding: '0.28rem 0.6rem',
-                borderRadius: 'var(--df-radius-md)',
-                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
-                letterSpacing: '-0.5px',
+                width: '28px',
+                height: '28px',
+                borderRadius: '6px',
+                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                fontWeight: 700,
+                fontSize: '0.72rem',
+                letterSpacing: '-0.02em',
+                flexShrink: 0,
               }}
             >
               DF
@@ -137,11 +148,10 @@ export function Navbar({ onResetDemo }: NavbarProps) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <span
                   style={{
-                    fontSize: '1.05rem',
-                    fontWeight: 800,
+                    fontSize: '0.98rem',
+                    fontWeight: 700,
                     color: 'var(--df-text-main)',
                     letterSpacing: '-0.02em',
-                    display: 'block',
                     lineHeight: 1.1,
                   }}
                 >
@@ -150,21 +160,21 @@ export function Navbar({ onResetDemo }: NavbarProps) {
                 <span
                   className="hidden sm:inline-block"
                   style={{
-                    fontSize: '0.58rem',
-                    fontWeight: 700,
+                    fontSize: '0.55rem',
+                    fontWeight: 600,
                     padding: '1px 4px',
-                    borderRadius: 'var(--df-radius-xs)',
-                    background: 'var(--df-status-ok-bg)',
-                    color: 'var(--df-status-ok-text)',
-                    border: '1px solid var(--df-status-ok-border)',
+                    borderRadius: '3px',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    color: '#10b981',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
                     letterSpacing: '0.04em',
                   }}
                 >
                   DZ
                 </span>
               </div>
-              <span className="hidden xl:block" style={{ fontSize: '0.65rem', color: 'var(--df-text-muted)' }}>
-                Contrôle & Décisionnel
+              <span className="hidden xl:block" style={{ fontSize: '0.64rem', color: 'var(--df-text-muted)' }}>
+                Télématique & Décisionnel
               </span>
             </div>
           </Link>
@@ -205,19 +215,18 @@ export function Navbar({ onResetDemo }: NavbarProps) {
             title="Cockpit Télématique Live (GIS, CAN J1939)"
             style={{
               textDecoration: 'none',
-              background: 'var(--df-status-ok-bg)',
-              border: '1px solid var(--df-status-ok)',
-              color: 'var(--df-status-ok-text)',
-              padding: '0.28rem 0.6rem',
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              color: '#10b981',
+              padding: '0.24rem 0.55rem',
               borderRadius: 'var(--df-radius-sm)',
-              fontSize: '0.74rem',
-              fontWeight: 700,
+              fontSize: '0.72rem',
+              fontWeight: 600,
               display: 'flex',
               alignItems: 'center',
               gap: '0.35rem',
               whiteSpace: 'nowrap',
-              boxShadow: 'var(--df-shadow-sm)',
-              transition: 'background var(--df-transition-fast), border-color var(--df-transition-fast)',
+              transition: 'all var(--df-transition-fast)',
             }}
           >
             <span
@@ -225,12 +234,12 @@ export function Navbar({ onResetDemo }: NavbarProps) {
                 width: 6,
                 height: 6,
                 borderRadius: '50%',
-                background: 'var(--df-status-ok)',
-                boxShadow: '0 0 6px var(--df-status-ok)',
+                background: '#10b981',
+                boxShadow: '0 0 6px rgba(16, 185, 129, 0.5)',
               }}
               aria-hidden="true"
             />
-            <IconNavigation size={13} strokeWidth={2} style={{ color: 'var(--df-status-ok)' }} aria-hidden="true" />
+            <IconNavigation size={12} strokeWidth={2} style={{ color: '#10b981' }} aria-hidden="true" />
             <span className="hidden 2xl:inline">Cockpit Live</span>
           </Link>
 

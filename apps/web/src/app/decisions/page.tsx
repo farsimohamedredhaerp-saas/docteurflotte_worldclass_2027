@@ -21,6 +21,20 @@ import { CalculationProofModal, CalculationProofButton, CalculationProofData } f
 import { CalculationProofBuilder } from '../../lib/calculation-proofs';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { getSimulationDispatchCandidates, getSimulationDecisions } from '../../lib/simulation-sandbox';
+import {
+  IconWrench,
+  IconAlertTriangle,
+  IconAlertOctagon,
+  IconShieldCheck,
+  IconBarChart3,
+  IconCrosshair,
+  IconLayers,
+  IconCheck,
+  IconCheckCircle,
+  IconRefreshCw,
+  IconZap,
+  IconX,
+} from '../../components/navigation/TechIcons';
 
 
 interface DecisionItem {
@@ -109,10 +123,10 @@ export default function DecisionsPage() {
       try {
         const result = await FleetIntelligenceClient.evaluateAndAssign(missionPayload as any, token, true);
         setDispatchResult(result);
-        setNotification(`✓ Décision ADS générée (Mode Simulation) : ${result.decisionOutcome}`);
+        setNotification(`Décision ADS générée (Mode Simulation) : ${result.decisionOutcome}`);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Erreur d’évaluation ADS.';
-        setNotification(`❌ ${msg}`);
+        setNotification(msg);
       } finally {
         setIsEvaluatingDispatch(false);
       }
@@ -120,7 +134,7 @@ export default function DecisionsPage() {
     }
 
     if (!token) {
-      setNotification('❌ Veuillez vous connecter pour évaluer une mission avec votre flotte réelle.');
+      setNotification('Veuillez vous connecter pour évaluer une mission avec votre flotte réelle.');
       setIsEvaluatingDispatch(false);
       return;
     }
@@ -137,13 +151,13 @@ export default function DecisionsPage() {
       if (res.ok) {
         const result = await res.json();
         setDispatchResult(result);
-        setNotification(`✓ Décision ADS générée : ${result.decisionOutcome}`);
+        setNotification(`Décision ADS générée : ${result.decisionOutcome}`);
       } else {
         const err = await res.json().catch(() => ({}));
-        setNotification(`❌ ${err.message || 'Votre parc ne dispose pas d’assez de véhicules qualifiés pour cette mission.'}`);
+        setNotification(err.message || 'Votre parc ne dispose pas d’assez de véhicules qualifiés pour cette mission.');
       }
     } catch {
-      setNotification('❌ Impossible de joindre le moteur de décision ADS.');
+      setNotification('Impossible de joindre le moteur de décision ADS.');
     } finally {
       setIsEvaluatingDispatch(false);
     }
@@ -218,7 +232,7 @@ export default function DecisionsPage() {
     if (!token) {
       setTimeout(() => {
         setIsEvaluating(false);
-        setNotification('✓ Réévaluation de démonstration exécutée. Flotte inspectée.');
+        setNotification('Réévaluation de démonstration exécutée. Flotte inspectée.');
       }, 700);
       return;
     }
@@ -231,10 +245,10 @@ export default function DecisionsPage() {
       if (res.ok) {
         const data = await res.json();
         setDecisions(data);
-        setNotification(`✓ Analyse terminée : ${data.length} recommandation(s) formulée(s).`);
+        setNotification(`Analyse terminée : ${data.length} recommandation(s) formulée(s).`);
       }
     } catch (err) {
-      setNotification('❌ Erreur lors de l\'évaluation des règles décisionnelles.');
+      setNotification('Erreur lors de l\'évaluation des règles décisionnelles.');
     } finally {
       setIsEvaluating(false);
     }
@@ -246,7 +260,7 @@ export default function DecisionsPage() {
 
     if (!token) {
       setDecisions((prev) => prev.filter((d) => d.id !== dec.id));
-      setNotification(`✓ Arbitrage ${dec.ruleId} approuvé en démo ! Ordre de travail généré.`);
+      setNotification(`Arbitrage ${dec.ruleId} approuvé en démo. Ordre de travail généré.`);
       return;
     }
 
@@ -263,10 +277,10 @@ export default function DecisionsPage() {
       if (res.ok) {
         const result = await res.json();
         setDecisions((prev) => prev.filter((d) => d.id !== dec.id));
-        setNotification(`✓ Arbitrage validé ! Ordre de Travail budgété créé.`);
+        setNotification('Arbitrage validé. Ordre de Travail budgété créé.');
       }
     } catch (err) {
-      setNotification('❌ Erreur lors de l\'approbation de la recommandation.');
+      setNotification('Erreur lors de l\'approbation de la recommandation.');
     }
   };
 
@@ -292,10 +306,10 @@ export default function DecisionsPage() {
 
       if (res.ok) {
         setDecisions((prev) => prev.filter((d) => d.id !== dec.id));
-        setNotification(`ℹ Recommandation différée.`);
+        setNotification('Recommandation différée.');
       }
     } catch (err) {
-      setNotification('❌ Erreur lors du report.');
+      setNotification('Erreur lors du report.');
     }
   };
 
@@ -403,9 +417,10 @@ export default function DecisionsPage() {
             <span style={{ fontWeight: 600 }}>{notification}</span>
             <button
               onClick={() => setNotification(null)}
-              style={{ background: 'none', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', color: 'var(--df-text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              aria-label="Fermer"
             >
-              ✕
+              <IconX size={14} />
             </button>
           </div>
         )}
@@ -432,7 +447,17 @@ export default function DecisionsPage() {
                 onClick={handleEvaluate}
                 disabled={isEvaluating}
               >
-                {isEvaluating ? '⏳ Évaluation en cours...' : '⚡ Évaluer la flotte maintenant'}
+                {isEvaluating ? (
+                  <>
+                    <IconRefreshCw size={14} className="animate-spin inline mr-1" />
+                    Évaluation en cours...
+                  </>
+                ) : (
+                  <>
+                    <IconZap size={14} className="inline mr-1" />
+                    Évaluer la flotte maintenant
+                  </>
+                )}
               </Button>
             ) : (
               <Button
@@ -440,7 +465,17 @@ export default function DecisionsPage() {
                 onClick={() => handleEvaluateDispatch()}
                 disabled={isEvaluatingDispatch}
               >
-                {isEvaluatingDispatch ? '⏳ Analyse ADS...' : '⚡ Lancer le Dispatch ADS'}
+                {isEvaluatingDispatch ? (
+                  <>
+                    <IconRefreshCw size={14} className="animate-spin inline mr-1" />
+                    Analyse ADS...
+                  </>
+                ) : (
+                  <>
+                    <IconZap size={14} className="inline mr-1" />
+                    Lancer le Dispatch ADS
+                  </>
+                )}
               </Button>
             )}
           </div>
@@ -465,7 +500,7 @@ export default function DecisionsPage() {
               gap: '0.5rem',
             }}
           >
-            <span>🔧</span> Arbitrages Maintenance & Inaction (Gate 4)
+            <IconWrench size={16} /> Arbitrages Maintenance & Inaction (Gate 4)
           </button>
           <button
             type="button"
@@ -487,7 +522,7 @@ export default function DecisionsPage() {
               gap: '0.5rem',
             }}
           >
-            <span>⚡</span> Moteur Décisionnel de Dispatch ADS (Gate 5)
+            <IconZap size={16} /> Moteur Décisionnel de Dispatch ADS (Gate 5)
           </button>
         </div>
 
@@ -501,14 +536,14 @@ export default function DecisionsPage() {
             title="Coût Estimé des Actions"
             value={totalActionCost.toLocaleString('fr-DZ')}
             unit="DA"
-            icon="🔧"
+            icon={<IconWrench size={18} />}
             trend={{ direction: 'neutral', text: `${decisions.length} interventions requises`, isPositive: true }}
           />
           <MetricCard
             title="Risque Économique d'Inaction"
             value={totalInactionRisk.toLocaleString('fr-DZ')}
             unit="DA"
-            icon="⚠️"
+            icon={<IconAlertTriangle size={18} style={{ color: 'var(--df-status-danger)' }} />}
             trend={{ direction: 'down', text: 'Risque de panne en mission', isPositive: false }}
             actions={
               <CalculationProofButton
@@ -523,7 +558,7 @@ export default function DecisionsPage() {
             title="Économie Nette Projetée"
             value={totalExpectedSavings.toLocaleString('fr-DZ')}
             unit="DA"
-            icon="💰"
+            icon={<IconShieldCheck size={18} style={{ color: 'var(--df-status-ok)' }} />}
             progressPercent={82}
             trend={{ direction: 'up', text: 'Rentabilité directe arbitrages', isPositive: true }}
             actions={
@@ -539,7 +574,7 @@ export default function DecisionsPage() {
             title="Dépenses Budgétaires"
             value={budgetReport ? budgetReport.actualSpent.toLocaleString('fr-DZ') : '1 120 000'}
             unit="DA"
-            icon="📊"
+            icon={<IconBarChart3 size={18} style={{ color: 'var(--df-accent-blue)' }} />}
             progressPercent={budgetReport ? Math.round((budgetReport.actualSpent / (budgetReport.budgetAllocated || 1)) * 100) : 74}
             trend={{ direction: 'up', text: budgetReport ? `${budgetReport.variancePercentage}% d'écart` : '-25.3% sous budget', isPositive: true }}
           />
@@ -580,7 +615,9 @@ export default function DecisionsPage() {
             </div>
           ) : filteredDecisions.length === 0 ? (
             <Card style={{ padding: '3rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>✓</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem', color: 'var(--df-status-ok)' }}>
+                <IconCheckCircle size={40} />
+              </div>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.5rem' }}>
                 Aucune alerte critique en cours
               </h3>
@@ -700,10 +737,10 @@ export default function DecisionsPage() {
                   <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
                     <Button
                       variant="primary"
-                      style={{ flex: 1, fontSize: '0.8rem', padding: '0.5rem' }}
+                      style={{ flex: 1, fontSize: '0.8rem', padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
                       onClick={() => handleApprove(dec)}
                     >
-                      ✓ Approuver & Créer OT
+                      <IconCheck size={14} /> Approuver & Créer OT
                     </Button>
                     <Button
                       variant="secondary"
@@ -727,7 +764,7 @@ export default function DecisionsPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>🎯</span> Banc d&apos;Essai ADS : Scénarios Réglementaires Algériens
+                <IconCrosshair size={18} /> Banc d&apos;Essai ADS : Scénarios Réglementaires Algériens
               </h3>
               <p style={{ fontSize: '0.82rem', color: 'var(--df-text-secondary)', margin: '0.25rem 0 0 0' }}>
                 Testez l&apos;arbre de décision SAD &rarr; ADS (Portes 1 à 4, Filtrage Wilayas, Substitution TOPSIS).
@@ -738,9 +775,19 @@ export default function DecisionsPage() {
               variant="primary"
               onClick={() => handleEvaluateDispatch()}
               disabled={isEvaluatingDispatch}
-              style={{ fontSize: '0.85rem', padding: '0.6rem 1.25rem' }}
+              style={{ fontSize: '0.85rem', padding: '0.6rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             >
-              {isEvaluatingDispatch ? 'Évaluation en cours...' : '🔄 Lancer l\'Arbitrage ADS'}
+              {isEvaluatingDispatch ? (
+                <>
+                  <IconRefreshCw size={14} className="animate-spin inline" />
+                  Évaluation en cours...
+                </>
+              ) : (
+                <>
+                  <IconRefreshCw size={14} className="inline" />
+                  Lancer l&apos;Arbitrage ADS
+                </>
+              )}
             </Button>
           </div>
 
@@ -841,10 +888,10 @@ export default function DecisionsPage() {
                           : 'danger'
                       }
                     >
-                      {dispatchResult.decisionOutcome === 'APPROVED_AS_REQUESTED' && '✓ MISSION VALIDÉE'}
-                      {dispatchResult.decisionOutcome === 'APPROVED_WITH_ETD_OR_ROUTE_SHIFT' && '⚠️ ROUTAGE AJUSTÉ'}
-                      {dispatchResult.decisionOutcome === 'SUBSTITUTED_AUTOMATICALLY' && '🔄 SUBSTITUTION OPTIMALE (TOPSIS)'}
-                      {dispatchResult.decisionOutcome === 'REJECTED_NO_ELIGIBLE_ASSET' && '🛑 MISSION NON ÉLIGIBLE'}
+                      {dispatchResult.decisionOutcome === 'APPROVED_AS_REQUESTED' && 'MISSION VALIDÉE'}
+                      {dispatchResult.decisionOutcome === 'APPROVED_WITH_ETD_OR_ROUTE_SHIFT' && 'ROUTAGE AJUSTÉ'}
+                      {dispatchResult.decisionOutcome === 'SUBSTITUTED_AUTOMATICALLY' && 'SUBSTITUTION OPTIMALE (TOPSIS)'}
+                      {dispatchResult.decisionOutcome === 'REJECTED_NO_ELIGIBLE_ASSET' && 'MISSION NON ÉLIGIBLE'}
                     </Badge>
                   </div>
                   <p style={{ color: 'var(--df-text-secondary)', fontSize: '0.9rem', margin: 0, maxWidth: '850px', lineHeight: 1.5 }}>
@@ -890,12 +937,12 @@ export default function DecisionsPage() {
               {/* PORTE 1 À 4 : CONTRÔLE RÉGLEMENTAIRE & VIOLATIONS */}
               <Card style={{ padding: '1.25rem' }}>
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span>⚖️</span> Portes Réglementaires & Santé (Loi 18-07 / JORADP)
+                  <IconShieldCheck size={18} /> Portes Réglementaires & Santé (Loi 18-07 / JORADP)
                 </h4>
 
                 {dispatchResult.violationsDetected.length === 0 ? (
                   <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--df-status-ok)', background: 'rgba(34, 197, 94, 0.08)', borderRadius: 'var(--df-radius-md)' }}>
-                    ✓ Aucune violation réglementaire ni technique constatée. Les 4 portes de conformité sont au vert.
+                    Aucune violation réglementaire ni technique constatée. Les 4 portes de conformité sont au vert.
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -929,7 +976,7 @@ export default function DecisionsPage() {
               {/* ORDRES DE TRAVAIL AUTOMATIQUES (OTs) */}
               <Card style={{ padding: '1.25rem' }}>
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span>🛠️</span> Remédiation Automatique (Ordres de Travail Émis)
+                  <IconWrench size={18} /> Remédiation Automatique (Ordres de Travail Émis)
                 </h4>
 
                 {dispatchResult.generatedWorkOrders.length === 0 ? (
@@ -975,7 +1022,7 @@ export default function DecisionsPage() {
               <Card style={{ padding: '1.5rem' }}>
                 <div style={{ marginBottom: '1rem' }}>
                   <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span>📊</span> Classement des Actifs Alternatifs de Remplacement (Algorithme TOPSIS)
+                    <IconBarChart3 size={18} /> Classement des Actifs Alternatifs de Remplacement (Algorithme TOPSIS)
                   </h4>
                   <p style={{ fontSize: '0.8rem', color: 'var(--df-text-secondary)', margin: '0.25rem 0 0 0' }}>
                     Arbitrage multicritère : Distance d&apos;approche, Santé VHI résiduelle, Consommation Naftal et Conformité légale.

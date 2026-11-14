@@ -80,12 +80,12 @@ export const LIGHT_COMMERCIAL_CHASSIS: VehicleChassisTemplate = {
     { x: 450, y: 166, width: 60, height: 24, rx: 6 },
   ],
   hotspots: [
-    { organKey: 'COOLING_SYSTEM', x: 530, y: 100, color: '#38bdf8', icon: '🌡️' },
-    { organKey: 'ENGINE_OIL', x: 470, y: 115, color: '#f59e0b', icon: '🛢️' },
-    { organKey: 'BATTERY_CRANKING', x: 440, y: 65, color: '#10b981', icon: '🔋' },
-    { organKey: 'TRANSMISSION_DRIVETRAIN', x: 345, y: 100, color: '#06b6d4', icon: '⚙️' },
-    { organKey: 'BRAKE_PADS', x: 250, y: 65, color: '#ef4444', icon: '🛑' },
-    { organKey: 'DPF_FILTER', x: 170, y: 115, color: '#a855f7', icon: '💨' },
+    { organKey: 'COOLING_SYSTEM', x: 530, y: 100, color: '#38bdf8', icon: 'RAD' },
+    { organKey: 'ENGINE_OIL', x: 470, y: 115, color: '#f59e0b', icon: 'OIL' },
+    { organKey: 'BATTERY_CRANKING', x: 440, y: 65, color: '#10b981', icon: 'BAT' },
+    { organKey: 'TRANSMISSION_DRIVETRAIN', x: 345, y: 100, color: '#06b6d4', icon: 'GBX' },
+    { organKey: 'BRAKE_PADS', x: 250, y: 65, color: '#ef4444', icon: 'BRK' },
+    { organKey: 'DPF_FILTER', x: 170, y: 115, color: '#a855f7', icon: 'DPF' },
   ],
 };
 
@@ -127,12 +127,12 @@ export const HEAVY_TRUCK_CHASSIS: VehicleChassisTemplate = {
     { x: 470, y: 168, width: 60, height: 24, rx: 4 },
   ],
   hotspots: [
-    { organKey: 'COOLING_SYSTEM', x: 545, y: 100, color: '#38bdf8', icon: '🌡️' },
-    { organKey: 'ENGINE_OIL', x: 485, y: 110, color: '#f59e0b', icon: '🛢️' },
-    { organKey: 'BATTERY_CRANKING', x: 440, y: 60, color: '#10b981', icon: '🔋' },
-    { organKey: 'TRANSMISSION_DRIVETRAIN', x: 310, y: 100, color: '#06b6d4', icon: '⚙️' },
-    { organKey: 'BRAKE_PADS', x: 190, y: 65, color: '#ef4444', icon: '🛑' },
-    { organKey: 'DPF_FILTER', x: 230, y: 125, color: '#a855f7', icon: '💨' },
+    { organKey: 'COOLING_SYSTEM', x: 545, y: 100, color: '#38bdf8', icon: 'RAD' },
+    { organKey: 'ENGINE_OIL', x: 485, y: 110, color: '#f59e0b', icon: 'OIL' },
+    { organKey: 'BATTERY_CRANKING', x: 440, y: 60, color: '#10b981', icon: 'BAT' },
+    { organKey: 'TRANSMISSION_DRIVETRAIN', x: 310, y: 100, color: '#06b6d4', icon: 'GBX' },
+    { organKey: 'BRAKE_PADS', x: 190, y: 65, color: '#ef4444', icon: 'BRK' },
+    { organKey: 'DPF_FILTER', x: 230, y: 125, color: '#a855f7', icon: 'DPF' },
   ],
 };
 
@@ -172,12 +172,12 @@ export const OFF_ROAD_BTP_CHASSIS: VehicleChassisTemplate = {
     { x: 440, y: 162, width: 80, height: 26, rx: 6 },
   ],
   hotspots: [
-    { organKey: 'COOLING_SYSTEM', x: 515, y: 100, color: '#38bdf8', icon: '🌡️' },
-    { organKey: 'ENGINE_OIL', x: 450, y: 115, color: '#f59e0b', icon: '🛢️' },
-    { organKey: 'BATTERY_CRANKING', x: 360, y: 65, color: '#10b981', icon: '🔋' },
-    { organKey: 'TRANSMISSION_DRIVETRAIN', x: 270, y: 100, color: '#06b6d4', icon: '⚙️' },
-    { organKey: 'BRAKE_PADS', x: 180, y: 65, color: '#ef4444', icon: '🛑' },
-    { organKey: 'DPF_FILTER', x: 140, y: 115, color: '#a855f7', icon: '💨' },
+    { organKey: 'COOLING_SYSTEM', x: 515, y: 100, color: '#38bdf8', icon: 'RAD' },
+    { organKey: 'ENGINE_OIL', x: 450, y: 115, color: '#f59e0b', icon: 'OIL' },
+    { organKey: 'BATTERY_CRANKING', x: 360, y: 65, color: '#10b981', icon: 'BAT' },
+    { organKey: 'TRANSMISSION_DRIVETRAIN', x: 270, y: 100, color: '#06b6d4', icon: 'GBX' },
+    { organKey: 'BRAKE_PADS', x: 180, y: 65, color: '#ef4444', icon: 'BRK' },
+    { organKey: 'DPF_FILTER', x: 140, y: 115, color: '#a855f7', icon: 'DPF' },
   ],
 };
 

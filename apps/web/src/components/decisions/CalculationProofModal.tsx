@@ -1,6 +1,14 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import {
+  IconX,
+  IconFileText,
+  IconRadio,
+  IconActivity,
+  IconCheck,
+  IconLock,
+} from '../navigation/TechIcons';
 
 export interface CalculationVariable {
   name: string;
@@ -134,7 +142,7 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
           }}
           title="Fermer (Échap)"
         >
-          ✕
+          <IconX size={16} />
         </button>
 
         {/* En-tête Preuve de Calcul */}
@@ -177,8 +185,8 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
             marginBottom: 20,
           }}
         >
-          <div style={{ fontSize: 12, textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700, marginBottom: 6 }}>
-            📐 Formule Mathématique Déterministe
+          <div style={{ fontSize: 12, textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <IconActivity size={14} className="text-cyan-400" /> Formule Mathématique Déterministe
           </div>
           <div
             style={{
@@ -202,8 +210,8 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
 
         {/* Variables d'Entrée & Télématique Réelle */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 12, textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700, marginBottom: 10 }}>
-            📡 Données Observées Réelles & Hypothèses d&apos;Entrée
+          <div style={{ fontSize: 12, textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <IconRadio size={14} className="text-blue-400" /> Données Observées Réelles & Hypothèses d&apos;Entrée
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
             {data.variables.map((v, idx) => (
@@ -234,8 +242,8 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
 
         {/* Déroulement de la Preuve Pas-à-Pas */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 12, textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700, marginBottom: 10 }}>
-            🔍 Démonstration Numérique Pas-à-Pas
+          <div style={{ fontSize: 12, textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <IconFileText size={14} className="text-emerald-400" /> Démonstration Numérique Pas-à-Pas
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {data.steps.map((st) => (
@@ -306,18 +314,18 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
                 gap: 6,
               }}
             >
-              <span>✓</span> Preuve Conforme & Auditable
+              <IconCheck size={14} /> Preuve Conforme & Auditable
             </span>
           </div>
         </div>
 
         {/* Réf. Juridique et Garantie Déterministe */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: '#64748b', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 14 }}>
-          <div>
-            📜 Référence : <strong style={{ color: '#94a3b8' }}>{data.legalOrOemReference}</strong>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <IconFileText size={13} className="text-slate-400" /> Référence : <strong style={{ color: '#94a3b8' }}>{data.legalOrOemReference}</strong>
           </div>
-          <div>
-            🔒 RLS Fail-Closed • Zéro boîte noire
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <IconLock size={13} className="text-emerald-400" /> RLS Fail-Closed • Zéro boîte noire
           </div>
         </div>
       </div>

@@ -260,7 +260,7 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
             }}
           >
             <span style={{ color: selectedVoiceLanguage === 'FR' ? '#FFFFFF' : '#334155', fontWeight: 800 }}>
-              🇫🇷 Voix Français
+              FR • Français Technique
             </span>
           </button>
           <button
@@ -276,7 +276,7 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
             }}
           >
             <span style={{ color: selectedVoiceLanguage === 'DARJA' ? '#FFFFFF' : '#334155', fontWeight: 800 }}>
-              🇩🇿 Voix Darja Phonétique
+              DZ • Darja Phonétique
             </span>
           </button>
         </div>
@@ -342,8 +342,9 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
               gap: '6px',
             }}
           >
-            <span style={{ color: '#FFFFFF', fontWeight: 800 }}>
-              {isProcessing ? 'Résolution...' : '⚡ Interroger'}
+            <span style={{ color: '#FFFFFF', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <Sparkles size={13} />
+              {isProcessing ? 'Résolution...' : 'Interroger'}
             </span>
           </button>
         </div>
@@ -433,9 +434,13 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
                   padding: '2px 8px',
                   borderRadius: '4px',
                   border: '1px solid #A7F3D0',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
                 }}
               >
-                ✓ Résolu en {result.executionMs} ms (Zéro LLM)
+                <CheckCircle2 size={11} />
+                <span>Résolu en {result.executionMs} ms (Zéro LLM)</span>
               </span>
               <button
                 onClick={() => speakResponse(result)}
@@ -470,7 +475,7 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
               }}
             >
               <div style={{ fontSize: '11px', fontWeight: 800, color: '#1D4ED8', marginBottom: '6px' }}>
-                🇫🇷 Consigne Orale Français Technique :
+                Consigne Orale — Français Technique :
               </div>
               <div style={{ fontSize: '13px', color: '#1E293B', lineHeight: '1.5', fontWeight: 500 }}>
                 {result.spokenResponseFr}
@@ -486,7 +491,7 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
               }}
             >
               <div style={{ fontSize: '11px', fontWeight: 800, color: '#15803D', marginBottom: '6px' }}>
-                🇩🇿 Consigne Orale Phonétique Darja :
+                Consigne Orale — Darja Phonétique :
               </div>
               <div style={{ fontSize: '13px', color: '#1E293B', lineHeight: '1.5', fontWeight: 500 }}>
                 {result.spokenResponseDarja}

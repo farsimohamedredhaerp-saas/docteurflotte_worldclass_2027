@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Asset } from '@docteurflotte/contracts';
 import { ROUTES } from '../../lib/routes';
+import { IconRadio } from '../navigation/TechIcons';
 
 export interface DigitalTwinHeaderProps {
   badgeTitle: string;
@@ -104,7 +105,7 @@ export const DigitalTwinHeader: React.FC<DigitalTwinHeaderProps> = ({
                 textDecoration: 'none',
               }}
             >
-              <span>🛰️</span>
+              <IconRadio size={14} className="text-cyan-400" />
               <span>{liveCockpitLabel}</span>
             </Link>
 

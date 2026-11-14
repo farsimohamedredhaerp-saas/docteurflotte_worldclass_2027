@@ -24,7 +24,7 @@ const mockTwin: DigitalTwinAsset = {
     {
       organ: 'ENGINE_OIL',
       name: 'Huile Moteur',
-      icon: '🛢️',
+      icon: 'OIL',
       healthPercent: 72,
       remainingUsefulLifeValue: 3450,
       remainingUsefulLifeUnit: 'KM',
@@ -38,7 +38,7 @@ const mockTwin: DigitalTwinAsset = {
     {
       organ: 'BRAKE_PADS',
       name: 'Plaquettes de Frein',
-      icon: '🛑',
+      icon: 'BRK',
       healthPercent: 54,
       remainingUsefulLifeValue: 4800,
       remainingUsefulLifeUnit: 'KM',

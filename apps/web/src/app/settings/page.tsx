@@ -8,6 +8,12 @@ import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
 import { TenantSettings } from '@docteurflotte/contracts';
 import { Navbar } from '../../components/navigation/Navbar';
+import {
+  IconCreditCard,
+  IconCheck,
+  IconAlertTriangle,
+  IconShieldCheck,
+} from '../../components/navigation/TechIcons';
 
 type SettingsTab = 'regional' | 'operational' | 'economic' | 'data';
 
@@ -173,7 +179,8 @@ export default function SettingsPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <Link href="/settings/subscription" style={{ textDecoration: 'none' }}>
               <Button variant="secondary" size="sm" style={{ border: '1px solid rgba(16, 185, 129, 0.4)', color: '#34d399', background: 'rgba(16, 185, 129, 0.08)' }}>
-                💳 Mon Abonnement & Factures DGI
+                <IconCreditCard size={14} className="inline mr-1" />
+                Mon Abonnement & Factures DGI
               </Button>
             </Link>
             <Badge variant="ok">RLS Isolation Active</Badge>
@@ -209,7 +216,7 @@ export default function SettingsPage() {
               gap: '10px',
             }}
           >
-            <span>{feedback.type === 'success' ? '✓' : '⚠️'}</span>
+            {feedback.type === 'success' ? <IconCheck size={16} /> : <IconAlertTriangle size={16} />}
             <span>{feedback.message}</span>
           </div>
         )}
@@ -274,7 +281,7 @@ export default function SettingsPage() {
                     gap: '14px',
                   }}
                 >
-                  <span style={{ fontSize: '22px', lineHeight: 1 }}>🛡️</span>
+                  <IconShieldCheck size={22} className="text-cyan-400 mt-0.5" />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--df-accent-cyan)', marginBottom: '4px' }}>
                       Périodicités & Tolérances d&apos;Entretien : Modèle OEM-First par Actif

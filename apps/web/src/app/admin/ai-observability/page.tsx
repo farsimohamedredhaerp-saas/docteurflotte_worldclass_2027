@@ -13,6 +13,16 @@ import { CusumLegalReportViewer } from '../../../components/fuel/CusumLegalRepor
 import { SovereignRagExplorer } from '../../../components/knowledge/SovereignRagExplorer';
 import { ProactiveAnomaliesWidget } from '../../../components/decisions/ProactiveAnomaliesWidget';
 import { WorkshopVoiceAssistant } from '../../../components/voice/WorkshopVoiceAssistant';
+import {
+  IconZap,
+  IconRefreshCw,
+  IconPause,
+  IconDownload,
+  IconShieldCheck,
+  IconCheck,
+  IconClock,
+  IconFileText,
+} from '../../../components/navigation/TechIcons';
 
 // Exemples prédéfinis de tests opérationnels pour le marché algérien
 const PLAYGROUND_PRESETS = [
@@ -150,13 +160,13 @@ export default function AiObservabilityPage() {
     const avgTokSec =
       localCalls > 0
         ? Number(
-            (
-              logs
-                .filter((l) => l.tokensPerSec && l.tokensPerSec > 0)
-                .reduce((acc, curr) => acc + (curr.tokensPerSec || 0), 0) /
-              Math.max(1, logs.filter((l) => l.tokensPerSec && l.tokensPerSec > 0).length)
-            ).toFixed(1)
-          )
+          (
+            logs
+              .filter((l) => l.tokensPerSec && l.tokensPerSec > 0)
+              .reduce((acc, curr) => acc + (curr.tokensPerSec || 0), 0) /
+            Math.max(1, logs.filter((l) => l.tokensPerSec && l.tokensPerSec > 0).length)
+          ).toFixed(1)
+        )
         : 11.5;
 
     return {
@@ -258,7 +268,9 @@ export default function AiObservabilityPage() {
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-            <span style={{ fontSize: '24px' }}>⚡</span>
+            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.12)', border: '1px solid rgba(234, 179, 8, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#eab308' }}>
+              <IconZap size={20} />
+            </div>
             <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
               Observabilité IA Souveraine & Audit Ollama (Qwen 2.5)
             </h1>
@@ -293,8 +305,8 @@ export default function AiObservabilityPage() {
             </span>
           </div>
           <p style={{ margin: 0, fontSize: '13px', color: 'var(--df-text-secondary)', maxWidth: '850px' }}>
-            Surveillance en temps réel du moteur LLM local Qwen 2.5 embarqué sur l’hôte algérien. 
-            Contrôle strict du coupe-feu <strong style={{ color: '#10b981' }}>Loi 18-07 (ANPDP)</strong>, mesure du débit 
+            Surveillance en temps réel du moteur LLM local Qwen 2.5 embarqué sur l’hôte algérien.
+            Contrôle strict du coupe-feu <strong style={{ color: '#10b981' }}>Loi 18-07 (ANPDP)</strong>, mesure du débit
             (tokens/sec), temps de latence et audit exhaustif avant/après anonymisation.
           </p>
         </div>
@@ -316,7 +328,17 @@ export default function AiObservabilityPage() {
               gap: '6px',
             }}
           >
-            <span>{autoRefresh ? '🔄 Auto-Refresh (4s)' : '⏸️ Pausé'}</span>
+            {autoRefresh ? (
+              <>
+                <IconRefreshCw size={13} className="animate-spin" />
+                <span>Auto-Refresh (4s)</span>
+              </>
+            ) : (
+              <>
+                <IconPause size={13} />
+                <span>Pausé</span>
+              </>
+            )}
           </button>
 
           <button
@@ -352,7 +374,8 @@ export default function AiObservabilityPage() {
               gap: '6px',
             }}
           >
-            <span>📥 Export Journal ANPDP</span>
+            <IconDownload size={14} />
+            <span>Export Journal ANPDP</span>
           </button>
         </div>
       </div>
@@ -385,7 +408,8 @@ export default function AiObservabilityPage() {
             {status?.model || 'docteurflotte:latest'}
           </div>
           <div style={{ fontSize: '11px', color: '#10b981', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span>✓ 100% Souverain On-Premise</span>
+            <IconCheck size={12} />
+            <span>100% Souverain On-Premise</span>
           </div>
         </div>
 
@@ -592,9 +616,13 @@ export default function AiObservabilityPage() {
                               background: 'rgba(239, 68, 68, 0.15)',
                               color: '#ef4444',
                               fontWeight: 700,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
                             }}
                           >
-                            🛡️ {log.piiMaskedCount} PII
+                            <IconShieldCheck size={11} />
+                            {log.piiMaskedCount} PII
                           </span>
                         )}
                       </div>
@@ -922,12 +950,13 @@ export default function AiObservabilityPage() {
             >
               {isInferringPlayground ? (
                 <>
-                  <span className="animate-spin">⏳</span>
+                  <IconRefreshCw size={14} className="animate-spin" />
                   <span>Inférence CPU en cours sur Qwen 2.5...</span>
                 </>
               ) : (
                 <>
-                  <span>⚡ Lancer l'Inférence Directe</span>
+                  <IconZap size={14} />
+                  <span>Lancer l'Inférence Directe</span>
                 </>
               )}
             </button>
@@ -967,11 +996,12 @@ export default function AiObservabilityPage() {
                     fontSize: '11px',
                   }}
                 >
-                  <span style={{ fontWeight: 700, color: '#10b981' }}>
-                    ✓ Inférence Terminée avec Succès
+                  <span style={{ fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <IconCheck size={13} />
+                    Inférence Terminée avec Succès
                   </span>
                   <span style={{ fontFamily: 'monospace', color: 'var(--df-text-muted)' }}>
-                    ⏱️ {playgroundResult.durationMs} ms | ⚡ {playgroundResult.tokensPerSec} tok/s | 📝{' '}
+                    {playgroundResult.durationMs} ms | {playgroundResult.tokensPerSec} tok/s |{' '}
                     {playgroundResult.tokensGenerated} tokens
                   </span>
                 </div>
@@ -985,10 +1015,16 @@ export default function AiObservabilityPage() {
                       padding: '4px 8px',
                       borderRadius: '4px',
                       background: 'rgba(245, 158, 11, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
                     }}
                   >
-                    🛡️ <strong>Loi 18-07 active :</strong> {playgroundResult.piiMaskedCount} donnée(s) personnelle(s) ont été
-                    masquées avant transmission à Ollama.
+                    <IconShieldCheck size={13} />
+                    <span>
+                      <strong>Loi 18-07 active :</strong> {playgroundResult.piiMaskedCount} donnée(s) personnelle(s) ont été
+                      masquées avant transmission à Ollama.
+                    </span>
                   </div>
                 )}
 

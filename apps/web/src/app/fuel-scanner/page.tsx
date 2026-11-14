@@ -27,6 +27,9 @@ import {
   IconCheck,
   IconAlertTriangle,
   IconTruck,
+  IconFuel,
+  IconShieldCheck,
+  IconDownload,
 } from '../../components/navigation/TechIcons';
 import { getSimulationAssets, getSimulationReceipts } from '@/lib/simulation-sandbox';
 
@@ -290,7 +293,7 @@ export default function FuelScannerPage() {
 
       setCurrentResult(res);
       setRecentReceipts((prev) => [res, ...prev]);
-      showNotification(`✓ Reçu analysé : Statut ${res.reconciliation.reconciliationStatus === 'VERIFIED' ? 'CONFORME' : 'ANOMALIE'}.`);
+      showNotification(`Reçu analysé : Statut ${res.reconciliation.reconciliationStatus === 'VERIFIED' ? 'CONFORME' : 'ANOMALIE'}.`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       showNotification(`Erreur lors du scan : ${msg}`);
@@ -334,7 +337,7 @@ export default function FuelScannerPage() {
 
     setRecentReceipts((prev) => [newReceipt, ...prev]);
     setCurrentResult(newReceipt);
-    showNotification(`✓ Plein de ${newReceipt.liters} L à ${newReceipt.stationName} enregistré.`);
+    showNotification(`Plein de ${newReceipt.liters} L à ${newReceipt.stationName} enregistré.`);
     setIsManualModalOpen(false);
   };
 
@@ -372,7 +375,7 @@ export default function FuelScannerPage() {
         totalAmountDzd: Number(editForm.totalAmountDzd),
       });
     }
-    showNotification(`✓ Reçu Naftal de ${editForm.stationName} mis à jour.`);
+    showNotification(`Reçu Naftal de ${editForm.stationName} mis à jour.`);
     setIsEditModalOpen(false);
   };
 
@@ -382,7 +385,7 @@ export default function FuelScannerPage() {
     if (currentResult && currentResult.receiptId === deleteConfirm.id) {
       setCurrentResult(null);
     }
-    showNotification(`✓ Reçu « ${deleteConfirm.label} » supprimé de l'historique.`);
+    showNotification(`Reçu « ${deleteConfirm.label} » supprimé de l'historique.`);
     setDeleteConfirm(null);
   };
 
@@ -481,9 +484,13 @@ export default function FuelScannerPage() {
                   fontWeight: 600,
                   cursor: 'pointer',
                   textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
                 }}
               >
-                ✅ Chéraga RN41 (45L Conforme)
+                <IconCheck size={12} style={{ color: 'var(--df-status-ok)' }} />
+                <span>Chéraga RN41 (45L Conforme)</span>
               </button>
               <button
                 type="button"
@@ -498,9 +505,13 @@ export default function FuelScannerPage() {
                   fontWeight: 600,
                   cursor: 'pointer',
                   textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
                 }}
               >
-                🏜️ Hassi Messaoud (380L Lourd)
+                <IconTruck size={12} style={{ color: 'var(--df-accent-blue)' }} />
+                <span>Hassi Messaoud (380L Lourd)</span>
               </button>
               <button
                 type="button"
@@ -515,9 +526,13 @@ export default function FuelScannerPage() {
                   fontWeight: 600,
                   cursor: 'pointer',
                   textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
                 }}
               >
-                ⚠️ Blida Centre (Suspect Fraude)
+                <IconAlertTriangle size={12} />
+                <span>Blida Centre (Suspect Fraude)</span>
               </button>
             </div>
 
@@ -587,7 +602,7 @@ export default function FuelScannerPage() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '1.25rem' }}>⛽</span>
+                <IconFuel size={18} style={{ color: 'var(--df-accent-blue)' }} />
                 <Badge variant="ok">SOUVERAIN DZ</Badge>
                 <Badge variant="neutral">Contrôle CUSUM &amp; Jauge Traccar</Badge>
               </div>
@@ -740,7 +755,7 @@ export default function FuelScannerPage() {
                     disabled={isScanning}
                     style={{ width: '100%', justifyContent: 'center', marginTop: '0.25rem' }}
                   >
-                    {isScanning ? '⏳ Réconciliation en cours...' : '⚡ Exécuter la Réconciliation Naftal'}
+                    {isScanning ? 'Réconciliation en cours...' : 'Exécuter la Réconciliation Naftal'}
                   </Button>
                 </div>
               </div>
@@ -772,7 +787,7 @@ export default function FuelScannerPage() {
                         </h3>
                       </div>
                       <Badge variant={currentResult.reconciliation.reconciliationStatus === 'VERIFIED' ? 'ok' : 'danger'}>
-                        {currentResult.reconciliation.reconciliationStatus === 'VERIFIED' ? '✓ CERTIFIÉ CONFORME' : '⚠️ ANOMALIE CUSUM'}
+                        {currentResult.reconciliation.reconciliationStatus === 'VERIFIED' ? 'CERTIFIÉ CONFORME' : 'ANOMALIE CUSUM'}
                       </Badge>
                     </div>
 
@@ -839,13 +854,15 @@ export default function FuelScannerPage() {
                         variant="secondary"
                         size="sm"
                         onClick={() => setIsLegalReportOpen(true)}
+                        leftIcon={<IconShieldCheck size={14} />}
                       >
-                        ⚖️ Procès-Verbal Opposable
+                        Procès-Verbal Opposable
                       </Button>
                       <Button
                         variant="primary"
                         size="sm"
                         onClick={() => setIsTechnicalDossierOpen(true)}
+                        leftIcon={<IconDownload size={14} />}
                         style={{
                           backgroundColor: '#4F46E5',
                           borderColor: '#4338CA',
@@ -854,13 +871,15 @@ export default function FuelScannerPage() {
                           fontSize: '0.75rem',
                         }}
                       >
-                        📑 Dossier Technique &amp; Export ERP
+                        Dossier Technique &amp; Export ERP
                       </Button>
                     </div>
                   </div>
                 ) : (
                   <div style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--df-text-muted)' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🧾</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
+                      <IconFuel size={28} style={{ color: 'var(--df-text-muted)' }} />
+                    </div>
                     <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--df-text-main)', margin: '0 0 0.25rem 0' }}>
                       En attente d&apos;un reçu Naftal
                     </h4>
@@ -884,7 +903,7 @@ export default function FuelScannerPage() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
-                  📋 Historique des Derniers Pleins Contrôlés ({filteredReceipts.length})
+                  Historique des Derniers Pleins Contrôlés ({filteredReceipts.length})
                 </h3>
                 <Button variant="outline" size="sm" onClick={() => setIsManualModalOpen(true)} style={{ gap: '0.35rem' }}>
                   <IconPlus size={13} />
@@ -910,7 +929,7 @@ export default function FuelScannerPage() {
                       <tr>
                         <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--df-text-muted)' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '1.5rem' }}>⛽</span>
+                            <IconFuel size={24} style={{ color: 'var(--df-text-muted)' }} />
                             <span style={{ fontWeight: 600 }}>
                               {isDemoMode
                                 ? 'Aucun reçu de simulation ne correspond à ce filtre.'

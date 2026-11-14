@@ -7,6 +7,16 @@ import {
   NAFTAL_FUEL_PRICES_DZD,
 } from '@docteurflotte/contracts';
 import { FuelScannerClient } from '../../lib/api-fuel-scanner';
+import {
+  IconFileText,
+  IconCheck,
+  IconX,
+  IconShieldCheck,
+  IconAlertTriangle,
+  IconLock,
+  IconActivity,
+  IconFuel,
+} from '../navigation/TechIcons';
 
 interface CusumLegalReportViewerProps {
   initialReport?: BilingualLegalAuditReport | null;
@@ -171,7 +181,7 @@ export function CusumLegalReportViewer({
               fontSize: '18px',
             }}
           >
-            ⚖️
+            <IconFileText size={18} className="text-white" />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -256,7 +266,9 @@ export function CusumLegalReportViewer({
               border: '1px solid #CBD5E1',
             }}
           >
-            <span style={{ color: '#0F172A', fontWeight: 800 }}>🖨️ Imprimer PV</span>
+            <span style={{ color: '#0F172A', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <IconFileText size={13} /> Imprimer PV
+            </span>
           </button>
 
           {onClose && (
@@ -267,11 +279,10 @@ export function CusumLegalReportViewer({
                 border: 'none',
                 color: '#64748B',
                 cursor: 'pointer',
-                fontSize: '16px',
                 padding: '4px',
               }}
             >
-              ✕
+              <IconX size={16} />
             </button>
           )}
         </div>
@@ -312,7 +323,15 @@ export function CusumLegalReportViewer({
               }}
             >
               <span style={{ color: selectedPresetIndex === idx ? '#1D4ED8' : '#0F172A', fontWeight: 800 }}>
-                {idx === 0 ? '🚨 Siphonnage Djelfa (RN1)' : '🏔️ Fausse Alerte Chiffa (Pente 11.5%)'}
+                {idx === 0 ? (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <IconAlertTriangle size={13} className="text-rose-500" /> Siphonnage Djelfa (RN1)
+                  </span>
+                ) : (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <IconActivity size={13} className="text-indigo-500" /> Fausse Alerte Chiffa (Pente 11.5%)
+                  </span>
+                )}
               </span>
             </button>
           ))}
@@ -320,15 +339,15 @@ export function CusumLegalReportViewer({
 
         {isEvaluating && (
           <div style={{ fontSize: '11px', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span className="animate-spin">⏳</span>
+            <IconActivity size={12} className="inline animate-spin mr-1" />
             <span>Calcul géométrique Valhalla &amp; CUSUM en cours (&lt; 20 ms)...</span>
           </div>
         )}
       </div>
 
       {errorMsg && (
-        <div style={{ padding: '10px 20px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', fontSize: '12px' }}>
-          ⚠️ {errorMsg}
+        <div style={{ padding: '10px 20px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconAlertTriangle size={14} /> {errorMsg}
         </div>
       )}
 
@@ -366,9 +385,15 @@ export function CusumLegalReportViewer({
                   color: report.status === 'OPPOSABLE_DISCIPLINAIRE' ? '#ef4444' : '#10b981',
                 }}
               >
-                {report.status === 'OPPOSABLE_DISCIPLINAIRE'
-                  ? '⚖️ OPPOSABLE DISCIPLINAIRE'
-                  : '🛡️ CLASSEMENT SANS SUITE'}
+                {report.status === 'OPPOSABLE_DISCIPLINAIRE' ? (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <IconAlertTriangle size={14} className="text-rose-500" /> OPPOSABLE DISCIPLINAIRE
+                  </span>
+                ) : (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <IconShieldCheck size={14} className="text-emerald-500" /> CLASSEMENT SANS SUITE
+                  </span>
+                )}
               </div>
               <div style={{ fontSize: '10px', color: 'var(--df-text-secondary)', marginTop: '4px' }}>
                 Certitude Physique : {(report.confidenceScore * 100).toFixed(1)}%
@@ -495,7 +520,7 @@ export function CusumLegalReportViewer({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '13px' }}>🔒</span>
+              <IconLock size={14} className="text-cyan-400" />
               <div>
                 <span style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>
                   Scellé Numérique HMAC-SHA256 (Inaltérabilité Opposable) :
@@ -527,7 +552,13 @@ export function CusumLegalReportViewer({
                 cursor: 'pointer',
               }}
             >
-              {copiedHmac ? '✓ Hash Copié' : 'Copier Sceau'}
+              {copiedHmac ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <IconCheck size={12} className="text-emerald-600" /> Hash Copié
+                </span>
+              ) : (
+                'Copier Sceau'
+              )}
             </button>
           </div>
 
@@ -608,7 +639,7 @@ export function CusumLegalReportViewer({
                   }}
                 >
                   <h4 style={{ fontSize: '12px', fontWeight: 700, color: '#10b981', textTransform: 'uppercase', margin: '0 0 6px 0' }}>
-                    VI. Recommandations Décisionnelles (Arbitrage SAD ➔ ADS)
+                    VI. Recommandations Décisionnelles (Arbitrage SAD &rarr; ADS)
                   </h4>
                   <p style={{ fontSize: '13px', color: '#e2e8f0', margin: 0, whiteSpace: 'pre-wrap' }}>
                     {report.frenchReport.recommandationDecisionnelle}

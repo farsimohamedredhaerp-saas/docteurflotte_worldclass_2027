@@ -1,4 +1,5 @@
 import React from 'react';
+import { IconCheck } from '../navigation/TechIcons';
 
 interface Props {
   password: string;
@@ -59,14 +60,14 @@ export const PasswordStrengthIndicator: React.FC<Props> = ({ password }) => {
         />
       </div>
       <div style={{ display: 'flex', gap: '10px', fontSize: '11px', marginTop: '6px', color: 'var(--df-text-muted)' }}>
-        <span style={{ color: hasLength ? 'var(--df-status-ok)' : undefined }}>
-          {hasLength ? '✓' : '•'} 8+ caractères
+        <span style={{ color: hasLength ? 'var(--df-status-ok)' : undefined, display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+          {hasLength ? <IconCheck size={10} /> : '•'} 8+ caractères
         </span>
-        <span style={{ color: hasLetter ? 'var(--df-status-ok)' : undefined }}>
-          {hasLetter ? '✓' : '•'} Lettres
+        <span style={{ color: hasLetter ? 'var(--df-status-ok)' : undefined, display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+          {hasLetter ? <IconCheck size={10} /> : '•'} Lettres
         </span>
-        <span style={{ color: hasNumber ? 'var(--df-status-ok)' : undefined }}>
-          {hasNumber ? '✓' : '•'} Chiffres
+        <span style={{ color: hasNumber ? 'var(--df-status-ok)' : undefined, display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+          {hasNumber ? <IconCheck size={10} /> : '•'} Chiffres
         </span>
       </div>
     </div>

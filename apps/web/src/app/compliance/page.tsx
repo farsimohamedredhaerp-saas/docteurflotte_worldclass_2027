@@ -20,6 +20,9 @@ import {
   IconEdit,
   IconTrash,
   IconX,
+  IconFileText,
+  IconCompass,
+  IconCreditCard,
 } from '../../components/navigation/TechIcons';
 
 export type ComplianceTab = 'ENACTA' | 'INSURANCE' | 'WILAYAS' | 'TAXES';
@@ -179,7 +182,7 @@ export default function CompliancePage() {
           item.id === editingEnacta.id ? ({ ...item, ...enactaForm } as EnactaRecord) : item
         )
       );
-      setNotification(`✓ Contrôle ENACTA mis à jour pour ${enactaForm.registrationNumber}`);
+      setNotification(`Contrôle ENACTA mis à jour pour ${enactaForm.registrationNumber}`);
     } else {
       const newRec: EnactaRecord = {
         id: `EN-${Date.now().toString().slice(-4)}`,
@@ -195,7 +198,7 @@ export default function CompliancePage() {
         defectCount: 0,
       };
       setEnactaList((prev) => [newRec, ...prev]);
-      setNotification(`✓ Nouveau contrôle ENACTA consigné pour ${newRec.registrationNumber}`);
+      setNotification(`Nouveau contrôle ENACTA consigné pour ${newRec.registrationNumber}`);
     }
 
     setIsEnactaModalOpen(false);
@@ -205,7 +208,7 @@ export default function CompliancePage() {
   const handleDeleteEnacta = (id: string, plate: string) => {
     if (confirm(`Êtes-vous sûr de vouloir supprimer le contrôle de ${plate} ?`)) {
       setEnactaList((prev) => prev.filter((i) => i.id !== id));
-      setNotification(`ℹ Contrôle ENACTA supprimé pour ${plate}`);
+      setNotification(`Contrôle ENACTA supprimé pour ${plate}`);
       setTimeout(() => setNotification(null), 4000);
     }
   };
@@ -244,7 +247,7 @@ export default function CompliancePage() {
           item.id === editingInsurance.id ? ({ ...item, ...insuranceForm } as InsuranceRecord) : item
         )
       );
-      setNotification(`✓ Police d'assurance mise à jour pour ${insuranceForm.registrationNumber}`);
+      setNotification(`Police d'assurance mise à jour pour ${insuranceForm.registrationNumber}`);
     } else {
       const newIns: InsuranceRecord = {
         id: `INS-${Date.now().toString().slice(-4)}`,
@@ -258,7 +261,7 @@ export default function CompliancePage() {
         status: (insuranceForm.status as InsuranceRecord['status']) || 'VALID',
       };
       setInsuranceList((prev) => [newIns, ...prev]);
-      setNotification(`✓ Nouvelle police d'assurance consignée pour ${newIns.registrationNumber}`);
+      setNotification(`Nouvelle police d'assurance consignée pour ${newIns.registrationNumber}`);
     }
 
     setIsInsuranceModalOpen(false);
@@ -325,10 +328,10 @@ export default function CompliancePage() {
 
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               {[
-                { id: 'ENACTA', label: 'Contrôles ENACTA', count: enactaList.length, icon: '🛡️' },
-                { id: 'INSURANCE', label: 'Assurances & Cartes', count: insuranceList.length, icon: '📋' },
-                { id: 'WILAYAS', label: 'Restrictions Wilayas', count: WILAYA_RESTRICTIONS.length, icon: '🗺️' },
-                { id: 'TAXES', label: 'Vignettes & Fiscalité', icon: '💰' },
+                { id: 'ENACTA', label: 'Contrôles ENACTA', count: enactaList.length, icon: <IconShieldCheck size={14} /> },
+                { id: 'INSURANCE', label: 'Assurances & Cartes', count: insuranceList.length, icon: <IconFileText size={14} /> },
+                { id: 'WILAYAS', label: 'Restrictions Wilayas', count: WILAYA_RESTRICTIONS.length, icon: <IconCompass size={14} /> },
+                { id: 'TAXES', label: 'Vignettes & Fiscalité', icon: <IconCreditCard size={14} /> },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -468,7 +471,9 @@ export default function CompliancePage() {
                       {enactaList.length === 0 ? (
                         <tr>
                           <td colSpan={7} style={{ padding: '3rem 1rem', textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>🛡️</div>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', marginBottom: '0.75rem' }}>
+                              <IconShieldCheck size={20} />
+                            </div>
                             <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.25rem' }}>
                               Aucun contrôle technique ENACTA enregistré
                             </div>
@@ -588,7 +593,9 @@ export default function CompliancePage() {
                       {insuranceList.length === 0 ? (
                         <tr>
                           <td colSpan={7} style={{ padding: '3rem 1rem', textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>📜</div>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', marginBottom: '0.75rem' }}>
+                              <IconFileText size={20} />
+                            </div>
                             <div style={{ fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.25rem' }}>
                               Aucune police d&apos;assurance enregistrée
                             </div>

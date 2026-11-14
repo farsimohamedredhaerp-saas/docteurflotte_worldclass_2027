@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { IconPenTool, IconCheck, IconTrash, IconShieldCheck } from '../navigation/TechIcons';
 
 interface SignaturePadProps {
   value?: string | null;
@@ -148,20 +149,20 @@ export function SignaturePad({
     fr: {
       title: 'Signature Tactile du Chauffeur / Visiteur Technique',
       subtitle: 'Signer du doigt ou au stylet dans la zone ci-dessous (Engagement légal DVIR)',
-      placeholder: '✍️ Tracez votre signature ici...',
+      placeholder: 'Tracez votre signature ici...',
       certifiedBy: 'Certifié par :',
       clear: 'Effacer la signature',
-      signed: '✓ Signature capturée',
+      signed: 'Signature capturée',
       empty: 'Signature requise avant départ',
       legalNote: 'Horodatage sécurisé • Loi 18-07 ANPDP & Décret Exécutif 03-223',
     },
     ar: {
       title: 'التوقيع الرقمي الميداني للسائق / الفاحص التقني',
       subtitle: 'وقع بإصبعك أو بالقلم في المربع أدناه (مصادقة قانونية على الفحص)',
-      placeholder: '✍️ ضع إمضاءك هنا...',
+      placeholder: 'ضع إمضاءك هنا...',
       certifiedBy: 'مصادق من طرف :',
       clear: 'مسح التوقيع',
-      signed: '✓ تم تسجيل الإمضاء',
+      signed: 'تم تسجيل الإمضاء',
       empty: 'التوقيع إلزامي قبل الانطلاق',
       legalNote: 'بصمة زمنية مشفرة • القانون 18-07 والمرسوم التنفيذي 03-223',
     },
@@ -198,9 +199,18 @@ export function SignaturePad({
             background: hasSignature ? 'var(--df-status-ok-bg)' : 'var(--df-status-warning-bg)',
             color: hasSignature ? 'var(--df-status-ok-text)' : 'var(--df-status-warning-text)',
             border: `1px solid ${hasSignature ? 'var(--df-status-ok-border)' : 'var(--df-status-warning-border)'}`,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
           }}
         >
-          {hasSignature ? t.signed : t.empty}
+          {hasSignature ? (
+            <>
+              <IconCheck size={12} /> {t.signed}
+            </>
+          ) : (
+            t.empty
+          )}
         </span>
       </div>
 
@@ -246,9 +256,13 @@ export function SignaturePad({
               pointerEvents: 'none',
               opacity: 0.6,
               textAlign: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            {t.placeholder}
+            <IconPenTool size={14} className="opacity-70" />
+            <span>{t.placeholder}</span>
           </div>
         )}
       </div>
@@ -273,16 +287,20 @@ export function SignaturePad({
                 borderRadius: 'var(--df-radius-xs)',
                 cursor: 'pointer',
                 fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
               }}
             >
-              🗑️ {t.clear}
+              <IconTrash size={12} /> {t.clear}
             </button>
           )}
         </div>
       </div>
 
-      <div style={{ fontSize: '0.68rem', color: 'var(--df-text-muted)', fontStyle: 'italic', borderTop: '1px solid var(--df-border-subtle)', paddingTop: '0.3rem' }}>
-        🛡️ {t.legalNote}
+      <div style={{ fontSize: '0.68rem', color: 'var(--df-text-muted)', fontStyle: 'italic', borderTop: '1px solid var(--df-border-subtle)', paddingTop: '0.3rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <IconShieldCheck size={13} className="text-emerald-500" />
+        <span>{t.legalNote}</span>
       </div>
     </div>
   );

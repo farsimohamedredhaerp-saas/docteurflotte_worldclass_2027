@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { AuthClient } from '../../../lib/api-auth';
 import { PlatformAdminClient } from '../../../lib/api-platform-admin';
 import { PlatformAuditLog } from '@docteurflotte/contracts';
+import { IconRefreshCw } from '../../../components/navigation/TechIcons';
 
 export default function AdminAuditPage() {
   const [logs, setLogs] = useState<PlatformAuditLog[]>([]);
@@ -54,9 +55,13 @@ export default function AdminAuditPage() {
             fontSize: '13px',
             fontWeight: 600,
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
-          🔄 Actualiser le journal
+          <IconRefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+          Actualiser le journal
         </button>
       </div>
 

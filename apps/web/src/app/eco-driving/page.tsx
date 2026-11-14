@@ -19,6 +19,16 @@ import {
   CalculationProofModal,
   CalculationProofData,
 } from '../../components/decisions';
+import {
+  IconActivity,
+  IconRefreshCw,
+  IconFuel,
+  IconSparkles,
+  IconClock,
+  IconTrendingUp,
+  IconZap,
+  IconShieldCheck,
+} from '../../components/navigation/TechIcons';
 
 export default function EcoDrivingPage() {
   const { isDemoMode, session } = useDemoMode();
@@ -202,7 +212,21 @@ export default function EcoDrivingPage() {
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '1.85rem' }}>🌿</span>
+              <div
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  background: 'rgba(16, 185, 129, 0.12)',
+                  border: '1px solid rgba(16, 185, 129, 0.25)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#10b981',
+                }}
+              >
+                <IconActivity size={20} />
+              </div>
               <h1
                 style={{
                   fontSize: '1.85rem',
@@ -233,11 +257,13 @@ export default function EcoDrivingPage() {
 
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <Button variant="outline" size="sm" onClick={loadSummary} disabled={isLoading}>
-              {isLoading ? '⏳ Chargement...' : '🔄 Actualiser Télémétrie'}
+              <IconRefreshCw size={13} className={`inline mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+              {isLoading ? 'Chargement...' : 'Actualiser Télémétrie'}
             </Button>
             <Link href="/admin/fiscal" style={{ textDecoration: 'none' }}>
               <Button variant="outline" size="sm">
-                ⛽ Barèmes Fiscaux
+                <IconFuel size={13} className="inline mr-1" />
+                Barèmes Fiscaux
               </Button>
             </Link>
             <Link href="/decisions" style={{ textDecoration: 'none' }}>
@@ -262,7 +288,7 @@ export default function EcoDrivingPage() {
             value={summary ? `${summary.averageFleetScore}` : '--'}
             unit="/ 100"
             description="Indice consolidé de conduite rationnelle"
-            icon="🏆"
+            icon={<IconSparkles size={16} className="text-amber-400" />}
             progressPercent={summary?.averageFleetScore}
           />
           <MetricCard
@@ -270,7 +296,7 @@ export default function EcoDrivingPage() {
             value={summary ? `${summary.totalWastedFuelLiters.toLocaleString('fr-DZ')}` : '--'}
             unit="Litres"
             description={summary ? `${summary.totalIdlingHours} heures moteur à l'arrêt` : '0 L'}
-            icon="⏱️"
+            icon={<IconClock size={16} className="text-blue-400" />}
           />
           <MetricCard
             title="Perte Trésorerie Naftal"
@@ -281,7 +307,7 @@ export default function EcoDrivingPage() {
                 ? `Valorisé au tarif officiel de ${activeDieselPrice.toFixed(2)} DA/L (Moteur Fiscal)`
                 : 'Tarif en cours de synchronisation avec le moteur fiscal'
             }
-            icon="💸"
+            icon={<IconFuel size={16} className="text-rose-400" />}
             trend={{
               direction: 'down',
               text: 'Perte sèche évitable',
@@ -301,7 +327,7 @@ export default function EcoDrivingPage() {
             value={summary ? `+${summary.potentialSavingsDzd.toLocaleString('fr-DZ')}` : '--'}
             unit="DA"
             description="Objectif 75% du gaspillage résorbé"
-            icon="📈"
+            icon={<IconTrendingUp size={16} className="text-emerald-400" />}
             trend={{
               direction: 'up',
               text: 'Gain direct trésorerie',
@@ -339,7 +365,9 @@ export default function EcoDrivingPage() {
           >
             <div style={{ maxWidth: '640px', flex: '1 1 360px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '1.35rem' }}>💡</span>
+                <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(234, 179, 8, 0.12)', border: '1px solid rgba(234, 179, 8, 0.25)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#eab308' }}>
+                  <IconZap size={14} />
+                </div>
                 <h3
                   style={{
                     fontSize: '1.15rem',
@@ -461,7 +489,7 @@ export default function EcoDrivingPage() {
           >
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '1.15rem' }}>🎖️</span>
+                <IconShieldCheck size={18} className="text-emerald-500" />
                 <h2
                   style={{
                     fontSize: '1.1rem',

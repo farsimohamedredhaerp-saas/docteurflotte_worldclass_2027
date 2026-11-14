@@ -16,6 +16,17 @@ import {
   UpdateTenantSubscriptionDto,
   GenerateInvoiceDto,
 } from '@docteurflotte/contracts';
+import {
+  IconCreditCard,
+  IconRefreshCw,
+  IconPlus,
+  IconAlertTriangle,
+  IconCheck,
+  IconFileText,
+  IconLayers,
+  IconEdit,
+  IconSliders,
+} from '../../../components/navigation/TechIcons';
 
 export default function AdminSubscriptionsPage() {
   const [activeTab, setActiveTab] = useState<'plans' | 'tenants' | 'invoices'>('plans');
@@ -252,7 +263,9 @@ export default function AdminSubscriptionsPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.35rem' }}>
-            <span style={{ fontSize: '1.75rem' }}>💳</span>
+            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
+              <IconCreditCard size={20} />
+            </div>
             <h1 style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0, color: 'var(--df-text-main)' }}>
               Plans & Abonnements B2B Algérie
             </h1>
@@ -288,9 +301,13 @@ export default function AdminSubscriptionsPage() {
               fontSize: '0.8rem',
               fontWeight: 600,
               cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            🔄 Actualiser
+            <IconRefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+            Actualiser
           </button>
           <button
             type="button"
@@ -305,22 +322,28 @@ export default function AdminSubscriptionsPage() {
               fontWeight: 700,
               cursor: 'pointer',
               boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
           >
-            ➕ Créer un Plan d'Abonnement
+            <IconPlus size={14} />
+            Créer un Plan d'Abonnement
           </button>
         </div>
       </div>
 
       {/* NOTIFICATIONS */}
       {errorMsg && (
-        <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#fca5a5', marginBottom: '1rem', fontSize: '0.85rem' }}>
-          ⚠️ {errorMsg}
+        <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#fca5a5', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconAlertTriangle size={15} />
+          <span>{errorMsg}</span>
         </div>
       )}
       {successMsg && (
-        <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)', color: '#86efac', marginBottom: '1rem', fontSize: '0.85rem' }}>
-          ✓ {successMsg}
+        <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)', color: '#86efac', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconCheck size={15} />
+          <span>{successMsg}</span>
         </div>
       )}
 
@@ -389,9 +412,13 @@ export default function AdminSubscriptionsPage() {
             fontWeight: activeTab === 'plans' ? 700 : 500,
             fontSize: '0.88rem',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
-          📋 Catalogue des Plans ({plans.length})
+          <IconFileText size={15} />
+          <span>Catalogue des Plans ({plans.length})</span>
         </button>
         <button
           type="button"
@@ -405,9 +432,13 @@ export default function AdminSubscriptionsPage() {
             fontWeight: activeTab === 'tenants' ? 700 : 500,
             fontSize: '0.88rem',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
-          🏢 Abonnements Tenants & Négociations ({tenantSubs.length})
+          <IconLayers size={15} />
+          <span>Abonnements Tenants & Négociations ({tenantSubs.length})</span>
         </button>
         <button
           type="button"
@@ -421,9 +452,13 @@ export default function AdminSubscriptionsPage() {
             fontWeight: activeTab === 'invoices' ? 700 : 500,
             fontSize: '0.88rem',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
-          📑 Facturation & Proformas DGI ({invoices.length})
+          <IconCreditCard size={15} />
+          <span>Facturation & Proformas DGI ({invoices.length})</span>
         </button>
       </div>
 
@@ -572,9 +607,14 @@ export default function AdminSubscriptionsPage() {
                       fontSize: '0.75rem',
                       fontWeight: 600,
                       cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
                     }}
                   >
-                    ✏️ Modifier ce plan
+                    <IconEdit size={13} />
+                    Modifier ce plan
                   </button>
                 </div>
               </div>
@@ -676,9 +716,13 @@ export default function AdminSubscriptionsPage() {
                             fontSize: '0.72rem',
                             fontWeight: 600,
                             cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
                           }}
                         >
-                          ⚙️ Négocier
+                          <IconSliders size={12} />
+                          Négocier
                         </button>
                         <button
                           type="button"
@@ -692,9 +736,13 @@ export default function AdminSubscriptionsPage() {
                             fontSize: '0.72rem',
                             fontWeight: 600,
                             cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
                           }}
                         >
-                          📄 Facturer DGI
+                          <IconFileText size={12} />
+                          Facturer DGI
                         </button>
                       </div>
                     </td>
@@ -714,7 +762,7 @@ export default function AdminSubscriptionsPage() {
           </h3>
           {invoices.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--df-text-muted)' }}>
-              Aucune facture générée durant cette session. Utilisez le bouton "📄 Facturer DGI" dans l'onglet des tenants pour émettre un proforma.
+              Aucune facture générée durant cette session. Utilisez le bouton « Facturer DGI » dans l'onglet des tenants pour émettre un proforma.
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>

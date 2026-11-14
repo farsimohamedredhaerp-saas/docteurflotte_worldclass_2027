@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
+import { IconCamera, IconX, IconCheck, IconActivity } from '../navigation/TechIcons';
 
 interface PhotoProofCaptureProps {
   itemCode: string;
@@ -69,7 +70,7 @@ export function PhotoProofCapture({
 
   const t = {
     fr: {
-      attachPhoto: '📷 Photo de Preuve (Appareil Photo / Galerie)',
+      attachPhoto: 'Photo de Preuve (Appareil Photo / Galerie)',
       compressing: 'Compression de la photo en cours...',
       remove: 'Supprimer',
       view: 'Agrandir',
@@ -77,7 +78,7 @@ export function PhotoProofCapture({
       modalClose: 'Fermer',
     },
     ar: {
-      attachPhoto: '📷 صورة إثبات العطب (كاميرا / معرض الصور)',
+      attachPhoto: 'صورة إثبات العطب (كاميرا / معرض الصور)',
       compressing: 'جاري ضغط الصورة محلياً...',
       remove: 'حذف',
       view: 'تكبير',
@@ -143,7 +144,17 @@ export function PhotoProofCapture({
               transition: 'all var(--df-transition-fast)',
             }}
           >
-            {isCompressing ? `⏳ ${t.compressing}` : t.attachPhoto}
+            {isCompressing ? (
+              <>
+                <IconActivity size={12} className="inline animate-spin mr-1 text-cyan-400" />
+                {t.compressing}
+              </>
+            ) : (
+              <>
+                <IconCamera size={13} className="inline mr-1 text-slate-400" />
+                {t.attachPhoto}
+              </>
+            )}
           </button>
           <span style={{ fontSize: '0.68rem', color: 'var(--df-text-muted)' }}>
             {t.sizeNote}
@@ -177,11 +188,11 @@ export function PhotoProofCapture({
           />
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--df-text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              📸 Photo attachée
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--df-text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <IconCamera size={13} className="text-slate-400" /> Photo attachée
             </div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--df-status-ok)' }}>
-              ✓ Preuve JPEG compressée
+            <div style={{ fontSize: '0.68rem', color: 'var(--df-status-ok)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <IconCheck size={12} className="text-emerald-500" /> Preuve JPEG compressée
             </div>
           </div>
 
@@ -212,9 +223,12 @@ export function PhotoProofCapture({
                 cursor: 'pointer',
                 fontWeight: 600,
                 padding: '2px 4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '2px',
               }}
             >
-              ✕ {t.remove}
+              <IconX size={12} /> {t.remove}
             </button>
           </div>
         </div>
@@ -252,8 +266,8 @@ export function PhotoProofCapture({
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontWeight: 700, color: 'var(--df-text-main)', fontSize: '0.9rem' }}>
-                📸 Preuve photographique : {itemLabel}
+              <div style={{ fontWeight: 700, color: 'var(--df-text-main)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <IconCamera size={15} className="text-cyan-400" /> Preuve photographique : {itemLabel}
               </div>
               <button
                 type="button"
@@ -262,11 +276,11 @@ export function PhotoProofCapture({
                   background: 'transparent',
                   border: 'none',
                   color: 'var(--df-text-muted)',
-                  fontSize: '1.2rem',
                   cursor: 'pointer',
+                  padding: '4px',
                 }}
               >
-                ✕
+                <IconX size={16} />
               </button>
             </div>
 

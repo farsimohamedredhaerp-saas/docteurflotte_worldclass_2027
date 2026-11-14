@@ -12,6 +12,7 @@ import {
   SlidersHorizontal,
   FileCheck,
   CheckCircle2,
+  Globe,
 } from 'lucide-react';
 
 interface StructuredSpecs {
@@ -355,7 +356,7 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
               onChange={(e) => setEnableWebSearch(e.target.checked)}
               style={{ width: '16px', height: '16px', accentColor: '#2563EB', cursor: 'pointer' }}
             />
-            🌐 Recherche Web / Internet Approfondie (Auto-Ingestion en Coffre Souverain)
+            <Globe size={14} className="text-blue-600 inline" /> Recherche Web / Internet Approfondie (Auto-Ingestion en Coffre Souverain)
           </label>
 
           <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 600, color: '#475569' }}>
@@ -365,7 +366,7 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
               onChange={(e) => setIncludeSynthesis(e.target.checked)}
               style={{ width: '16px', height: '16px', accentColor: '#059669', cursor: 'pointer' }}
             />
-            ✨ Synthèse Technique Qwen 2.5
+            <Sparkles size={14} className="text-emerald-600 inline" /> Synthèse Technique Qwen 2.5
           </label>
         </div>
 
@@ -543,7 +544,7 @@ export function SovereignRagExplorer({ token }: { token?: string | null }) {
                         gap: '4px',
                       }}
                     >
-                      🌐 Source Web Détectée &amp; Auto-Ingérée
+                      <Globe size={11} className="text-blue-600 inline" /> Source Web Détectée &amp; Auto-Ingérée
                     </span>
                   )}
                 </div>

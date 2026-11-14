@@ -3,6 +3,7 @@
 import React from 'react';
 import { RegulatoryMissionOrderData } from '@docteurflotte/contracts';
 import { MissionOrderQrCode } from './MissionOrderQrCode';
+import { IconFileText, IconAlertTriangle } from '../navigation/TechIcons';
 
 interface PrintableMissionOrderProps {
   order: RegulatoryMissionOrderData;
@@ -28,7 +29,7 @@ export function PrintableMissionOrder({ order, onClose }: PrintableMissionOrderP
         marginBottom: '10px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '20px' }}>📜</span>
+          <IconFileText size={18} className="text-emerald-400" />
           <span style={{ fontWeight: 700, fontSize: '15px' }}>
             Ordre de Mission Officiel #{order.orderNumber} (Code de la Route DZ)
           </span>
@@ -50,7 +51,7 @@ export function PrintableMissionOrder({ order, onClose }: PrintableMissionOrderP
               cursor: 'pointer',
             }}
           >
-            <span>🖨️</span>
+            <IconFileText size={14} />
             <span>Imprimer / Exporter PDF (Format A4)</span>
           </button>
           {onClose && (
@@ -160,8 +161,9 @@ export function PrintableMissionOrder({ order, onClose }: PrintableMissionOrderP
             <div style={{ fontSize: '11px', color: '#dc2626', fontWeight: 700, marginBottom: '6px' }}>
               Valide jusqu&apos;au : {new Date(order.validUntilIso).toLocaleString('fr-DZ')}
             </div>
-            <div style={{ fontSize: '9.5px', color: '#64748b', fontStyle: 'italic', background: '#e2e8f0', padding: '4px 6px', borderRadius: '3px' }}>
-              ⚠️ Durée maximale légale : 72h. Tout dépassement rend le transport non conforme.
+            <div style={{ fontSize: '9.5px', color: '#64748b', fontStyle: 'italic', background: '#e2e8f0', padding: '4px 6px', borderRadius: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <IconAlertTriangle size={11} className="text-amber-600 shrink-0" />
+              <span>Durée maximale légale : 72h. Tout dépassement rend le transport non conforme.</span>
             </div>
           </div>
         </div>

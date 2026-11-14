@@ -1,4 +1,5 @@
 import React from 'react';
+import { IconRadio } from '../navigation/TechIcons';
 
 export interface EmptyStateProps {
   title: string;
@@ -30,7 +31,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         margin: '48px auto',
       }}
     >
-      <div style={{ fontSize: '48px', marginBottom: '16px' }}>🛰️</div>
+      <div style={{ width: '64px', height: '64px', borderRadius: '16px', backgroundColor: 'rgba(56, 189, 248, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+        <IconRadio size={32} className="text-cyan-400" />
+      </div>
       <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--df-text-main)', margin: '0 0 8px' }}>
         {title}
       </h2>

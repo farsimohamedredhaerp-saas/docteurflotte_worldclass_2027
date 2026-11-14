@@ -9,6 +9,7 @@ import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
 import { Navbar } from '../../components/navigation/Navbar';
 import { ActivityPack } from '@docteurflotte/contracts';
+import { IconAlertTriangle, IconArrowUpRight } from '../../components/navigation/TechIcons';
 
 export default function SetupPage() {
   const router = useRouter();
@@ -135,9 +136,13 @@ export default function SetupPage() {
               color: '#fca5a5',
               fontSize: '13px',
               marginBottom: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
             }}
           >
-            ⚠️ {error}
+            <IconAlertTriangle size={16} />
+            <span>{error}</span>
           </div>
         )}
 
@@ -355,7 +360,7 @@ export default function SetupPage() {
                 onClick={handleFinishSetup}
                 style={{ backgroundColor: 'var(--df-status-ok)', borderColor: 'var(--df-status-ok)' }}
               >
-                {isLoading ? 'Activation en cours...' : 'Finaliser & Accéder au Tableau de Bord 🚀'}
+                {isLoading ? 'Activation en cours...' : 'Finaliser & Accéder au Tableau de Bord'}
               </Button>
             )}
           </div>

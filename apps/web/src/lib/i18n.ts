@@ -8,7 +8,7 @@ export type Locale = 'fr' | 'ar' | 'en';
 
 export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
   fr: {
-    "digitalTwin.header.badgeTitle": "🧬 JUMEAU NUMÉRIQUE DYNAMIQUE & RUL",
+    "digitalTwin.header.badgeTitle": "JUMEAU NUMÉRIQUE DYNAMIQUE & RUL",
     "digitalTwin.header.title": "Physique Prédictive de l’Actif & Durée de Vie Résiduelle (RUL)",
     "digitalTwin.header.description":
       "Modélisation dynamique des {count} organes physiques d’usure ({algorithms}). Calibrée sur les contraintes thermiques et abrasives des {wilayasCount} Wilayas algériennes.",
@@ -41,7 +41,7 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.anatomy.subtitle":
       "Sélectionnez un organe pour analyser ses équations physiques, sa dégradation et son RUL.",
     "digitalTwin.anatomy.legend":
-      "✦ Vue télématique en temps réel • Modélisation {count} organes physiques ({algorithms}) conforme {specVersion}",
+      "• Vue télématique en temps réel • Modélisation {count} organes physiques ({algorithms}) conforme {specVersion}",
 
     "digitalTwin.organ.algorithmPrefix": "Algorithme :",
     "digitalTwin.organ.proofButton": "Formule & Preuve",
@@ -50,7 +50,7 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.organ.thresholdPrefix": "Seuil :",
     "digitalTwin.organ.physicalFinding": "Constat Physique SAD :",
 
-    "digitalTwin.trajectory.title": "📈 Trajectoire Prédictive Déterministe",
+    "digitalTwin.trajectory.title": "Trajectoire Prédictive Déterministe",
     "digitalTwin.trajectory.proofButton": "Preuve dégradation",
     "digitalTwin.trajectory.subtitle":
       "Comparaison du score VHI sans action vs avec action préventive SAD.",
@@ -74,13 +74,13 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.arbitrage.perDayDowntime": "+ {amount}/j d'arrêt",
     "digitalTwin.arbitrage.netSavings": "Économie Nette",
     "digitalTwin.arbitrage.actionInDays": "Action sous {days} jours",
-    "digitalTwin.arbitrage.recommendation": "✓ Recommandation ADS :",
+    "digitalTwin.arbitrage.recommendation": "Recommandation ADS :",
     "digitalTwin.arbitrage.maxDays": "Max : {days} j.",
     "digitalTwin.arbitrage.openWorkOrder": "Ouvrir l’Ordre de Travail Atelier ({currency})",
     "digitalTwin.arbitrage.redirectNotification":
-      "✓ Redirection vers le module Ordres de Travail pour l'actif {assetCode}...",
+      "Redirection vers le module Ordres de Travail pour l'actif {assetCode}...",
 
-    "digitalTwin.simulation.title": "🎮 Studio de Simulation : Scénarios « What-If » ({wilayasCount} Wilayas)",
+    "digitalTwin.simulation.title": "Studio de Simulation : Scénarios « What-If » ({wilayasCount} Wilayas)",
     "digitalTwin.simulation.subtitle":
       "Évaluez l’impact des contraintes climatiques des {wilayasCount} Wilayas et de la conduite sur le VHI.",
     "digitalTwin.simulation.wilayaSelect": "Wilaya ({wilayasCount} Wilayas) :",
@@ -92,10 +92,10 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.simulation.brakeGradient": "Déclivité Freins",
     "digitalTwin.simulation.climateSliderLabel": "Sévérité Wilaya (K_clim)",
     "digitalTwin.simulation.driverSliderLabel": "Conduite (K_driver)",
-    "digitalTwin.simulation.recalculateBtn": "⚡ Recalculer le Jumeau Numérique",
+    "digitalTwin.simulation.recalculateBtn": "Recalculer le Jumeau Numérique",
     "digitalTwin.simulation.recalculatingBtn": "Calcul des équations physiques...",
     "digitalTwin.simulation.successNotification":
-      "✓ Simulation validée pour la Wilaya {wilayaCode} - {wilayaName} (VHI: {vhi}/100)",
+      "Simulation validée pour la Wilaya {wilayaCode} - {wilayaName} (VHI: {vhi}/100)",
     "digitalTwin.simulation.climateMin": "1.00 (Tempéré)",
     "digitalTwin.simulation.climateMax": "1.70 (In Salah/HMD)",
     "digitalTwin.simulation.driverMin": "0.80 (Éco)",
@@ -107,12 +107,12 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
       "Allocation proactive des pièces certifiées OEM avant le seuil d’usure critique.",
     "digitalTwin.ads.inStock": "En Stock ({qty})",
     "digitalTwin.ads.oemRef": "Réf OEM : {partNumber} • {homologation}",
-    "digitalTwin.ads.substitutionWarning": "⚠️ Remplacement Flotte Recommandé (VHI < {threshold})",
+    "digitalTwin.ads.substitutionWarning": "Remplacement Flotte Recommandé (VHI < {threshold})",
     "digitalTwin.ads.suggestedAsset": "Actif suggéré : {name} ({code})",
     "digitalTwin.ads.vhiHealth": "Santé VHI : {vhi}/100 • {reason}",
-    "digitalTwin.ads.generateOrderBtn": "🛠️ Générer l’Ordre d’Intervention Préventif",
+    "digitalTwin.ads.generateOrderBtn": "Générer l’Ordre d’Intervention Préventif",
     "digitalTwin.ads.generatingOrderNotification":
-      "✓ Génération de l'ordre d'intervention préventif pour {assetCode}...",
+      "Génération de l'ordre d'intervention préventif pour {assetCode}...",
 
     "digitalTwin.empty.title": "Aucun Jumeau Numérique Disponible",
     "digitalTwin.empty.description":
@@ -124,19 +124,19 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.common.loading": "Chargement des équations physiques...",
     "digitalTwin.loading": "Chargement du Jumeau Numérique...",
     "digitalTwin.proof.unavailable": "Détails de la preuve de calcul indisponibles.",
-    "digitalTwin.config.defaultBanner": "⚠ Configuration par défaut active — les seuils proviennent du fallback local.",
+    "digitalTwin.config.defaultBanner": "Configuration par défaut active — les seuils proviennent du fallback local.",
     "digitalTwin.error.unknown": "Erreur inconnue",
-    "digitalTwin.share.summary": "🚛 {assetCode} — VHI {vhi}/100 | {odometer} km | {wilaya} | {organs} organes ({algorithms}) | {spec}",
+    "digitalTwin.share.summary": "{assetCode} — VHI {vhi}/100 | {odometer} km | {wilaya} | {organs} organes ({algorithms}) | {spec}",
     "digitalTwin.share.noAlgorithms": "algorithmes physiques",
     "digitalTwin.share.unknownSpec": "MASTER_SPEC",
-    "digitalTwin.share.copied": "✓ Résumé copié dans le presse-papiers",
+    "digitalTwin.share.copied": "Résumé copié dans le presse-papiers",
     "digitalTwin.share.copiedShort": "Copié !",
     "digitalTwin.share.copy": "Copier le résumé",
     "digitalTwin.share.copyAria": "Copier le résumé du jumeau numérique",
     "digitalTwin.share.copyFailed": "Impossible de copier — vérifiez les permissions du navigateur",
   },
   ar: {
-    "digitalTwin.header.badgeTitle": "🧬 التوأم الرقمي الديناميكي ومؤشر RUL",
+    "digitalTwin.header.badgeTitle": "التوأم الرقمي الديناميكي ومؤشر RUL",
     "digitalTwin.header.title": "الفيزياء التنبؤية للأصل والعمر الافتراضي المتبقي (RUL)",
     "digitalTwin.header.description":
       "النمذجة الديناميكية لـ {count} أعضاء ميكانيكية ({algorithms}). معايرة حسب الظروف المناخية لـ {wilayasCount} ولاية جزائرية.",
@@ -169,7 +169,7 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.anatomy.subtitle":
       "اختر عضواً لتحليل معادلاته الفيزيائية وتدهوره وعمره المتبقي.",
     "digitalTwin.anatomy.legend":
-      "✦ رؤية القياس عن بُعد الحية • نمذجة {count} أعضاء ({algorithms}) مطابقة لـ {specVersion}",
+      "• رؤية القياس عن بُعد الحية • نمذجة {count} أعضاء ({algorithms}) مطابقة لـ {specVersion}",
 
     "digitalTwin.organ.algorithmPrefix": "الخوارزمية :",
     "digitalTwin.organ.proofButton": "المعادلة والإثبات",
@@ -178,7 +178,7 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.organ.thresholdPrefix": "العتبة :",
     "digitalTwin.organ.physicalFinding": "الاستنتاج الفيزيائي SAD :",
 
-    "digitalTwin.trajectory.title": "📈 المسار التنبؤي الحتمي",
+    "digitalTwin.trajectory.title": "المسار التنبؤي الحتمي",
     "digitalTwin.trajectory.proofButton": "إثبات التدهور",
     "digitalTwin.trajectory.subtitle":
       "مقارنة درجة VHI دون تدخل مقابل التدخل الوقائي SAD.",
@@ -202,13 +202,13 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.arbitrage.perDayDowntime": "+ {amount}/يوم توقف",
     "digitalTwin.arbitrage.netSavings": "الوفر الصافي",
     "digitalTwin.arbitrage.actionInDays": "التدخل خلال {days} أيام",
-    "digitalTwin.arbitrage.recommendation": "✓ توصية نظام ADS :",
+    "digitalTwin.arbitrage.recommendation": "توصية نظام ADS :",
     "digitalTwin.arbitrage.maxDays": "أقصى أجل : {days} ي.",
     "digitalTwin.arbitrage.openWorkOrder": "فتح أمر عمل الورشة ({currency})",
     "digitalTwin.arbitrage.redirectNotification":
-      "✓ جاري التوجيه إلى أوامر العمل للأصل {assetCode}...",
+      "جاري التوجيه إلى أوامر العمل للأصل {assetCode}...",
 
-    "digitalTwin.simulation.title": "🎮 استوديو المحاكاة : سيناريوهات افتراضية ({wilayasCount} ولاية)",
+    "digitalTwin.simulation.title": "استوديو المحاكاة : سيناريوهات افتراضية ({wilayasCount} ولاية)",
     "digitalTwin.simulation.subtitle":
       "تقييم أثر الإجهاد المناخي والسياقة عبر {wilayasCount} ولاية على VHI.",
     "digitalTwin.simulation.wilayaSelect": "الولاية ({wilayasCount} ولاية) :",
@@ -220,10 +220,10 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.simulation.brakeGradient": "انحدار الفرامل",
     "digitalTwin.simulation.climateSliderLabel": "شدة المناخ (K_clim)",
     "digitalTwin.simulation.driverSliderLabel": "طريقة السياقة (K_driver)",
-    "digitalTwin.simulation.recalculateBtn": "⚡ إعادة حساب التوأم الرقمي",
+    "digitalTwin.simulation.recalculateBtn": "إعادة حساب التوأم الرقمي",
     "digitalTwin.simulation.recalculatingBtn": "جاري حساب المعادلات الفيزيائية...",
     "digitalTwin.simulation.successNotification":
-      "✓ تمت المحاكاة بنجاح لولاية {wilayaCode} - {wilayaName} (VHI: {vhi}/100)",
+      "تمت المحاكاة بنجاح لولاية {wilayaCode} - {wilayaName} (VHI: {vhi}/100)",
     "digitalTwin.simulation.climateMin": "1.00 (معتدل)",
     "digitalTwin.simulation.climateMax": "1.70 (عين صالح/حاسي مسعود)",
     "digitalTwin.simulation.driverMin": "0.80 (اقتصادي)",
@@ -235,12 +235,12 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
       "تخصيص استباقي للقطع الأصلية المعتمدة قبل بلوغ عتبة الاهتراء الحرج.",
     "digitalTwin.ads.inStock": "في المخزن ({qty})",
     "digitalTwin.ads.oemRef": "رقم OEM : {partNumber} • {homologation}",
-    "digitalTwin.ads.substitutionWarning": "⚠️ يوصى باستبدال المركبة في الأسطول (VHI < {threshold})",
+    "digitalTwin.ads.substitutionWarning": "يوصى باستبدال المركبة في الأسطول (VHI < {threshold})",
     "digitalTwin.ads.suggestedAsset": "المركبة المقترحة : {name} ({code})",
     "digitalTwin.ads.vhiHealth": "درجة الصحة : {vhi}/100 • {reason}",
-    "digitalTwin.ads.generateOrderBtn": "🛠️ توليد أمر التدخل الوقائي",
+    "digitalTwin.ads.generateOrderBtn": "توليد أمر التدخل الوقائي",
     "digitalTwin.ads.generatingOrderNotification":
-      "✓ جاري إعداد أمر التدخل الوقائي للمركبة {assetCode}...",
+      "جاري إعداد أمر التدخل الوقائي للمركبة {assetCode}...",
 
     "digitalTwin.empty.title": "لا يتوفر توأم رقمي",
     "digitalTwin.empty.description":
@@ -252,19 +252,19 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.common.loading": "جاري تحميل المعادلات الفيزيائية...",
     "digitalTwin.loading": "جاري تحميل التوأم الرقمي...",
     "digitalTwin.proof.unavailable": "تفاصيل إثبات الحساب غير متوفرة.",
-    "digitalTwin.config.defaultBanner": "⚠ الإعدادات الافتراضية مفعلة — العتبات مستمدة من التكوين الاحتياطي المحلي.",
+    "digitalTwin.config.defaultBanner": "الإعدادات الافتراضية مفعلة — العتبات مستمدة من التكوين الاحتياطي المحلي.",
     "digitalTwin.error.unknown": "خطأ غير معروف",
-    "digitalTwin.share.summary": "🚛 {assetCode} — مؤشر VHI {vhi}/100 | {odometer} كم | {wilaya} | {organs} أعضاء ({algorithms}) | {spec}",
+    "digitalTwin.share.summary": "{assetCode} — مؤشر VHI {vhi}/100 | {odometer} كم | {wilaya} | {organs} أعضاء ({algorithms}) | {spec}",
     "digitalTwin.share.noAlgorithms": "خوارزميات فيزيائية",
     "digitalTwin.share.unknownSpec": "MASTER_SPEC",
-    "digitalTwin.share.copied": "✓ تم نسخ الملخص إلى الحافظة",
+    "digitalTwin.share.copied": "تم نسخ الملخص إلى الحافظة",
     "digitalTwin.share.copiedShort": "تم النسخ !",
     "digitalTwin.share.copy": "نسخ الملخص",
     "digitalTwin.share.copyAria": "نسخ ملخص التوأم الرقمي",
     "digitalTwin.share.copyFailed": "تعذر النسخ — يرجى التحقق من أذونات المتصفح",
   },
   en: {
-    "digitalTwin.header.badgeTitle": "🧬 DYNAMIC DIGITAL TWIN & RUL",
+    "digitalTwin.header.badgeTitle": "DYNAMIC DIGITAL TWIN & RUL",
     "digitalTwin.header.title": "Asset Predictive Physics & Remaining Useful Life (RUL)",
     "digitalTwin.header.description":
       "Dynamic modeling of {count} physical wear components ({algorithms}). Calibrated for thermal and abrasive stress across Algeria’s {wilayasCount} Wilayas.",
@@ -297,7 +297,7 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.anatomy.subtitle":
       "Select a component to inspect its physics equations, degradation kinetics and RUL.",
     "digitalTwin.anatomy.legend":
-      "✦ Real-time telematics view • Modeling {count} physical organs ({algorithms}) per {specVersion}",
+      "• Real-time telematics view • Modeling {count} physical organs ({algorithms}) per {specVersion}",
 
     "digitalTwin.organ.algorithmPrefix": "Algorithm:",
     "digitalTwin.organ.proofButton": "Formula & Proof",
@@ -306,7 +306,7 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.organ.thresholdPrefix": "Threshold:",
     "digitalTwin.organ.physicalFinding": "SAD Physical Assessment:",
 
-    "digitalTwin.trajectory.title": "📈 Deterministic Predictive Trajectory",
+    "digitalTwin.trajectory.title": "Deterministic Predictive Trajectory",
     "digitalTwin.trajectory.proofButton": "Degradation Proof",
     "digitalTwin.trajectory.subtitle":
       "Comparison of VHI score without action vs with preventive workshop action.",
@@ -330,13 +330,13 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.arbitrage.perDayDowntime": "+ {amount}/day downtime",
     "digitalTwin.arbitrage.netSavings": "Net Benefit",
     "digitalTwin.arbitrage.actionInDays": "Action within {days} days",
-    "digitalTwin.arbitrage.recommendation": "✓ ADS Recommendation:",
+    "digitalTwin.arbitrage.recommendation": "ADS Recommendation:",
     "digitalTwin.arbitrage.maxDays": "Max: {days} d.",
     "digitalTwin.arbitrage.openWorkOrder": "Open Workshop Work Order ({currency})",
     "digitalTwin.arbitrage.redirectNotification":
-      "✓ Redirecting to Work Orders module for asset {assetCode}...",
+      "Redirecting to Work Orders module for asset {assetCode}...",
 
-    "digitalTwin.simulation.title": "🎮 Simulation Studio: What-If Stress Scenarios ({wilayasCount} Wilayas)",
+    "digitalTwin.simulation.title": "Simulation Studio: What-If Stress Scenarios ({wilayasCount} Wilayas)",
     "digitalTwin.simulation.subtitle":
       "Evaluate climate stress across {wilayasCount} Wilayas and driving styles on VHI.",
     "digitalTwin.simulation.wilayaSelect": "Wilaya ({wilayasCount} Wilayas):",
@@ -348,10 +348,10 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.simulation.brakeGradient": "Brake Gradient",
     "digitalTwin.simulation.climateSliderLabel": "Wilaya Severity (K_clim)",
     "digitalTwin.simulation.driverSliderLabel": "Driver Style (K_driver)",
-    "digitalTwin.simulation.recalculateBtn": "⚡ Recalculate Digital Twin",
+    "digitalTwin.simulation.recalculateBtn": "Recalculate Digital Twin",
     "digitalTwin.simulation.recalculatingBtn": "Computing physics equations...",
     "digitalTwin.simulation.successNotification":
-      "✓ Simulation validated for Wilaya {wilayaCode} - {wilayaName} (VHI: {vhi}/100)",
+      "Simulation validated for Wilaya {wilayaCode} - {wilayaName} (VHI: {vhi}/100)",
     "digitalTwin.simulation.climateMin": "1.00 (Temperate)",
     "digitalTwin.simulation.climateMax": "1.70 (In Salah/HMD)",
     "digitalTwin.simulation.driverMin": "0.80 (Eco)",
@@ -363,12 +363,12 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
       "Proactive allocation of OEM parts before critical wear threshold.",
     "digitalTwin.ads.inStock": "In Stock ({qty})",
     "digitalTwin.ads.oemRef": "OEM Ref: {partNumber} • {homologation}",
-    "digitalTwin.ads.substitutionWarning": "⚠️ Fleet Replacement Recommended (VHI < {threshold})",
+    "digitalTwin.ads.substitutionWarning": "Fleet Replacement Recommended (VHI < {threshold})",
     "digitalTwin.ads.suggestedAsset": "Suggested Asset: {name} ({code})",
     "digitalTwin.ads.vhiHealth": "VHI Health: {vhi}/100 • {reason}",
-    "digitalTwin.ads.generateOrderBtn": "🛠️ Generate Preventive Work Order",
+    "digitalTwin.ads.generateOrderBtn": "Generate Preventive Work Order",
     "digitalTwin.ads.generatingOrderNotification":
-      "✓ Generating preventive work order for {assetCode}...",
+      "Generating preventive work order for {assetCode}...",
 
     "digitalTwin.empty.title": "No Digital Twin Available",
     "digitalTwin.empty.description":
@@ -380,12 +380,12 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.common.loading": "Loading physics equations...",
     "digitalTwin.loading": "Loading Digital Twin...",
     "digitalTwin.proof.unavailable": "Calculation proof details unavailable.",
-    "digitalTwin.config.defaultBanner": "⚠ Default configuration active — thresholds are sourced from local fallback.",
+    "digitalTwin.config.defaultBanner": "Default configuration active — thresholds are sourced from local fallback.",
     "digitalTwin.error.unknown": "Unknown error",
-    "digitalTwin.share.summary": "🚛 {assetCode} — VHI {vhi}/100 | {odometer} km | {wilaya} | {organs} organs ({algorithms}) | {spec}",
+    "digitalTwin.share.summary": "{assetCode} — VHI {vhi}/100 | {odometer} km | {wilaya} | {organs} organs ({algorithms}) | {spec}",
     "digitalTwin.share.noAlgorithms": "physics algorithms",
     "digitalTwin.share.unknownSpec": "MASTER_SPEC",
-    "digitalTwin.share.copied": "✓ Summary copied to clipboard",
+    "digitalTwin.share.copied": "Summary copied to clipboard",
     "digitalTwin.share.copiedShort": "Copied!",
     "digitalTwin.share.copy": "Copy summary",
     "digitalTwin.share.copyAria": "Copy digital twin summary",

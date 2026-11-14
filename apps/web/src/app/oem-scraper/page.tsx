@@ -6,6 +6,15 @@ import { Navbar } from '../../components/navigation/Navbar';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
 import {
+  IconSearch,
+  IconDatabase,
+  IconCheck,
+  IconLayers,
+  IconFileText,
+  IconCompass,
+  IconZap,
+} from '../../components/navigation/TechIcons';
+import {
   OEMScraperClient,
   NormalizedOEMTemplate,
   NormalizedOEMTask,
@@ -205,7 +214,9 @@ export default function OEMScraperPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '1.75rem' }}>🔍</span>
+                <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
+                  <IconSearch size={20} />
+                </div>
                 <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
                   Référentiel Souverain & Scraper OEM RMI
                 </h1>
@@ -282,7 +293,9 @@ export default function OEMScraperPage() {
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>{searchMode === 'VIN' ? '🔢' : searchMode === 'CATALOG' ? '📋' : '🌍'}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  {searchMode === 'VIN' ? <IconSearch size={16} /> : searchMode === 'CATALOG' ? <IconFileText size={16} /> : <IconCompass size={16} />}
+                </span>
                 {searchMode === 'VIN'
                   ? 'Décodage par Châssis VIN'
                   : searchMode === 'CATALOG'
@@ -455,11 +468,11 @@ export default function OEMScraperPage() {
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.5rem', marginBottom: '0.75rem' }}>
                   {[
-                    { id: 'TRUCKS_BUSES', label: '🚛 Poids Lourds' },
-                    { id: 'CONSTRUCTION', label: '🏗️ Engins BTP' },
-                    { id: 'AGRICULTURAL', label: '🚜 Machinisme' },
-                    { id: 'LIGHT_COMMERCIAL', label: '🚐 Utilitaires' },
-                    { id: 'CARS_SUVS', label: '🚙 Voitures / SUV' },
+                    { id: 'TRUCKS_BUSES', label: 'Poids Lourds' },
+                    { id: 'CONSTRUCTION', label: 'Engins BTP' },
+                    { id: 'AGRICULTURAL', label: 'Machinisme Agricole' },
+                    { id: 'LIGHT_COMMERCIAL', label: 'Utilitaires VUL' },
+                    { id: 'CARS_SUVS', label: 'Voitures / SUV' },
                   ].map((cat) => (
                     <button
                       key={cat.id}
@@ -504,7 +517,7 @@ export default function OEMScraperPage() {
                     onClick={() => handleBulkCrawl()}
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Crawling...' : '🚀 Lancer Crawl Mondial'}
+                    {isLoading ? 'Crawling...' : 'Lancer Crawl Mondial'}
                   </Button>
                 </div>
               </div>
@@ -583,13 +596,13 @@ export default function OEMScraperPage() {
                       </button>
                     ))
                     : [
-                      { make: 'Scania', cat: 'TRUCKS_BUSES', label: '🦁 Scania (Poids Lourds)' },
-                      { make: 'Volvo Trucks', cat: 'TRUCKS_BUSES', label: '🇸🇪 Volvo Trucks (FH/FMX)' },
-                      { make: 'Caterpillar', cat: 'CONSTRUCTION', label: '🚜 Caterpillar (Pelleteuses BTP)' },
-                      { make: 'John Deere', cat: 'AGRICULTURAL', label: '🌾 John Deere (Tracteurs)' },
-                      { make: 'Mercedes-Benz GLK 2012 4MATIC', cat: 'CARS_SUVS', label: '⭐ Mercedes GLK 4MATIC' },
-                      { make: 'Mercedes-Benz', cat: 'TRUCKS_BUSES', label: '⭐ Mercedes (Actros / Sprinter)' },
-                      { make: 'Toyota', cat: 'CARS_SUVS', label: '🇯🇵 Toyota (Land Cruiser / Hilux)' },
+                      { make: 'Scania', cat: 'TRUCKS_BUSES', label: 'Scania (Poids Lourds)' },
+                      { make: 'Volvo Trucks', cat: 'TRUCKS_BUSES', label: 'Volvo Trucks (FH/FMX)' },
+                      { make: 'Caterpillar', cat: 'CONSTRUCTION', label: 'Caterpillar (Pelleteuses BTP)' },
+                      { make: 'John Deere', cat: 'AGRICULTURAL', label: 'John Deere (Tracteurs)' },
+                      { make: 'Mercedes-Benz GLK 2012 4MATIC', cat: 'CARS_SUVS', label: 'Mercedes GLK 4MATIC' },
+                      { make: 'Mercedes-Benz', cat: 'TRUCKS_BUSES', label: 'Mercedes (Actros / Sprinter)' },
+                      { make: 'Toyota', cat: 'CARS_SUVS', label: 'Toyota (Land Cruiser / Hilux)' },
                     ].map((item) => (
                       <button
                         key={item.make}
@@ -628,7 +641,7 @@ export default function OEMScraperPage() {
             }}
           >
             <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>🌐</span> Sources Publiques & Paramètres d&apos;Extraction
+              <IconDatabase size={16} className="text-blue-400" /> Sources Publiques & Paramètres d&apos;Extraction
             </h2>
 
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
@@ -936,7 +949,17 @@ export default function OEMScraperPage() {
                   onClick={handleSaveToPostgres}
                   disabled={savedSuccess}
                 >
-                  {savedSuccess ? '✓ Enregistré dans PostgreSQL' : '💾 Sauvegarder dans Référentiel Local'}
+                  {savedSuccess ? (
+                    <>
+                      <IconCheck size={14} className="inline mr-1" />
+                      Enregistré dans PostgreSQL
+                    </>
+                  ) : (
+                    <>
+                      <IconDatabase size={14} className="inline mr-1" />
+                      Sauvegarder dans Référentiel Local
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

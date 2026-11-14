@@ -1,4 +1,5 @@
 import React from 'react';
+import { IconCheck } from '../navigation/TechIcons';
 
 interface SetupStepperProps {
   currentStep: number;
@@ -41,7 +42,7 @@ export const SetupStepper: React.FC<SetupStepperProps> = ({ currentStep }) => {
                   boxShadow: isActive ? 'var(--df-shadow-glow-blue)' : 'none',
                 }}
               >
-                {isDone ? '✓' : s.num}
+                {isDone ? <IconCheck size={14} /> : s.num}
               </div>
               <span
                 style={{

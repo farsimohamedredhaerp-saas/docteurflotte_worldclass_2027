@@ -37,6 +37,8 @@ import {
   IconX,
   IconCheck,
   IconClock,
+  IconCpu,
+  IconFileText,
 } from '../../components/navigation/TechIcons';
 import { getSimulationWorkOrders, getSimulationAssets } from '@/lib/simulation-sandbox';
 
@@ -346,8 +348,8 @@ export default function WorkOrdersPage() {
         );
 
         const successMsg = isDvirOrder
-          ? `✓ Ordre de travail clôturé (${totalCost.toLocaleString()} DA). 🛑 Verrou de sécurité DVIR levé avec succès : le véhicule ${activeWoForComplete.assetName || activeWoForComplete.assetCode} est requalifié pour le dispatching TOPSIS.`
-          : `✓ Ordre de travail clôturé. Coût total : ${totalCost.toLocaleString()} DA (MO: ${laborCost.toLocaleString()} DA, Pièces: ${partsCost.toLocaleString()} DA) • Immobilisation: ${completeForm.downtimeHours || 0}h.`;
+          ? `Ordre de travail clôturé (${totalCost.toLocaleString()} DA). Verrou de sécurité DVIR levé avec succès : le véhicule ${activeWoForComplete.assetName || activeWoForComplete.assetCode} est requalifié pour le dispatching TOPSIS.`
+          : `Ordre de travail clôturé. Coût total : ${totalCost.toLocaleString()} DA (MO: ${laborCost.toLocaleString()} DA, Pièces: ${partsCost.toLocaleString()} DA) • Immobilisation: ${completeForm.downtimeHours || 0}h.`;
 
         showNotification('success', successMsg);
         setActiveWoForComplete(null);
@@ -373,8 +375,8 @@ export default function WorkOrdersPage() {
         }
 
         const successMsg = isDvirOrder
-          ? `✓ Ordre de travail clôturé (${updated.totalCost?.toLocaleString()} DA). 🛑 Verrou de sécurité DVIR levé avec succès : le véhicule ${activeWoForComplete.assetName || activeWoForComplete.assetCode} est requalifié pour le dispatching TOPSIS.`
-          : `✓ Ordre de travail clôturé. Coût total : ${updated.totalCost?.toLocaleString()} DA (MO: ${updated.laborCost} DA, Pièces: ${updated.partsCost} DA) • Immobilisation: ${updated.downtimeHours}h.`;
+          ? `Ordre de travail clôturé (${updated.totalCost?.toLocaleString()} DA). Verrou de sécurité DVIR levé avec succès : le véhicule ${activeWoForComplete.assetName || activeWoForComplete.assetCode} est requalifié pour le dispatching TOPSIS.`
+          : `Ordre de travail clôturé. Coût total : ${updated.totalCost?.toLocaleString()} DA (MO: ${updated.laborCost} DA, Pièces: ${updated.partsCost} DA) • Immobilisation: ${updated.downtimeHours}h.`;
 
         showNotification('success', successMsg);
         setActiveWoForComplete(null);
@@ -573,10 +575,10 @@ export default function WorkOrdersPage() {
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               {[
                 { id: 'ALL', label: 'Toutes Priorités' },
-                { id: WorkOrderPriority.CRITICAL, label: '🚨 Critique' },
-                { id: WorkOrderPriority.HIGH, label: '⚠️ Haute' },
-                { id: WorkOrderPriority.MEDIUM, label: 'ℹ️ Moyenne' },
-                { id: WorkOrderPriority.LOW, label: '🟢 Basse' },
+                { id: WorkOrderPriority.CRITICAL, label: 'Critique' },
+                { id: WorkOrderPriority.HIGH, label: 'Haute' },
+                { id: WorkOrderPriority.MEDIUM, label: 'Moyenne' },
+                { id: WorkOrderPriority.LOW, label: 'Basse' },
               ].map((p) => (
                 <button
                   key={p.id}
@@ -622,8 +624,8 @@ export default function WorkOrdersPage() {
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
               {[
                 { id: 'ALL', label: 'Toutes Origines' },
-                { id: 'DVIR', label: '🛑 DVIR Sécurité' },
-                { id: 'PREDICTIVE', label: '🧠 Jumeau Numérique' },
+                { id: 'DVIR', label: 'DVIR Sécurité' },
+                { id: 'PREDICTIVE', label: 'Jumeau Numérique' },
               ].map((s) => (
                 <button
                   key={s.id}
@@ -818,7 +820,9 @@ export default function WorkOrdersPage() {
                   borderRadius: 'var(--df-radius-lg)',
                 }}
               >
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🔧</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem', color: 'var(--df-text-muted)' }}>
+                  <IconWrench size={40} />
+                </div>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '0.5rem' }}>
                   Aucun ordre de travail dans cette sélection
                 </h3>
@@ -896,8 +900,8 @@ export default function WorkOrdersPage() {
                               }}
                               title="Déclenché par une anomalie critique DVIR. Cliquer pour voir la fiche d'inspection."
                             >
-                              <span>🛑 Origine DVIR Sécurité</span>
-                              <span>➔</span>
+                              <IconShieldCheck size={12} />
+                              <span>Origine DVIR Sécurité</span>
                             </Link>
                           )}
                           {wo.resetAlgorithmKey && !wo.id.startsWith('ot-dvir') && !wo.title.includes('DVIR') && (
@@ -915,7 +919,8 @@ export default function WorkOrdersPage() {
                                 fontWeight: 700,
                               }}
                             >
-                              <span>🧠 Jumeau Numérique ({wo.resetAlgorithmKey})</span>
+                              <IconCpu size={12} />
+                              <span>Jumeau Numérique ({wo.resetAlgorithmKey})</span>
                             </span>
                           )}
                         </div>
@@ -978,7 +983,7 @@ export default function WorkOrdersPage() {
                                 gap: '0.35rem',
                               }}
                             >
-                              <span>🧾</span>
+                              <IconFileText size={13} />
                               <span>Facture Fiscale DGI (A4)</span>
                             </button>
                           </div>
@@ -996,7 +1001,7 @@ export default function WorkOrdersPage() {
                               });
                             }}
                           >
-                            ✓ Clôturer Intervention
+                            Clôturer Intervention
                           </Button>
                         )}
 

@@ -5,6 +5,15 @@ import Link from 'next/link';
 import { AuthClient } from '../../lib/api-auth';
 import { PlatformAdminClient } from '../../lib/api-platform-admin';
 import { PlatformOverviewKpis } from '@docteurflotte/contracts';
+import {
+  IconLayers,
+  IconTruck,
+  IconCpu,
+  IconFuel,
+  IconRadio,
+  IconShieldCheck,
+  IconAlertTriangle,
+} from '../../components/navigation/TechIcons';
 
 export default function AdminOverviewPage() {
   const [kpis, setKpis] = useState<PlatformOverviewKpis | null>(null);
@@ -49,9 +58,13 @@ export default function AdminOverviewPage() {
           border: '1px solid rgba(239, 68, 68, 0.25)',
           color: '#fca5a5',
           fontSize: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
         }}
       >
-        ⚠️ Impossible de charger la vue d'ensemble : {error}
+        <IconAlertTriangle size={16} />
+        <span>Impossible de charger la vue d'ensemble : {error}</span>
       </div>
     );
   }
@@ -122,7 +135,7 @@ export default function AdminOverviewPage() {
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--df-text-muted)', textTransform: 'uppercase' }}>
               Organisations SaaS
             </span>
-            <span style={{ fontSize: '20px' }}>🏢</span>
+            <IconLayers size={18} className="text-blue-400" />
           </div>
           <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--df-text-main)', marginBottom: '8px' }}>
             {kpis?.totalTenants ?? 0}
@@ -148,7 +161,7 @@ export default function AdminOverviewPage() {
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--df-text-muted)', textTransform: 'uppercase' }}>
               Flotte Globale Sous Contrat
             </span>
-            <span style={{ fontSize: '20px' }}>🚗</span>
+            <IconTruck size={18} className="text-emerald-400" />
           </div>
           <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--df-text-main)', marginBottom: '8px' }}>
             {kpis?.totalVehicles ?? 0}
@@ -172,7 +185,7 @@ export default function AdminOverviewPage() {
             <span style={{ fontSize: '13px', fontWeight: 600, color: '#a5b4fc', textTransform: 'uppercase' }}>
               Moteur Décisionnel Actif
             </span>
-            <span style={{ fontSize: '20px' }}>🧠</span>
+            <IconCpu size={18} className="text-indigo-400" />
           </div>
           <div style={{ fontSize: '24px', fontWeight: 800, color: '#818cf8', marginBottom: '8px', wordBreak: 'break-all' }}>
             {kpis?.activeDecisionConfigVersion ?? 'v2.0-PROD-BASELINE'}
@@ -196,7 +209,7 @@ export default function AdminOverviewPage() {
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--df-text-muted)', textTransform: 'uppercase' }}>
               Barème Énergie & Fiscal
             </span>
-            <span style={{ fontSize: '20px' }}>⛽</span>
+            <IconFuel size={18} className="text-amber-400" />
           </div>
           <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--df-text-main)', marginBottom: '8px' }}>
             {kpis?.fuelPricesCount ?? 0}
@@ -220,7 +233,7 @@ export default function AdminOverviewPage() {
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--df-text-muted)', textTransform: 'uppercase' }}>
               Passerelles IoT
             </span>
-            <span style={{ fontSize: '20px' }}>📡</span>
+            <IconRadio size={18} className="text-cyan-400" />
           </div>
           <div style={{ fontSize: '32px', fontWeight: 800, color: '#34d399', marginBottom: '8px' }}>
             {kpis?.healthyGatewaysCount ?? 0} OK
@@ -244,7 +257,7 @@ export default function AdminOverviewPage() {
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--df-text-muted)', textTransform: 'uppercase' }}>
               Traçabilité & Audit
             </span>
-            <span style={{ fontSize: '20px' }}>🛡️</span>
+            <IconShieldCheck size={18} className="text-purple-400" />
           </div>
           <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '8px' }}>
             {kpis?.lastAuditAction ?? 'ACTIVATE_CONFIG'}
@@ -274,7 +287,9 @@ export default function AdminOverviewPage() {
             transition: 'transform 0.15s ease, border-color 0.15s ease',
           }}
         >
-          <div style={{ fontSize: '24px', marginBottom: '10px' }}>🏢</div>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', marginBottom: '14px' }}>
+            <IconLayers size={20} />
+          </div>
           <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '6px' }}>
             Gestion des Tenants & Quotas
           </div>
@@ -296,7 +311,9 @@ export default function AdminOverviewPage() {
             transition: 'transform 0.15s ease, border-color 0.15s ease',
           }}
         >
-          <div style={{ fontSize: '24px', marginBottom: '10px' }}>🧠</div>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#818cf8', marginBottom: '14px' }}>
+            <IconCpu size={20} />
+          </div>
           <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '6px' }}>
             Moteur Décisionnel (6 Physiques)
           </div>
@@ -318,7 +335,9 @@ export default function AdminOverviewPage() {
             transition: 'transform 0.15s ease, border-color 0.15s ease',
           }}
         >
-          <div style={{ fontSize: '24px', marginBottom: '10px' }}>⛽</div>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fbbf24', marginBottom: '14px' }}>
+            <IconFuel size={20} />
+          </div>
           <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '6px' }}>
             Barèmes Fiscaux & Réglementaires
           </div>
@@ -340,7 +359,9 @@ export default function AdminOverviewPage() {
             transition: 'transform 0.15s ease, border-color 0.15s ease',
           }}
         >
-          <div style={{ fontSize: '24px', marginBottom: '10px' }}>📡</div>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(6, 182, 212, 0.12)', border: '1px solid rgba(6, 182, 212, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22d3ee', marginBottom: '14px' }}>
+            <IconRadio size={20} />
+          </div>
           <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '6px' }}>
             Passerelles IoT & Supervision Traccar
           </div>
@@ -362,7 +383,9 @@ export default function AdminOverviewPage() {
             transition: 'transform 0.15s ease, border-color 0.15s ease',
           }}
         >
-          <div style={{ fontSize: '24px', marginBottom: '10px' }}>🛡️</div>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(168, 85, 247, 0.12)', border: '1px solid rgba(168, 85, 247, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c084fc', marginBottom: '14px' }}>
+            <IconShieldCheck size={20} />
+          </div>
           <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '6px' }}>
             Piste d’Audit Immuable
           </div>
