@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Navbar } from '@/components/navigation/Navbar';
+import { Badge } from '@/components/Badge';
 import { useDemoMode } from '@/context/DemoModeContext';
 import { AssetClient } from '@/lib/api-assets';
 import {
@@ -264,636 +266,535 @@ export default function DispatchPage() {
   };
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px 20px' }}>
-      {/* HEADER COCKPIT */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.3)', borderRadius: '20px', fontSize: '12px', fontWeight: 700, color: 'var(--df-accent-blue)', marginBottom: '8px' }}>
-            <IconFileText size={14} />
-            <span>RÉGLEMENTATION ALGORITHMIQUE & DISPATCH (GATE DZ)</span>
-          </div>
-          <h1 style={{ fontSize: '26px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0, letterSpacing: '-0.02em' }}>
-            Cockpit de Dispatch & Ordres de Mission Réglementaires (OM)
-          </h1>
-          <p style={{ fontSize: '14px', color: 'var(--df-text-secondary)', marginTop: '4px' }}>
-            Machine à états stricte conforme au Code de la Route algérien (Loi 01-14 / Décret 04-415), barème ENACTA et jetons QR cryptographiques hors-ligne HMAC-256.
-          </p>
-        </div>
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 transition-colors duration-150">
+      {/* 1. BARRE DE NAVIGATION SUPÉRIEURE UNIFIÉE */}
+      <Navbar />
 
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <Link
-            href="/preventive"
-            style={{
-              padding: '10px 16px',
-              borderRadius: '8px',
-              border: '1px solid var(--df-border-subtle)',
-              background: 'var(--df-bg-surface-1)',
-              color: 'var(--df-text-main)',
-              fontSize: '13px',
-              fontWeight: 600,
-              textDecoration: 'none',
-              boxShadow: 'var(--df-shadow-sm)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-          >
-            <IconCpu size={14} /> Cockpit Maintenance 5.0
-          </Link>
-          <Link
-            href="/guide#field-modules"
-            style={{
-              padding: '10px 16px',
-              borderRadius: '8px',
-              border: '1px solid var(--df-border-subtle)',
-              background: 'var(--df-bg-surface-1)',
-              color: 'var(--df-text-main)',
-              fontSize: '13px',
-              fontWeight: 600,
-              textDecoration: 'none',
-              boxShadow: 'var(--df-shadow-sm)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-          >
-            <IconFileText size={14} /> Référentiel Réglementaire
-          </Link>
-        </div>
-      </div>
-
-      {/* MODALE D'ORDRE DE MISSION IMPRIMABLE */}
-      {activeMissionOrder && (
-        <div style={{ marginBottom: '32px' }}>
-          <PrintableMissionOrder order={activeMissionOrder} onClose={() => setActiveMissionOrder(null)} />
-        </div>
-      )}
-
-      {/* BANNIÈRE PARC VIERGE */}
-      {vehicles.length === 0 && !loadingFleet && (
-        <div
-          style={{
-            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, var(--df-bg-surface-1) 100%)',
-            border: '1px solid var(--df-accent-cyan)',
-            borderRadius: '14px',
-            padding: '24px 28px',
-            marginBottom: '24px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '16px',
-            boxShadow: 'var(--df-shadow-sm)',
-          }}
-        >
-          <div style={{ maxWidth: '640px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <IconTruck size={20} className="text-blue-500" />
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
-                Votre parc est vierge
-              </h3>
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-16">
+        {/* 2. HEADER DU COCKPIT DE DISPATCH */}
+        <section className="mb-6 rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 sm:p-6 shadow-2xs">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+            <div>
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <Badge variant="ok" pulse>
+                  Gate DZ Opposable
+                </Badge>
+                <span className="text-slate-300 dark:text-slate-700" aria-hidden="true">•</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Code de la Route (Loi 01-14 / Décret 04-415) • Signature Ed25519
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 mb-2">
+                Cockpit de Dispatch & Ordres de Mission Réglementaires (OM)
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl">
+                Machine à états stricte validant en temps réel les 4 portes réglementaires (Véhicule, Chauffeur, Trajet 58 Wilayas, Cargaison) et génération de jetons QR cryptographiques opposables hors-ligne.
+              </p>
             </div>
-            <p style={{ fontSize: '0.825rem', color: 'var(--df-text-muted)', margin: 0, lineHeight: 1.5 }}>
-              Aucun véhicule d&apos;exploitation n&apos;est enregistré dans votre organisation. Pour planifier un ordre de mission réglementaire, ajoutez un véhicule dans l&apos;inventaire ou basculez en mode démo.
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <Link href="/assets" style={{ textDecoration: 'none' }}>
-              <button
-                type="button"
-                style={{
-                  padding: '9px 16px',
-                  borderRadius: '8px',
-                  background: 'var(--df-accent-cyan)',
-                  color: '#000',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
+
+            <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+              <Link
+                href="/preventive"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors"
               >
-                + Ajouter un véhicule
-              </button>
+                <IconCpu size={14} className="text-indigo-500" />
+                <span>Cockpit Maintenance</span>
+              </Link>
+              <Link
+                href="/compliance"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition-colors"
+              >
+                <IconShieldCheck size={14} />
+                <span>Portail Conformité DZ</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* MODALE D'ORDRE DE MISSION IMPRIMABLE */}
+        {activeMissionOrder && (
+          <div className="mb-6">
+            <PrintableMissionOrder order={activeMissionOrder} onClose={() => setActiveMissionOrder(null)} />
+          </div>
+        )}
+
+        {/* BANNIÈRE PARC VIERGE (EMPTY STATE) */}
+        {vehicles.length === 0 && !loadingFleet && (
+          <div className="mb-6 rounded-2xl border border-blue-500/30 bg-blue-50/70 dark:bg-blue-950/20 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-2 mb-1.5">
+                <IconTruck size={18} className="text-blue-600 dark:text-blue-400" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  Votre parc d&apos;exploitation est vierge
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Aucun véhicule n&apos;est enregistré dans votre organisation. Pour planifier un ordre de mission réglementaire, ajoutez un véhicule dans l&apos;inventaire ou activez le mode démo.
+              </p>
+            </div>
+            <Link
+              href="/assets"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition-colors shrink-0"
+            >
+              + Ajouter un véhicule
             </Link>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* GRILLE PRINCIPALE : FORMULAIRE DE MISSION & RÉSULTAT DÉCISIONNEL */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(380px, 1.2fr) minmax(380px, 1.4fr)', gap: '24px', alignItems: 'start' }}>
-        {/* COLONNE GAUCHE : FORMULAIRE INTELLIGENT */}
-        <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '14px', padding: '24px', boxShadow: 'var(--df-shadow-sm)' }}>
-          <h2 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--df-text-main)', margin: '0 0 18px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <IconLayers size={18} /> Paramètres de la Mission de Transport
-          </h2>
+        {/* GRILLE PRINCIPALE : FORMULAIRE DE MISSION & RÉSULTAT DÉCISIONNEL */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* COLONNE GAUCHE : FORMULAIRE INTELLIGENT DE MISSION (5 COLS) */}
+          <div className="lg:col-span-5 rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 sm:p-6 shadow-2xs">
+            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+              <IconLayers size={16} className="text-blue-500" />
+              <span>Paramètres de la Mission de Transport</span>
+            </h2>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* SECTEUR INDUSTRIEL */}
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--df-text-secondary)', marginBottom: '6px' }}>
-                Secteur d&apos;Activité
-              </label>
-              <select
-                value={selectedSector}
-                onChange={(e) => setSelectedSector(e.target.value as IndustrySector)}
-                style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '13px', fontWeight: 600 }}
-              >
-                <option value={IndustrySector.TRANSPORT}>Transport Routier & Fret Général</option>
-                <option value={IndustrySector.BTP}>BTPH & Chantiers de Terrassement</option>
-                <option value={IndustrySector.LOGISTICS}>Logistique & Distribution Urbaine</option>
-                <option value={IndustrySector.COLD_CHAIN}>Chaîne du Froid & Pharmacie (ATP)</option>
-                <option value={IndustrySector.AGRICULTURE}>Agriculture & Transport Céréalier</option>
-              </select>
-            </div>
-
-            {/* VÉHICULE & CHAUFFEUR */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="space-y-4">
+              {/* SECTEUR INDUSTRIEL */}
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--df-text-secondary)', marginBottom: '6px' }}>
-                  Véhicule Demandé {loadingFleet ? '(Chargement...)' : ''}
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                  Secteur d&apos;Activité
                 </label>
                 <select
-                  value={selectedVehicleId}
-                  onChange={(e) => setSelectedVehicleId(e.target.value)}
-                  disabled={loadingFleet || vehicles.length === 0}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '12.5px', fontWeight: 600 }}
+                  value={selectedSector}
+                  onChange={(e) => setSelectedSector(e.target.value as IndustrySector)}
+                  className="w-full px-3 py-2 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
                 >
-                  {vehicles.length === 0 ? (
-                    <option value="">Aucun véhicule dans ce parc</option>
-                  ) : (
-                    vehicles.map((v) => (
-                      <option key={v.vehicleId} value={v.vehicleId}>
-                        {v.registrationPlate} ({v.makeModel.split(' ')[0]}) — VHI {v.vehicleHealthIndex}%
-                      </option>
-                    ))
-                  )}
+                  <option value={IndustrySector.TRANSPORT}>Transport Routier & Fret Général</option>
+                  <option value={IndustrySector.BTP}>BTPH & Chantiers de Terrassement</option>
+                  <option value={IndustrySector.LOGISTICS}>Logistique & Distribution Urbaine</option>
+                  <option value={IndustrySector.COLD_CHAIN}>Chaîne du Froid & Pharmacie (ATP)</option>
+                  <option value={IndustrySector.AGRICULTURE}>Agriculture & Transport Céréalier</option>
                 </select>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--df-text-secondary)', marginBottom: '6px' }}>
-                  Conducteur Demandé
-                </label>
-                <select
-                  value={selectedDriverId}
-                  onChange={(e) => setSelectedDriverId(e.target.value)}
-                  disabled={drivers.length === 0}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '12.5px', fontWeight: 600 }}
+              {/* VÉHICULE & CHAUFFEUR */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                    Véhicule {loadingFleet ? '(Chargement...)' : ''}
+                  </label>
+                  <select
+                    value={selectedVehicleId}
+                    onChange={(e) => setSelectedVehicleId(e.target.value)}
+                    disabled={loadingFleet || vehicles.length === 0}
+                    className="w-full px-3 py-2 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all disabled:opacity-50"
+                  >
+                    {vehicles.length === 0 ? (
+                      <option value="">Aucun véhicule</option>
+                    ) : (
+                      vehicles.map((v) => (
+                        <option key={v.vehicleId} value={v.vehicleId}>
+                          {v.registrationPlate} — VHI {v.vehicleHealthIndex}%
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                    Conducteur
+                  </label>
+                  <select
+                    value={selectedDriverId}
+                    onChange={(e) => setSelectedDriverId(e.target.value)}
+                    disabled={drivers.length === 0}
+                    className="w-full px-3 py-2 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all disabled:opacity-50"
+                  >
+                    {drivers.length === 0 ? (
+                      <option value="">Aucun conducteur</option>
+                    ) : (
+                      drivers.map((d) => (
+                        <option key={d.driverId} value={d.driverId}>
+                          {d.fullName} ({d.licenseCategories.join('+')})
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              {/* ITINÉRAIRE (58 WILAYAS) */}
+              <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800 space-y-3">
+                <div className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                  <IconCompass size={14} className="text-emerald-500" />
+                  <span>Itinéraire National (58 Wilayas)</span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="col-span-2">
+                    <label className="block text-[10.5px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                      Origine (Départ)
+                    </label>
+                    <input
+                      type="text"
+                      value={originName}
+                      onChange={(e) => setOriginName(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10.5px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                      Wilaya
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="58"
+                      value={originWilaya}
+                      onChange={(e) => setOriginWilaya(Number(e.target.value))}
+                      className="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-center"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="col-span-2">
+                    <label className="block text-[10.5px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                      Destination (Arrivée)
+                    </label>
+                    <input
+                      type="text"
+                      value={destinationName}
+                      onChange={(e) => setDestinationName(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10.5px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                      Wilaya
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="58"
+                      value={destinationWilaya}
+                      onChange={(e) => setDestinationWilaya(Number(e.target.value))}
+                      className="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-center"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10.5px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                    Wilayas de Transit Autorisées
+                  </label>
+                  <input
+                    type="text"
+                    value={transitWilayas}
+                    onChange={(e) => setTransitWilayas(e.target.value)}
+                    placeholder="Ex: 09, 28, 47"
+                    className="w-full px-3 py-1.5 text-xs font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                  />
+                </div>
+              </div>
+
+              {/* CARGAISON & EXIGENCES */}
+              <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800 space-y-3">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="col-span-1">
+                    <label className="block text-[10.5px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                      Cargaison
+                    </label>
+                    <input
+                      type="text"
+                      value={cargoNature}
+                      onChange={(e) => setCargoNature(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10.5px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                      Charge (T)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      value={payloadTons}
+                      onChange={(e) => setPayloadTons(Number(e.target.value))}
+                      className="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-center"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10.5px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                      Distance (km)
+                    </label>
+                    <input
+                      type="number"
+                      value={routeKm}
+                      onChange={(e) => setRouteKm(Number(e.target.value))}
+                      className="w-full px-2.5 py-1.5 text-xs font-mono font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-center"
+                    />
+                  </div>
+                </div>
+
+                {/* CLIMAT & EXIGENCES SPÉCIALES */}
+                <div className="flex items-center gap-4 flex-wrap pt-1">
+                  <label className="inline-flex items-center gap-2 text-xs font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={requiresHazmat}
+                      onChange={(e) => setRequiresHazmat(e.target.checked)}
+                      className="rounded border-slate-300 text-rose-600 focus:ring-rose-500 h-3.5 w-3.5"
+                    />
+                    <span className="flex items-center gap-1">
+                      <IconAlertTriangle size={13} className="text-rose-500" />
+                      <span>HAZMAT / ADR</span>
+                    </span>
+                  </label>
+
+                  <label className="inline-flex items-center gap-2 text-xs font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={requiresReefer}
+                      onChange={(e) => setRequiresReefer(e.target.checked)}
+                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-3.5 w-3.5"
+                    />
+                    <span className="flex items-center gap-1">
+                      <IconThermometer size={13} className="text-blue-500" />
+                      <span>Frigo / ATP</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {/* BOUTON D'ÉVALUATION PRINCIPAL */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleEvaluateDispatch}
+                  disabled={isEvaluating || vehicles.length === 0}
+                  className="w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  {drivers.length === 0 ? (
-                    <option value="">Aucun conducteur disponible</option>
+                  {isEvaluating ? (
+                    <IconRefreshCw size={14} className="animate-spin" />
                   ) : (
-                    drivers.map((d) => (
-                      <option key={d.driverId} value={d.driverId}>
-                        {d.fullName} ({d.licenseCategories.join('+')})
-                      </option>
-                    ))
+                    <IconZap size={14} />
                   )}
-                </select>
+                  <span>
+                    {isEvaluating
+                      ? 'Évaluation des 4 Portes Réglementaires...'
+                      : vehicles.length === 0
+                        ? 'Aucun véhicule disponible'
+                        : 'Évaluer Éligibilité Réglementaire (Gate DZ)'}
+                  </span>
+                </button>
               </div>
             </div>
+          </div>
 
-            {/* BADGE ÉTAT DU VÉHICULE SÉLECTIONNÉ */}
-            {selectedVehicle ? (
-              <div style={{ background: 'var(--df-bg-surface-2)', padding: '12px', borderRadius: '8px', border: '1px solid var(--df-border-subtle)', fontSize: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ fontWeight: 700, color: 'var(--df-text-main)' }}>{selectedVehicle.makeModel}</span>
-                  <span style={{ padding: '2px 8px', borderRadius: '4px', fontWeight: 800, fontSize: '11px', background: selectedVehicle.vehicleHealthIndex >= 80 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)', color: selectedVehicle.vehicleHealthIndex >= 80 ? '#059669' : '#dc2626' }}>
-                    Santé VHI : {selectedVehicle.vehicleHealthIndex}/100
+          {/* COLONNE DROITE : RÉSULTAT DÉCISIONNEL & VERDICT (7 COLS) */}
+          <div className="lg:col-span-7 space-y-6">
+            {decisionResult ? (
+              <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 sm:p-6 shadow-2xs">
+                {/* BANDEAU DE STATUT */}
+                <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Verdict du Moteur Décisionnel (Gate DZ)
+                  </span>
+                  <span
+                    className={`text-xs font-bold px-3 py-1 rounded-full ${
+                      decisionResult.decisionOutcome === 'APPROVED_AS_REQUESTED'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
+                        : decisionResult.decisionOutcome === 'SUBSTITUTED_AUTOMATICALLY'
+                          ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60'
+                          : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60'
+                    }`}
+                  >
+                    {decisionResult.decisionOutcome === 'APPROVED_AS_REQUESTED' && 'MISSION APPROUVÉE CONFORME'}
+                    {decisionResult.decisionOutcome === 'APPROVED_WITH_ETD_OR_ROUTE_SHIFT' && 'APPROUVÉ AVEC DÉCALAGE HORAIRE'}
+                    {decisionResult.decisionOutcome === 'SUBSTITUTED_AUTOMATICALLY' && 'SUBSTITUTION AUTOMATIQUE TOPSIS'}
+                    {decisionResult.decisionOutcome === 'REJECTED_NO_ELIGIBLE_ASSET' && 'MISSION REJETÉE SANS ACTIF VALIDE'}
                   </span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', color: 'var(--df-text-secondary)', fontSize: '11px' }}>
-                  <div>Batterie SOH : <strong>{selectedVehicle.batterySohPct}%</strong></div>
-                  <div>Charge Max : <strong>{selectedVehicle.maxPayloadTons}t</strong></div>
-                  <div>Consom. Réf : <strong>{selectedVehicle.refConsumptionL100Km} L</strong></div>
+
+                {/* DÉTAIL DES ACTIFS AFFECTÉS */}
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#161F30] border border-slate-200/90 dark:border-[#1F2937] mb-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Véhicule Assigné :</div>
+                      <div className="font-mono text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+                        {decisionResult.assignedRegistrationPlate || 'Aucun'}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Conducteur Autorisé :</div>
+                      <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+                        {decisionResult.assignedDriverName || 'Aucun'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {decisionResult.routeAdvisoryNotes && decisionResult.routeAdvisoryNotes.length > 0 && (
+                    <div className="mt-3 pt-2.5 border-t border-slate-200/80 dark:border-slate-800 text-xs text-blue-600 dark:text-blue-400">
+                      Avis Routier : {decisionResult.routeAdvisoryNotes.join(' • ')}
+                    </div>
+                  )}
                 </div>
+
+                {/* VIOLATIONS & BLOCAGES DÉTECTÉS */}
+                {decisionResult.violationsDetected && decisionResult.violationsDetected.length > 0 && (
+                  <div className="mb-4">
+                    <div className="text-xs font-bold text-rose-600 dark:text-rose-400 mb-2 flex items-center gap-1.5">
+                      <IconAlertOctagon size={14} />
+                      <span>Violations Réglementaires Bloquantes :</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {decisionResult.violationsDetected.map((v, i) => (
+                        <div
+                          key={i}
+                          className="p-2.5 rounded-lg bg-rose-50/70 dark:bg-rose-950/25 border border-rose-200/70 dark:border-rose-800/40 text-xs text-rose-700 dark:text-rose-300"
+                        >
+                          <strong>[{v.gate}]</strong> {v.messageFr}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* SUBSTITUTIONS TOPSIS RECOMMANDÉES */}
+                {decisionResult.rankedSubstitutions && decisionResult.rankedSubstitutions.length > 0 && (
+                  <div className="mb-4">
+                    <div className="text-xs font-bold text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-1.5">
+                      <IconRefreshCw size={14} />
+                      <span>Classement TOPSIS des Véhicules de Substitution :</span>
+                    </div>
+                    <div className="space-y-2">
+                      {decisionResult.rankedSubstitutions.slice(0, 2).map((sub, i) => (
+                        <div
+                          key={i}
+                          className="p-3 rounded-lg bg-slate-50 dark:bg-[#161F30] border border-slate-200/80 dark:border-[#1F2937]"
+                        >
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <strong className="text-xs text-slate-900 dark:text-slate-100">
+                              #{i + 1} — {sub.registrationPlate} ({sub.makeModel})
+                            </strong>
+                            <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">
+                              Score TOPSIS : {sub.totalScore100}/100
+                            </span>
+                          </div>
+                          <div className="text-[11.5px] text-slate-500 dark:text-slate-400">
+                            {sub.auditJustification} • Carburant estimé :{' '}
+                            <strong className="font-mono text-slate-700 dark:text-slate-300">
+                              {sub.estimatedFuelCostDzd.toLocaleString('fr-DZ')} DZD
+                            </strong>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* BOUTON D'ÉMISSION OFFICIEL DE L'ORDRE DE MISSION */}
+                {(decisionResult.decisionOutcome === 'APPROVED_AS_REQUESTED' ||
+                  decisionResult.decisionOutcome === 'APPROVED_WITH_ETD_OR_ROUTE_SHIFT' ||
+                  decisionResult.decisionOutcome === 'SUBSTITUTED_AUTOMATICALLY') && (
+                  <button
+                    onClick={handleIssueMissionOrder}
+                    className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors flex items-center justify-center gap-2"
+                  >
+                    <IconFileText size={16} />
+                    <span>Générer l&apos;Ordre de Mission Officiel Bilingue (FR/AR) & QR Ed25519</span>
+                  </button>
+                )}
               </div>
             ) : (
-              <div style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '12px', borderRadius: '8px', fontSize: '12px', color: 'var(--df-text-secondary)' }}>
-                Aucun véhicule assigné. En mode réel, veuillez créer vos actifs dans la section <Link href="/assets" style={{ color: 'var(--df-brand-blue)', fontWeight: 600 }}>Parc &amp; Actifs</Link> ou activer le Mode Démonstration dans la barre supérieure.
+              <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 bg-white/50 dark:bg-[#111827]/50 p-8 text-center">
+                <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-500 flex items-center justify-center mx-auto mb-3">
+                  <IconShieldCheck size={24} />
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">
+                  En Attente d&apos;Évaluation Réglementaire
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
+                  Renseignez les paramètres de la mission à gauche puis cliquez sur <strong>Évaluer Éligibilité Réglementaire</strong> pour exécuter la machine à états et contrôler les 4 portes de conformité.
+                </p>
               </div>
             )}
 
-            {/* ITINÉRAIRE (ORIGINE / DESTINATION / TRANSIT) */}
-            <div style={{ borderTop: '1px solid var(--df-border-subtle)', paddingTop: '14px' }}>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <IconCompass size={16} /> Itinéraire National (58 Wilayas)
+            {/* VÉRIFICATEUR HORS-LIGNE POUR LA GENDARMERIE / DGSN */}
+            <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 sm:p-6 shadow-2xs">
+              <div className="flex items-center gap-2 mb-2">
+                <IconShieldCheck size={16} className="text-blue-500" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
+                  Vérificateur Hors-Ligne (Contrôle Routier Gendarmerie / DGSN)
+                </h3>
               </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3.5">
+                Testez la validation cryptographique sans accès Internet (Mode 100% hors-ligne dans le Grand Sud) :
+              </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px', marginBottom: '10px' }}>
+              <div className="space-y-3">
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--df-text-muted)', marginBottom: '4px' }}>Origine (Lieu de Départ)</label>
+                  <label className="block text-[10.5px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                    Chaîne lue par scan QR (Format DZOM) :
+                  </label>
                   <input
                     type="text"
-                    value={originName}
-                    onChange={(e) => setOriginName(e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '12px' }}
+                    value={verifyQrText}
+                    onChange={(e) => setVerifyQrText(e.target.value)}
+                    placeholder="DZOM|OM-2026-161234|01492-319-16|198516012345678901|16|30|2026-11-04|FRET"
+                    className="w-full px-3 py-1.5 text-xs font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                   />
                 </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--df-text-muted)', marginBottom: '4px' }}>Wilaya N°</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="58"
-                    value={originWilaya}
-                    onChange={(e) => setOriginWilaya(Number(e.target.value))}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '12px' }}
-                  />
-                </div>
-              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px', marginBottom: '10px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--df-text-muted)', marginBottom: '4px' }}>Destination (Lieu d&apos;Arrivée)</label>
+                  <label className="block text-[10.5px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                    Jeton de signature numérique Ed25519 :
+                  </label>
                   <input
                     type="text"
-                    value={destinationName}
-                    onChange={(e) => setDestinationName(e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '12px' }}
+                    value={verifyTokenText}
+                    onChange={(e) => setVerifyTokenText(e.target.value)}
+                    placeholder="ED25519-SIG-..."
+                    className="w-full px-3 py-1.5 text-xs font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                   />
                 </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--df-text-muted)', marginBottom: '4px' }}>Wilaya N°</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="58"
-                    value={destinationWilaya}
-                    onChange={(e) => setDestinationWilaya(Number(e.target.value))}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '12px' }}
-                  />
-                </div>
-              </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '11px', color: 'var(--df-text-muted)', marginBottom: '4px' }}>Wilayas de Transit Autorisées (séparées par virgule)</label>
-                <input
-                  type="text"
-                  value={transitWilayas}
-                  onChange={(e) => setTransitWilayas(e.target.value)}
-                  placeholder="Ex: 09, 28, 47"
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '12px' }}
-                />
-              </div>
-            </div>
-
-            {/* CARGAISON & EXIGENCES */}
-            <div style={{ borderTop: '1px solid var(--df-border-subtle)', paddingTop: '14px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '10px', marginBottom: '12px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--df-text-muted)', marginBottom: '4px' }}>Nature Cargaison</label>
-                  <input
-                    type="text"
-                    value={cargoNature}
-                    onChange={(e) => setCargoNature(e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '12px' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--df-text-muted)', marginBottom: '4px' }}>Charge (T)</label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    value={payloadTons}
-                    onChange={(e) => setPayloadTons(Number(e.target.value))}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '12px' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--df-text-muted)', marginBottom: '4px' }}>Distance (km)</label>
-                  <input
-                    type="number"
-                    value={routeKm}
-                    onChange={(e) => setRouteKm(Number(e.target.value))}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '12px' }}
-                  />
-                </div>
-              </div>
-
-              {/* CLIMAT & RESTRICTIONS SPÉCIALES */}
-              <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '12px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer', color: 'var(--df-text-secondary)' }}>
-                  <input
-                    type="checkbox"
-                    checked={requiresHazmat}
-                    onChange={(e) => setRequiresHazmat(e.target.checked)}
-                    style={{ accentColor: '#dc2626' }}
-                  />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <IconAlertTriangle size={13} className="text-red-500" /> ADR (Matières Dangereuses)
-                  </span>
-                </label>
-
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer', color: 'var(--df-text-secondary)' }}>
-                  <input
-                    type="checkbox"
-                    checked={requiresReefer}
-                    onChange={(e) => setRequiresReefer(e.target.checked)}
-                    style={{ accentColor: 'var(--df-accent-blue)' }}
-                  />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <IconThermometer size={13} className="text-blue-500" /> Frigo / ATP (Pharmaceutique)
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            {/* BOUTON D'ÉVALUATION */}
-            <button
-              onClick={handleEvaluateDispatch}
-              disabled={isEvaluating || vehicles.length === 0 || !selectedVehicle}
-              style={{
-                width: '100%',
-                padding: '12px 18px',
-                borderRadius: '8px',
-                border: 'none',
-                background: isEvaluating || vehicles.length === 0 || !selectedVehicle ? '#64748b' : 'var(--df-accent-blue)',
-                color: '#ffffff',
-                fontWeight: 800,
-                fontSize: '14px',
-                cursor: isEvaluating || vehicles.length === 0 || !selectedVehicle ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                boxShadow: 'var(--df-shadow-sm)',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {isEvaluating ? (
-                <IconRefreshCw size={15} className="animate-spin" />
-              ) : vehicles.length === 0 ? (
-                <IconAlertOctagon size={15} />
-              ) : (
-                <IconZap size={15} />
-              )}
-              <span>
-                {isEvaluating
-                  ? 'Évaluation des 4 Portes Réglementaires...'
-                  : vehicles.length === 0
-                  ? 'Aucun véhicule disponible'
-                  : 'Évaluer Éligibilité Réglementaire (Gate DZ)'}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* COLONNE DROITE : RÉSULTAT DÉCISIONNEL & MACHINE À ÉTATS */}
-        <div>
-          {decisionResult ? (
-            <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '14px', padding: '24px', boxShadow: 'var(--df-shadow-sm)', marginBottom: '24px' }}>
-              {/* BANDEAU DE STATUT */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                <div style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--df-text-muted)' }}>
-                  Verdict du Moteur Décisionnel (Gate DZ)
-                </div>
-                <div
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: '20px',
-                    fontWeight: 800,
-                    fontSize: '13px',
-                    background:
-                      decisionResult.decisionOutcome === 'APPROVED_AS_REQUESTED'
-                        ? 'rgba(16, 185, 129, 0.15)'
-                        : decisionResult.decisionOutcome === 'SUBSTITUTED_AUTOMATICALLY'
-                        ? 'rgba(245, 158, 11, 0.15)'
-                        : 'rgba(239, 68, 68, 0.15)',
-                    color:
-                      decisionResult.decisionOutcome === 'APPROVED_AS_REQUESTED'
-                        ? '#059669'
-                        : decisionResult.decisionOutcome === 'SUBSTITUTED_AUTOMATICALLY'
-                        ? '#d97706'
-                        : '#dc2626',
-                    border: `1px solid ${
-                      decisionResult.decisionOutcome === 'APPROVED_AS_REQUESTED'
-                        ? 'rgba(16, 185, 129, 0.3)'
-                        : decisionResult.decisionOutcome === 'SUBSTITUTED_AUTOMATICALLY'
-                        ? 'rgba(245, 158, 11, 0.3)'
-                        : 'rgba(239, 68, 68, 0.3)'
-                    }`,
-                  }}
+                <button
+                  type="button"
+                  onClick={handleVerifyOfflineOrder}
+                  className="w-full py-2 px-3 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors flex items-center justify-center gap-1.5"
                 >
-                  {decisionResult.decisionOutcome === 'APPROVED_AS_REQUESTED' && 'MISSION APPROUVÉE CONFORME'}
-                  {decisionResult.decisionOutcome === 'APPROVED_WITH_ETD_OR_ROUTE_SHIFT' && 'APPROUVÉ AVEC DÉCALAGE HORAIRE'}
-                  {decisionResult.decisionOutcome === 'SUBSTITUTED_AUTOMATICALLY' && 'SUBSTITUTION AUTOMATIQUE TOPSIS'}
-                  {decisionResult.decisionOutcome === 'REJECTED_NO_ELIGIBLE_ASSET' && 'MISSION REJETÉE SANS ACTIF VALIDE'}
-                </div>
-              </div>
+                  <IconSearch size={13} />
+                  <span>Vérifier l&apos;Authenticité Hors-Ligne</span>
+                </button>
 
-              {/* DÉTAIL DES ACTIFS AFFECTÉS */}
-              <div style={{ background: 'var(--df-bg-surface-2)', padding: '16px', borderRadius: '10px', marginBottom: '18px', border: '1px solid var(--df-border-subtle)' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', fontSize: '13px' }}>
-                  <div>
-                    <div style={{ fontSize: '11px', color: 'var(--df-text-muted)' }}>Véhicule Assigné pour le Trajet :</div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--df-text-main)', marginTop: '2px' }}>
-                      {decisionResult.assignedRegistrationPlate || 'Aucun'}
+                {verificationOutput && (
+                  <div
+                    className={`p-3 rounded-xl border text-xs ${
+                      verificationOutput.isValid
+                        ? 'bg-emerald-50/70 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-300'
+                        : 'bg-rose-50/70 dark:bg-rose-950/20 border-rose-200 dark:border-rose-800/50 text-rose-800 dark:text-rose-300'
+                    }`}
+                  >
+                    <div className="font-bold flex items-center gap-1.5 mb-1">
+                      {verificationOutput.isValid ? (
+                        <>
+                          <IconCheck size={14} className="text-emerald-600" />
+                          <span>ORDRE DE MISSION AUTHENTIQUE & VALIDE</span>
+                        </>
+                      ) : (
+                        <>
+                          <IconAlertOctagon size={14} className="text-rose-600" />
+                          <span>INVALIDITÉ : {verificationOutput.reason}</span>
+                        </>
+                      )}
                     </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '11px', color: 'var(--df-text-muted)' }}>Conducteur Titulaire Autorisé :</div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--df-text-main)', marginTop: '2px' }}>
-                      {decisionResult.assignedDriverName || 'Aucun'}
-                    </div>
-                  </div>
-                </div>
-
-                {decisionResult.routeAdvisoryNotes && decisionResult.routeAdvisoryNotes.length > 0 && (
-                  <div style={{ marginTop: '12px', borderTop: '1px dashed var(--df-border-medium)', paddingTop: '8px', fontSize: '12px', color: '#0284c7' }}>
-                    Avis Routier : {decisionResult.routeAdvisoryNotes.join(' • ')}
+                    {verificationOutput.decodedOrder && (
+                      <div className="text-[11px] opacity-80 leading-relaxed font-mono">
+                        Ordre : {verificationOutput.decodedOrder.orderNumber} • Véhicule : {verificationOutput.decodedOrder.registrationPlate} • Validité : {verificationOutput.decodedOrder.validUntil}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-
-              {/* VIOLATIONS & BLOCAGES DÉTECTÉS */}
-              {decisionResult.violationsDetected && decisionResult.violationsDetected.length > 0 && (
-                <div style={{ marginBottom: '18px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#dc2626', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <IconAlertOctagon size={15} /> Violations Réglementaires & Techniques Bloquantes :
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {decisionResult.violationsDetected.map((v, i) => (
-                      <div key={i} style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '6px', padding: '10px 12px', fontSize: '12px', color: '#991b1b' }}>
-                        <strong>[{v.gate}]</strong> {v.messageFr}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* ORDRES DE TRAVAIL (OT) GÉNÉRÉS AUTOMATIQUEMENT */}
-              {decisionResult.generatedWorkOrders && decisionResult.generatedWorkOrders.length > 0 && (
-                <div style={{ marginBottom: '18px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#d97706', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <IconWrench size={15} /> Ordres de Travail (OT) d&apos;Atelier Déclenchés :
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {decisionResult.generatedWorkOrders.map((ot, idx) => (
-                      <div key={idx} style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '6px', padding: '10px 12px', fontSize: '12px' }}>
-                        <div style={{ fontWeight: 700, color: '#b45309' }}>{ot.title} (Immobilisation estimée: {ot.estimatedDowntimeHours}h)</div>
-                        <div style={{ color: 'var(--df-text-secondary)', fontSize: '11px', marginTop: '2px' }}>Tâches : {ot.tasksToPerform.join(', ')}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* SUBSTITUTIONS TOPSIS RECOMMANDÉES */}
-              {decisionResult.rankedSubstitutions && decisionResult.rankedSubstitutions.length > 0 && (
-                <div style={{ marginBottom: '18px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--df-accent-blue)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <IconRefreshCw size={15} /> Classement Multicritère TOPSIS des Véhicules de Remplacement :
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {decisionResult.rankedSubstitutions.slice(0, 2).map((sub, i) => (
-                      <div key={i} style={{ background: 'var(--df-bg-surface-2)', border: '1px solid var(--df-border-subtle)', borderRadius: '8px', padding: '12px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                          <strong style={{ fontSize: '13px', color: 'var(--df-text-main)' }}>
-                            #{i + 1} — {sub.registrationPlate} ({sub.makeModel})
-                          </strong>
-                          <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--df-accent-blue)' }}>
-                            Score TOPSIS : {sub.totalScore100}/100
-                          </span>
-                        </div>
-                        <div style={{ fontSize: '11.5px', color: 'var(--df-text-secondary)', lineHeight: 1.5 }}>
-                          {sub.auditJustification} • Carburant estimé : <strong>{sub.estimatedFuelCostDzd.toLocaleString('fr-DZ')} DZD</strong>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* BOUTON D'ÉMISSION OFFICIEL DE L'ORDRE DE MISSION */}
-              {(decisionResult.decisionOutcome === 'APPROVED_AS_REQUESTED' ||
-                decisionResult.decisionOutcome === 'APPROVED_WITH_ETD_OR_ROUTE_SHIFT' ||
-                decisionResult.decisionOutcome === 'SUBSTITUTED_AUTOMATICALLY') && (
-                <button
-                  onClick={handleIssueMissionOrder}
-                  style={{
-                    width: '100%',
-                    padding: '12px 18px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: '#059669',
-                    color: '#ffffff',
-                    fontWeight: 800,
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    boxShadow: 'var(--df-shadow-sm)',
-                  }}
-                >
-                  <IconFileText size={16} />
-                  <span>Générer l&apos;Ordre de Mission Officiel Bilingue (FR/AR) & QR HMAC</span>
-                </button>
-              )}
-            </div>
-          ) : (
-            <div style={{ background: 'var(--df-bg-surface-1)', border: '1px dashed var(--df-border-medium)', borderRadius: '14px', padding: '40px 24px', textAlign: 'center', color: 'var(--df-text-secondary)', marginBottom: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px', color: 'var(--df-text-muted)' }}>
-                <IconShieldCheck size={36} />
-              </div>
-              <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', margin: '0 0 6px 0' }}>
-                En Attente d&apos;Évaluation Réglementaire
-              </h3>
-              <p style={{ fontSize: '13px', maxWidth: '420px', margin: '0 auto', lineHeight: 1.6 }}>
-                Renseignez les paramètres de la mission à gauche puis cliquez sur <strong>Évaluer Éligibilité Réglementaire</strong> pour exécuter la machine à états et contrôler les 4 portes de conformité.
-              </p>
-            </div>
-          )}
-
-          {/* SIMULATEUR DE VÉRIFICATION HORS-LIGNE POUR LA GENDARMERIE / DGSN */}
-          <div style={{ background: 'var(--df-bg-surface-1)', border: '1px solid var(--df-border-subtle)', borderRadius: '14px', padding: '20px', boxShadow: 'var(--df-shadow-sm)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <IconShieldCheck size={18} className="text-blue-500" />
-              <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
-                Vérificateur Hors-Ligne (Contrôle Routier Gendarmerie / DGSN)
-              </h3>
-            </div>
-            <p style={{ fontSize: '12px', color: 'var(--df-text-secondary)', lineHeight: 1.5, marginBottom: '12px' }}>
-              Testez la validation cryptographique sans accès Internet (Mode 100% hors-ligne dans le Grand Sud) :
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '11px', color: 'var(--df-text-muted)', marginBottom: '3px' }}>
-                  Chaîne lue par scan QR (Format DZOM) :
-                </label>
-                <input
-                  type="text"
-                  value={verifyQrText}
-                  onChange={(e) => setVerifyQrText(e.target.value)}
-                  placeholder="DZOM|OM-2026-161234|01492-319-16|198516012345678901|16|30|2026-11-04|FRET"
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '11px', fontFamily: 'monospace' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '11px', color: 'var(--df-text-muted)', marginBottom: '3px' }}>
-                  Jeton de signature HMAC-SHA256 :
-                </label>
-                <input
-                  type="text"
-                  value={verifyTokenText}
-                  onChange={(e) => setVerifyTokenText(e.target.value)}
-                  placeholder="SIG-HMAC256-..."
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--df-border-medium)', background: 'var(--df-bg-surface-2)', color: 'var(--df-text-main)', fontSize: '11px', fontFamily: 'monospace' }}
-                />
-              </div>
-
-              <button
-                onClick={handleVerifyOfflineOrder}
-                style={{
-                  padding: '9px 14px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  background: 'var(--df-bg-surface-2)',
-                  color: 'var(--df-text-main)',
-                  fontWeight: 700,
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  borderColor: 'var(--df-border-medium)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                }}
-              >
-                <IconSearch size={14} /> Vérifier l&apos;Authenticité Hors-Ligne
-              </button>
-
-              {verificationOutput && (
-                <div style={{ marginTop: '8px', padding: '10px 12px', borderRadius: '6px', background: verificationOutput.isValid ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', border: `1px solid ${verificationOutput.isValid ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, fontSize: '12px' }}>
-                  <div style={{ fontWeight: 800, color: verificationOutput.isValid ? '#059669' : '#dc2626', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {verificationOutput.isValid ? (
-                      <>
-                        <IconCheck size={14} /> ORDRE DE MISSION AUTHENTIQUE & VALIDE
-                      </>
-                    ) : (
-                      <>
-                        <IconAlertOctagon size={14} /> INVALIDITÉ : {verificationOutput.reason}
-                      </>
-                    )}
-                  </div>
-                  {verificationOutput.decodedOrder && (
-                    <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--df-text-secondary)', lineHeight: 1.5 }}>
-                      Ordre : <strong>{verificationOutput.decodedOrder.orderNumber}</strong> • Véhicule : <strong>{verificationOutput.decodedOrder.registrationPlate}</strong> • Validité : <strong>{verificationOutput.decodedOrder.validUntil}</strong>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
-
