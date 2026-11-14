@@ -74,3 +74,4 @@ export const WILAYA_RESTRICTIONS: WilayaRestriction[] = [
     activeStatus: 'SPECIAL_PERMIT',
   },
 ];
+

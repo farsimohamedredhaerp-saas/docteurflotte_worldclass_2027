@@ -26,3 +26,4 @@ export function useComplianceTabs() {
 
   return { activeTab, setActiveTab };
 }
+

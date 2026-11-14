@@ -60,3 +60,4 @@ describe('Compliance & Algerian Regulatory Framework (Lot 3 - Compliance)', () =
     expect(getEnactaPeriodicityMonths('VL', 1)).toBe(24);
   });
 });
+

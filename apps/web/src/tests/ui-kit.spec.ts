@@ -109,5 +109,17 @@ describe('UI Kit Transverse — Certification de Stabilité (Porte 0)', () => {
       clearTimeout(timer);
     });
   });
+
+  describe('ModalErrorBoundary (Porte 8b)', () => {
+    it('isole les exceptions de calcul et fournit getDerivedStateFromError', async () => {
+      const { ModalErrorBoundary } = await import('../components/ui/ModalErrorBoundary');
+      const testError = new Error('Erreur de calcul DGI');
+      const state = ModalErrorBoundary.getDerivedStateFromError(testError);
+
+      expect(state.hasError).toBe(true);
+      expect(state.error).toBe(testError);
+      expect(state.error?.message).toBe('Erreur de calcul DGI');
+    });
+  });
 });
 

@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { ModalErrorBoundary } from './ModalErrorBoundary';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -117,7 +118,11 @@ export const Modal: React.FC<ModalProps> = ({
           </div>
         )}
 
-        <div className="p-5 overflow-y-auto flex-1">{children}</div>
+        <div className="p-5 overflow-y-auto flex-1">
+          <ModalErrorBoundary onReset={onClose}>
+            {children}
+          </ModalErrorBoundary>
+        </div>
 
         {footer && (
           <div className="flex items-center justify-end gap-3 p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">

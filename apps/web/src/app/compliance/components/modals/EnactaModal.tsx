@@ -159,3 +159,4 @@ export function EnactaModal({
     </div>
   );
 }
+
