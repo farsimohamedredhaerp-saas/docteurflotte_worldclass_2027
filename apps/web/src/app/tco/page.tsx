@@ -6,6 +6,8 @@ import { Navbar } from '../../components/navigation/Navbar';
 import { Card } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
+import { VehicleSilhouette } from '../../components/ui/VehicleSilhouette';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import {
   IconBarChart3,
   IconFuel,
@@ -67,6 +69,7 @@ export default function TcoPage() {
   // Modal CRUD state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<AssetTcoRecord | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; plate: string } | null>(null);
   const [formState, setFormState] = useState<Partial<AssetTcoRecord>>({
     registrationNumber: '',
     makeModel: '',
@@ -108,7 +111,8 @@ export default function TcoPage() {
   const handleSaveTco = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formState.registrationNumber || !formState.kmOrHoursPeriod) {
-      alert('Veuillez renseigner l\'immatriculation et l\'usage.');
+      setNotification('Erreur : Veuillez renseigner l\'immatriculation et l\'usage.');
+      setTimeout(() => setNotification(null), 5000);
       return;
     }
 
@@ -170,11 +174,15 @@ export default function TcoPage() {
   };
 
   const handleDeleteTco = (id: string, plate: string) => {
-    if (confirm(`Confirmez-vous la suppression de la fiche TCO pour ${plate} ?`)) {
-      setTcoRecords((prev) => prev.filter((r) => r.id !== id));
-      setNotification(`ℹ Fiche TCO supprimée pour ${plate}`);
-      setTimeout(() => setNotification(null), 4000);
-    }
+    setDeleteTarget({ id, plate });
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return;
+    setTcoRecords((prev) => prev.filter((r) => r.id !== deleteTarget.id));
+    setNotification(`ℹ Fiche TCO supprimée pour ${deleteTarget.plate}`);
+    setDeleteTarget(null);
+    setTimeout(() => setNotification(null), 4000);
   };
 
   const filteredData = tcoRecords.filter((item) => {
@@ -444,10 +452,34 @@ export default function TcoPage() {
                       filteredData.map((row) => (
                       <tr key={row.id} style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
                         <td style={{ padding: '0.85rem 1rem' }}>
-                          <div style={{ fontWeight: 700, color: 'var(--df-text-main)', fontFamily: 'var(--df-font-mono)' }}>
-                            {row.registrationNumber}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div
+                              style={{
+                                width: '48px',
+                                height: '28px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: 'var(--df-bg-surface-2)',
+                                borderRadius: 'var(--df-radius-sm)',
+                                border: '1px solid var(--df-border-subtle)',
+                                flexShrink: 0,
+                              }}
+                            >
+                              <VehicleSilhouette
+                                brand={row.makeModel}
+                                category={row.category}
+                                size="sm"
+                                color="var(--df-text-secondary)"
+                              />
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 700, color: 'var(--df-text-main)', fontFamily: 'var(--df-font-mono)' }}>
+                                {row.registrationNumber}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--df-text-muted)' }}>{row.makeModel}</div>
+                            </div>
                           </div>
-                          <div style={{ fontSize: '0.68rem', color: 'var(--df-text-muted)' }}>{row.makeModel}</div>
                         </td>
                         <td style={{ padding: '0.85rem 1rem', fontFamily: 'var(--df-font-mono)' }}>
                           {row.kmOrHoursPeriod.toLocaleString('fr-DZ')} {row.unitType}
@@ -733,6 +765,18 @@ export default function TcoPage() {
           </div>
         </div>
       )}
+
+      {/* CONFIRMATION DE SUPPRESSION CRITIQUE */}
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleConfirmDelete}
+        title="Supprimer la fiche TCO"
+        description={`Confirmez-vous la suppression définitive de la fiche analytique TCO pour le véhicule ${deleteTarget?.plate} ?`}
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        variant="danger"
+      />
     </div>
   );
 }

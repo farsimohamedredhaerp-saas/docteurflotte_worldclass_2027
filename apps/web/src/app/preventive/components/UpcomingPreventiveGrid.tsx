@@ -9,6 +9,7 @@ import {
   IconClock,
   IconCheck,
 } from '@/components/navigation/TechIcons';
+import { VehicleSilhouette } from '@/components/ui/VehicleSilhouette';
 import type { UpcomingPreventiveDue } from '../types';
 
 interface UpcomingPreventiveGridProps {
@@ -48,7 +49,7 @@ export function UpcomingPreventiveGrid({
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
         <div>
-          <h2 style={{ fontSize: '16px', fontWeight: 800, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
             <IconClock size={18} className="text-amber-400" />
             Échéancier des Révisions & Vidanges Imminentes (Flotte Active)
           </h2>
@@ -75,7 +76,7 @@ export function UpcomingPreventiveGrid({
               borderRadius: '6px',
               border: '1px solid var(--df-border-medium)',
               background: 'var(--df-bg-base)',
-              color: '#fff',
+              color: 'var(--df-text-main)',
               fontSize: '12px',
               outline: 'none',
             }}
@@ -139,19 +140,38 @@ export function UpcomingPreventiveGrid({
               {upcoming.map((due) => {
                 const urgencyColor =
                   due.urgency === 'URGENT'
-                    ? '#EF4444'
+                    ? 'var(--df-status-danger)'
                     : due.urgency === 'WARNING'
-                    ? '#F59E0B'
-                    : '#10B981';
+                    ? 'var(--df-status-warning)'
+                    : 'var(--df-status-ok)';
 
                 return (
                   <tr key={due.id} style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
-                    <td style={{ padding: '10px 12px', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: '#fff' }}>
+                    <td style={{ padding: '10px 12px', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: 'var(--df-text-main)' }}>
                       {due.registrationNumber}
                     </td>
                     <td style={{ padding: '10px 12px' }}>
-                      <div style={{ fontWeight: 600, color: '#fff' }}>{due.makeModel}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--df-text-muted)' }}>{due.assignedSite}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div
+                          style={{
+                            width: '40px',
+                            height: '24px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: 'var(--df-bg-base)',
+                            borderRadius: 'var(--df-radius-sm)',
+                            border: '1px solid var(--df-border-subtle)',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <VehicleSilhouette brand={due.makeModel} size="sm" color="var(--df-text-secondary)" />
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 600, color: 'var(--df-text-main)' }}>{due.makeModel}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--df-text-muted)' }}>{due.assignedSite}</div>
+                        </div>
+                      </div>
                     </td>
                     <td style={{ padding: '10px 12px', color: '#a5b4fc', fontWeight: 600 }}>
                       {due.templateName}

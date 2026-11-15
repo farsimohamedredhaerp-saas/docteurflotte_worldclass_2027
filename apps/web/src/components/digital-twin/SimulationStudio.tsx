@@ -58,37 +58,38 @@ export const SimulationStudio: React.FC<SimulationStudioProps> = ({
     {
       label: t('digitalTwin.simulation.bioZone'),
       value: currentWilayaProfile?.zoneLabel ?? 'N/A',
-      color: '#38bdf8',
+      color: 'var(--df-accent-blue)',
     },
     {
       label: t('digitalTwin.simulation.summerTempMax'),
       value: `${currentWilayaProfile?.ambientTempSummerC ?? 0} °C`,
-      color: '#f8fafc',
+      color: 'var(--df-text-main)',
     },
     {
       label: t('digitalTwin.simulation.silicaDust'),
       value: `x${currentWilayaProfile?.dustSilicaFactor ?? 1}`,
-      color: '#f8fafc',
+      color: 'var(--df-text-main)',
     },
     {
       label: t('digitalTwin.simulation.oilArrhenius'),
       value: `x${currentWilayaProfile?.oilArrheniusFactor ?? 1}`,
-      color: '#f59e0b',
+      color: 'var(--df-status-warning)',
     },
     {
       label: t('digitalTwin.simulation.brakeGradient'),
       value: `x${currentWilayaProfile?.brakeGradientFactor ?? 1}`,
-      color: '#10b981',
+      color: 'var(--df-status-ok)',
     },
   ];
 
   return (
     <div
       style={{
-        background: 'linear-gradient(180deg, rgba(20, 29, 47, 0.9) 0%, rgba(12, 17, 29, 0.95) 100%)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '20px',
+        background: 'var(--df-bg-surface-1)',
+        border: '1px solid var(--df-border-subtle)',
+        borderRadius: 'var(--df-radius-lg)',
         padding: '24px',
+        boxShadow: 'var(--df-shadow-sm)',
       }}
     >
       <div
@@ -103,7 +104,7 @@ export const SimulationStudio: React.FC<SimulationStudioProps> = ({
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <h4 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 4px', color: '#f8fafc' }}>
+            <h4 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 4px', color: 'var(--df-text-main)' }}>
               {t('digitalTwin.simulation.title', { wilayasCount })}
             </h4>
             <span
@@ -120,11 +121,11 @@ export const SimulationStudio: React.FC<SimulationStudioProps> = ({
                       : 'rgba(148, 163, 184, 0.2)',
                 color:
                   telemetryTier === TelemetryTier.MODE_2_CAN_J1939
-                    ? '#34d399'
+                    ? 'var(--df-status-ok)'
                     : telemetryTier === TelemetryTier.MODE_1_GNSS
-                      ? '#38bdf8'
-                      : '#cbd5e1',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
+                      ? 'var(--df-accent-blue)'
+                      : 'var(--df-text-muted)',
+                border: '1px solid var(--df-border-subtle)',
               }}
             >
               {telemetryTier === TelemetryTier.MODE_2_CAN_J1939
@@ -199,10 +200,10 @@ export const SimulationStudio: React.FC<SimulationStudioProps> = ({
               value={selection.wilayaCode}
               onChange={(e) => actions.selectWilaya(parseInt(e.target.value, 10))}
               style={{
-                background: '#0f172a',
-                border: '1px solid #38bdf8',
-                color: '#38bdf8',
-                borderRadius: '8px',
+                background: 'var(--df-bg-surface-2)',
+                border: '1px solid var(--df-border-subtle)',
+                color: 'var(--df-text-main)',
+                borderRadius: 'var(--df-radius-sm)',
                 padding: '5px 10px',
                 fontSize: '13px',
                 fontWeight: 700,
@@ -227,14 +228,14 @@ export const SimulationStudio: React.FC<SimulationStudioProps> = ({
               cursor: 'pointer',
               fontSize: '12px',
               fontWeight: 600,
-              color: '#f8fafc',
+              color: 'var(--df-text-main)',
             }}
           >
             <input
               type="checkbox"
               checked={selection.isDesertTransit}
               onChange={(e) => actions.toggleDesertTransit(e.target.checked)}
-              style={{ accentColor: '#f59e0b', width: '15px', height: '15px', cursor: 'pointer' }}
+              style={{ accentColor: 'var(--df-accent-blue)', width: '15px', height: '15px', cursor: 'pointer' }}
             />
             <span>
               {desertTowingAmount !== undefined
@@ -252,13 +253,13 @@ export const SimulationStudio: React.FC<SimulationStudioProps> = ({
             <div
               key={i}
               style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                borderRadius: '8px',
+                background: 'var(--df-bg-surface-2)',
+                borderRadius: 'var(--df-radius-sm)',
                 padding: '6px 10px',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
+                border: '1px solid var(--df-border-subtle)',
               }}
             >
-              <div style={{ fontSize: '10px', color: '#94a3b8' }}>{card.label}</div>
+              <div style={{ fontSize: '10px', color: 'var(--df-text-muted)' }}>{card.label}</div>
               <div style={{ fontSize: '13px', fontWeight: 700, color: card.color }}>
                 {card.value}
               </div>
@@ -270,12 +271,12 @@ export const SimulationStudio: React.FC<SimulationStudioProps> = ({
       {/* Sliders Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(210px, 100%), 1fr))', gap: '14px', marginBottom: '18px' }}>
         {/* Climate Slider */}
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '14px' }}>
+        <div style={{ background: 'var(--df-bg-surface-2)', border: '1px solid var(--df-border-subtle)', borderRadius: 'var(--df-radius-md)', padding: '14px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <label htmlFor="sim-climate-slider" style={{ fontSize: '12px', fontWeight: 700, color: '#f8fafc' }}>
+            <label htmlFor="sim-climate-slider" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--df-text-main)' }}>
               {t('digitalTwin.simulation.climateSliderLabel')}
             </label>
-            <span style={{ fontSize: '14px', fontWeight: 800, color: '#38bdf8' }}>
+            <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--df-accent-blue)' }}>
               x{selection.climateMultiplier.toFixed(2)}
             </span>
           </div>
@@ -289,21 +290,21 @@ export const SimulationStudio: React.FC<SimulationStudioProps> = ({
             aria-valuetext={`x${selection.climateMultiplier.toFixed(2)}`}
             aria-label={t('digitalTwin.simulation.climateSliderLabel')}
             onChange={(e) => actions.changeClimateMultiplier(parseFloat(e.target.value))}
-            style={{ width: '100%', accentColor: '#38bdf8', cursor: 'pointer' }}
+            style={{ width: '100%', accentColor: 'var(--df-accent-blue)', cursor: 'pointer' }}
           />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#64748b', marginTop: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--df-text-muted)', marginTop: '4px' }}>
             <span>{t(limits.climate.minLabelKey)}</span>
             <span>{t(limits.climate.maxLabelKey)}</span>
           </div>
         </div>
 
         {/* Driver Slider */}
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '14px' }}>
+        <div style={{ background: 'var(--df-bg-surface-2)', border: '1px solid var(--df-border-subtle)', borderRadius: 'var(--df-radius-md)', padding: '14px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <label htmlFor="sim-driver-slider" style={{ fontSize: '12px', fontWeight: 700, color: '#f8fafc' }}>
+            <label htmlFor="sim-driver-slider" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--df-text-main)' }}>
               {t('digitalTwin.simulation.driverSliderLabel')}
             </label>
-            <span style={{ fontSize: '14px', fontWeight: 800, color: '#f59e0b' }}>
+            <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--df-status-warning)' }}>
               x{selection.driverMultiplier.toFixed(2)}
             </span>
           </div>
@@ -317,9 +318,9 @@ export const SimulationStudio: React.FC<SimulationStudioProps> = ({
             aria-valuetext={`x${selection.driverMultiplier.toFixed(2)}`}
             aria-label={t('digitalTwin.simulation.driverSliderLabel')}
             onChange={(e) => actions.changeDriverMultiplier(parseFloat(e.target.value))}
-            style={{ width: '100%', accentColor: '#f59e0b', cursor: 'pointer' }}
+            style={{ width: '100%', accentColor: 'var(--df-status-warning)', cursor: 'pointer' }}
           />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#64748b', marginTop: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--df-text-muted)', marginTop: '4px' }}>
             <span>{t(limits.driver.minLabelKey)}</span>
             <span>{t(limits.driver.maxLabelKey)}</span>
           </div>
@@ -332,15 +333,15 @@ export const SimulationStudio: React.FC<SimulationStudioProps> = ({
           onClick={actions.runSimulation}
           disabled={isSimulating}
           style={{
-            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-            color: '#fff',
+            background: 'var(--df-accent-blue)',
+            color: '#ffffff',
             border: 'none',
-            borderRadius: '10px',
+            borderRadius: 'var(--df-radius-md)',
             padding: '10px 22px',
             fontSize: '14px',
             fontWeight: 700,
             cursor: isSimulating ? 'wait' : 'pointer',
-            boxShadow: '0 4px 16px rgba(2, 132, 199, 0.4)',
+            boxShadow: 'var(--df-shadow-sm)',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
