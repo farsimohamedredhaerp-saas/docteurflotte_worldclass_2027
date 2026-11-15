@@ -36,6 +36,9 @@ export interface EconomicRates {
   approvalExpenseThreshold: number;
   inactionRiskMultiplier: number;
   referenceFuelPricePerLiter: number;
+  towingBaseRateTellDzd?: number;
+  towingSurchargeSaharaDzd?: number;
+  dailyImmobilizationCostDzd?: number;
 }
 
 export interface NotificationPreferences {

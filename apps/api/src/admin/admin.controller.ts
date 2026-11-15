@@ -18,6 +18,7 @@ import {
   PlatformTelematicsGateway,
   PlatformTenant,
   UpdateDecisionConfigDto,
+  UpdatePlatformRegulatoryEnactaRuleDto,
 } from '@docteurflotte/contracts';
 import { JwtAuthGuard, AuthenticatedRequest } from '../auth/auth.guard';
 import { PlatformAdminGuard } from './guards/platform-admin.guard';
@@ -152,6 +153,15 @@ export class AdminController {
   @Get('fiscal/enacta')
   async getEnactaRules() {
     return this.fiscalService.getEnactaRules();
+  }
+
+  @Patch('fiscal/enacta/:id')
+  async updateEnactaRule(
+    @Param('id') id: string,
+    @Body() body: UpdatePlatformRegulatoryEnactaRuleDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.fiscalService.updateEnactaRule(id, body, req.user?.email || 'admin@docteurflotte.dz');
   }
 
   // Gateways

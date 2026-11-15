@@ -218,4 +218,80 @@ describe('AdminControlPlane (Unit Tests)', () => {
       ).rejects.toThrow('Seules les versions DRAFT peuvent être modifiées');
     });
   });
+
+  describe('AdminFiscalService (Dynamic Tariffs & ENACTA)', () => {
+    it('devrait retourner les règles ENACTA avec les tarifs HT/TTC et provision TCO', async () => {
+      const mockPool = {
+        query: jest.fn().mockResolvedValue({
+          rows: [
+            {
+              id: 'enacta-rule-1',
+              asset_category: 'HEAVY_TRUCK',
+              label_fr: 'Poids Lourds',
+              periodicity_months: '6',
+              first_inspection_months: '6',
+              tariff_base_ht_dzd: '2600.00',
+              tva_rate_pct: '19.00',
+              tariff_total_ttc_dzd: '3094.00',
+              internal_tco_provision_dzd: '9000.00',
+              official_decree_ref: 'Décret exécutif 03-223',
+            },
+          ],
+        }),
+      };
+
+      const mockDbService = { getPool: () => mockPool } as any;
+      const service = new AdminFiscalService(mockDbService);
+
+      const rules = await service.getEnactaRules();
+      expect(rules).toHaveLength(1);
+      expect(rules[0].tariff_base_ht_dzd).toBe(2600);
+      expect(rules[0].tva_rate_pct).toBe(19);
+      expect(rules[0].tariff_total_ttc_dzd).toBe(3094);
+      expect(rules[0].internal_tco_provision_dzd).toBe(9000);
+      expect(rules[0].periodicity_months).toBe(6);
+    });
+
+    it('devrait mettre à jour un barème ENACTA et inscrire une piste d audit immuable', async () => {
+      const mockPool = {
+        query: jest.fn()
+          .mockResolvedValueOnce({
+            rowCount: 1,
+            rows: [
+              {
+                id: 'enacta-rule-1',
+                asset_category: 'HEAVY_TRUCK',
+                label_fr: 'Poids Lourds',
+                tariff_base_ht_dzd: '3000.00',
+                tva_rate_pct: '19.00',
+                tariff_total_ttc_dzd: '3570.00',
+                internal_tco_provision_dzd: '10000.00',
+                periodicity_months: '6',
+                first_inspection_months: '6',
+              },
+            ],
+          })
+          .mockResolvedValueOnce({ rowCount: 1 }), // Audit log
+      };
+
+      const mockDbService = { getPool: () => mockPool } as any;
+      const service = new AdminFiscalService(mockDbService);
+
+      const updated = await service.updateEnactaRule(
+        'enacta-rule-1',
+        {
+          tariff_base_ht_dzd: 3000,
+          tva_rate_pct: 19,
+          internal_tco_provision_dzd: 10000,
+          justification: 'Ajustement barème ENACTA 2026',
+        },
+        'superadmin@docteurflotte.dz'
+      );
+
+      expect(updated.tariff_base_ht_dzd).toBe(3000);
+      expect(updated.tariff_total_ttc_dzd).toBe(3570);
+      expect(updated.internal_tco_provision_dzd).toBe(10000);
+      expect(mockPool.query).toHaveBeenCalledTimes(2);
+    });
+  });
 });

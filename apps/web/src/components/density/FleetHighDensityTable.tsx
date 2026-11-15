@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
 import {
   IconSearch,
   IconSlidersHorizontal,
@@ -351,20 +352,34 @@ const SEED_FLEET_UNITS: FleetUnitRecord[] = [
   }),
 ];
 
-interface FleetHighDensityTableProps {
+export interface FleetHighDensityTableProps {
+  units?: FleetUnitRecord[];
+  isLoading?: boolean;
   onSelectUnit?: (unit: FleetUnitRecord) => void;
   onOpenWorkOrder?: (unit: FleetUnitRecord) => void;
 }
 
 export function FleetHighDensityTable({
+  units: propUnits,
+  isLoading = false,
   onSelectUnit,
   onOpenWorkOrder,
 }: FleetHighDensityTableProps) {
-  const [units] = useState<FleetUnitRecord[]>(SEED_FLEET_UNITS);
+  const units = propUnits ?? SEED_FLEET_UNITS;
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'ALL' | FleetUnitRecord['category']>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | VehicleOperationalStatus>('ALL');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Statistiques calculées dynamiquement
+  const stats = useMemo(() => {
+    const motion = units.filter((u) => u.status === 'MOTION').length;
+    const idle = units.filter((u) => u.status === 'IDLE_WARNING').length;
+    const dtc = units.filter((u) => u.status === 'DTC_CRITICAL').length;
+    const parked = units.filter((u) => u.status === 'PARKED_OFF' || u.status === 'OFFLINE').length;
+    const dtoRate = units.length > 0 ? (((units.length - dtc) / units.length) * 100).toFixed(1) : '100';
+    return { motion, idle, dtc, parked, dtoRate };
+  }, [units]);
 
   // Filtrage combiné haute performance
   const filteredUnits = useMemo(() => {
@@ -683,7 +698,38 @@ export function FleetHighDensityTable({
 
           {/* CORPS DE TABLEAU HAUTE DENSITÉ */}
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-[12px]">
-            {filteredUnits.length === 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan={11} className="py-16 text-center text-slate-400 font-mono text-[11.5px]">
+                  <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent align-[-0.125em] mb-2" />
+                  <p>Chargement des unités de flotte...</p>
+                </td>
+              </tr>
+            ) : units.length === 0 ? (
+              <tr>
+                <td colSpan={11} className="py-16 text-center">
+                  <div className="flex flex-col items-center justify-center p-6 max-w-md mx-auto">
+                    <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mb-3">
+                      <IconTruck size={24} />
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">
+                      Aucun véhicule ou engin dans votre organisation
+                    </h4>
+                    <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                      Votre parc est actuellement vierge. Démarrez en ajoutant votre premier actif avec la fiche constructeur OEM ou en important un relevé Naftal (Mode 0).
+                    </p>
+                    <div className="flex gap-2 flex-wrap justify-center">
+                      <Link href="/assets" className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition-colors">
+                        Ajouter un Véhicule
+                      </Link>
+                      <Link href="/fuel-scanner" className="px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-semibold transition-colors">
+                        Scanner Reçu Naftal
+                      </Link>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            ) : filteredUnits.length === 0 ? (
               <tr>
                 <td colSpan={11} className="py-12 text-center text-slate-400 font-mono text-[11.5px]">
                   Aucune unité ne correspond aux critères de filtre sélectionnés.
@@ -820,24 +866,24 @@ export function FleetHighDensityTable({
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>28 En Mouvement</span>
+            <span>{stats.motion} En Mouvement</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-amber-500" />
-            <span>4 Ralenti</span>
+            <span>{stats.idle} Ralenti</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-rose-500" />
-            <span>2 DTC Actifs</span>
+            <span>{stats.dtc} DTC Actif{stats.dtc > 1 ? 's' : ''}</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-slate-400" />
-            <span>18 Arrêtés</span>
+            <span>{stats.parked} Arrêté{stats.parked > 1 ? 's' : ''}</span>
           </span>
         </div>
 
         <div className="flex items-center gap-3">
-          <span>Taux DTO : <strong>94.6%</strong></span>
+          <span>Taux DTO : <strong>{stats.dtoRate}%</strong></span>
           <span>•</span>
           <span>Norme SAE J1939 / ANPDP 18-07</span>
         </div>

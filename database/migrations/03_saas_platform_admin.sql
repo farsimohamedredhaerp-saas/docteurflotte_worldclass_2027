@@ -305,9 +305,19 @@ CREATE TABLE IF NOT EXISTS platform_regulatory_enacta_rules (
     warning_lead_days INT[] NOT NULL DEFAULT '{30, 15, 7}',
     official_decree_ref VARCHAR(255) NOT NULL,
     mandatory_checkpoints TEXT[] NOT NULL DEFAULT '{FREINAGE,DIRECTION,CHASSIS_SUSPENSION,OPACITE_FUMEES,DISPOSITIF_ATTELAGE}',
+    tariff_base_ht_dzd NUMERIC(10, 2) NOT NULL DEFAULT 2450.00,
+    tva_rate_pct NUMERIC(5, 2) NOT NULL DEFAULT 19.00,
+    tariff_total_ttc_dzd NUMERIC(10, 2) NOT NULL DEFAULT 2915.50,
+    internal_tco_provision_dzd NUMERIC(10, 2) NOT NULL DEFAULT 8500.00,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE platform_regulatory_enacta_rules
+    ADD COLUMN IF NOT EXISTS tariff_base_ht_dzd NUMERIC(10, 2) NOT NULL DEFAULT 2450.00,
+    ADD COLUMN IF NOT EXISTS tva_rate_pct NUMERIC(5, 2) NOT NULL DEFAULT 19.00,
+    ADD COLUMN IF NOT EXISTS tariff_total_ttc_dzd NUMERIC(10, 2) NOT NULL DEFAULT 2915.50,
+    ADD COLUMN IF NOT EXISTS internal_tco_provision_dzd NUMERIC(10, 2) NOT NULL DEFAULT 8500.00;
 
 -- 9. Table des Tarifs Officiels de Vignettes Automobiles (Loi de Finances Algérie)
 CREATE TABLE IF NOT EXISTS platform_vignette_tarifs (

@@ -159,6 +159,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       approvalExpenseThreshold: defaultApprovalThreshold,
       inactionRiskMultiplier: 3.5,
       referenceFuelPricePerLiter: 29.0,
+      towingBaseRateTellDzd: 35000,
+      towingSurchargeSaharaDzd: 75000,
+      dailyImmobilizationCostDzd: 25000,
     });
 
     await client.query(`
@@ -504,6 +507,18 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       ALTER TABLE vehicles FORCE ROW LEVEL SECURITY;
       ALTER TABLE vehicle_maintenance_schedules ENABLE ROW LEVEL SECURITY;
       ALTER TABLE vehicle_maintenance_schedules FORCE ROW LEVEL SECURITY;
+
+      -- Mise à niveau dynamique des tarifs ENACTA pour configuration SuperAdmin (Zéro Hardcoding)
+      DO $$
+      BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'platform_regulatory_enacta_rules') THEN
+          ALTER TABLE platform_regulatory_enacta_rules
+            ADD COLUMN IF NOT EXISTS tariff_base_ht_dzd NUMERIC(10, 2) NOT NULL DEFAULT 2450.00,
+            ADD COLUMN IF NOT EXISTS tva_rate_pct NUMERIC(5, 2) NOT NULL DEFAULT 19.00,
+            ADD COLUMN IF NOT EXISTS tariff_total_ttc_dzd NUMERIC(10, 2) NOT NULL DEFAULT 2915.50,
+            ADD COLUMN IF NOT EXISTS internal_tco_provision_dzd NUMERIC(10, 2) NOT NULL DEFAULT 8500.00;
+        END IF;
+      END $$;
 
       -- Création des politiques RLS Fail-Closed compatibles Cloud Managé (RDS / Cloud SQL / Supabase)
       DO $$

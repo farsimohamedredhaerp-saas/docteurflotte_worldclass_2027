@@ -21,7 +21,7 @@ export default function SetupPage() {
   const [activityPack, setActivityPack] = useState<ActivityPack>(ActivityPack.TRANSPORT);
   const [measurementSystem, setMeasurementSystem] = useState<'METRIC' | 'IMPERIAL'>('METRIC');
   const [currency, setCurrency] = useState('DZD');
-  const [enableDemoData, setEnableDemoData] = useState(true);
+  const [enableDemoData, setEnableDemoData] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,9 +67,20 @@ export default function SetupPage() {
             ...session.tenant,
             status: response.tenant.status,
             activityPack: response.tenant.activityPack,
+            dataOrigin: response.tenant.dataOrigin,
             isSetupCompleted: true,
           },
         });
+      }
+
+      if (typeof window !== 'undefined') {
+        if (!enableDemoData) {
+          localStorage.setItem('df_demo_mode_active', 'false');
+        } else {
+          localStorage.setItem('df_demo_mode_active', 'true');
+        }
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('auth:session-changed'));
       }
 
       router.push('/');

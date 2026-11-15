@@ -71,4 +71,46 @@ describe('Auth & Digital Twin Simulation Resiliency (Login, Register & Sandbox)'
     expect(singleTwin.assetId).toBe('unit-001');
     expect(singleTwin.organs).toHaveLength(6);
   });
+
+  it('should dynamically respect custom tenant economic rates (towing and immobilization)', () => {
+    const customRates = {
+      towingBaseRateTellDzd: 42000,
+      towingSurchargeSaharaDzd: 95000,
+      dailyImmobilizationCostDzd: 32000,
+    };
+
+    const northTwin = buildDeterministicSandboxTwin(
+      'truck-north',
+      'Volvo FH 500',
+      '01234-116-16',
+      'Volvo',
+      'FH 500',
+      2023,
+      140000,
+      16, // Alger
+      1.15,
+      1.1,
+      false,
+      customRates
+    );
+    expect(northTwin.financialArbitrage.desertTowingCostDzd).toBe(42000);
+    expect(northTwin.financialArbitrage.dailyImmobilizationLossDzd).toBe(32000);
+
+    const saharaTwin = buildDeterministicSandboxTwin(
+      'truck-sahara',
+      'Mercedes Actros 3340',
+      '05678-130-30',
+      'Mercedes',
+      'Actros',
+      2022,
+      210000,
+      30, // Ouargla
+      1.7,
+      1.2,
+      true,
+      customRates
+    );
+    expect(saharaTwin.financialArbitrage.desertTowingCostDzd).toBe(95000);
+    expect(saharaTwin.financialArbitrage.dailyImmobilizationLossDzd).toBe(32000);
+  });
 });

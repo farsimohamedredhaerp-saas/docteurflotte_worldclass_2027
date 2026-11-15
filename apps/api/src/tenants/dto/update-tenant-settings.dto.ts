@@ -81,6 +81,21 @@ export class EconomicRatesDto implements Partial<EconomicRates> {
   @Min(0, { message: 'referenceFuelPricePerLiter doit être supérieur ou égal à 0' })
   @IsOptional()
   referenceFuelPricePerLiter?: number;
+
+  @IsNumber()
+  @Min(0, { message: 'towingBaseRateTellDzd doit être supérieur ou égal à 0' })
+  @IsOptional()
+  towingBaseRateTellDzd?: number;
+
+  @IsNumber()
+  @Min(0, { message: 'towingSurchargeSaharaDzd doit être supérieur ou égal à 0' })
+  @IsOptional()
+  towingSurchargeSaharaDzd?: number;
+
+  @IsNumber()
+  @Min(0, { message: 'dailyImmobilizationCostDzd doit être supérieur ou égal à 0' })
+  @IsOptional()
+  dailyImmobilizationCostDzd?: number;
 }
 
 export class NotificationPreferencesDto implements Partial<NotificationPreferences> {

@@ -158,6 +158,9 @@ export class TenantsService {
         approvalExpenseThreshold: countryPack.approvalExpenseThreshold,
         inactionRiskMultiplier: countryPack.inactionRiskMultiplier,
         referenceFuelPricePerLiter: countryPack.referenceFuelPricePerLiter,
+        towingBaseRateTellDzd: countryPack.towingBaseRateTellDzd ?? 35000,
+        towingSurchargeSaharaDzd: countryPack.towingSurchargeSaharaDzd ?? 75000,
+        dailyImmobilizationCostDzd: countryPack.dailyImmobilizationCostDzd ?? 25000,
         ...(existing.economic_rates || {}),
         ...(dto.economicRates || {}),
       };

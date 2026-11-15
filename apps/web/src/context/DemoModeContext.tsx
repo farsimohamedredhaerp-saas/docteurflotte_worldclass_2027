@@ -36,10 +36,14 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
       // Les visiteurs sans connexion sont toujours en Mode Démonstration
       setIsDemoMode(true);
     } else {
-      // Pour les clients connectés, mode réel par défaut sauf s'ils ont activé le toggle démo
+      // Pour les clients connectés, mode réel par défaut sauf s'ils ont explicitement activé le toggle démo
       if (typeof window !== 'undefined') {
         const savedPref = localStorage.getItem(DEMO_STORAGE_KEY);
-        setIsDemoMode(savedPref === 'true');
+        if (currentSession.tenant?.dataOrigin === 'USER_ENTRY' && savedPref !== 'true') {
+          setIsDemoMode(false);
+        } else {
+          setIsDemoMode(savedPref === 'true');
+        }
       } else {
         setIsDemoMode(false);
       }

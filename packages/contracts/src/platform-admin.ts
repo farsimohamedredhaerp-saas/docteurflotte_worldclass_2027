@@ -103,8 +103,23 @@ export interface PlatformRegulatoryEnactaRule {
   warning_lead_days: number[];
   official_decree_ref: string;
   mandatory_checkpoints: string[];
+  tariff_base_ht_dzd?: number;
+  tva_rate_pct?: number;
+  tariff_total_ttc_dzd?: number;
+  internal_tco_provision_dzd?: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface UpdatePlatformRegulatoryEnactaRuleDto {
+  tariff_base_ht_dzd?: number;
+  tva_rate_pct?: number;
+  tariff_total_ttc_dzd?: number;
+  internal_tco_provision_dzd?: number;
+  periodicity_months?: number;
+  first_inspection_months?: number;
+  official_decree_ref?: string;
+  justification?: string;
 }
 
 export interface PlatformVignetteTarif {

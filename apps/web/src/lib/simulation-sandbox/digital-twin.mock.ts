@@ -24,7 +24,12 @@ export function buildDeterministicSandboxTwin(
   wilayaCode: number = 16,
   climateMultiplier: number = 1.15,
   driverMultiplier: number = 1.1,
-  isDesertTransit: boolean = false
+  isDesertTransit: boolean = false,
+  economicRates?: {
+    towingBaseRateTellDzd?: number;
+    towingSurchargeSaharaDzd?: number;
+    dailyImmobilizationCostDzd?: number;
+  }
 ): DigitalTwinAsset {
   const wilaya = getWilayaProfile(wilayaCode);
   const effectiveClimate = isDesertTransit ? Math.max(climateMultiplier, 1.75) : climateMultiplier;
@@ -174,7 +179,10 @@ export function buildDeterministicSandboxTwin(
   );
 
   const isSud = wilaya.zone === 'ZONE_3_SAHARA' || isDesertTransit;
-  const towingForfait = isSud ? 75000 : 35000;
+  const tellRate = Number(economicRates?.towingBaseRateTellDzd) || 35000;
+  const saharaRate = Number(economicRates?.towingSurchargeSaharaDzd) || 75000;
+  const towingForfait = isSud ? saharaRate : tellRate;
+  const dailyImmob = Number(economicRates?.dailyImmobilizationCostDzd) || 25000;
   const immediateCost = bottleneck.organ === 'ENGINE_OIL' ? 28000 : 45000;
   const breakdownCost = 420000 + towingForfait;
   const failureProb = Math.min(95, Math.round((100 - bottleneck.healthPercent) * 0.95));
@@ -185,7 +193,7 @@ export function buildDeterministicSandboxTwin(
     preventiveInterventionCostDzd: immediateCost,
     unplannedBreakdownRiskDzd: breakdownCost,
     desertTowingCostDzd: towingForfait,
-    dailyImmobilizationLossDzd: 25000,
+    dailyImmobilizationLossDzd: dailyImmob,
     netBenefitDzd,
     roiRatio: Number((expectedLoss / immediateCost).toFixed(1)),
     recommendedAction: bottleneck.healthPercent < 40 ? 'MAINTENANCE_IMMÉDIATE' : bottleneck.healthPercent < 70 ? 'SURVEILLANCE_APPROFONDIE' : 'OPÉRATIONNEL_NOMINAL',
@@ -224,7 +232,12 @@ export function getSimulationDigitalTwin(
   wilayaCode: number = 16,
   climateMultiplier: number = 1.15,
   driverMultiplier: number = 1.1,
-  isDesertTransit: boolean = false
+  isDesertTransit: boolean = false,
+  economicRates?: {
+    towingBaseRateTellDzd?: number;
+    towingSurchargeSaharaDzd?: number;
+    dailyImmobilizationCostDzd?: number;
+  }
 ): DigitalTwinAsset {
   const asset =
     MOCK_SANDBOX_ASSETS.find((a) => a.id === assetId) || MOCK_SANDBOX_ASSETS[0];
@@ -240,11 +253,16 @@ export function getSimulationDigitalTwin(
     wilayaCode,
     climateMultiplier,
     driverMultiplier,
-    isDesertTransit
+    isDesertTransit,
+    economicRates
   );
 }
 
-export function getSimulationDigitalTwinsList(): DigitalTwinAsset[] {
+export function getSimulationDigitalTwinsList(economicRates?: {
+  towingBaseRateTellDzd?: number;
+  towingSurchargeSaharaDzd?: number;
+  dailyImmobilizationCostDzd?: number;
+}): DigitalTwinAsset[] {
   return MOCK_SANDBOX_ASSETS.map((asset, idx) => {
     const wilayas = [16, 30, 31, 19, 25];
     const wCode = wilayas[idx % wilayas.length];
@@ -258,7 +276,9 @@ export function getSimulationDigitalTwinsList(): DigitalTwinAsset[] {
       asset.currentMeterValue || 150000,
       wCode,
       wCode === 30 ? 1.65 : 1.15,
-      idx % 2 === 0 ? 0.95 : 1.3
+      idx % 2 === 0 ? 0.95 : 1.3,
+      false,
+      economicRates
     );
   });
 }

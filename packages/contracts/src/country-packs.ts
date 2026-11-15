@@ -19,6 +19,9 @@ export interface CountryEconomicDefaults {
   regulatoryInspectionAuthority: string;
   heavyInspectionPeriodicityMonths: number;
   lightInspectionPeriodicityMonths: number;
+  towingBaseRateTellDzd?: number;
+  towingSurchargeSaharaDzd?: number;
+  dailyImmobilizationCostDzd?: number;
 }
 
 export const GLOBAL_COUNTRY_PACKS: Record<string, CountryEconomicDefaults> = {
@@ -37,6 +40,9 @@ export const GLOBAL_COUNTRY_PACKS: Record<string, CountryEconomicDefaults> = {
     regulatoryInspectionAuthority: 'ENACTA (Décret exécutif 03-223)',
     heavyInspectionPeriodicityMonths: 6,
     lightInspectionPeriodicityMonths: 12,
+    towingBaseRateTellDzd: 35000,
+    towingSurchargeSaharaDzd: 75000,
+    dailyImmobilizationCostDzd: 25000,
   },
   FR: {
     currency: 'EUR',

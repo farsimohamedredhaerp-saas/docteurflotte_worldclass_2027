@@ -64,6 +64,12 @@ export function useRegisterForm(): UseRegisterFormReturn {
 
         AuthClient.saveSession(response);
 
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('df_demo_mode_active', 'false');
+          window.dispatchEvent(new Event('storage'));
+          window.dispatchEvent(new CustomEvent('auth:session-changed'));
+        }
+
         // Redirection vers le setup guidé
         router.push('/setup');
       } catch (err: unknown) {

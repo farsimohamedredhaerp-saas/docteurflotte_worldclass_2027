@@ -63,6 +63,7 @@ export class DigitalTwinService {
   }
 
   async getDigitalTwinsForTenant(tenantId: string): Promise<DigitalTwinAsset[]> {
+    const rates = await this.getTenantEconomicRates(tenantId);
     const assetsRes = await this.queryInTenant<DigitalTwinAssetDatabaseRow>(
       tenantId,
       `SELECT id, code, name, category, status, brand, model, year, current_meter_value
@@ -89,6 +90,7 @@ export class DigitalTwinService {
           16, // Alger
           1.05,
           1.1,
+          rates,
         ),
       ];
     }
@@ -113,11 +115,13 @@ export class DigitalTwinService {
         wilayaCode,
         climate,
         driver,
+        rates,
       );
     });
   }
 
   async getDigitalTwinById(assetId: string, tenantId: string): Promise<DigitalTwinAsset> {
+    const rates = await this.getTenantEconomicRates(tenantId);
     const assetRes = await this.queryInTenant<DigitalTwinAssetDatabaseRow>(
       tenantId,
       `SELECT id, code, name, category, status, brand, model, year, current_meter_value
@@ -140,6 +144,7 @@ export class DigitalTwinService {
         16, // Alger
         1.15,
         1.1,
+        rates,
       );
     }
 
@@ -154,6 +159,7 @@ export class DigitalTwinService {
       16,
       1.15,
       1.1,
+      rates,
     );
   }
 
@@ -162,6 +168,7 @@ export class DigitalTwinService {
     params: DigitalTwinSimulationParams,
     tenantId: string,
   ): Promise<DigitalTwinAsset> {
+    const rates = await this.getTenantEconomicRates(tenantId);
     const twin = await this.getDigitalTwinById(assetId, tenantId);
 
     const wilayaCode = params.wilayaCode ?? twin.wilayaCode ?? 16;
@@ -187,6 +194,7 @@ export class DigitalTwinService {
       wilayaCode,
       climateMultiplier,
       params.driverAggressivenessMultiplier,
+      rates,
     );
   }
 
@@ -281,6 +289,24 @@ export class DigitalTwinService {
     };
   }
 
+  private async getTenantEconomicRates(tenantId?: string): Promise<{
+    towingBaseRateTellDzd?: number;
+    towingSurchargeSaharaDzd?: number;
+    dailyImmobilizationCostDzd?: number;
+  } | undefined> {
+    if (!tenantId) return undefined;
+    try {
+      const res = await this.queryInTenant<{ economic_rates: any }>(
+        tenantId,
+        'SELECT economic_rates FROM tenant_settings WHERE tenant_id = $1',
+        [tenantId],
+      );
+      return res?.rows?.[0]?.economic_rates;
+    } catch {
+      return undefined;
+    }
+  }
+
   public getWilayaProfile(code: number): AlgeriaWilayaProfile {
     const found = ALGERIA_58_WILAYAS_PROFILES.find((w) => w.code === code);
     return (
@@ -301,6 +327,11 @@ export class DigitalTwinService {
     wilayaCode: number,
     climateMultiplier: number,
     driverMultiplier: number,
+    economicRates?: {
+      towingBaseRateTellDzd?: number;
+      towingSurchargeSaharaDzd?: number;
+      dailyImmobilizationCostDzd?: number;
+    },
   ): DigitalTwinAsset {
     const wilaya = this.getWilayaProfile(wilayaCode);
     const stressFactor = climateMultiplier * driverMultiplier;
@@ -459,9 +490,11 @@ export class DigitalTwinService {
 
     // Arbitrage Financier SAD -> ADS en Dinars Algériens (DZD)
     const isSahara = wilaya.zone === 'ZONE_3_SAHARA';
-    const desertTowingCost = isSahara ? 75000 : 35000; // Remorquage désertique majoré
+    const tellRate = Number(economicRates?.towingBaseRateTellDzd) || 35000;
+    const saharaRate = Number(economicRates?.towingSurchargeSaharaDzd) || 75000;
+    const desertTowingCost = isSahara ? saharaRate : tellRate; // Remorquage désertique majoré dynamique
     const partsReplacementCost = 28500;
-    const dailyImmobilization = 25000;
+    const dailyImmobilization = Number(economicRates?.dailyImmobilizationCostDzd) || 25000;
     const failureProb = currentVhi < 50 ? 0.88 : currentVhi < 70 ? 0.45 : 0.15;
 
     const rawInactionCost = desertTowingCost + partsReplacementCost + 3 * dailyImmobilization;

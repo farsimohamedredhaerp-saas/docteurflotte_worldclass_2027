@@ -10,6 +10,7 @@ import {
   PlatformVignetteTarif,
   CreateDecisionConfigDto,
   UpdateDecisionConfigDto,
+  UpdatePlatformRegulatoryEnactaRuleDto,
   DecisionEngineSimulationParams,
   DecisionEngineSimulationResult,
 } from '@docteurflotte/contracts';
@@ -177,6 +178,17 @@ export class PlatformAdminClient {
 
   static async getEnactaRules(token: string): Promise<PlatformRegulatoryEnactaRule[]> {
     return this.request<PlatformRegulatoryEnactaRule[]>('/fiscal/enacta', token);
+  }
+
+  static async updateEnactaRule(
+    id: string,
+    dto: UpdatePlatformRegulatoryEnactaRuleDto,
+    token: string
+  ): Promise<PlatformRegulatoryEnactaRule> {
+    return this.request<PlatformRegulatoryEnactaRule>(`/fiscal/enacta/${id}`, token, {
+      method: 'PATCH',
+      body: JSON.stringify(dto),
+    });
   }
 
   // Gateways

@@ -46,6 +46,9 @@ export default function SettingsPage() {
   const [approvalExpenseThreshold, setApprovalExpenseThreshold] = useState(100000);
   const [inactionRiskMultiplier, setInactionRiskMultiplier] = useState(3.5);
   const [referenceFuelPricePerLiter, setReferenceFuelPricePerLiter] = useState(29.0);
+  const [towingBaseRateTellDzd, setTowingBaseRateTellDzd] = useState(35000);
+  const [towingSurchargeSaharaDzd, setTowingSurchargeSaharaDzd] = useState(75000);
+  const [dailyImmobilizationCostDzd, setDailyImmobilizationCostDzd] = useState(25000);
 
   // Données & Démo
   const [dataOrigin, setDataOrigin] = useState<string>('DEMO');
@@ -86,6 +89,9 @@ export default function SettingsPage() {
           setApprovalExpenseThreshold(settings.economicRates.approvalExpenseThreshold ?? 100000);
           setInactionRiskMultiplier(settings.economicRates.inactionRiskMultiplier ?? 3.5);
           setReferenceFuelPricePerLiter(settings.economicRates.referenceFuelPricePerLiter ?? 29.0);
+          setTowingBaseRateTellDzd(settings.economicRates.towingBaseRateTellDzd ?? 35000);
+          setTowingSurchargeSaharaDzd(settings.economicRates.towingSurchargeSaharaDzd ?? 75000);
+          setDailyImmobilizationCostDzd(settings.economicRates.dailyImmobilizationCostDzd ?? 25000);
         }
       })
       .catch((err: unknown) => {
@@ -119,6 +125,9 @@ export default function SettingsPage() {
             approvalExpenseThreshold: Number(approvalExpenseThreshold),
             inactionRiskMultiplier: Number(inactionRiskMultiplier),
             referenceFuelPricePerLiter: Number(referenceFuelPricePerLiter),
+            towingBaseRateTellDzd: Number(towingBaseRateTellDzd),
+            towingSurchargeSaharaDzd: Number(towingSurchargeSaharaDzd),
+            dailyImmobilizationCostDzd: Number(dailyImmobilizationCostDzd),
           },
         },
         token,
@@ -440,6 +449,65 @@ export default function SettingsPage() {
                       style={inputStyle}
                     />
                     <span style={helperStyle}>Base de calcul pour les surconsommations et budgets prévisionnels.</span>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '28px', paddingTop: '24px', borderTop: '1px solid var(--df-border-subtle)' }}>
+                  <h4 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '6px' }}>
+                    Assistance Routière, Remorquage & Immobilisation Saharienne
+                  </h4>
+                  <p style={{ fontSize: '13px', color: 'var(--df-text-muted)', marginBottom: '20px' }}>
+                    Configurez vos forfaits de dépannage pour la Zone Tell/Nord et les Wilayas Sahariennes (SAD ➔ ADS, arbitrage financier DZD).
+                  </p>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                    <div>
+                      <label htmlFor="towingBaseRateInput" style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--df-text-main)', marginBottom: '6px' }}>
+                        Forfait Remorquage Base — Zone Tell / Nord ({currency})
+                      </label>
+                      <input
+                        id="towingBaseRateInput"
+                        type="number"
+                        min={0}
+                        step={1000}
+                        value={towingBaseRateTellDzd}
+                        onChange={(e) => setTowingBaseRateTellDzd(Number(e.target.value))}
+                        style={inputStyle}
+                      />
+                      <span style={helperStyle}>Tarif standard pour remorquage atelier en zone côtière et plaines.</span>
+                    </div>
+
+                    <div>
+                      <label htmlFor="towingSaharaInput" style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--df-text-main)', marginBottom: '6px' }}>
+                        Surcoût / Forfait Remorquage Désertique — Grand Sud ({currency})
+                      </label>
+                      <input
+                        id="towingSaharaInput"
+                        type="number"
+                        min={0}
+                        step={1000}
+                        value={towingSurchargeSaharaDzd}
+                        onChange={(e) => setTowingSurchargeSaharaDzd(Number(e.target.value))}
+                        style={inputStyle}
+                      />
+                      <span style={helperStyle}>Tarif appliqué lors d&apos;avaries en zone désertique (Ouargla, Hassi Messaoud, Tamanrasset...).</span>
+                    </div>
+
+                    <div>
+                      <label htmlFor="dailyImmobInput" style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--df-text-main)', marginBottom: '6px' }}>
+                        Coût Journalier d&apos;Immobilisation Véhicule ({currency} / jour)
+                      </label>
+                      <input
+                        id="dailyImmobInput"
+                        type="number"
+                        min={0}
+                        step={1000}
+                        value={dailyImmobilizationCostDzd}
+                        onChange={(e) => setDailyImmobilizationCostDzd(Number(e.target.value))}
+                        style={inputStyle}
+                      />
+                      <span style={helperStyle}>Perte d&apos;exploitation journalière directe due à l&apos;immobilisation forcée d&apos;un véhicule.</span>
+                    </div>
                   </div>
                 </div>
               </div>

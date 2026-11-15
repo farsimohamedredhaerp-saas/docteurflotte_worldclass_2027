@@ -1,4 +1,5 @@
 import { ActivityPack, Tenant, TenantStatus } from './tenant';
+import { DataOrigin } from './assets';
 
 export enum UserRole {
   PLATFORM_ADMIN = 'PLATFORM_ADMIN',
@@ -48,6 +49,7 @@ export interface AuthResponse {
     status: TenantStatus;
     activityPack: ActivityPack;
     isSetupCompleted: boolean;
+    dataOrigin?: DataOrigin;
   };
 }
 
