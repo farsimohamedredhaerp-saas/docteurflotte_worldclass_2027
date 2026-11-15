@@ -9,49 +9,104 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Mission-Critical Command Center Industrial Slate Palette
-        slate: {
-          canvas: '#090A0C',
-          panel: '#111317',
-          surface: '#111317',
-          hover: '#181B20',
-          active: '#181B20',
+        // Design Operating System v5.1 — Tokens Sémantiques Officiels
+        canvas: 'var(--df-bg-base)',
+        surface: {
+          DEFAULT: 'var(--df-bg-surface1)',
+          1: 'var(--df-bg-surface1)',
+          2: 'var(--df-bg-surface2)',
+          3: 'var(--df-bg-surface3)',
         },
         border: {
-          hairline: '#23272F',
-          focus: '#343A46',
+          hairline: 'var(--df-border-hairline)',
+          subtle: 'var(--df-border-subtle)',
+          medium: 'var(--df-border-medium)',
+          highlight: 'var(--df-border-highlight)',
+          focus: 'var(--df-border-highlight)',
         },
-        primary: {
-          text: '#F3F4F6',
-          secondary: '#9CA3AF',
-          muted: '#6B7280',
+        foreground: {
+          primary: 'var(--df-text-primary)',
+          secondary: 'var(--df-text-secondary)',
+          muted: 'var(--df-text-muted)',
+          faint: 'var(--df-text-faint)',
+          onBrand: 'var(--df-text-on-brand)',
         },
-        // Couleurs Sémantiques Normées
-        cobalt: {
-          DEFAULT: '#2563EB',
-          hover: '#1D4ED8',
-          subtle: 'rgba(37, 99, 235, 0.14)',
+        brand: {
+          primary: 'var(--df-brand-primary)',
+          'primary-hover': 'var(--df-brand-primary-hover)',
+          glow: 'var(--df-brand-glow)',
         },
         telemetry: {
-          nominal: '#10B981',
-          warning: '#F59E0B',
-          critical: '#EF4444',
-          offline: '#64748B',
+          nominal: 'var(--df-status-nominal)',
+          warning: 'var(--df-status-warning)',
+          critical: 'var(--df-status-critical)',
+          offline: 'var(--df-status-neutral)',
+          cyan: 'var(--df-telemetry-cyan)',
+          'cyan-subtle': 'var(--df-telemetry-cyan-subtle)',
+        },
+        status: {
+          nominal: 'var(--df-status-nominal)',
+          'nominal-bg': 'var(--df-status-nominal-bg)',
+          warning: 'var(--df-status-warning)',
+          'warning-bg': 'var(--df-status-warning-bg)',
+          critical: 'var(--df-status-critical)',
+          'critical-bg': 'var(--df-status-critical-bg)',
+          neutral: 'var(--df-status-neutral)',
+          'neutral-bg': 'var(--df-status-neutral-bg)',
+        },
+
+        // Mission-Critical Command Center Industrial Slate Palette (compatibilité)
+        slate: {
+          canvas: 'var(--df-bg-base)',
+          panel: 'var(--df-bg-surface1)',
+          surface: 'var(--df-bg-surface1)',
+          hover: 'var(--df-bg-surface2)',
+          active: 'var(--df-bg-surface3)',
+        },
+        primary: {
+          text: 'var(--df-text-primary)',
+          secondary: 'var(--df-text-secondary)',
+          muted: 'var(--df-text-muted)',
+        },
+        cobalt: {
+          DEFAULT: 'var(--df-brand-primary)',
+          hover: 'var(--df-brand-primary-hover)',
+          subtle: 'var(--df-brand-glow)',
         },
       },
       borderRadius: {
         none: '0',
-        xs: '2px',
-        sm: '4px',
-        DEFAULT: '2px',
+        xs: 'var(--df-radius-xs, 4px)',
+        sm: 'var(--df-radius-sm, 6px)',
+        DEFAULT: 'var(--df-radius-md, 8px)',
+        md: 'var(--df-radius-md, 8px)',
+        lg: 'var(--df-radius-lg, 10px)',
+        xl: 'var(--df-radius-xl, 14px)',
+        full: 'var(--df-radius-full, 9999px)',
       },
       fontFamily: {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        mono: ['JetBrains Mono', 'Geist Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        arabic: ['Noto Sans Arabic', 'IBM Plex Sans Arabic', 'sans-serif'],
       },
       boxShadow: {
         none: 'none',
-        crisp: '0 1px 2px 0 rgba(0, 0, 0, 0.5)',
+        crisp: 'var(--df-shadow-card)',
+        card: 'var(--df-shadow-card)',
+        dropdown: 'var(--df-shadow-dropdown)',
+        modal: 'var(--df-shadow-modal)',
+        focus: 'var(--df-shadow-focus)',
+      },
+      transitionDuration: {
+        fast: 'var(--df-dur-fast, 120ms)',
+        base: 'var(--df-dur-base, 200ms)',
+        slow: 'var(--df-dur-slow, 320ms)',
+        xslow: 'var(--df-dur-xslow, 480ms)',
+      },
+      transitionTimingFunction: {
+        'out-quint': 'var(--df-ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1))',
+        'in-out': 'var(--df-ease-in-out, cubic-bezier(0.65, 0, 0.35, 1))',
+        spring: 'var(--df-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1))',
       },
       height: {
         header: '48px',

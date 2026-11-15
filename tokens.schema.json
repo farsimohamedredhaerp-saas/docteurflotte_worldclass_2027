@@ -1,0 +1,426 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docteurflotte.dz/schemas/tokens.schema.json",
+  "title": "DocteurFlotte Design Tokens",
+  "description": "Schéma de validation pour tokens.json (Design Operating System v5.x)",
+  "type": "object",
+  "required": [
+    "version",
+    "name",
+    "primitives",
+    "semantic",
+    "chart"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "prefix": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*$"
+        },
+        "outputDir": {
+          "type": "string"
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "css",
+              "tailwind",
+              "ts"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "defaultTheme": {
+          "enum": [
+            "dark",
+            "light"
+          ]
+        }
+      }
+    },
+    "primitives": {
+      "$ref": "#/$defs/primitives"
+    },
+    "semantic": {
+      "type": "object",
+      "required": [
+        "dark",
+        "light"
+      ],
+      "properties": {
+        "dark": {
+          "$ref": "#/$defs/theme"
+        },
+        "light": {
+          "$ref": "#/$defs/theme"
+        }
+      },
+      "additionalProperties": false
+    },
+    "chart": {
+      "$ref": "#/$defs/chart"
+    }
+  },
+  "$defs": {
+    "stringOrNumber": {
+      "type": [
+        "string",
+        "number"
+      ]
+    },
+    "stringMap": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "primitives": {
+      "type": "object",
+      "required": [
+        "spacing",
+        "radius",
+        "zIndex",
+        "motion",
+        "typography",
+        "borderWidths",
+        "density"
+      ],
+      "properties": {
+        "spacing": {
+          "$ref": "#/$defs/stringMap"
+        },
+        "radius": {
+          "$ref": "#/$defs/stringMap"
+        },
+        "zIndex": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "borderWidths": {
+          "$ref": "#/$defs/stringMap"
+        },
+        "density": {
+          "type": "object",
+          "required": [
+            "compact",
+            "comfort",
+            "spacious"
+          ],
+          "additionalProperties": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "motion": {
+          "type": "object",
+          "required": [
+            "durations",
+            "easings"
+          ],
+          "properties": {
+            "durations": {
+              "$ref": "#/$defs/stringMap"
+            },
+            "easings": {
+              "$ref": "#/$defs/stringMap"
+            }
+          }
+        },
+        "typography": {
+          "type": "object",
+          "required": [
+            "fonts",
+            "sizes",
+            "weights",
+            "lineHeights",
+            "letterSpacings"
+          ],
+          "properties": {
+            "fonts": {
+              "$ref": "#/$defs/stringMap"
+            },
+            "sizes": {
+              "$ref": "#/$defs/stringMap"
+            },
+            "weights": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 100,
+                "maximum": 900
+              }
+            },
+            "lineHeights": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "letterSpacings": {
+              "$ref": "#/$defs/stringMap"
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "theme": {
+      "type": "object",
+      "required": [
+        "bg",
+        "border",
+        "text",
+        "brand",
+        "telemetry",
+        "status",
+        "shadows",
+        "focus",
+        "skeleton",
+        "overlay",
+        "glass",
+        "halo",
+        "selection"
+      ],
+      "properties": {
+        "bg": {
+          "type": "object",
+          "required": [
+            "base",
+            "surface1",
+            "surface2",
+            "surface3"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "border": {
+          "type": "object",
+          "required": [
+            "hairline",
+            "subtle",
+            "medium",
+            "highlight"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "text": {
+          "type": "object",
+          "required": [
+            "primary",
+            "secondary",
+            "muted",
+            "faint",
+            "onBrand"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "brand": {
+          "type": "object",
+          "required": [
+            "primary",
+            "primaryHover",
+            "glow"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "telemetry": {
+          "type": "object",
+          "required": [
+            "cyan",
+            "cyanSubtle"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "type": "object",
+          "required": [
+            "nominal",
+            "nominalBg",
+            "warning",
+            "warningBg",
+            "critical",
+            "criticalBg",
+            "neutral",
+            "neutralBg"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "shadows": {
+          "type": "object",
+          "required": [
+            "card",
+            "dropdown",
+            "modal",
+            "focus"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "focus": {
+          "type": "object",
+          "required": [
+            "ring"
+          ],
+          "properties": {
+            "ring": {
+              "type": "object",
+              "required": [
+                "color",
+                "width",
+                "offset"
+              ],
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "skeleton": {
+          "type": "object",
+          "required": [
+            "base",
+            "shimmer"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "overlay": {
+          "type": "string"
+        },
+        "glass": {
+          "type": "object",
+          "required": [
+            "bg",
+            "blur"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "halo": {
+          "type": "string"
+        },
+        "selection": {
+          "type": "object",
+          "required": [
+            "barColor",
+            "barWidth",
+            "bg"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "chart": {
+      "type": "object",
+      "required": [
+        "series",
+        "grid",
+        "axisText",
+        "tooltip",
+        "annotation",
+        "sparklineOpacity"
+      ],
+      "properties": {
+        "series": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "seriesLight": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "grid": {
+          "type": "string"
+        },
+        "axisText": {
+          "type": "string"
+        },
+        "sparklineOpacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "tooltip": {
+          "type": "object",
+          "required": [
+            "bg",
+            "border",
+            "text"
+          ],
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "dark",
+              "light"
+            ],
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "annotation": {
+          "type": "object",
+          "required": [
+            "color",
+            "labelBg"
+          ],
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "dark",
+              "light"
+            ],
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

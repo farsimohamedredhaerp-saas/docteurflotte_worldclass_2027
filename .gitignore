@@ -82,8 +82,10 @@ data/tiles/
 # ------------------------------------------------------------------------------
 # 6. ARTEFACTS DE COMPILATION, SOURCE MAPS & BYTECODE V8 / NATIVE
 # ------------------------------------------------------------------------------
-dist/
-**/dist/
+dist/*
+!dist/tokens/
+packages/*/dist/
+apps/*/dist/
 .next/
 out/
 build/

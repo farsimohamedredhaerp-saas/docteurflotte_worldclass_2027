@@ -1,11 +1,10 @@
 /* ==========================================================================
-   DOCTEURFLOTTE — DESIGN OPERATING SYSTEM TOKENS (v5.0)
-   GÉNÉRÉ AUTOMATIQUEMENT PAR scripts/build-tokens.cjs — NE PAS ÉDITER DIRECTEMENT
-   Source de vérité : tokens/tokens.json
+   DocteurFlotte Design Tokens — v5.1.0
+   Généré automatiquement depuis tokens.json — NE PAS ÉDITER MANUELLEMENT
    ========================================================================== */
 
+/* ---- Primitives (invariants, partagés) ---- */
 :root {
-  /* Espacements (base 4px) */
   --df-space-0: 0;
   --df-space-1: 0.25rem;
   --df-space-2: 0.5rem;
@@ -18,16 +17,12 @@
   --df-space-12: 3rem;
   --df-space-16: 4rem;
   --df-space-20: 5rem;
-
-  /* Rayons de courbure techniques */
   --df-radius-xs: 4px;
   --df-radius-sm: 6px;
   --df-radius-md: 8px;
   --df-radius-lg: 10px;
   --df-radius-xl: 14px;
   --df-radius-full: 9999px;
-
-  /* Niveaux d'élévation Z-Index */
   --df-z-base: 0;
   --df-z-sticky: 10;
   --df-z-dropdown: 100;
@@ -36,17 +31,19 @@
   --df-z-popover: 400;
   --df-z-toast: 500;
   --df-z-command: 600;
-
-  /* Durées et Easings d'Animation */
+  --df-border-w-hairline: 1px;
+  --df-border-w-medium: 1.5px;
+  --df-border-w-thick: 2px;
+  --df-density-compact: 0.75;
+  --df-density-comfort: 1;
+  --df-density-spacious: 1.25;
   --df-dur-fast: 120ms;
   --df-dur-base: 200ms;
   --df-dur-slow: 320ms;
   --df-dur-xslow: 480ms;
-  --df-ease-outQuint: cubic-bezier(0.22, 1, 0.36, 1);
-  --df-ease-inOut: cubic-bezier(0.65, 0, 0.35, 1);
+  --df-ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --df-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --df-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  /* Typographie */
   --df-font-sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --df-font-mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, SFMono-Regular, monospace;
   --df-font-arabic: 'Noto Sans Arabic', 'IBM Plex Sans Arabic', sans-serif;
@@ -56,20 +53,65 @@
   --df-text-lg: 0.9375rem;
   --df-text-xl: 1.375rem;
   --df-text-2xl: 2rem;
+  --df-weight-regular: 400;
+  --df-weight-medium: 500;
+  --df-weight-semibold: 600;
+  --df-weight-bold: 700;
+  --df-leading-tight: 1.2;
+  --df-leading-snug: 1.35;
+  --df-leading-normal: 1.5;
+  --df-leading-relaxed: 1.625;
+  --df-tracking-tighter: -0.02em;
+  --df-tracking-tight: -0.01em;
+  --df-tracking-normal: 0;
+  --df-tracking-wide: 0.025em;
+  --df-tracking-wider: 0.05em;
+}
 
-  /* Couleurs Sémantiques — Thème Clair (Sahara Calcite) */
+/* ---- Chart (partagé + variantes dark/light suffixées) ---- */
+:root {
+  --df-chart-1: #2563EB;
+  --df-chart-2: #0284C7;
+  --df-chart-3: #8B5CF6;
+  --df-chart-4: #D97706;
+  --df-chart-5: #10B981;
+  --df-chart-6: #64748B;
+  --df-chart-light-1: #1D4ED8;
+  --df-chart-light-2: #0369A1;
+  --df-chart-light-3: #7C3AED;
+  --df-chart-light-4: #B45309;
+  --df-chart-light-5: #059669;
+  --df-chart-light-6: #475569;
+  --df-chart-grid: rgba(148, 163, 184, 0.10);
+  --df-chart-axis-text: #64748B;
+  --df-chart-sparkline-opacity: 0.4;
+  --df-chart-tooltip-bg-dark: #121824;
+  --df-chart-tooltip-bg-light: #FFFFFF;
+  --df-chart-tooltip-border-dark: #2A364F;
+  --df-chart-tooltip-border-light: #E2E8F0;
+  --df-chart-tooltip-text-dark: #F8FAFC;
+  --df-chart-tooltip-text-light: #0F172A;
+  --df-chart-annotation-color-dark: #D97706;
+  --df-chart-annotation-color-light: #B45309;
+  --df-chart-annotation-label-bg-dark: #121824;
+  --df-chart-annotation-label-bg-light: #FFFFFF;
+}
+
+/* ---- Thème (défaut : light) ---- */
+:root, [data-theme="light"] {
   --df-bg-base: #F4F6F9;
-  --df-bg-surface-1: #FFFFFF;
-  --df-bg-surface-2: #EDF1F7;
-  --df-bg-surface-3: #E2E8F0;
+  --df-bg-surface1: #FFFFFF;
+  --df-bg-surface2: #EDF1F7;
+  --df-bg-surface3: #E2E8F0;
   --df-border-hairline: #E2E8F0;
   --df-border-subtle: #CBD5E1;
   --df-border-medium: #94A3B8;
-  --df-border-highlight: rgba(255, 255, 255, 0.8);
+  --df-border-highlight: rgba(255, 255, 255, 0.80);
   --df-text-primary: #0F172A;
   --df-text-secondary: #334155;
   --df-text-muted: #64748B;
   --df-text-faint: #CBD5E1;
+  --df-text-on-brand: #FFFFFF;
   --df-brand-primary: #1D4ED8;
   --df-brand-primary-hover: #1E40AF;
   --df-brand-glow: rgba(29, 78, 216, 0.12);
@@ -83,25 +125,27 @@
   --df-status-critical-bg: #FEF2F2;
   --df-status-neutral: #64748B;
   --df-status-neutral-bg: #F1F5F9;
-
-  /* Data-Viz Séries & Grilles */
-  --df-chart-1: #2563EB;
-  --df-chart-2: #0284C7;
-  --df-chart-3: #8B5CF6;
-  --df-chart-4: #D97706;
-  --df-chart-5: #10B981;
-  --df-chart-6: #64748B;
-  --df-chart-grid: rgba(148, 163, 184, 0.10);
-  --df-chart-axis-text: #64748B;
-  --df-chart-tooltip-bg: #FFFFFF;
+  --df-shadow-card: inset 0 1px 0 0 rgba(255, 255, 255, 0.80), 0 2px 8px -2px rgba(15, 23, 42, 0.06);
+  --df-shadow-dropdown: 0 8px 24px -4px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.06);
+  --df-shadow-modal: 0 24px 48px -8px rgba(15, 23, 42, 0.18);
+  --df-shadow-focus: 0 0 0 2px var(--df-brand-primary), 0 0 0 4px var(--df-bg-base);
+  --df-focus-ring: [object Object];
+  --df-skeleton-base: #E2E8F0;
+  --df-skeleton-shimmer: rgba(255, 255, 255, 0.60);
+  --df-glass-bg: rgba(255, 255, 255, 0.80);
+  --df-glass-blur: 12px;
+  --df-selection-bar-color: var(--df-brand-primary);
+  --df-selection-bar-width: 2px;
+  --df-selection-bg: var(--df-bg-surface3);
+  --df-overlay: rgba(15, 23, 42, 0.40);
+  --df-halo: radial-gradient(1000px circle at 50% -20%, rgba(29, 78, 216, 0.04), transparent 70%);
 }
 
-/* Thème Sombre — Titanium Aerospace */
-:root[data-theme="dark"], html.dark {
+html.dark, [data-theme="dark"] {
   --df-bg-base: #080A0F;
-  --df-bg-surface-1: #0D111A;
-  --df-bg-surface-2: #121824;
-  --df-bg-surface-3: #182030;
+  --df-bg-surface1: #0D111A;
+  --df-bg-surface2: #121824;
+  --df-bg-surface3: #182030;
   --df-border-hairline: rgba(255, 255, 255, 0.08);
   --df-border-subtle: #1E2638;
   --df-border-medium: #2A364F;
@@ -110,6 +154,7 @@
   --df-text-secondary: #94A3B8;
   --df-text-muted: #64748B;
   --df-text-faint: #334155;
+  --df-text-on-brand: #FFFFFF;
   --df-brand-primary: #2563EB;
   --df-brand-primary-hover: #1D4ED8;
   --df-brand-glow: rgba(37, 99, 235, 0.18);
@@ -123,21 +168,18 @@
   --df-status-critical-bg: rgba(220, 38, 38, 0.12);
   --df-status-neutral: #64748B;
   --df-status-neutral-bg: rgba(100, 116, 139, 0.10);
-  --df-chart-tooltip-bg: #121824;
-}
-
-/* Accessibilité WCAG : Respect strict du mode sans animation */
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --df-dur-fast: 0.01ms !important;
-    --df-dur-base: 0.01ms !important;
-    --df-dur-slow: 0.01ms !important;
-    --df-dur-xslow: 0.01ms !important;
-  }
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+  --df-shadow-card: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.40);
+  --df-shadow-dropdown: 0 8px 24px -4px rgba(0, 0, 0, 0.50), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --df-shadow-modal: 0 24px 48px -8px rgba(0, 0, 0, 0.60);
+  --df-shadow-focus: 0 0 0 2px var(--df-brand-primary), 0 0 0 4px var(--df-bg-base);
+  --df-focus-ring: [object Object];
+  --df-skeleton-base: #1E2638;
+  --df-skeleton-shimmer: rgba(255, 255, 255, 0.04);
+  --df-glass-bg: rgba(13, 17, 26, 0.72);
+  --df-glass-blur: 12px;
+  --df-selection-bar-color: var(--df-brand-primary);
+  --df-selection-bar-width: 2px;
+  --df-selection-bg: var(--df-bg-surface3);
+  --df-overlay: rgba(8, 10, 15, 0.72);
+  --df-halo: radial-gradient(1000px circle at 50% -20%, rgba(37, 99, 235, 0.06), transparent 70%);
 }

@@ -6,8 +6,8 @@
     "dev": "node --max-old-space-size=2048 ./node_modules/next/dist/bin/next dev --turbopack -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "typecheck": "node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc --noEmit",
-    "lint": "node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {

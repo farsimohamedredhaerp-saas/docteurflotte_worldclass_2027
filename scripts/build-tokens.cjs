@@ -189,3 +189,4 @@ export type ChartSeriesColor = typeof DESIGN_TOKENS.chart.series[number];
 
 fs.writeFileSync(tsOutputPath, ts, 'utf8');
 console.log(`✅ TypeScript compilé avec succès : ${tsOutputPath}`);
+

@@ -12,7 +12,7 @@
     "dev": "turbo run dev",
     "dev:api": "pnpm --filter @docteurflotte/api dev",
     "dev:web": "pnpm --filter @docteurflotte/web dev",
-    "tokens:build": "node scripts/build-tokens.cjs",
+    "tokens:build": "node build-tokens.mjs",
     "lint": "turbo run lint --concurrency=1",
     "lint:hardcode": "node scripts/guardrails/lint-decision-engine-hardcode.cjs",
     "bench": "pnpm --filter @docteurflotte/decision-engine build && node scripts/bench-decision-engine.cjs",
@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.4",
+    "tailwindcss": "^3.4.19",
     "turbo": "^2.4.4",
     "typescript": "^5.7.3"
   }

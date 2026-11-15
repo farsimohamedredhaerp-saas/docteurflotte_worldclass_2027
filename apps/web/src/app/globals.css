@@ -4,6 +4,7 @@
    Thème : Carbon Space Cockpit (Dark) / Alpine High-Contrast Slate (Light)
    ========================================================================== */
 
+@import './tokens.css';
 @import './cockpit-utilities.css';
 
 :root {

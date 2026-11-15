@@ -1,13 +1,24 @@
-/**
- * DocteurFlotte Design Tokens (v5.0) — Typage et constantes TypeScript
- * GÉNÉRÉ AUTOMATIQUEMENT PAR scripts/build-tokens.cjs
- */
+// Généré automatiquement depuis tokens.json — NE PAS ÉDITER
+// Source unique de vérité : tokens.json (v5.1.0)
 
-export const DESIGN_TOKENS = {
-  "$schema": "https://json.schemastore.org/design-tokens.json",
-  "version": "5.0.0",
+export type ThemeName = 'dark' | 'light';
+export type Density = 'compact' | 'comfort' | 'spacious';
+
+export const tokens = {
+  "$schema": "./tokens.schema.json",
+  "version": "5.1.0",
   "name": "DocteurFlotte Design Tokens — Titanium & Sahara Calcite",
-  "description": "Design Operating System v5.0 — Source unique de vérité pour le thème et l'architecture UI",
+  "description": "Design Operating System v5.1 — Source unique de vérité pour le thème et l'architecture UI",
+  "meta": {
+    "prefix": "df",
+    "outputDir": "./dist/tokens",
+    "targets": [
+      "css",
+      "tailwind",
+      "ts"
+    ],
+    "defaultTheme": "light"
+  },
   "primitives": {
     "spacing": {
       "0": "0",
@@ -41,6 +52,16 @@ export const DESIGN_TOKENS = {
       "toast": 500,
       "command": 600
     },
+    "borderWidths": {
+      "hairline": "1px",
+      "medium": "1.5px",
+      "thick": "2px"
+    },
+    "density": {
+      "compact": 0.75,
+      "comfort": 1,
+      "spacious": 1.25
+    },
     "motion": {
       "durations": {
         "fast": "120ms",
@@ -67,6 +88,25 @@ export const DESIGN_TOKENS = {
         "lg": "0.9375rem",
         "xl": "1.375rem",
         "2xl": "2rem"
+      },
+      "weights": {
+        "regular": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700
+      },
+      "lineHeights": {
+        "tight": 1.2,
+        "snug": 1.35,
+        "normal": 1.5,
+        "relaxed": 1.625
+      },
+      "letterSpacings": {
+        "tighter": "-0.02em",
+        "tight": "-0.01em",
+        "normal": "0",
+        "wide": "0.025em",
+        "wider": "0.05em"
       }
     }
   },
@@ -109,6 +149,34 @@ export const DESIGN_TOKENS = {
         "criticalBg": "rgba(220, 38, 38, 0.12)",
         "neutral": "#64748B",
         "neutralBg": "rgba(100, 116, 139, 0.10)"
+      },
+      "shadows": {
+        "card": "inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.40)",
+        "dropdown": "0 8px 24px -4px rgba(0, 0, 0, 0.50), 0 0 0 1px rgba(255, 255, 255, 0.06)",
+        "modal": "0 24px 48px -8px rgba(0, 0, 0, 0.60)",
+        "focus": "0 0 0 2px var(--df-brand-primary), 0 0 0 4px var(--df-bg-base)"
+      },
+      "focus": {
+        "ring": {
+          "color": "var(--df-brand-primary)",
+          "width": "2px",
+          "offset": "2px"
+        }
+      },
+      "skeleton": {
+        "base": "#1E2638",
+        "shimmer": "rgba(255, 255, 255, 0.04)"
+      },
+      "overlay": "rgba(8, 10, 15, 0.72)",
+      "glass": {
+        "bg": "rgba(13, 17, 26, 0.72)",
+        "blur": "12px"
+      },
+      "halo": "radial-gradient(1000px circle at 50% -20%, rgba(37, 99, 235, 0.06), transparent 70%)",
+      "selection": {
+        "barColor": "var(--df-brand-primary)",
+        "barWidth": "2px",
+        "bg": "var(--df-bg-surface3)"
       }
     },
     "light": {
@@ -122,7 +190,7 @@ export const DESIGN_TOKENS = {
         "hairline": "#E2E8F0",
         "subtle": "#CBD5E1",
         "medium": "#94A3B8",
-        "highlight": "rgba(255, 255, 255, 0.8)"
+        "highlight": "rgba(255, 255, 255, 0.80)"
       },
       "text": {
         "primary": "#0F172A",
@@ -149,6 +217,34 @@ export const DESIGN_TOKENS = {
         "criticalBg": "#FEF2F2",
         "neutral": "#64748B",
         "neutralBg": "#F1F5F9"
+      },
+      "shadows": {
+        "card": "inset 0 1px 0 0 rgba(255, 255, 255, 0.80), 0 2px 8px -2px rgba(15, 23, 42, 0.06)",
+        "dropdown": "0 8px 24px -4px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.06)",
+        "modal": "0 24px 48px -8px rgba(15, 23, 42, 0.18)",
+        "focus": "0 0 0 2px var(--df-brand-primary), 0 0 0 4px var(--df-bg-base)"
+      },
+      "focus": {
+        "ring": {
+          "color": "var(--df-brand-primary)",
+          "width": "2px",
+          "offset": "2px"
+        }
+      },
+      "skeleton": {
+        "base": "#E2E8F0",
+        "shimmer": "rgba(255, 255, 255, 0.60)"
+      },
+      "overlay": "rgba(15, 23, 42, 0.40)",
+      "glass": {
+        "bg": "rgba(255, 255, 255, 0.80)",
+        "blur": "12px"
+      },
+      "halo": "radial-gradient(1000px circle at 50% -20%, rgba(29, 78, 216, 0.04), transparent 70%)",
+      "selection": {
+        "barColor": "var(--df-brand-primary)",
+        "barWidth": "2px",
+        "bg": "var(--df-bg-surface3)"
       }
     }
   },
@@ -161,15 +257,50 @@ export const DESIGN_TOKENS = {
       "#10B981",
       "#64748B"
     ],
+    "seriesLight": [
+      "#1D4ED8",
+      "#0369A1",
+      "#7C3AED",
+      "#B45309",
+      "#059669",
+      "#475569"
+    ],
     "grid": "rgba(148, 163, 184, 0.10)",
     "axisText": "#64748B",
-    "tooltipBgDark": "#121824",
-    "tooltipBgLight": "#FFFFFF"
+    "sparklineOpacity": 0.4,
+    "tooltip": {
+      "bg": {
+        "dark": "#121824",
+        "light": "#FFFFFF"
+      },
+      "border": {
+        "dark": "#2A364F",
+        "light": "#E2E8F0"
+      },
+      "text": {
+        "dark": "#F8FAFC",
+        "light": "#0F172A"
+      }
+    },
+    "annotation": {
+      "color": {
+        "dark": "#D97706",
+        "light": "#B45309"
+      },
+      "labelBg": {
+        "dark": "#121824",
+        "light": "#FFFFFF"
+      }
+    }
   }
 } as const;
 
-export type DesignTokens = typeof DESIGN_TOKENS;
-export type SpacingToken = keyof typeof DESIGN_TOKENS.primitives.spacing;
-export type RadiusToken = keyof typeof DESIGN_TOKENS.primitives.radius;
-export type ZIndexToken = keyof typeof DESIGN_TOKENS.primitives.zIndex;
-export type ChartSeriesColor = typeof DESIGN_TOKENS.chart.series[number];
+export const primitives = tokens.primitives;
+export const semantic = tokens.semantic;
+export const chart = tokens.chart;
+
+export type PrimitiveTokens = typeof primitives;
+export type SemanticTokens = typeof semantic;
+export type ChartTokens = typeof chart;
+
+export default tokens;
