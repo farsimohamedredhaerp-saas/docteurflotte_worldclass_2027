@@ -20,7 +20,18 @@ export function useLoginForm(): UseLoginFormReturn {
   const [isOfflineError, setIsOfflineError] = useState(false);
 
   const setField = useCallback((field: keyof LoginFormData, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value };
+      if (
+        field === 'email' &&
+        typeof value === 'string' &&
+        value.trim() !== 'admin@farsi.dz' &&
+        prev.tenantSlug === 'entreprise-bth'
+      ) {
+        next.tenantSlug = '';
+      }
+      return next;
+    });
     setError(null);
     setIsOfflineError(false);
   }, []);
