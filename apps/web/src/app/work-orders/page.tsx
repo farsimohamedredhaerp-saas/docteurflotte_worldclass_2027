@@ -85,7 +85,7 @@ function WorkOrdersContainer() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 transition-colors duration-150">
+    <div className="min-h-screen bg-[var(--df-bg-canvas)] text-[var(--df-text-main)] transition-colors duration-[var(--df-dur-base,200ms)]">
       <Navbar />
 
       <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-16">

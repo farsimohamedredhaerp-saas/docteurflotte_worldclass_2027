@@ -8,3 +8,5 @@ export * from './NotificationBanner';
 export * from './KpiCard';
 export * from './TrendChart';
 export * from './CostArbitrationBars';
+export * from './VehicleSilhouette';
+export * from './SovereigntySeal';

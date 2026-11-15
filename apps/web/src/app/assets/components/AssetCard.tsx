@@ -4,6 +4,8 @@ import React from 'react';
 import { Asset, AssetStatus, MeterType } from '@docteurflotte/contracts';
 import { Badge } from '@/components/Badge';
 import { Card } from '@/components/ui/Card';
+import { VehicleSilhouette } from '@/components/ui/VehicleSilhouette';
+import { SovereigntySeal } from '@/components/ui/SovereigntySeal';
 import {
   IconTruck,
   IconClock,
@@ -87,25 +89,37 @@ export const AssetCard: React.FC<AssetCardProps> = React.memo(({
           </span>
         </div>
 
-        {/* NOM DE L'ACTIF & MARQUE/MODÈLE */}
-        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 line-clamp-1 mb-1 leading-snug">
-          {a.name}
-        </h3>
+        {/* NOM DE L'ACTIF, SILHOUETTE VECTORIELLE ALGÉRIENNE & MARQUE/MODÈLE */}
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-bold text-[var(--df-text-main)] line-clamp-1 mb-1 leading-snug">
+              {a.name}
+            </h3>
 
-        <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 mb-3">
-          <IconTruck size={13} className="text-blue-500 flex-shrink-0" />
-          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
-            {a.brand || 'Constructeur'} {a.model || ''}
-          </span>
-          {a.year && (
-            <span className="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[10px] text-slate-600 dark:text-slate-300">
-              {a.year}
-            </span>
-          )}
-        </div>
+            <div className="flex items-center gap-2 text-xs text-[var(--df-text-secondary)] mb-1">
+              <span className="font-semibold text-[var(--df-text-main)] truncate">
+                {a.brand || 'Constructeur'} {a.model || ''}
+              </span>
+              {a.year && (
+                <span className="px-1.5 py-0.2 rounded bg-[var(--df-bg-surface-2)] font-mono text-[10px] text-[var(--df-text-muted)] border border-[var(--df-border-subtle)]">
+                  {a.year}
+                </span>
+              )}
+            </div>
 
-        <div className="text-[11px] text-slate-500 mb-3">
-          {formatCategoryLabel(a.category)}
+            <div className="text-[11px] text-[var(--df-text-muted)] font-mono">
+              {formatCategoryLabel(a.category)}
+            </div>
+          </div>
+
+          {/* Silhouette vectorielle réaliste DZ */}
+          <VehicleSilhouette
+            brand={a.brand}
+            model={a.model}
+            category={a.category}
+            size="md"
+            className="text-[var(--df-text-secondary)] opacity-85 hover:opacity-100 transition-opacity"
+          />
         </div>
 
         {/* PROGRESSION DE L'ÉCHÉANCE D'ENTRETIEN */}
@@ -144,22 +158,25 @@ export const AssetCard: React.FC<AssetCardProps> = React.memo(({
       </div>
 
       {/* PIED DE CARTE & ACTIONS OPÉRATEUR */}
-      <div className="p-3 bg-slate-50/80 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={() => onOpenMeterModal(a)}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors"
-          title="Enregistrer un nouveau relevé de compteur"
-        >
-          <IconClock size={12} />
-          <span>Relever Compteur</span>
-        </button>
+      <div className="p-3 bg-[var(--df-bg-surface-2)] border-t border-[var(--df-border-subtle)] flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onOpenMeterModal(a)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--df-radius-xs,4px)] text-xs font-semibold text-[var(--df-accent-blue)] bg-[var(--df-accent-blue-subtle)] hover:bg-[var(--df-bg-surface-3)] transition-colors"
+            title="Enregistrer un nouveau relevé de compteur (Mode 0)"
+          >
+            <IconClock size={12} />
+            <span>Relevé</span>
+          </button>
+          <SovereigntySeal type="ANPDP_18_07" size="xs" />
+        </div>
 
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => onOpenEditModal(a)}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-[var(--df-text-muted)] hover:text-[var(--df-text-main)] rounded-[var(--df-radius-xs,4px)] hover:bg-[var(--df-bg-surface-3)] transition-colors"
             aria-label="Modifier cet actif"
           >
             <IconEdit size={13} />
@@ -167,7 +184,7 @@ export const AssetCard: React.FC<AssetCardProps> = React.memo(({
           <button
             type="button"
             onClick={() => onOpenDeleteConfirm(a.id, `${a.code} — ${a.name}`)}
-            className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+            className="p-1.5 text-[var(--df-text-muted)] hover:text-[var(--df-status-danger-text)] rounded-[var(--df-radius-xs,4px)] hover:bg-[var(--df-status-danger-bg)] transition-colors"
             aria-label="Supprimer cet actif"
           >
             <IconTrash size={13} />

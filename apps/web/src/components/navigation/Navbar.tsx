@@ -8,6 +8,7 @@ import { NavFeaturesMenu } from './NavFeaturesMenu';
 import { UserMenuDropdown } from './UserMenuDropdown';
 import { DemoModeToggle } from './DemoModeToggle';
 import { ThemeToggle } from '../ThemeToggle';
+import { LanguageToggle } from './LanguageToggle';
 import { PlatformStatusBar } from './PlatformStatusBar';
 import { MobileNavDrawer } from './MobileNavDrawer';
 import { CommandPaletteModal } from './CommandPaletteModal';
@@ -321,6 +322,9 @@ export function Navbar({ onResetDemo }: NavbarProps) {
 
           {/* COMMUTATEUR MODE DÉMO VS MODE RÉEL */}
           <DemoModeToggle />
+
+          {/* SÉLECTEUR DE LANGUE (FR / AR RTL / EN) */}
+          <LanguageToggle />
 
           {/* COMMUTATEUR THÈME SOMBRE / CLAIR */}
           <ThemeToggle />

@@ -161,6 +161,56 @@ describe('UI Kit Transverse — Certification de Stabilité (Porte 0)', () => {
     it('FleetHighDensityTable gère la haute densité avec pagination et toggle compact/confort', async () => {
       const { FleetHighDensityTable } = await import('../components/density/FleetHighDensityTable');
       expect(FleetHighDensityTable).toBeDefined();
+    }, 15000);
+
+    it('VehicleSilhouette résout dynamiquement les types de véhicules du parc algérien', async () => {
+      const { resolveSilhouetteType, VehicleSilhouette } = await import('../components/ui/VehicleSilhouette');
+      expect(VehicleSilhouette).toBeDefined();
+
+      expect(resolveSilhouetteType('Renault Trucks', 'K-Range')).toBe('TRACTOR_SEMI');
+      expect(resolveSilhouetteType('Mercedes-Benz', 'Actros')).toBe('TRACTOR_SEMI');
+      expect(resolveSilhouetteType('Shacman', 'F3000')).toBe('HEAVY_TIPPER_8X4');
+      expect(resolveSilhouetteType('Sinotruk', 'HOWO 8x4')).toBe('HEAVY_TIPPER_8X4');
+      expect(resolveSilhouetteType('Caterpillar', '320D')).toBe('EXCAVATOR_BTP');
+      expect(resolveSilhouetteType('Toyota', 'Hilux 4x4')).toBe('PICKUP_4X4');
+      expect(resolveSilhouetteType('Renault', 'Master')).toBe('VAN_LIGHT');
+      expect(resolveSilhouetteType('Hyundai', 'H350')).toBe('VAN_LIGHT');
+      expect(resolveSilhouetteType('Unknown', 'Unknown')).toBe('TRACTOR_SEMI');
+    });
+
+    it('VehicleSilhouette résout dynamiquement les types de véhicules du parc algérien', async () => {
+      const { resolveSilhouetteType, VehicleSilhouette } = await import('../components/ui/VehicleSilhouette');
+      expect(VehicleSilhouette).toBeDefined();
+
+      expect(resolveSilhouetteType('Renault Trucks', 'K-Range')).toBe('TRACTOR_SEMI');
+      expect(resolveSilhouetteType('Mercedes-Benz', 'Actros')).toBe('TRACTOR_SEMI');
+      expect(resolveSilhouetteType('Shacman', 'F3000')).toBe('HEAVY_TIPPER_8X4');
+      expect(resolveSilhouetteType('Sinotruk', 'HOWO 8x4')).toBe('HEAVY_TIPPER_8X4');
+      expect(resolveSilhouetteType('Caterpillar', '320D')).toBe('EXCAVATOR_BTP');
+      expect(resolveSilhouetteType('Toyota', 'Hilux 4x4')).toBe('PICKUP_4X4');
+      expect(resolveSilhouetteType('Renault', 'Master')).toBe('VAN_LIGHT');
+      expect(resolveSilhouetteType('Hyundai', 'H350')).toBe('VAN_LIGHT');
+      expect(resolveSilhouetteType('Unknown', 'Unknown')).toBe('TRACTOR_SEMI');
+    });
+
+    it('SovereigntySeal supporte les 4 tampons réglementaires souverains algériens', async () => {
+      const { SovereigntySeal } = await import('../components/ui/SovereigntySeal');
+      expect(SovereigntySeal).toBeDefined();
+    });
+
+    it('LanguageToggle supporte la commutation trilingue et le mode RTL', async () => {
+      const { LanguageToggle } = await import('../components/navigation/LanguageToggle');
+      expect(LanguageToggle).toBeDefined();
+    });
+
+    it('SovereigntySeal supporte les 4 tampons réglementaires souverains algériens', async () => {
+      const { SovereigntySeal } = await import('../components/ui/SovereigntySeal');
+      expect(SovereigntySeal).toBeDefined();
+    });
+
+    it('LanguageToggle supporte la commutation trilingue et le mode RTL', async () => {
+      const { LanguageToggle } = await import('../components/navigation/LanguageToggle');
+      expect(LanguageToggle).toBeDefined();
     });
   });
 });

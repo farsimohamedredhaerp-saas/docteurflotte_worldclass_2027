@@ -334,6 +334,7 @@ export default function DigitalTwinPage() {
               wilayaLocation={digitalTwin.wilayaLocation}
               climateFactor={digitalTwin.climateSeverityFactor}
               driverFactor={digitalTwin.driverAggressivenessScore}
+              category={digitalTwin.category}
             />
           </div>
 

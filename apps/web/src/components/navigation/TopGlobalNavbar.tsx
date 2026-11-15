@@ -10,6 +10,7 @@ import {
   type NavigationModuleId,
 } from './navigationConfig';
 import { DemoModeToggle } from './DemoModeToggle';
+import { LanguageToggle } from './LanguageToggle';
 import {
   IconSearch,
   IconSun,
@@ -529,6 +530,9 @@ export function TopGlobalNavbar({
 
         {/* COMMUTATEUR MODE DÉMO VS RÉEL */}
         <DemoModeToggle />
+
+        {/* SÉLECTEUR DE LANGUE (FR / AR RTL / EN) */}
+        <LanguageToggle />
 
         {/* SWITCH DE THÈME (DARK OPS / LIGHT FIELD) */}
         <button

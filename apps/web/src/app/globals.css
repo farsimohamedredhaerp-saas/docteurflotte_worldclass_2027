@@ -652,3 +652,35 @@ a:hover {
     animation: none;
   }
 }
+
+/* ==========================================================================
+   SUPPORT BILINGUE & RTL ARABE NATUREL (PLAN DIRECTEUR §11)
+   ========================================================================== */
+
+:root {
+  --df-font-arabic: 'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+}
+
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+  font-family: var(--df-font-arabic), var(--df-font-sans);
+}
+
+/* Les chiffres, métriques monétaires DZD, VIN et identifiants télématiques
+   restent impérativement en LTR monospace isolés (règle comptable/télématique algérienne) */
+[dir="rtl"] .font-mono,
+[dir="rtl"] .tabular-nums,
+[dir="rtl"] input[type="number"],
+[dir="rtl"] input[type="tel"] {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: isolate;
+}
+
+/* Miroir directionnel des chevrons et flèches de navigation en RTL */
+[dir="rtl"] .df-icon-mirror-rtl,
+[dir="rtl"] .df-chevron-rtl {
+  transform: scaleX(-1);
+}
+

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card } from '@/components/ui/Card';
+import { KpiCard } from '@/components/ui/KpiCard';
 import { AssetsKpiSummary } from '../types';
 
 export interface AssetsKpisProps {
@@ -11,55 +11,63 @@ export interface AssetsKpisProps {
 export const AssetsKpis: React.FC<AssetsKpisProps> = ({ kpis }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-6">
-      <Card variant="subtle" padding="sm" className="bg-white dark:bg-[#111827]">
-        <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-          Total Actifs
-        </div>
-        <div className="mt-1 text-2xl font-black text-slate-900 dark:text-slate-50">
-          {kpis.totalCount}
-        </div>
-        <div className="mt-1 text-[11px] text-slate-500">Parc global supervisé</div>
-      </Card>
+      <KpiCard
+        label="Total Actifs"
+        value={kpis.totalCount}
+        unit="unités"
+        status="neutral"
+        sparklineData={[
+          Math.max(1, kpis.totalCount - 4),
+          Math.max(1, kpis.totalCount - 2),
+          kpis.totalCount,
+        ]}
+      />
 
-      <Card variant="subtle" padding="sm" className="bg-white dark:bg-[#111827]">
-        <div className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-          En Service
-        </div>
-        <div className="mt-1 text-2xl font-black text-emerald-600 dark:text-emerald-400">
-          {kpis.operationalCount}
-        </div>
-        <div className="mt-1 text-[11px] text-slate-500">Requalifiés en mission</div>
-      </Card>
+      <KpiCard
+        label="En Service"
+        value={kpis.operationalCount}
+        unit="actifs"
+        status="nominal"
+        sparklineData={[
+          Math.max(0, kpis.operationalCount - 3),
+          Math.max(0, kpis.operationalCount - 1),
+          kpis.operationalCount,
+        ]}
+      />
 
-      <Card variant="subtle" padding="sm" className="bg-white dark:bg-[#111827]">
-        <div className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-          Maintenance Requise
-        </div>
-        <div className="mt-1 text-2xl font-black text-amber-600 dark:text-amber-400">
-          {kpis.maintenanceCount}
-        </div>
-        <div className="mt-1 text-[11px] text-slate-500">Échéance compteur échue</div>
-      </Card>
+      <KpiCard
+        label="Maintenance Requise"
+        value={kpis.maintenanceCount}
+        unit="échéances"
+        status={kpis.maintenanceCount > 0 ? 'warning' : 'nominal'}
+        sparklineData={[
+          Math.max(0, kpis.maintenanceCount + 1),
+          kpis.maintenanceCount,
+        ]}
+      />
 
-      <Card variant="subtle" padding="sm" className="bg-white dark:bg-[#111827]">
-        <div className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
-          Arrêt Critique (Down)
-        </div>
-        <div className="mt-1 text-2xl font-black text-rose-600 dark:text-rose-400">
-          {kpis.downCount}
-        </div>
-        <div className="mt-1 text-[11px] text-slate-500">Verrou DVIR ou panne</div>
-      </Card>
+      <KpiCard
+        label="Arrêt Critique"
+        value={kpis.downCount}
+        unit="veto"
+        status={kpis.downCount > 0 ? 'critical' : 'nominal'}
+        sparklineData={[
+          Math.max(0, kpis.downCount + 2),
+          kpis.downCount,
+        ]}
+      />
 
-      <Card variant="subtle" padding="sm" className="bg-white dark:bg-[#111827] col-span-2 md:col-span-1">
-        <div className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
-          Télémétrie Mode 2 (CAN)
-        </div>
-        <div className="mt-1 text-2xl font-black text-indigo-600 dark:text-indigo-400">
-          {kpis.canJ1939Count}
-        </div>
-        <div className="mt-1 text-[11px] text-slate-500">J1939 &amp; capteurs temps réel</div>
-      </Card>
+      <KpiCard
+        label="Télémétrie Mode 2 (CAN)"
+        value={kpis.canJ1939Count}
+        unit="J1939"
+        status="nominal"
+        className="col-span-2 md:col-span-1"
+        sparklineData={[
+          Math.max(0, kpis.canJ1939Count - 2),
+          kpis.canJ1939Count,
+        ]}
+      />
     </div>
   );
 };

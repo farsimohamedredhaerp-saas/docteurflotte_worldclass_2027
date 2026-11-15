@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { WorkOrder, WorkOrderPriority, WorkOrderStatus } from '@docteurflotte/contracts';
 import { Badge } from '@/components/Badge';
 import { Card } from '@/components/ui/Card';
+import { SovereigntySeal } from '@/components/ui/SovereigntySeal';
 import {
   IconTruck,
   IconClock,
@@ -132,24 +133,24 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = React.memo(({
 
         {/* COÛT TOTAL SI CLÔTURÉ */}
         {isCompleted && (
-          <div className="mt-3 p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-900/40 flex items-center justify-between text-xs">
-            <span className="text-emerald-800 dark:text-emerald-300 text-[11px] font-semibold">
+          <div className="mt-3 p-2 rounded-[var(--df-radius-xs,4px)] bg-[var(--df-status-ok-bg)] border border-[var(--df-status-ok-border)] flex items-center justify-between text-xs">
+            <span className="text-[var(--df-status-ok-text)] text-[11px] font-semibold">
               Coût Total Facturable DGI
             </span>
-            <span className="font-black text-emerald-700 dark:text-emerald-400">
-              {(wo.totalCost || 0).toLocaleString('fr-DZ')} DA
+            <span className="font-mono font-bold text-[var(--df-status-ok-text)] tabular-nums">
+              {(wo.totalCost || 0).toLocaleString('fr-FR')} DZD
             </span>
           </div>
         )}
       </div>
 
       {/* PIED DE CARTE & ACTIONS OPÉRATEUR */}
-      <div className="p-3 bg-slate-50/80 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1">
+      <div className="p-3 bg-[var(--df-bg-surface-2)] border-t border-[var(--df-border-subtle)] flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <button
             type="button"
             onClick={() => onOpenInvoice(wo)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--df-radius-xs,4px)] text-xs font-semibold text-[var(--df-accent-blue)] bg-[var(--df-accent-blue-subtle)] hover:bg-[var(--df-bg-surface-3)] transition-colors"
             title="Générer Facture DGI A4"
           >
             <IconFileText size={12} />
@@ -160,20 +161,22 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = React.memo(({
             <button
               type="button"
               onClick={() => onOpenComplete(wo)}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--df-radius-xs,4px)] text-xs font-semibold text-[var(--df-status-ok-text)] bg-[var(--df-status-ok-bg)] hover:bg-[var(--df-bg-surface-3)] border border-[var(--df-status-ok-border)] transition-colors"
               title="Clôturer l'intervention"
             >
               <IconCheck size={12} />
               <span>Clôturer</span>
             </button>
           )}
+
+          <SovereigntySeal type="DGI_FISCAL" size="xs" />
         </div>
 
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => onOpenEdit(wo)}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-[var(--df-text-muted)] hover:text-[var(--df-text-main)] rounded-[var(--df-radius-xs,4px)] hover:bg-[var(--df-bg-surface-3)] transition-colors"
             aria-label="Modifier cet ordre"
           >
             <IconEdit size={13} />
@@ -181,7 +184,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = React.memo(({
           <button
             type="button"
             onClick={() => onOpenDelete(wo.id, wo.title)}
-            className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+            className="p-1.5 text-[var(--df-text-muted)] hover:text-[var(--df-status-danger-text)] rounded-[var(--df-radius-xs,4px)] hover:bg-[var(--df-status-danger-bg)] transition-colors"
             aria-label="Supprimer cet ordre"
           >
             <IconTrash size={13} />
