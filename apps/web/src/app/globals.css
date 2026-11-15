@@ -25,65 +25,65 @@
   --df-border-subtle: #E2E8F0;
   --df-border-hairline: #E2E8F0;
   --df-border-medium: #CBD5E1;
-  --df-border-focus: #2563EB;
-  --df-border-glow: #2563EB;
+  --df-border-focus: #1D4ED8;
+  --df-border-glow: #1D4ED8;
   --df-border-card-top: #E2E8F0;
 
-  /* Typographie & Lisibilité Haute Densité */
+  /* Typographie & Lisibilité Haute Densité (Contraste WCAG 2.2 AA+ >= 4.5:1) */
   --df-text-main: #0F172A;
-  --df-text-secondary: #475569;
-  --df-text-muted: #94A3B8;
+  --df-text-secondary: #334155;
+  --df-text-muted: #55637A;
   --df-text-faint: #CBD5E1;
   --df-text-on-accent: #FFFFFF;
 
   /* Accents de marque (Cobalt Technique) */
-  --df-accent-blue: #2563EB;
-  --df-accent-blue-hover: #1D4ED8;
+  --df-accent-blue: #1D4ED8;
+  --df-accent-blue-hover: #1E40AF;
   --df-accent-blue-subtle: #EFF6FF;
-  --df-accent-cyan: #2563EB;
+  --df-accent-cyan: #0284C7;
   --df-accent-cyan-subtle: #EFF6FF;
-  --df-gradient-primary: #2563EB;
+  --df-gradient-primary: #1D4ED8;
   --df-gradient-card: transparent;
-  --df-gradient-telemetry: #10B981;
+  --df-gradient-telemetry: #059669;
 
   /* Statuts Télématiques Sémantiques Normés (Thème Clair) */
-  --df-status-ok: #10B981;
+  --df-status-ok: #059669;
   --df-status-ok-bg: #ECFDF5;
   --df-status-ok-text: #065F46;
   --df-status-ok-border: #A7F3D0;
 
-  --df-status-warning: #F59E0B;
+  --df-status-warning: #B45309;
   --df-status-warning-bg: #FFFBEB;
   --df-status-warning-text: #92400E;
   --df-status-warning-border: #FDE68A;
 
-  --df-status-danger: #EF4444;
+  --df-status-danger: #B91C1C;
   --df-status-danger-bg: #FEF2F2;
   --df-status-danger-text: #991B1B;
   --df-status-danger-border: #FECACA;
 
-  --df-status-info: #2563EB;
+  --df-status-info: #1D4ED8;
   --df-status-info-bg: #EFF6FF;
   --df-status-info-text: #1E40AF;
   --df-status-info-border: #BFDBFE;
 
   /* Télémétrie en temps réel (États IoT / Traccar) */
-  --df-telemetry-live: #10B981;
-  --df-telemetry-motion: #2563EB;
-  --df-telemetry-idle: #F59E0B;
+  --df-telemetry-live: #059669;
+  --df-telemetry-motion: #1D4ED8;
+  --df-telemetry-idle: #B45309;
   --df-telemetry-offline: #64748B;
 
   /* Tag Données Démo Synthétiques */
-  --df-badge-demo-color: #F59E0B;
+  --df-badge-demo-color: #B45309;
   --df-badge-demo-bg: #FFFBEB;
-  --df-badge-demo-border: #F59E0B;
+  --df-badge-demo-border: #FDE68A;
 
-  /* Rayons de courbure techniques stricts */
-  --df-radius-xs: 2px;
-  --df-radius-sm: 4px;
-  --df-radius-md: 6px;
-  --df-radius-lg: 8px;
-  --df-radius-xl: 8px;
+  /* Rayons de courbure techniques stricts (§3.2 Plan Directeur v5.1) */
+  --df-radius-xs: 4px;
+  --df-radius-sm: 6px;
+  --df-radius-md: 8px;
+  --df-radius-lg: 10px;
+  --df-radius-xl: 14px;
   --df-radius-full: 9999px;
 
   /* Ombres nettes et discrètes */
@@ -93,9 +93,9 @@
   --df-shadow-glow-cyan: none;
   --df-shadow-glow-blue: none;
 
-  /* Transitions nettes et chirurgicales */
-  --df-transition-fast: 100ms cubic-bezier(0.16, 1, 0.3, 1);
-  --df-transition-smooth: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  /* Transitions unifiées sur l'échelle officielle v5.1 (§3.4) */
+  --df-transition-fast: var(--df-dur-fast, 120ms) var(--df-ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1));
+  --df-transition-smooth: var(--df-dur-base, 200ms) var(--df-ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1));
 
   /* Typographie */
   --df-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -189,22 +189,22 @@ html.dark,
   --df-border-subtle: #1F2937;
   --df-border-hairline: #1F2937;
   --df-border-medium: #374151;
-  --df-border-focus: #2563EB;
-  --df-border-glow: #2563EB;
+  --df-border-focus: #3B82F6;
+  --df-border-glow: #3B82F6;
   --df-border-card-top: #1F2937;
 
   --df-text-main: #F8FAFC;
   --df-text-secondary: #94A3B8;
-  --df-text-muted: #64748B;
+  --df-text-muted: #8392A8;
   --df-text-faint: #475569;
   --df-text-on-accent: #FFFFFF;
 
-  --df-accent-blue: #2563EB;
-  --df-accent-blue-hover: #1D4ED8;
-  --df-accent-blue-subtle: rgba(37, 99, 235, 0.12);
-  --df-accent-cyan: #2563EB;
-  --df-accent-cyan-subtle: rgba(37, 99, 235, 0.12);
-  --df-gradient-primary: #2563EB;
+  --df-accent-blue: #3B82F6;
+  --df-accent-blue-hover: #60A5FA;
+  --df-accent-blue-subtle: rgba(59, 130, 246, 0.14);
+  --df-accent-cyan: #38BDF8;
+  --df-accent-cyan-subtle: rgba(56, 189, 248, 0.14);
+  --df-gradient-primary: #3B82F6;
   --df-gradient-card: transparent;
   --df-gradient-telemetry: #10B981;
 
@@ -282,9 +282,7 @@ html.dark,
 html {
   color-scheme: light;
   scroll-behavior: smooth;
-  max-width: 100vw;
-  overflow-x: hidden;
-  height: 100%;
+  min-height: 100%;
 }
 
 html.dark {
@@ -296,42 +294,25 @@ body {
   background-color: var(--df-bg-base);
   color: var(--df-text-main);
   line-height: 1.55;
-  height: 100%;
   min-height: 100vh;
-  max-width: 100vw;
-  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  /* Fond par défaut mode clair haute lisibilité */
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.03) 1px, transparent 0),
-    radial-gradient(ellipse 65% 50% at 20% 10%, rgba(29, 78, 216, 0.04) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 45% at 85% 85%, rgba(2, 132, 199, 0.03) 0%, transparent 55%),
-    linear-gradient(180deg, #ffffff 0%, var(--df-bg-base) 100%);
-  background-size: 28px 28px, 100% 100%, 100% 100%, 100% 100%;
-  background-attachment: fixed;
-  transition: background-color var(--df-transition-smooth), color var(--df-transition-smooth);
-}
-
-html.dark body {
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(0, 210, 255, 0.04) 1px, transparent 0),
-    radial-gradient(ellipse 65% 50% at 20% 10%, rgba(37, 99, 235, 0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 45% at 85% 85%, rgba(0, 210, 255, 0.05) 0%, transparent 55%),
-    linear-gradient(180deg, #080c14 0%, var(--df-bg-base) 100%);
+  /* Surface calme et déterministe conforme à P1 (Sérénité Opérationnelle) — zéro jank mobile */
+  transition: background-color var(--df-dur-base, 200ms) var(--df-ease-in-out, cubic-bezier(0.65, 0, 0.35, 1)),
+              color var(--df-dur-base, 200ms) var(--df-ease-in-out, cubic-bezier(0.65, 0, 0.35, 1));
 }
 
 a {
   color: var(--df-accent-blue);
   text-decoration: none;
-  transition: color var(--df-transition-fast);
+  transition: color var(--df-dur-fast, 120ms) var(--df-ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 a:hover {
-  color: var(--df-accent-cyan);
+  color: var(--df-accent-blue-hover);
+  text-decoration: underline;
 }
 
 /* ==========================================================================
@@ -351,13 +332,13 @@ a:hover {
 
 .df-glass {
   background: var(--df-bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--df-border-subtle);
   border-top: 1px solid var(--df-border-card-top);
-  border-radius: var(--df-radius-lg);
+  border-radius: var(--df-radius-lg, 10px);
   box-shadow: var(--df-shadow-md);
-  transition: transform var(--df-transition-smooth), border-color var(--df-transition-smooth), box-shadow var(--df-transition-smooth);
+  transition: transform var(--df-dur-fast, 120ms) var(--df-ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1)),
+              border-color var(--df-dur-fast, 120ms) var(--df-ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1)),
+              box-shadow var(--df-dur-fast, 120ms) var(--df-ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1));
   position: relative;
   overflow: hidden;
 }
@@ -366,11 +347,10 @@ a:hover {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  inset-inline: 0;
   height: 2px;
   background: transparent;
-  transition: background var(--df-transition-smooth);
+  transition: background var(--df-dur-fast, 120ms) var(--df-ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .df-glass:hover {
@@ -387,7 +367,7 @@ a:hover {
 }
 
 .df-card-interactive:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: var(--df-border-focus);
 }
 
@@ -395,7 +375,7 @@ a:hover {
    TYPOGRAPHIE & DONNÉES TÉLÉMATIQUES TABULAIRES
    ========================================================================== */
 
-.df-mono {
+.df-mono, .tabular-nums {
   font-family: var(--df-font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -408,7 +388,7 @@ a:hover {
   padding: 0.5rem 0.85rem;
   background: var(--df-bg-surface-2);
   border: 1px solid var(--df-border-subtle);
-  border-radius: var(--df-radius-sm);
+  border-radius: var(--df-radius-sm, 6px);
   font-size: 0.75rem;
   font-family: var(--df-font-mono);
   color: var(--df-text-secondary);
@@ -442,7 +422,7 @@ a:hover {
 }
 
 .df-btn:focus-visible {
-  outline: var(--df-focus-ring-width, 2px) solid var(--df-brand-primary, #2563EB);
+  outline: var(--df-focus-ring-width, 2px) solid var(--df-brand-primary, #1D4ED8);
   outline-offset: var(--df-focus-ring-offset, 2px);
 }
 
@@ -477,13 +457,13 @@ a:hover {
 }
 
 .df-btn-outline:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--df-bg-surface-2);
   border-color: var(--df-accent-cyan);
 }
 
 .df-btn-danger {
   background: var(--df-status-danger-bg);
-  color: var(--df-status-danger);
+  color: var(--df-status-danger-text);
   border-color: var(--df-status-danger-border);
 }
 
@@ -495,7 +475,7 @@ a:hover {
 .df-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-  transform: none !important;
+  transform: none;
 }
 
 /* ==========================================================================
@@ -507,12 +487,12 @@ a:hover {
   align-items: center;
   gap: 0.375rem;
   padding: 0.175rem 0.55rem;
-  border-radius: var(--df-radius-full);
+  border-radius: var(--df-radius-xs, 4px);
   font-size: 0.72rem;
-  font-weight: 550;
+  font-weight: 600;
   line-height: 1.2;
   letter-spacing: 0.01em;
-  transition: all var(--df-transition-fast);
+  transition: all var(--df-dur-fast, 120ms) var(--df-ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .df-badge-dot {
@@ -525,25 +505,25 @@ a:hover {
 
 .df-badge-ok {
   background: var(--df-status-ok-bg);
-  color: var(--df-status-ok);
+  color: var(--df-status-ok-text);
   border: 1px solid var(--df-status-ok-border);
 }
 
 .df-badge-warning {
   background: var(--df-status-warning-bg);
-  color: var(--df-status-warning);
+  color: var(--df-status-warning-text);
   border: 1px solid var(--df-status-warning-border);
 }
 
 .df-badge-danger {
   background: var(--df-status-danger-bg);
-  color: var(--df-status-danger);
+  color: var(--df-status-danger-text);
   border: 1px solid var(--df-status-danger-border);
 }
 
 .df-badge-info {
   background: var(--df-status-info-bg);
-  color: var(--df-status-info);
+  color: var(--df-status-info-text);
   border: 1px solid var(--df-status-info-border);
 }
 
@@ -551,7 +531,6 @@ a:hover {
   background: var(--df-badge-demo-bg);
   color: var(--df-badge-demo-color);
   border: 1px solid var(--df-badge-demo-border);
-  box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);
 }
 
 /* ==========================================================================
@@ -570,7 +549,8 @@ a:hover {
 .df-gauge-fill {
   height: 100%;
   border-radius: var(--df-radius-full);
-  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s;
+  transition: width var(--df-dur-slow, 320ms) var(--df-ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1)),
+              background-color var(--df-dur-fast, 120ms);
 }
 
 .df-gauge-ok {
@@ -586,18 +566,18 @@ a:hover {
 }
 
 /* ==========================================================================
-   ANIMATIONS RADAR ET BALISES CLIGNOTANTES
+   ANIMATIONS RADAR ET BALISES CLIGNOTANTES (CONDITIONNELLES §4.2)
    ========================================================================== */
 
 @keyframes pulseBeacon {
   0% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
   }
   70% {
-    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    box-shadow: 0 0 0 6px rgba(5, 150, 105, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
   }
 }
 
@@ -606,8 +586,13 @@ a:hover {
   height: 8px;
   border-radius: 50%;
   background-color: var(--df-telemetry-live);
-  animation: pulseBeacon 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
   display: inline-block;
+}
+
+/* Le pulse n'est déclenché QUE si nominal (règle anti-surcharge cognitive) */
+.df-point-nominal,
+.df-pulse-nominal {
+  animation: pulseBeacon 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 @keyframes pulseGlow {
@@ -617,7 +602,7 @@ a:hover {
   }
   50% {
     opacity: 0.65;
-    transform: scale(1.1);
+    transform: scale(1.05);
   }
 }
 
@@ -625,7 +610,7 @@ a:hover {
   animation: pulseGlow 2s infinite ease-in-out;
 }
 
-/* Shimmer pour les états de chargement (Skeleton) */
+/* Shimmer pour les états de chargement (Skeleton) — Universel Clair et Sombre */
 @keyframes dfShimmer {
   0% {
     background-position: -200% 0;
@@ -636,8 +621,34 @@ a:hover {
 }
 
 .df-skeleton {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+  background: linear-gradient(90deg,
+    var(--df-bg-surface-2) 25%,
+    var(--df-bg-surface-3) 50%,
+    var(--df-bg-surface-2) 75%);
   background-size: 200% 100%;
-  animation: dfShimmer 1.8s infinite;
-  border-radius: var(--df-radius-sm);
+  animation: dfShimmer 1.8s infinite ease-in-out;
+  border-radius: var(--df-radius-sm, 6px);
+}
+
+/* ==========================================================================
+   ACCESSIBILITÉ WCAG 2.2 AA+ : PREFERS-REDUCED-MOTION (§4.2)
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .df-pulse-live,
+  .df-pulse,
+  .df-skeleton,
+  .df-point-nominal,
+  .df-pulse-nominal {
+    animation: none;
+  }
 }
