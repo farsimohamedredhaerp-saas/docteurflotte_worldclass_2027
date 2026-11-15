@@ -2,14 +2,26 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { IconSearch, IconTerminal, IconWrench, IconTruck, IconFuel, IconCpu, IconX } from './TechIcons';
+import {
+  IconSearch,
+  IconTerminal,
+  IconWrench,
+  IconTruck,
+  IconFuel,
+  IconCpu,
+  IconActivity,
+  IconLayers,
+  IconShieldCheck,
+  IconCompass,
+  IconX,
+} from './TechIcons';
 
-interface CommandPaletteModalProps {
+export interface CommandPaletteModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface CommandItem {
+export interface CommandItem {
   id: string;
   category: 'NAVIGATION' | 'DIAGNOSTIC' | 'VEHICLE' | 'ACTION';
   title: string;
@@ -17,80 +29,176 @@ interface CommandItem {
   code?: string;
   href?: string;
   action?: () => void;
+  shortcut?: string;
 }
 
 const COMMANDS: CommandItem[] = [
+  // Navigation Rapide
   {
-    id: 'cmd-maint-rul',
+    id: 'cmd-nav-dashboard',
     category: 'NAVIGATION',
-    title: 'Santé Prédictive & Matrice RUL',
-    subtitle: 'Consulter l’état d’usure physique Weibull / Arrhenius',
-    code: 'NAV /maint/rul',
-    href: '/maintenance',
+    title: 'Dashboard Exécutif & Arbitrage DZD',
+    subtitle: 'Vue d\'ensemble, ROI préventif et décisions prioritaires',
+    code: 'G D',
+    href: '/',
   },
   {
-    id: 'cmd-maint-can',
+    id: 'cmd-nav-assets',
     category: 'NAVIGATION',
-    title: 'Diagnostic Télématique CAN-bus & J1939',
-    subtitle: 'Inspecter les trames .dbc, DM1 et codes défauts en direct',
-    code: 'NAV /maint/can',
-    href: '/maintenance',
-  },
-  {
-    id: 'cmd-fleet-assets',
-    category: 'NAVIGATION',
-    title: 'Inventaire Flotte & Engins BTP',
-    subtitle: 'Accéder aux 320 fiches techniques, horamètres et VIN',
-    code: 'NAV /assets',
+    title: 'Inventaire Flotte & Actifs Haute Densité',
+    subtitle: 'Tableau des 58 Wilayas, odomètres, horamètres et VHI',
+    code: 'G F',
     href: '/assets',
   },
   {
-    id: 'cmd-fuel-cusum',
+    id: 'cmd-nav-preventive',
     category: 'NAVIGATION',
-    title: 'Carburant : Détection Siphonnage CUSUM',
-    subtitle: 'Vérifier les alertes de chute de niveau de carburant au repos',
-    code: 'NAV /fuel',
+    title: 'Cockpit Maintenance 5.0 (Arrhenius & Archard)',
+    subtitle: 'Cinétique d\'oxydation huile, freins et seuils prédictifs',
+    code: 'G P',
+    href: '/preventive',
+  },
+  {
+    id: 'cmd-nav-digital-twin',
+    category: 'NAVIGATION',
+    title: 'Jumeau Numérique des 6 Organes',
+    subtitle: 'Modélisation physique temps réel sans capteur additionnel',
+    code: 'G T',
+    href: '/digital-twin',
+  },
+  {
+    id: 'cmd-nav-live-cockpit',
+    category: 'NAVIGATION',
+    title: 'Télématique Directe CAN-bus & J1939',
+    subtitle: 'Flux haute fréquence Traccar, trames SPN/FMI et régime moteur',
+    code: 'G C',
+    href: '/live-cockpit',
+  },
+  {
+    id: 'cmd-nav-map',
+    category: 'NAVIGATION',
+    title: 'Cartographie Corridors & 58 Wilayas',
+    subtitle: 'Fret national, RN1 Transsaharienne, A1 Est-Ouest MapLibre',
+    code: 'G M',
+    href: '/map',
+  },
+  {
+    id: 'cmd-nav-fuel',
+    category: 'NAVIGATION',
+    title: 'Scanner Reçus Naftal & Anti-Fraude CUSUM',
+    subtitle: 'Détection siphonnage au repos et réconciliation des pleins',
+    code: 'G S',
     href: '/fuel-scanner',
   },
   {
-    id: 'cmd-decisions-arbitrage',
+    id: 'cmd-nav-work-orders',
     category: 'NAVIGATION',
-    title: 'Système d’Aide à la Décision (SAD / ADS)',
-    subtitle: 'Arbitrage coût d’action vs risque d’inaction',
-    code: 'NAV /decisions',
-    href: '/decisions',
+    title: 'Ordres de Travail & Maintenance d\'Atelier',
+    subtitle: 'Gestion des OT préventifs, curatifs et fiches d\'intervention',
+    code: 'G W',
+    href: '/work-orders',
   },
+  {
+    id: 'cmd-nav-cold-chain',
+    category: 'NAVIGATION',
+    title: 'Chaîne du Froid & Agrément Sanitaire',
+    subtitle: 'Températures tri-zones, traçabilité pharmaceutique et agro',
+    code: 'NAV /cold-chain',
+    href: '/cold-chain',
+  },
+  {
+    id: 'cmd-nav-dispatch',
+    category: 'NAVIGATION',
+    title: 'Dispatch Algorithmique & Tournées Fret',
+    subtitle: 'Affectation chauffeurs, corridors pétroliers et permis ADR',
+    code: 'NAV /dispatch',
+    href: '/dispatch',
+  },
+  {
+    id: 'cmd-nav-copilot',
+    category: 'NAVIGATION',
+    title: 'Copilote IA Souverain (Ollama Qwen 2.5)',
+    subtitle: 'Assistant d\'atelier bilingue Français / Darja déterministe',
+    code: 'NAV /copilot',
+    href: '/copilot',
+  },
+  {
+    id: 'cmd-nav-dvir',
+    category: 'NAVIGATION',
+    title: 'Inspections DVIR PWA Hors-Ligne',
+    subtitle: 'Ronde de sécurité chauffeur avec photos et signature',
+    code: 'NAV /dvir',
+    href: '/dvir',
+  },
+
+  // Diagnostics Techniques
   {
     id: 'cmd-dtc-spn110',
     category: 'DIAGNOSTIC',
     title: 'SPN 110 FMI 0 — Surchauffe Liquide Refroidissement',
-    subtitle: 'Renault Trucks K480 (00421-16-16) — Temp: 104.2°C (Seuil 102°C)',
+    subtitle: 'Renault Trucks K480 (00421-116-16) — T°: 104.2°C (Seuil 102°C)',
     code: 'DTC #110',
-    href: '/maintenance',
+    href: '/preventive',
   },
   {
     id: 'cmd-dtc-spn1087',
     category: 'DIAGNOSTIC',
     title: 'SPN 1087 FMI 1 — Pression Basse Circuit Freinage APS',
-    subtitle: 'Mercedes Actros 3340 (01892-16-16) — Pression: 6.8 bar',
+    subtitle: 'Mercedes Actros 3340 (01892-116-16) — Pression: 6.8 bar',
     code: 'DTC #1087',
-    href: '/maintenance',
+    href: '/preventive',
   },
+  {
+    id: 'cmd-dtc-spn100',
+    category: 'DIAGNOSTIC',
+    title: 'SPN 100 FMI 1 — Pression Huile Moteur Basse',
+    subtitle: 'Shacman X3000 (09124-118-23) — Pression: 1.2 bar sous charge',
+    code: 'DTC #100',
+    href: '/preventive',
+  },
+
+  // Véhicules Clés
   {
     id: 'cmd-vin-cat336',
     category: 'VEHICLE',
     title: 'CAT 336D2 L — Pelle Hydraulique BTP',
     subtitle: 'Chantier Hassi Messaoud — Horamètre: 6 420 h — RUL Pompe: 18h',
     code: 'VIN CAT0336D2KL8912',
-    href: '/maintenance',
+    href: '/assets',
   },
   {
     id: 'cmd-vin-rt-k480',
     category: 'VEHICLE',
     title: 'Renault Trucks K480 6x4 Heavy — Tracteur PL',
-    subtitle: 'Direction Logistique Alger — Kilométrage: 284 150 km — VHI: 78/100',
+    subtitle: 'Corridor RN1 Ghardaïa — Odomètre: 284 150 km — VHI: 88/100',
     code: 'VIN VF624GPA00004128',
-    href: '/maintenance',
+    href: '/assets',
+  },
+  {
+    id: 'cmd-vin-actros',
+    category: 'VEHICLE',
+    title: 'Mercedes-Benz Actros 3340 6x4 S — Tracteur PL',
+    subtitle: 'Base Rouiba — Odomètre: 342 900 km — VHI: 62/100 (DTC Actif)',
+    code: 'VIN WDB9634031L89214',
+    href: '/assets',
+  },
+
+  // Actions Rapides
+  {
+    id: 'cmd-act-new-wo',
+    category: 'ACTION',
+    title: 'Créer un Ordre de Travail Prescriptif',
+    subtitle: 'Émettre un OT d\'intervention avec chiffrage DZD immédiat',
+    code: 'N',
+    href: '/work-orders',
+  },
+  {
+    id: 'cmd-act-scan-naftal',
+    category: 'ACTION',
+    title: 'Scanner un Reçu Carburant Naftal',
+    subtitle: 'Traitement OCR haute précision et contrôle odométrique Valhalla',
+    code: 'SCAN',
+    href: '/fuel-scanner',
   },
 ];
 
@@ -140,15 +248,46 @@ export function CommandPaletteModal({ isOpen, onClose }: CommandPaletteModalProp
     }
   };
 
+  const getCategoryColor = (cat: CommandItem['category']) => {
+    switch (cat) {
+      case 'DIAGNOSTIC':
+        return 'var(--df-status-danger)';
+      case 'VEHICLE':
+        return 'var(--df-accent-blue)';
+      case 'ACTION':
+        return 'var(--df-status-ok)';
+      default:
+        return 'var(--df-text-secondary)';
+    }
+  };
+
+  const renderCategoryIcon = (cat: CommandItem['category']) => {
+    switch (cat) {
+      case 'DIAGNOSTIC':
+        return <IconTerminal size={14} strokeWidth={1.75} />;
+      case 'VEHICLE':
+        return <IconTruck size={14} strokeWidth={1.75} />;
+      case 'ACTION':
+        return <IconWrench size={14} strokeWidth={1.75} />;
+      default:
+        return <IconCompass size={14} strokeWidth={1.75} />;
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Palette de commandes"
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 9999,
-        background: 'rgba(5, 7, 10, 0.78)',
+        zIndex: 'var(--df-z-command, 600)',
+        background: 'rgba(5, 7, 10, 0.75)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
@@ -158,37 +297,52 @@ export function CommandPaletteModal({ isOpen, onClose }: CommandPaletteModalProp
     >
       <div
         style={{
-          width: '640px',
+          width: '680px',
           maxWidth: '92vw',
-          background: '#111317',
-          border: '1px solid #343A46',
-          borderRadius: '4px',
-          boxShadow: '0 16px 36px rgba(0, 0, 0, 0.8)',
+          background: 'var(--df-bg-surface-1)',
+          border: '1px solid var(--df-border-subtle)',
+          borderRadius: 'var(--df-radius-lg, 10px)',
+          boxShadow: 'var(--df-shadow-lg)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
+          position: 'relative',
         }}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
+        {/* Liseré supérieur biseauté */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '1px',
+            background: 'var(--df-border-card-top, #ffffff)',
+            opacity: 0.12,
+            pointerEvents: 'none',
+          }}
+        />
+
         {/* EN-TÊTE DE RECHERCHE */}
         <div
           style={{
-            padding: '12px 14px',
-            borderBottom: '1px solid #23272F',
+            padding: '12px 16px',
+            borderBottom: '1px solid var(--df-border-subtle)',
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
-            background: '#0D0F12',
+            gap: '12px',
+            background: 'var(--df-bg-surface-2)',
           }}
         >
-          <span style={{ color: '#9CA3AF', display: 'flex' }}>
-            <IconSearch size={16} />
+          <span style={{ color: 'var(--df-text-muted)', display: 'flex' }}>
+            <IconSearch size={16} strokeWidth={2} />
           </span>
           <input
             ref={inputRef}
             type="text"
-            placeholder="Taper un mot-clé (SPN, DTC, VIN, Renault, Weibull, Naftal)..."
+            placeholder="Taper une commande, matricule, SPN, DTC, ou route..."
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -199,31 +353,32 @@ export function CommandPaletteModal({ isOpen, onClose }: CommandPaletteModalProp
               background: 'transparent',
               border: 'none',
               outline: 'none',
-              color: '#F3F4F6',
+              color: 'var(--df-text-main)',
               fontSize: '13px',
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: 'var(--df-font-sans)',
             }}
           />
           <span
             style={{
-              fontSize: '10px',
-              fontFamily: "'JetBrains Mono', monospace",
-              color: '#6B7280',
+              fontSize: '10.5px',
+              fontFamily: 'var(--df-font-mono)',
+              color: 'var(--df-text-muted)',
               padding: '2px 6px',
-              border: '1px solid #23272F',
-              borderRadius: '2px',
-              background: '#090A0C',
+              border: '1px solid var(--df-border-subtle)',
+              borderRadius: 'var(--df-radius-xs, 4px)',
+              background: 'var(--df-bg-surface-1)',
             }}
           >
-            ESC pour fermer
+            ESC
           </span>
           <button
             type="button"
             onClick={onClose}
+            aria-label="Fermer la palette"
             style={{
               background: 'none',
               border: 'none',
-              color: '#9CA3AF',
+              color: 'var(--df-text-muted)',
               cursor: 'pointer',
               display: 'flex',
               padding: '2px',
@@ -236,7 +391,7 @@ export function CommandPaletteModal({ isOpen, onClose }: CommandPaletteModalProp
         {/* LISTE DES RÉSULTATS */}
         <div
           style={{
-            maxHeight: '380px',
+            maxHeight: '400px',
             overflowY: 'auto',
             padding: '6px',
             display: 'flex',
@@ -247,11 +402,11 @@ export function CommandPaletteModal({ isOpen, onClose }: CommandPaletteModalProp
           {filtered.length === 0 ? (
             <div
               style={{
-                padding: '32px 16px',
+                padding: '36px 16px',
                 textAlign: 'center',
-                color: '#6B7280',
+                color: 'var(--df-text-muted)',
                 fontSize: '12px',
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: 'var(--df-font-mono)',
               }}
             >
               Aucun résultat technique ne correspond à &quot;{query}&quot;
@@ -259,6 +414,8 @@ export function CommandPaletteModal({ isOpen, onClose }: CommandPaletteModalProp
           ) : (
             filtered.map((item, idx) => {
               const isSelected = idx === selectedIndex;
+              const catColor = getCategoryColor(item.category);
+
               return (
                 <div
                   key={item.id}
@@ -269,43 +426,28 @@ export function CommandPaletteModal({ isOpen, onClose }: CommandPaletteModalProp
                   }}
                   onMouseEnter={() => setSelectedIndex(idx)}
                   style={{
-                    padding: '8px 10px',
-                    borderRadius: '2px',
-                    background: isSelected ? '#181B20' : 'transparent',
-                    border: isSelected ? '1px solid #343A46' : '1px solid transparent',
+                    padding: '8px 12px',
+                    borderRadius: 'var(--df-radius-sm, 6px)',
+                    background: isSelected ? 'var(--df-accent-blue-subtle)' : 'transparent',
+                    borderLeft: isSelected ? '2px solid var(--df-accent-blue)' : '2px solid transparent',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     gap: '12px',
+                    transition: 'background var(--df-dur-fast, 120ms)',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
-                    <span
-                      style={{
-                        color:
-                          item.category === 'DIAGNOSTIC'
-                            ? '#EF4444'
-                            : item.category === 'VEHICLE'
-                            ? '#2563EB'
-                            : '#9CA3AF',
-                        display: 'flex',
-                      }}
-                    >
-                      {item.category === 'DIAGNOSTIC' ? (
-                        <IconTerminal size={14} />
-                      ) : item.category === 'VEHICLE' ? (
-                        <IconTruck size={14} />
-                      ) : (
-                        <IconWrench size={14} />
-                      )}
+                    <span style={{ color: catColor, display: 'flex', flexShrink: 0 }}>
+                      {renderCategoryIcon(item.category)}
                     </span>
                     <div style={{ overflow: 'hidden' }}>
                       <div
                         style={{
                           fontSize: '12.5px',
                           fontWeight: 600,
-                          color: isSelected ? '#FFFFFF' : '#E5E7EB',
+                          color: isSelected ? 'var(--df-text-main)' : 'var(--df-text-secondary)',
                           whiteSpace: 'nowrap',
                           textOverflow: 'ellipsis',
                           overflow: 'hidden',
@@ -316,7 +458,7 @@ export function CommandPaletteModal({ isOpen, onClose }: CommandPaletteModalProp
                       <div
                         style={{
                           fontSize: '11px',
-                          color: '#6B7280',
+                          color: 'var(--df-text-muted)',
                           whiteSpace: 'nowrap',
                           textOverflow: 'ellipsis',
                           overflow: 'hidden',
@@ -330,12 +472,12 @@ export function CommandPaletteModal({ isOpen, onClose }: CommandPaletteModalProp
                   {item.code && (
                     <span
                       style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: '10px',
-                        color: isSelected ? '#F3F4F6' : '#9CA3AF',
-                        background: '#090A0C',
-                        border: '1px solid #23272F',
-                        borderRadius: '2px',
+                        fontFamily: 'var(--df-font-mono)',
+                        fontSize: '10.5px',
+                        color: isSelected ? 'var(--df-text-main)' : 'var(--df-text-muted)',
+                        background: 'var(--df-bg-surface-2)',
+                        border: '1px solid var(--df-border-subtle)',
+                        borderRadius: 'var(--df-radius-xs, 4px)',
                         padding: '2px 6px',
                         whiteSpace: 'nowrap',
                         flexShrink: 0,
@@ -353,15 +495,15 @@ export function CommandPaletteModal({ isOpen, onClose }: CommandPaletteModalProp
         {/* PIED DE COMMAND PALETTE */}
         <div
           style={{
-            padding: '8px 12px',
-            borderTop: '1px solid #23272F',
-            background: '#090A0C',
+            padding: '8px 14px',
+            borderTop: '1px solid var(--df-border-subtle)',
+            background: 'var(--df-bg-surface-2)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             fontSize: '10.5px',
-            color: '#6B7280',
-            fontFamily: "'JetBrains Mono', monospace",
+            color: 'var(--df-text-muted)',
+            fontFamily: 'var(--df-font-mono)',
           }}
         >
           <div style={{ display: 'flex', gap: '14px' }}>
@@ -369,7 +511,7 @@ export function CommandPaletteModal({ isOpen, onClose }: CommandPaletteModalProp
             <span>↵ Exécuter</span>
             <span>ESC Quitter</span>
           </div>
-          <span>MISSION CRITICAL v2.0 • ANPDP 18-07 COMPLIANT</span>
+          <span>SOUVERAINETÉ ALGÉRIE • LOI 18-07 ANPDP</span>
         </div>
       </div>
     </div>

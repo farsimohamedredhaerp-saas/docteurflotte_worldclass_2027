@@ -9,6 +9,8 @@ import { Button } from '../Button';
 import { ApiStatusPanel } from '../ApiStatusPanel';
 import { HighDensityKpiGrid, KpiMetricItem } from '../density/HighDensityKpiGrid';
 import { FleetHighDensityTable, FleetUnitRecord, VehicleOperationalStatus } from '../density/FleetHighDensityTable';
+import { TrendChart, DataPoint, SeriesConfig, CostArbitrationBars, CostArbitrationItem } from '../ui';
+import { SEED_FLEET_UNITS } from '../../lib/simulation-sandbox/fleet-table.mock';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { AuthClient } from '../../lib/api-auth';
 import { AssetClient } from '../../lib/api-assets';
@@ -156,6 +158,60 @@ const INITIAL_DECISIONS: DecisionItem[] = [
       currentSpeed: 0,
     },
   },
+];
+
+const DEMO_ARBITRATIONS: CostArbitrationItem[] = [
+  {
+    id: 'arb-001',
+    assetLabel: 'Scania R450 (02319-122-31) — A1 Oran',
+    actionCostDzd: 68000,
+    inactionRiskDzd: 380000,
+    breakdown: {
+      mechanicalDamageDzd: 280000,
+      towingCostDzd: 35000,
+      downtimeLossDzd: 65000,
+    },
+    preventiveActionLabel: 'Vidange Arrhenius + Remplacement Filtre Huile',
+  },
+  {
+    id: 'arb-002',
+    assetLabel: 'CAT 336D2 L (ENG-336-030) — Chantier Hassi Messaoud',
+    actionCostDzd: 45000,
+    inactionRiskDzd: 410000,
+    breakdown: {
+      mechanicalDamageDzd: 260000,
+      towingCostDzd: 75000,
+      downtimeLossDzd: 75000,
+    },
+    preventiveActionLabel: 'Filtration Hydraulique & Analyse Particules',
+  },
+  {
+    id: 'arb-003',
+    assetLabel: 'Shacman X3000 (09124-118-23) — Port Annaba',
+    actionCostDzd: 38000,
+    inactionRiskDzd: 295000,
+    breakdown: {
+      mechanicalDamageDzd: 210000,
+      towingCostDzd: 35000,
+      downtimeLossDzd: 50000,
+    },
+    preventiveActionLabel: 'Régénération Forcée FAP + Remplacement Sonde',
+  },
+];
+
+const FLEET_TREND_DATA: DataPoint[] = [
+  { timestamp: '15 Oct', vhiScore: 89, fuelL100: 34.2 },
+  { timestamp: '20 Oct', vhiScore: 87, fuelL100: 33.8 },
+  { timestamp: '25 Oct', vhiScore: 88, fuelL100: 33.1 },
+  { timestamp: '30 Oct', vhiScore: 86, fuelL100: 32.5 },
+  { timestamp: '05 Nov', vhiScore: 91, fuelL100: 32.0 },
+  { timestamp: '10 Nov', vhiScore: 93, fuelL100: 31.8 },
+  { timestamp: '15 Nov', vhiScore: 95, fuelL100: 31.4 },
+];
+
+const FLEET_SERIES: SeriesConfig[] = [
+  { key: 'vhiScore', label: 'Indice Santé Flotte (VHI / 100)', unit: 'pts', colorVar: 'var(--df-chart-1)' },
+  { key: 'fuelL100', label: 'Conso Moyenne (L/100km)', unit: 'L', colorVar: 'var(--df-chart-2)' },
 ];
 
 export function ExecutiveDashboardClient() {
@@ -388,13 +444,13 @@ export function ExecutiveDashboardClient() {
     ];
   }, [isDemoMode, assets]);
 
-  const tableUnits = useMemo<FleetUnitRecord[] | undefined>(() => {
-    if (isDemoMode) return undefined;
+  const tableUnits = useMemo<FleetUnitRecord[]>(() => {
+    if (isDemoMode) return SEED_FLEET_UNITS;
     return assets.map((a, idx) => mapAssetToFleetUnit(a, idx));
   }, [isDemoMode, assets]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 transition-colors duration-150">
+    <div className="min-h-screen bg-[var(--df-bg-canvas)] text-[var(--df-text-main)] transition-colors duration-[var(--df-dur-base,200ms)]">
       {/* 1. BARRE DE NAVIGATION SUPÉRIEURE UNIFIÉE */}
       <Navbar onResetDemo={handleResetDemo} />
 
@@ -440,7 +496,7 @@ export function ExecutiveDashboardClient() {
         )}
 
         {/* 2. COMMAND CENTER HEADER HAUTE DENSITÉ */}
-        <section className="mb-6 rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 sm:p-6 shadow-2xs">
+        <section className="mb-6 rounded-[var(--df-radius-xl,14px)] border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-1)] p-5 sm:p-6 shadow-[var(--df-shadow-sm)] relative">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div className="max-w-3xl">
               {/* EYEBROW SÉMANTIQUE */}
@@ -448,19 +504,19 @@ export function ExecutiveDashboardClient() {
                 <Badge variant="ok" pulse>
                   Maintenance 5.0 Prescriptive
                 </Badge>
-                <span className="text-slate-300 dark:text-slate-700" aria-hidden="true">
+                <span className="text-[var(--df-border-subtle)]" aria-hidden="true">
                   •
                 </span>
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--df-text-muted)]">
                   Physique Déterministe 0 DA • Arbitrage DZD • Loi 18-07 ANPDP
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 mb-2">
-                Supervision Télématique & Arbitrage Financier de Flotte
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--df-text-main)] mb-2 font-sans">
+                Supervision Télématique &amp; Arbitrage Financier de Flotte
               </h1>
 
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+              <p className="text-xs sm:text-sm text-[var(--df-text-secondary)] leading-relaxed mb-4">
                 Chaque signal télématique est transformé en décision financière opposable en Dinars Algériens (DZD). Modélisation continue des 6 organes d&apos;usure sans capteur additionnel et réconciliation instantanée des pleins Naftal.
               </p>
 
@@ -468,7 +524,7 @@ export function ExecutiveDashboardClient() {
               <div className="flex gap-2 flex-wrap items-center">
                 <Link
                   href="/preventive"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-accent-blue)] hover:bg-[var(--df-accent-blue-hover)] text-white text-xs font-semibold shadow-xs transition-colors"
                 >
                   <IconWrench size={13} />
                   <span>Cockpit Maintenance</span>
@@ -476,7 +532,7 @@ export function ExecutiveDashboardClient() {
 
                 <Link
                   href="/live-cockpit"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700/80 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-bg-surface-2)] hover:bg-[var(--df-bg-surface-3)] text-[var(--df-text-main)] text-xs font-semibold border border-[var(--df-border-subtle)] transition-colors"
                 >
                   <IconActivity size={13} className="text-emerald-500" />
                   <span>Télématique Temps Réel</span>
@@ -484,7 +540,7 @@ export function ExecutiveDashboardClient() {
 
                 <Link
                   href="/fuel-scanner"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-200 dark:border-slate-700/80 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-bg-surface-2)] hover:bg-[var(--df-bg-surface-3)] text-[var(--df-text-main)] text-xs font-medium border border-[var(--df-border-subtle)] transition-colors"
                 >
                   <IconFuel size={13} className="text-amber-500" />
                   <span>Scanner Naftal</span>
@@ -492,7 +548,7 @@ export function ExecutiveDashboardClient() {
 
                 <Link
                   href="/digital-twin"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-200 dark:border-slate-700/80 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-bg-surface-2)] hover:bg-[var(--df-bg-surface-3)] text-[var(--df-text-main)] text-xs font-medium border border-[var(--df-border-subtle)] transition-colors"
                 >
                   <IconCpu size={13} className="text-indigo-500" />
                   <span>Jumeau Numérique</span>
@@ -500,7 +556,7 @@ export function ExecutiveDashboardClient() {
 
                 <Link
                   href="/copilot"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-200 dark:border-slate-700/80 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-bg-surface-2)] hover:bg-[var(--df-bg-surface-3)] text-[var(--df-text-main)] text-xs font-medium border border-[var(--df-border-subtle)] transition-colors"
                 >
                   <IconZap size={13} className="text-purple-500" />
                   <span>Copilote IA</span>
@@ -509,29 +565,28 @@ export function ExecutiveDashboardClient() {
             </div>
 
             {/* WIDGET HUD TÉLÉMATIQUE HAUTE DENSITÉ */}
-            <div className="w-full lg:w-auto min-w-[240px] p-4 rounded-xl bg-slate-50 dark:bg-[#161F30] border border-slate-200/90 dark:border-[#1F2937] flex flex-col gap-2.5">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
+            <div className="w-full lg:w-auto min-w-[240px] p-4 rounded-[var(--df-radius-lg,10px)] bg-[var(--df-bg-surface-2)] border border-[var(--df-border-subtle)] flex flex-col gap-2.5">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--df-text-muted)] flex items-center justify-between">
                 <span>Statut Flotte Temps Réel</span>
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  <span className="df-point-nominal relative inline-flex rounded-full h-2 w-2 bg-[var(--df-status-ok)]" />
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-600 dark:text-slate-400">Actifs Supervisés</span>
-                <strong className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                <span className="text-[var(--df-text-secondary)]">Actifs Supervisés</span>
+                <strong className="font-mono font-bold text-[var(--df-text-main)]">
                   {isDemoMode ? '52 Unités (Démo)' : `${assets.length} Unité${assets.length > 1 ? 's' : ''}`}
                 </strong>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-600 dark:text-slate-400">Flux CAN / Traccar</span>
-                <strong className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                <span className="text-[var(--df-text-secondary)]">Flux CAN / Traccar</span>
+                <strong className="font-mono font-bold text-[var(--df-status-ok-text)]">
                   {isDemoMode ? '100% Nominale (< 24ms)' : assets.length > 0 ? `${assets.length} actif${assets.length > 1 ? 's' : ''} (< 24ms)` : 'En attente d’actifs'}
                 </strong>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-600 dark:text-slate-400">Sécurité Multi-Tenant</span>
-                <strong className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                <span className="text-[var(--df-text-secondary)]">Sécurité Multi-Tenant</span>
+                <strong className="font-mono font-bold text-[var(--df-accent-blue)]">
                   PostgreSQL RLS
                 </strong>
               </div>
@@ -552,19 +607,19 @@ export function ExecutiveDashboardClient() {
           <HighDensityKpiGrid metrics={metrics} />
         </section>
 
-        {/* 4. BANNIÈRE ARBITRAGE ÉCONOMIQUE & ROI CLIENT */}
+        {/* 4. DATA-VIZ & ARBITRAGE COCKPIT (CHANTIER C4) */}
         {!isDemoMode && assets.length === 0 ? (
-          <section className="mb-8 rounded-2xl border border-blue-500/20 bg-gradient-to-r from-blue-900/10 via-indigo-900/10 to-slate-900/10 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-slate-900/30 p-6 shadow-2xs">
+          <section className="mb-8 rounded-[var(--df-radius-xl,14px)] border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-1)] p-6 shadow-[var(--df-shadow-sm)]">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div className="max-w-2xl">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="ok">ESPACE CERTIFIÉ LOI 18-07</Badge>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">Données souveraines &amp; isolées (PostgreSQL RLS)</span>
+                  <span className="text-xs text-[var(--df-text-muted)]">Données souveraines &amp; isolées (PostgreSQL RLS)</span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">
+                <h3 className="text-lg font-bold text-[var(--df-text-main)] mb-1">
                   Bienvenue sur votre Espace Flotte {session.tenantName ? `« ${session.tenantName} »` : ''}
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p className="text-xs sm:text-sm text-[var(--df-text-secondary)] leading-relaxed">
                   Votre parc de véhicules est actuellement vierge. Dès l&apos;ajout de votre premier véhicule ou l&apos;importation d&apos;un premier relevé carburant Naftal, le jumeau numérique calculera votre retour sur investissement préventif en Dinars Algériens (DZD).
                 </p>
               </div>
@@ -572,21 +627,21 @@ export function ExecutiveDashboardClient() {
               <div className="flex flex-wrap items-center gap-3 shrink-0">
                 <Link
                   href="/assets"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-accent-blue)] hover:bg-[var(--df-accent-blue-hover)] text-white text-xs font-bold shadow-sm transition-colors"
                 >
                   <IconTruck size={15} />
                   <span>Ajouter un premier véhicule</span>
                 </Link>
                 <Link
                   href="/fuel-scanner"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-bg-surface-2)] text-[var(--df-text-main)] text-xs font-semibold border border-[var(--df-border-subtle)] transition-colors"
                 >
                   <IconFuel size={15} className="text-amber-500" />
                   <span>Scanner Reçu Naftal (Mode 0)</span>
                 </Link>
                 <button
                   onClick={() => toggleDemoMode(true)}
-                  className="inline-flex items-center gap-2 px-3 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-semibold border border-amber-500/20 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-2 px-3 py-2.5 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-status-warning-bg)] text-[var(--df-status-warning-text)] text-xs font-semibold border border-[var(--df-status-warning-border)] transition-colors cursor-pointer"
                 >
                   <span>Explorer la Démo 58 Wilayas</span>
                 </button>
@@ -594,79 +649,41 @@ export function ExecutiveDashboardClient() {
             </div>
           </section>
         ) : (
-          <section className="mb-8 rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 shadow-2xs">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-              <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <IconShieldCheck size={20} strokeWidth={2} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                      Arbitrage Décisionnel Mensuel : Coût d&apos;Action vs Risque d&apos;Inaction
-                    </span>
-                    <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
-                      ROI : {assets.length > 0 ? '12.8x' : '14.1x'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Lois physiques Arrhenius &amp; Archard : 2 avaries critiques évitées (Turbo Scania &amp; Filtration CAT).
-                  </p>
-                </div>
-              </div>
+          <section className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Graphique temporel Recharts/SVG unifié */}
+            <TrendChart
+              title="Tendance Télématique & Santé Flotte (30 Jours)"
+              subtitle="Indice composite VHI vs Consommation moyenne aux 100 km"
+              data={FLEET_TREND_DATA}
+              series={FLEET_SERIES}
+              height={270}
+            />
 
-              <div className="flex items-center gap-4 sm:gap-6 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-3 md:pt-0 border-slate-100 dark:border-slate-800">
-                <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Risque Évité
-                  </div>
-                  <div className="font-mono text-sm sm:text-base font-bold text-rose-600 dark:text-rose-400 mt-0.5">
-                    {assets.length > 0 ? `${(assets.length * 85000).toLocaleString('fr-FR')} DA` : '1 850 000 DA'}
-                  </div>
-                </div>
-                <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
-                <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Coût Préventif
-                  </div>
-                  <div className="font-mono text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 mt-0.5">
-                    {assets.length > 0 ? `${(assets.length * 9500).toLocaleString('fr-FR')} DA` : '131 000 DA'}
-                  </div>
-                </div>
-                <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
-                <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Gain Net Client
-                  </div>
-                  <div className="font-mono text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    {assets.length > 0 ? `+${(assets.length * 75500).toLocaleString('fr-FR')} DA` : '+1 719 000 DA'}
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Actuariat Financier SAD -> ADS DZD */}
+            <CostArbitrationBars items={DEMO_ARBITRATIONS} />
           </section>
         )}
 
         {/* 5. PARADIGME INDUSTRIEL : LES 5 GÉNÉRATIONS DE MAINTENANCE */}
-        <section className="mb-8 rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827] p-5 sm:p-6 shadow-2xs">
+        <section className="mb-8 rounded-[var(--df-radius-xl,14px)] border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-1)] p-5 sm:p-6 shadow-[var(--df-shadow-sm)]">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span className="text-[10.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-[var(--df-radius-xs,4px)] bg-[var(--df-status-ok-bg)] text-[var(--df-status-ok-text)] border border-[var(--df-status-ok-border)]">
                   Paradigme de Maintenance 5.0
                 </span>
-                <span className="text-[10.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60">
+                <span className="text-[10.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-[var(--df-radius-xs,4px)] bg-[var(--df-status-info-bg)] text-[var(--df-status-info-text)] border border-[var(--df-status-info-border)]">
                   Coût Matériel Zéro Capteur (0 DA)
                 </span>
               </div>
-              <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              <h2 className="text-lg font-bold tracking-tight text-[var(--df-text-main)] font-sans">
                 Pourquoi DocteurFlotte surpasse la Maintenance 4.0 Traditionnelle
               </h2>
             </div>
 
             <Link
               href="/preventive"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-colors shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-bg-surface-2)] hover:bg-[var(--df-bg-surface-3)] text-[var(--df-text-main)] text-xs font-semibold border border-[var(--df-border-subtle)] transition-colors shrink-0"
             >
               <span>Explorer le Cockpit 5.0</span>
               <IconArrowUpRight size={13} />
@@ -675,84 +692,84 @@ export function ExecutiveDashboardClient() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {/* 1.0 */}
-            <div className="p-3.5 rounded-xl border border-slate-200/70 dark:border-slate-800/60 bg-slate-50/60 dark:bg-slate-900/40 opacity-70">
-              <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            <div className="p-3.5 rounded-[var(--df-radius-md,8px)] border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-2)] opacity-70">
+              <div className="text-[10px] font-semibold text-[var(--df-text-muted)] uppercase tracking-wider font-mono">
                 1.0 (1970 - 1990)
               </div>
-              <div className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-1">
+              <div className="text-xs font-bold text-[var(--df-text-main)] mt-1 font-sans">
                 Réactive &amp; Curative
               </div>
-              <div className="text-[11px] text-rose-500 font-medium mt-0.5">
+              <div className="text-[11px] text-[var(--df-status-danger-text)] font-medium mt-0.5 font-sans">
                 « On répare quand ça casse »
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+              <p className="text-[11px] text-[var(--df-text-secondary)] mt-2 leading-relaxed">
                 Casse sur route, remorquage d&apos;urgence et immobilisation lourde non planifiée.
               </p>
             </div>
 
             {/* 2.0 */}
-            <div className="p-3.5 rounded-xl border border-slate-200/70 dark:border-slate-800/60 bg-slate-50/60 dark:bg-slate-900/40 opacity-80">
-              <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            <div className="p-3.5 rounded-[var(--df-radius-md,8px)] border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-2)] opacity-80">
+              <div className="text-[10px] font-semibold text-[var(--df-text-muted)] uppercase tracking-wider font-mono">
                 2.0 (1990 - 2010)
               </div>
-              <div className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-1">
+              <div className="text-xs font-bold text-[var(--df-text-main)] mt-1 font-sans">
                 Préventive Aveugle
               </div>
-              <div className="text-[11px] text-amber-500 font-medium mt-0.5">
+              <div className="text-[11px] text-[var(--df-status-warning-text)] font-medium mt-0.5 font-sans">
                 « Vidange fixe à 10 000 km »
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+              <p className="text-[11px] text-[var(--df-text-secondary)] mt-2 leading-relaxed">
                 Intervalles calendaires rigides. 35% d&apos;huiles encore viables jetées prématurément.
               </p>
             </div>
 
             {/* 3.0 */}
-            <div className="p-3.5 rounded-xl border border-slate-200/70 dark:border-slate-800/60 bg-slate-50/60 dark:bg-slate-900/40 opacity-85">
-              <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            <div className="p-3.5 rounded-[var(--df-radius-md,8px)] border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-2)] opacity-85">
+              <div className="text-[10px] font-semibold text-[var(--df-text-muted)] uppercase tracking-wider font-mono">
                 3.0 (2010 - 2018)
               </div>
-              <div className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-1">
+              <div className="text-xs font-bold text-[var(--df-text-main)] mt-1 font-sans">
                 Conditionnelle Basique
               </div>
-              <div className="text-[11px] text-blue-500 font-medium mt-0.5">
+              <div className="text-[11px] text-[var(--df-accent-blue)] font-medium mt-0.5 font-sans">
                 « Voyants et seuils simples »
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+              <p className="text-[11px] text-[var(--df-text-secondary)] mt-2 leading-relaxed">
                 Alerte voyant à &gt;95°C : l&apos;usure mécanique du moteur est déjà amorcée.
               </p>
             </div>
 
             {/* 4.0 */}
-            <div className="p-3.5 rounded-xl border border-slate-200/70 dark:border-slate-800/60 bg-slate-50/60 dark:bg-slate-900/40">
-              <div className="text-[10px] font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
+            <div className="p-3.5 rounded-[var(--df-radius-md,8px)] border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-2)]">
+              <div className="text-[10px] font-semibold text-[var(--df-chart-3)] uppercase tracking-wider font-mono">
                 4.0 (2018 - 2024)
               </div>
-              <div className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-1">
+              <div className="text-xs font-bold text-[var(--df-text-main)] mt-1 font-sans">
                 Prédictive Statistique
               </div>
-              <div className="text-[11px] text-purple-500 font-medium mt-0.5">
+              <div className="text-[11px] text-[var(--df-chart-3)] font-medium mt-0.5 font-sans">
                 « ML Boîte Noire »
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+              <p className="text-[11px] text-[var(--df-text-secondary)] mt-2 leading-relaxed">
                 Faux positifs fréquents, zéro formule physique, sans chiffrage de rentabilité en DZD.
               </p>
             </div>
 
             {/* 5.0 DOCTEURFLOTTE */}
-            <div className="relative p-3.5 rounded-xl border border-emerald-500/50 dark:border-emerald-500/40 bg-emerald-50/40 dark:bg-emerald-950/30">
-              <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center justify-between">
+            <div className="relative p-3.5 rounded-[var(--df-radius-md,8px)] border border-[var(--df-status-ok-border)] bg-[var(--df-status-ok-bg)]">
+              <div className="text-[10px] font-bold text-[var(--df-status-ok-text)] uppercase tracking-wider flex items-center justify-between font-mono">
                 <span>5.0 (2026 - 2030+)</span>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-white uppercase">
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-[var(--df-radius-xs,4px)] bg-[var(--df-status-ok)] text-white uppercase">
                   Souverain
                 </span>
               </div>
-              <div className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-1">
+              <div className="text-xs font-bold text-[var(--df-text-main)] mt-1 font-sans">
                 Prescriptive Déterministe
               </div>
-              <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
+              <div className="text-[11px] text-[var(--df-status-ok-text)] font-semibold mt-0.5 font-sans">
                 « 0 DA Capteur • Arbitrage DZD »
               </div>
-              <ul className="text-[11px] text-slate-600 dark:text-slate-300 mt-2 space-y-1">
+              <ul className="text-[11px] text-[var(--df-text-secondary)] mt-2 space-y-1 font-sans">
                 <li>• <strong>Physique 6 organes :</strong> Arrhenius &amp; Archard</li>
                 <li>• <strong>Arbitrage DZD :</strong> Action vs Inaction</li>
                 <li>• <strong>Assistant Darja / FR :</strong> Déterministe</li>
@@ -805,27 +822,27 @@ export function ExecutiveDashboardClient() {
           </div>
 
           {!isDemoMode && assets.length === 0 ? (
-            <div className="p-8 text-center rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white dark:bg-[#111827]">
-              <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-500 flex items-center justify-center mx-auto mb-3">
+            <div className="p-8 text-center rounded-[var(--df-radius-xl,14px)] border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-1)]">
+              <div className="w-12 h-12 rounded-full bg-[var(--df-accent-blue-subtle)] text-[var(--df-accent-blue)] flex items-center justify-center mx-auto mb-3">
                 <IconShieldCheck size={24} strokeWidth={2.5} />
               </div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">
+              <h3 className="text-sm font-bold text-[var(--df-text-main)] mb-1">
                 Aucun arbitrage décisionnel requis pour le moment
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-md mx-auto">
+              <p className="text-xs text-[var(--df-text-muted)] mb-4 max-w-md mx-auto">
                 Votre organisation est prête. Les décisions prescriptives SAD ➔ ADS apparaîtront automatiquement dès l&apos;ingestion des premiers relevés odométriques ou signaux télématiques.
               </p>
               <div className="flex items-center justify-center gap-3">
                 <Link
                   href="/assets"
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition-colors"
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-accent-blue)] hover:bg-[var(--df-accent-blue-hover)] text-white text-xs font-semibold shadow-xs transition-colors"
                 >
                   <IconTruck size={14} />
                   <span>Enregistrer un véhicule</span>
                 </Link>
                 <Link
                   href="/fuel-scanner"
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-bg-surface-2)] hover:bg-[var(--df-bg-surface-3)] text-[var(--df-text-main)] text-xs font-semibold border border-[var(--df-border-subtle)] transition-colors"
                 >
                   <IconFuel size={14} />
                   <span>Scanner un ticket Naftal</span>
@@ -833,14 +850,14 @@ export function ExecutiveDashboardClient() {
               </div>
             </div>
           ) : filteredDecisions.length === 0 ? (
-            <div className="p-8 text-center rounded-2xl border border-slate-200/90 dark:border-slate-800/80 bg-white dark:bg-[#111827]">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 flex items-center justify-center mx-auto mb-3">
+            <div className="p-8 text-center rounded-[var(--df-radius-xl,14px)] border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-1)]">
+              <div className="w-12 h-12 rounded-full bg-[var(--df-status-ok-bg)] text-[var(--df-status-ok)] flex items-center justify-center mx-auto mb-3">
                 <IconCheck size={24} strokeWidth={2.5} />
               </div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">
+              <h3 className="text-sm font-bold text-[var(--df-text-main)] mb-1">
                 Aucun arbitrage en attente pour cette sélection
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-md mx-auto">
+              <p className="text-xs text-[var(--df-text-muted)] mb-4 max-w-md mx-auto">
                 Toutes les recommandations ont été traitées ou les indicateurs d&apos;usure sont nominaux.
               </p>
               {isDemoMode && (

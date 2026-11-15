@@ -10,7 +10,8 @@ import { DemoModeToggle } from './DemoModeToggle';
 import { ThemeToggle } from '../ThemeToggle';
 import { PlatformStatusBar } from './PlatformStatusBar';
 import { MobileNavDrawer } from './MobileNavDrawer';
-import { IconRefreshCw, IconNavigation } from './TechIcons';
+import { CommandPaletteModal } from './CommandPaletteModal';
+import { IconRefreshCw, IconNavigation, IconSearch } from './TechIcons';
 
 interface NavbarProps {
   onResetDemo?: () => void;
@@ -20,6 +21,18 @@ export function Navbar({ onResetDemo }: NavbarProps) {
   const [session, setSession] = useState<NavbarSession | null>(null);
   const [sessionReady, setSessionReady] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   useEffect(() => {
     const syncSession = () => {
@@ -164,9 +177,9 @@ export function Navbar({ onResetDemo }: NavbarProps) {
                     fontWeight: 600,
                     padding: '1px 4px',
                     borderRadius: '3px',
-                    background: 'rgba(16, 185, 129, 0.1)',
-                    color: '#10b981',
-                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                    background: 'var(--df-status-ok-bg)',
+                    color: 'var(--df-status-ok-text)',
+                    border: '1px solid var(--df-status-ok-border)',
                     letterSpacing: '0.04em',
                   }}
                 >
@@ -208,6 +221,44 @@ export function Navbar({ onResetDemo }: NavbarProps) {
 
         {/* SECTION DROITE : RACCOURCIS CRITIQUES, THÈME & PROFIL */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
+          {/* BOUTON COMMAND PALETTE ⌘K */}
+          <button
+            type="button"
+            onClick={() => setIsCommandPaletteOpen(true)}
+            aria-label="Ouvrir la palette de commandes (⌘K / Ctrl+K)"
+            title="Palette de commandes (⌘K / Ctrl+K)"
+            style={{
+              background: 'var(--df-bg-surface-2)',
+              border: '1px solid var(--df-border-subtle)',
+              color: 'var(--df-text-secondary)',
+              padding: '0.24rem 0.65rem',
+              borderRadius: 'var(--df-radius-sm)',
+              fontSize: '0.72rem',
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              cursor: 'pointer',
+              transition: 'all var(--df-transition-fast)',
+            }}
+          >
+            <IconSearch size={12} strokeWidth={2} style={{ color: 'var(--df-text-muted)' }} />
+            <span className="hidden sm:inline" style={{ color: 'var(--df-text-muted)' }}>Rechercher...</span>
+            <kbd
+              style={{
+                fontFamily: 'var(--df-font-mono)',
+                fontSize: '0.62rem',
+                padding: '1px 4px',
+                borderRadius: '3px',
+                background: 'var(--df-bg-surface-3)',
+                border: '1px solid var(--df-border-subtle)',
+                color: 'var(--df-text-muted)',
+              }}
+            >
+              ⌘K
+            </kbd>
+          </button>
+
           {/* RACCOURCI LIVE FLEET COCKPIT & TÉLÉMÉTRIE GIS */}
           <Link
             href="/live-cockpit"
@@ -215,9 +266,9 @@ export function Navbar({ onResetDemo }: NavbarProps) {
             title="Cockpit Télématique Live (GIS, CAN J1939)"
             style={{
               textDecoration: 'none',
-              background: 'rgba(16, 185, 129, 0.08)',
-              border: '1px solid rgba(16, 185, 129, 0.25)',
-              color: '#10b981',
+              background: 'var(--df-status-ok-bg)',
+              border: '1px solid var(--df-status-ok-border)',
+              color: 'var(--df-status-ok-text)',
               padding: '0.24rem 0.55rem',
               borderRadius: 'var(--df-radius-sm)',
               fontSize: '0.72rem',
@@ -234,12 +285,11 @@ export function Navbar({ onResetDemo }: NavbarProps) {
                 width: 6,
                 height: 6,
                 borderRadius: '50%',
-                background: '#10b981',
-                boxShadow: '0 0 6px rgba(16, 185, 129, 0.5)',
+                background: 'var(--df-status-ok)',
               }}
               aria-hidden="true"
             />
-            <IconNavigation size={12} strokeWidth={2} style={{ color: '#10b981' }} aria-hidden="true" />
+            <IconNavigation size={12} strokeWidth={2} style={{ color: 'var(--df-status-ok-text)' }} aria-hidden="true" />
             <span className="hidden 2xl:inline">Cockpit Live</span>
           </Link>
 
@@ -291,6 +341,12 @@ export function Navbar({ onResetDemo }: NavbarProps) {
         isOpen={isMobileDrawerOpen}
         onClose={() => setIsMobileDrawerOpen(false)}
         session={session}
+      />
+
+      {/* 4. COMMAND PALETTE UNIVERSELLE (⌘K / Ctrl+K) */}
+      <CommandPaletteModal
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
       />
     </header>
   );

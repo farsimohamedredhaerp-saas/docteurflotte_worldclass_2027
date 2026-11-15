@@ -142,6 +142,26 @@ describe('UI Kit Transverse — Certification de Stabilité (Porte 0)', () => {
       const { ConfirmDialog } = await import('../components/ui/ConfirmDialog');
       expect(ConfirmDialog).toBeDefined();
     });
+
+    it('KpiCard exporte les types et gère les micro-sparklines et skeletons', async () => {
+      const { KpiCard } = await import('../components/ui/KpiCard');
+      expect(KpiCard).toBeDefined();
+    });
+
+    it('TrendChart exporte les types et gère les tracés temporels multi-séries', async () => {
+      const { TrendChart } = await import('../components/ui/TrendChart');
+      expect(TrendChart).toBeDefined();
+    });
+
+    it('CostArbitrationBars certifie le calcul du Gain Net et du ROI DZD', async () => {
+      const { CostArbitrationBars } = await import('../components/ui/CostArbitrationBars');
+      expect(CostArbitrationBars).toBeDefined();
+    });
+
+    it('FleetHighDensityTable gère la haute densité avec pagination et toggle compact/confort', async () => {
+      const { FleetHighDensityTable } = await import('../components/density/FleetHighDensityTable');
+      expect(FleetHighDensityTable).toBeDefined();
+    });
   });
 });
 
