@@ -69,6 +69,20 @@ export function OfflineMissionVerifier({
           />
         </div>
 
+        <div className="flex justify-end gap-2 text-[11px]">
+          <button
+            type="button"
+            onClick={() => {
+              const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+              setVerifyQrText(`DZOM|OM-2027-164821|16-04218-00|198816012345678901|16|30|${nextWeek}|FRET_GENERAL`);
+              setVerifyTokenText('ED25519-SIG-8f4b9e2a1c0d3e5f7a9b8c6d4e2f0a1b3c5d7e9f');
+            }}
+            className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+          >
+            + Charger Jeton Démo Valide (7j)
+          </button>
+        </div>
+
         <button
           type="button"
           onClick={onVerify}

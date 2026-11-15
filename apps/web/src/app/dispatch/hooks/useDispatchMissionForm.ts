@@ -109,7 +109,9 @@ export function useDispatchMissionForm({
       targetClimateZone: climateZone,
       requiresReeferColdChain: requiresReefer,
       requiresHazmatAdr: requiresHazmat,
-      requiresPtoHydraulics: true,
+      requiresPtoHydraulics:
+        selectedSector === IndustrySector.BTP ||
+        selectedSector === IndustrySector.AGRICULTURE,
     };
 
     try {
@@ -168,7 +170,9 @@ export function useDispatchMissionForm({
       targetClimateZone: climateZone,
       requiresReeferColdChain: requiresReefer,
       requiresHazmatAdr: requiresHazmat,
-      requiresPtoHydraulics: true,
+      requiresPtoHydraulics:
+        selectedSector === IndustrySector.BTP ||
+        selectedSector === IndustrySector.AGRICULTURE,
     };
 
     try {

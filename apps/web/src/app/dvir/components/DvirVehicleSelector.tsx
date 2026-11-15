@@ -4,6 +4,7 @@ import React from 'react';
 import { Badge } from '@/components/Badge';
 import { Card } from '@/components/ui/Card';
 import { IconTruck, IconShieldCheck } from '@/components/navigation/TechIcons';
+import { VehicleSilhouette } from '@/components/ui/VehicleSilhouette';
 import { VehicleProfile, DvirLanguage } from '../types';
 
 export interface DvirVehicleSelectorProps {
@@ -52,7 +53,16 @@ export const DvirVehicleSelector: React.FC<DvirVehicleSelectorProps> = ({
         </div>
 
         {selectedVehicle && (
-          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-xs space-y-1.5">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-xs space-y-2">
+            <div className="flex items-center gap-3 pb-2 border-b border-slate-200/80 dark:border-slate-800">
+              <div className="w-12 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
+                <VehicleSilhouette brand={selectedVehicle.name} category={selectedVehicle.category} size="sm" />
+              </div>
+              <div>
+                <div className="font-bold text-slate-900 dark:text-slate-100">{selectedVehicle.plate}</div>
+                <div className="text-[11px] text-slate-500">{selectedVehicle.name}</div>
+              </div>
+            </div>
             <div className="flex items-center justify-between">
               <span className="text-slate-500">Chauffeur habituel :</span>
               <strong className="text-slate-900 dark:text-slate-100">{selectedVehicle.driverName}</strong>

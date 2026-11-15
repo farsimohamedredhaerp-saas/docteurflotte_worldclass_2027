@@ -8,6 +8,7 @@ import {
   IconAlertOctagon,
   IconRefreshCw,
 } from '@/components/navigation/TechIcons';
+import { VehicleSilhouette } from '@/components/ui/VehicleSilhouette';
 
 interface DecisionVerdictCardProps {
   decisionResult: DispatchDecisionResult | null;
@@ -72,12 +73,19 @@ export function DecisionVerdictCard({
       {/* DÉTAIL DES ACTIFS AFFECTÉS */}
       <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#161F30] border border-slate-200/90 dark:border-[#1F2937] mb-4">
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-              Véhicule Assigné :
-            </div>
-            <div className="font-mono text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
-              {decisionResult.assignedRegistrationPlate || 'Aucun'}
+          <div className="flex items-center gap-3">
+            {decisionResult.assignedRegistrationPlate && (
+              <div className="w-12 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
+                <VehicleSilhouette brand={decisionResult.assignedRegistrationPlate} size="sm" />
+              </div>
+            )}
+            <div>
+              <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                Véhicule Assigné :
+              </div>
+              <div className="font-mono text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+                {decisionResult.assignedRegistrationPlate || 'Aucun'}
+              </div>
             </div>
           </div>
           <div>
@@ -131,9 +139,14 @@ export function DecisionVerdictCard({
                 className="p-3 rounded-lg bg-slate-50 dark:bg-[#161F30] border border-slate-200/80 dark:border-[#1F2937]"
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <strong className="text-xs text-slate-900 dark:text-slate-100">
-                    #{i + 1} — {sub.registrationPlate} ({sub.makeModel})
-                  </strong>
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-6 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
+                      <VehicleSilhouette brand={sub.makeModel} size="sm" />
+                    </div>
+                    <strong className="text-xs text-slate-900 dark:text-slate-100">
+                      #{i + 1} — {sub.registrationPlate} ({sub.makeModel})
+                    </strong>
+                  </div>
                   <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">
                     Score TOPSIS : {sub.totalScore100}/100
                   </span>
