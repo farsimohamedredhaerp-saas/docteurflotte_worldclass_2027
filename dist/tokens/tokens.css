@@ -70,7 +70,7 @@
 
 /* ---- Chart (partagé + variantes dark/light suffixées) ---- */
 :root {
-  --df-chart-1: #2563EB;
+  --df-chart-1: #3B82F6;
   --df-chart-2: #0284C7;
   --df-chart-3: #8B5CF6;
   --df-chart-4: #D97706;
@@ -82,8 +82,12 @@
   --df-chart-light-4: #B45309;
   --df-chart-light-5: #059669;
   --df-chart-light-6: #475569;
-  --df-chart-grid: rgba(148, 163, 184, 0.10);
-  --df-chart-axis-text: #64748B;
+  --df-chart-grid: rgba(15, 23, 42, 0.08);
+  --df-chart-grid-dark: rgba(148, 163, 184, 0.12);
+  --df-chart-grid-light: rgba(15, 23, 42, 0.08);
+  --df-chart-axis-text: #475569;
+  --df-chart-axis-text-dark: #94A3B8;
+  --df-chart-axis-text-light: #475569;
   --df-chart-sparkline-opacity: 0.4;
   --df-chart-tooltip-bg-dark: #121824;
   --df-chart-tooltip-bg-light: #FFFFFF;
@@ -155,9 +159,9 @@ html.dark, [data-theme="dark"] {
   --df-text-muted: #64748B;
   --df-text-faint: #334155;
   --df-text-on-brand: #FFFFFF;
-  --df-brand-primary: #2563EB;
-  --df-brand-primary-hover: #1D4ED8;
-  --df-brand-glow: rgba(37, 99, 235, 0.18);
+  --df-brand-primary: #3B82F6;
+  --df-brand-primary-hover: #60A5FA;
+  --df-brand-glow: rgba(59, 130, 246, 0.22);
   --df-telemetry-cyan: #0284C7;
   --df-telemetry-cyan-subtle: rgba(2, 132, 199, 0.12);
   --df-status-nominal: #10B981;

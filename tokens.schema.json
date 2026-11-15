@@ -374,10 +374,24 @@
           }
         },
         "grid": {
-          "type": "string"
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "object",
+              "required": ["dark", "light"],
+              "additionalProperties": { "type": "string" }
+            }
+          ]
         },
         "axisText": {
-          "type": "string"
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "object",
+              "required": ["dark", "light"],
+              "additionalProperties": { "type": "string" }
+            }
+          ]
         },
         "sparklineOpacity": {
           "type": "number",

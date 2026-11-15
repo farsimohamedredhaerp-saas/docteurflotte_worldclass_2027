@@ -1,0 +1,51 @@
+{
+  "series": [
+    "#3B82F6",
+    "#0284C7",
+    "#8B5CF6",
+    "#D97706",
+    "#10B981",
+    "#64748B"
+  ],
+  "seriesLight": [
+    "#1D4ED8",
+    "#0369A1",
+    "#7C3AED",
+    "#B45309",
+    "#059669",
+    "#475569"
+  ],
+  "grid": {
+    "dark": "rgba(148, 163, 184, 0.12)",
+    "light": "rgba(15, 23, 42, 0.08)"
+  },
+  "axisText": {
+    "dark": "#94A3B8",
+    "light": "#475569"
+  },
+  "sparklineOpacity": 0.4,
+  "tooltip": {
+    "bg": {
+      "dark": "#121824",
+      "light": "#FFFFFF"
+    },
+    "border": {
+      "dark": "#2A364F",
+      "light": "#E2E8F0"
+    },
+    "text": {
+      "dark": "#F8FAFC",
+      "light": "#0F172A"
+    }
+  },
+  "annotation": {
+    "color": {
+      "dark": "#D97706",
+      "light": "#B45309"
+    },
+    "labelBg": {
+      "dark": "#121824",
+      "light": "#FFFFFF"
+    }
+  }
+}

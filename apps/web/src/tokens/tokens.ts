@@ -132,9 +132,9 @@ export const tokens = {
         "onBrand": "#FFFFFF"
       },
       "brand": {
-        "primary": "#2563EB",
-        "primaryHover": "#1D4ED8",
-        "glow": "rgba(37, 99, 235, 0.18)"
+        "primary": "#3B82F6",
+        "primaryHover": "#60A5FA",
+        "glow": "rgba(59, 130, 246, 0.22)"
       },
       "telemetry": {
         "cyan": "#0284C7",
@@ -250,7 +250,7 @@ export const tokens = {
   },
   "chart": {
     "series": [
-      "#2563EB",
+      "#3B82F6",
       "#0284C7",
       "#8B5CF6",
       "#D97706",
@@ -265,8 +265,14 @@ export const tokens = {
       "#059669",
       "#475569"
     ],
-    "grid": "rgba(148, 163, 184, 0.10)",
-    "axisText": "#64748B",
+    "grid": {
+      "dark": "rgba(148, 163, 184, 0.12)",
+      "light": "rgba(15, 23, 42, 0.08)"
+    },
+    "axisText": {
+      "dark": "#94A3B8",
+      "light": "#475569"
+    },
     "sparklineOpacity": 0.4,
     "tooltip": {
       "bg": {

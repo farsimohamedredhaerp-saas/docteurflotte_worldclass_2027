@@ -99,8 +99,24 @@ const flattenChart = (c) => {
   const out = {};
   (c.series ?? []).forEach((v, i) => { out[`${P}-chart-${i + 1}`] = String(v); });
   (c.seriesLight ?? []).forEach((v, i) => { out[`${P}-chart-light-${i + 1}`] = String(v); });
-  if (c.grid) out[`${P}-chart-grid`] = String(c.grid);
-  if (c.axisText) out[`${P}-chart-axis-text`] = String(c.axisText);
+  if (c.grid) {
+    if (typeof c.grid === 'object') {
+      out[`${P}-chart-grid`] = String(c.grid[defaultTheme] ?? c.grid.dark ?? c.grid.light);
+      out[`${P}-chart-grid-dark`] = String(c.grid.dark);
+      out[`${P}-chart-grid-light`] = String(c.grid.light);
+    } else {
+      out[`${P}-chart-grid`] = String(c.grid);
+    }
+  }
+  if (c.axisText) {
+    if (typeof c.axisText === 'object') {
+      out[`${P}-chart-axis-text`] = String(c.axisText[defaultTheme] ?? c.axisText.dark ?? c.axisText.light);
+      out[`${P}-chart-axis-text-dark`] = String(c.axisText.dark);
+      out[`${P}-chart-axis-text-light`] = String(c.axisText.light);
+    } else {
+      out[`${P}-chart-axis-text`] = String(c.axisText);
+    }
+  }
   if (c.sparklineOpacity !== undefined) {
     out[`${P}-chart-sparkline-opacity`] = String(c.sparklineOpacity);
   }
@@ -353,6 +369,24 @@ if (targets.includes('ts')) {
   writeFileSync(webTsPath, tsContent, 'utf8');
   written.push(webTsPath);
 }
+
+// Écriture de tokens/chart.json pour data-viz (Recharts, visx, MapLibre - Règle zéro couleur brute)
+const chartJsonContent = JSON.stringify(tokens.chart, null, 2);
+const chartTokensDir = resolve(root, 'tokens');
+mkdirSync(chartTokensDir, { recursive: true });
+const chartTokensPath = join(chartTokensDir, 'chart.json');
+writeFileSync(chartTokensPath, chartJsonContent, 'utf8');
+written.push(chartTokensPath);
+
+const distChartPath = join(outDir, 'chart.json');
+writeFileSync(distChartPath, chartJsonContent, 'utf8');
+written.push(distChartPath);
+
+const webTokensDir = resolve(root, 'apps/web/src/tokens');
+mkdirSync(webTokensDir, { recursive: true });
+const webChartPath = join(webTokensDir, 'chart.json');
+writeFileSync(webChartPath, chartJsonContent, 'utf8');
+written.push(webChartPath);
 
 written.forEach((p) => log(`✓ ${p.replace(root, '.')}`));
 log(`\n✓ Build terminé — ${written.length} fichier(s) généré(s) depuis tokens.json v${tokens.version}`);

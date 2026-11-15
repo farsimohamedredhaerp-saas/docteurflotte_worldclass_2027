@@ -2,7 +2,21 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MapLibreCorridorsMap } from '../../components/cockpit';
+import dynamic from 'next/dynamic';
+
+// Chargement différé asynchrone (Lazy-load) pour préserver le budget initial de 180 Ko JS (§6, §14)
+const MapLibreCorridorsMap = dynamic(
+  () => import('../../components/cockpit').then((mod) => mod.MapLibreCorridorsMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 text-slate-400 gap-3">
+        <div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+        <span className="text-xs font-mono">Initialisation du moteur cartographique MapLibre GL...</span>
+      </div>
+    ),
+  }
+);
 
 export default function MapCorridorsPage() {
   return (
