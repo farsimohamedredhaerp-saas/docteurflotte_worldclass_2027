@@ -23,6 +23,24 @@ export interface FuelReceiptCardProps {
   onOpenDelete: (id: string, label: string) => void;
 }
 
+function formatReceiptDate(dateStr?: string, fallback?: string): string {
+  const target = dateStr || fallback;
+  if (!target) return new Date().toLocaleDateString('fr-DZ');
+  const dmyMatch = target.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+  if (dmyMatch) {
+    const [, d, m, y, hr, min] = dmyMatch;
+    const date = new Date(Number(y), Number(m) - 1, Number(d), Number(hr || 0), Number(min || 0));
+    if (!isNaN(date.getTime())) return date.toLocaleDateString('fr-DZ');
+  }
+  const parsed = new Date(target);
+  if (!isNaN(parsed.getTime())) return parsed.toLocaleDateString('fr-DZ');
+  if (fallback) {
+    const fbParsed = new Date(fallback);
+    if (!isNaN(fbParsed.getTime())) return fbParsed.toLocaleDateString('fr-DZ');
+  }
+  return new Date().toLocaleDateString('fr-DZ');
+}
+
 export const FuelReceiptCard: React.FC<FuelReceiptCardProps> = React.memo(({
   receipt: r,
   onOpenProof,
@@ -58,7 +76,7 @@ export const FuelReceiptCard: React.FC<FuelReceiptCardProps> = React.memo(({
           </div>
 
           <span className="text-[10px] text-slate-400 font-mono">
-            {new Date(r.dateTime || r.createdAt || Date.now()).toLocaleDateString('fr-DZ')}
+            {formatReceiptDate(r.dateTime, r.createdAt)}
           </span>
         </div>
 

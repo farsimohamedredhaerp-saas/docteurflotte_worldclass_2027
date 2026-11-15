@@ -24,12 +24,93 @@ import {
   IconZap,
   IconFuel,
 } from '../../components/navigation/TechIcons';
+import { CalculationProofModal, CalculationProofData } from '../../components/decisions';
+import { VehicleSilhouette } from '../../components/ui/VehicleSilhouette';
+
+function buildReeferProofData(reefer: ReeferLiveStatus): CalculationProofData {
+  const isAlert = !reefer.isWithinSafeRange;
+  return {
+    title: `Rapport Thermotrace & Conformité Chaîne du Froid — ${reefer.assetCode}`,
+    decisionOrMetricName: `Contrôle Thermique ${reefer.cargoType} (${reefer.currentTempC > 0 ? `+${reefer.currentTempC}` : reefer.currentTempC}°C)`,
+    category: 'REGULATORY',
+    ruleId: `HACCP-ATP-${reefer.assetCode}`,
+    legalOrOemReference: 'Arrêté Interministériel du 21 Safar 1414 / Norme Sanitaire Vétérinaire DSV & ATP',
+    deterministicFormula: 'ΔT = |T_mesuré - T_consigne| ≤ Seuil_ATP_HACCP',
+    formulaExplanation: `La chaîne du froid pour la cargaison ${reefer.cargoType} impose une plage de consigne stricte (+${reefer.setpointTempC}°C). En cas d'excursion thermique (ΔT > seuil), la cinétique d'échauffement génère un risque financier immédiat de dépréciation (${(reefer.estimatedCargoValueDzd / 1_000_000).toFixed(2)} M DZD).`,
+    variables: [
+      {
+        name: 'Température Relevée Frigo',
+        symbol: 'T_mesuré',
+        value: `${reefer.currentTempC}°C`,
+        source: 'Sonde BLE Haute Fréquence (Calibrée)',
+      },
+      {
+        name: 'Consigne Réglementaire',
+        symbol: 'T_consigne',
+        value: `+${reefer.setpointTempC}°C`,
+        source: 'Barème HACCP / ATP Algérie',
+      },
+      {
+        name: 'Écart de Température',
+        symbol: 'ΔT',
+        value: `${reefer.tempDeltaC}°C`,
+        source: 'Calcul différentiel temps réel',
+      },
+      {
+        name: 'Capteur Porte Caisse',
+        symbol: 'Door_Sensor',
+        value: reefer.doorOpen ? 'OUVERTE (Déperdition)' : 'Fermée & Étanche',
+        source: 'Capteur magnétique IoT Traccar',
+      },
+      {
+        name: 'Mode Alimentation',
+        symbol: 'Power_Mode',
+        value: reefer.powerMode,
+        source: 'Micro-contrôleur Thermo King / Carrier',
+      },
+      {
+        name: 'Valeur Cargaison Assurée',
+        symbol: 'Cargo_DZD',
+        value: `${reefer.estimatedCargoValueDzd.toLocaleString('fr-DZ')} DZD`,
+        source: 'Bordereau de livraison & Déclaration DGI',
+      },
+    ],
+    steps: [
+      {
+        stepNumber: 1,
+        description: 'Vérification de la plage de température admissible',
+        formula: 'SafeRange_Min ≤ T_mesuré ≤ SafeRange_Max',
+        calculation: `${reefer.currentTempC}°C comparé à la consigne +${reefer.setpointTempC}°C`,
+        intermediateResult: isAlert ? 'EXCURSION THERMIQUE DÉTECTÉE' : 'CONFORME À LA PLAGE',
+      },
+      {
+        stepNumber: 2,
+        description: 'Évaluation de la cinétique de dépréciation marchande',
+        formula: 'Risque_DZD = Cargo_DZD × f(ΔT, Durée_Excursion)',
+        calculation: isAlert
+          ? `${reefer.estimatedCargoValueDzd.toLocaleString('fr-DZ')} DZD × Excursion ${reefer.excursionDurationMinutes} min`
+          : 'Aucune dépréciation (température dans la norme)',
+        intermediateResult: isAlert
+          ? `${reefer.financialRiskDzd.toLocaleString('fr-DZ')} DZD de risque de perte`
+          : '0 DZD de perte financière',
+      },
+    ],
+    finalResult: {
+      label: 'Verdict Sanitaire & Réglementaire DSV',
+      value: isAlert ? 'RUPTURE DE CHAÎNE DU FROID' : 'LOT CERTIFIÉ CONFORME HACCP',
+      conclusion: isAlert
+        ? `Alerte active : Excursion de ${reefer.tempDeltaC}°C depuis ${reefer.excursionDurationMinutes} min. Risque financier chiffré à ${reefer.financialRiskDzd.toLocaleString('fr-DZ')} DZD. Intervention immédiate requise.`
+        : `Température nominale (+${reefer.setpointTempC}°C). Aucune rupture thermique. Traçabilité conforme pour transport agro-alimentaire et pharmaceutique.`,
+    },
+  };
+}
 
 export default function ColdChainPage() {
   const { isDemoMode, session } = useDemoMode();
   const [reefers, setReefers] = useState<ReeferLiveStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterCargo, setFilterCargo] = useState<string>('ALL');
+  const [activeProof, setActiveProof] = useState<CalculationProofData | null>(null);
 
   const loadReefers = useCallback(async () => {
     setIsLoading(true);
@@ -280,16 +361,24 @@ export default function ColdChainPage() {
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                        {reefer.assetCode}
-                      </span>
-                      <h3 className="text-base font-black text-slate-900 dark:text-white mt-1.5">
-                        {reefer.assetName}
-                      </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        {getCargoLabel(reefer.cargoType)}
-                      </p>
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 text-[var(--df-text-secondary)] opacity-85 shrink-0">
+                        <VehicleSilhouette
+                          category={reefer.assetName.toLowerCase().includes('master') ? 'LIGHT_COMMERCIAL' : 'HEAVY_TRUCK'}
+                          size="sm"
+                        />
+                      </div>
+                      <div>
+                        <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                          {reefer.assetCode}
+                        </span>
+                        <h3 className="text-base font-black text-slate-900 dark:text-white mt-1.5">
+                          {reefer.assetName}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          {getCargoLabel(reefer.cargoType)}
+                        </p>
+                      </div>
                     </div>
 
                     <Badge variant={isAlert ? 'danger' : 'ok'} pulse>
@@ -397,15 +486,11 @@ export default function ColdChainPage() {
                     </span>
                     <button
                       type="button"
-                      onClick={() =>
-                        alert(
-                          `Téléchargement de la courbe Thermotrace certifiée DSV pour ${reefer.assetCode}`,
-                        )
-                      }
-                      className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                      onClick={() => setActiveProof(buildReeferProofData(reefer))}
+                      className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
                     >
                       <IconFileText size={13} />
-                      <span>Thermotrace PDF</span>
+                      <span>Preuve Thermotrace (HACCP / DSV)</span>
                     </button>
                   </div>
                 </div>
@@ -413,6 +498,13 @@ export default function ColdChainPage() {
             })
           )}
         </div>
+
+        {/* MODALE DE PREUVE DÉCISIONNELLE THERMOTRACE */}
+        <CalculationProofModal
+          isOpen={!!activeProof}
+          onClose={() => setActiveProof(null)}
+          data={activeProof}
+        />
       </main>
     </div>
   );
