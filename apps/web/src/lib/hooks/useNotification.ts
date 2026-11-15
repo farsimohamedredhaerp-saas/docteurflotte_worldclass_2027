@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export type NotificationType = 'success' | 'warning' | 'error' | 'info';
 
@@ -79,14 +79,25 @@ export function useNotification(defaultDurationMs: number = 4000): UseNotificati
     };
   }, []);
 
-  return {
-    notification,
-    notify,
-    notifySuccess,
-    notifyWarning,
-    notifyError,
-    notifyInfo,
-    clearNotification,
-  };
+  return useMemo(
+    () => ({
+      notification,
+      notify,
+      notifySuccess,
+      notifyWarning,
+      notifyError,
+      notifyInfo,
+      clearNotification,
+    }),
+    [
+      notification,
+      notify,
+      notifySuccess,
+      notifyWarning,
+      notifyError,
+      notifyInfo,
+      clearNotification,
+    ]
+  );
 }
 

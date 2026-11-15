@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Asset, WorkOrder, WorkOrderPriority, WorkOrderStatus } from '@docteurflotte/contracts';
 import { AuthClient } from '@/lib/api-auth';
 import { AssetClient } from '@/lib/api-assets';
@@ -18,6 +18,11 @@ export function useWorkOrdersData() {
   const { isDemoMode } = useDemoMode();
   const { tariffs } = useSystemConfig();
   const notification = useNotification(5000);
+  const notifyErrorRef = useRef(notification.notifyError);
+
+  useEffect(() => {
+    notifyErrorRef.current = notification.notifyError;
+  }, [notification.notifyError]);
 
   const [token, setToken] = useState<string | null>(null);
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
@@ -38,11 +43,11 @@ export function useWorkOrdersData() {
       setAssets(assetList);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erreur de chargement des ordres de travail.';
-      notification.notifyError(msg);
+      notifyErrorRef.current(msg);
     } finally {
       setIsLoading(false);
     }
-  }, [notification]);
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;

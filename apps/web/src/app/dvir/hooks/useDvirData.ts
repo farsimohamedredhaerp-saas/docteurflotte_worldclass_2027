@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useDemoMode } from '@/context/DemoModeContext';
 import { useNotification } from '@/lib/hooks/useNotification';
 import { AuthClient } from '@/lib/api-auth';
@@ -22,6 +22,11 @@ import { computeDvirKpis } from '../lib/dvirSelectors';
 export function useDvirData() {
   const { isDemoMode } = useDemoMode();
   const notification = useNotification(5000);
+  const notifyRef = useRef(notification);
+
+  useEffect(() => {
+    notifyRef.current = notification;
+  }, [notification]);
 
   const [vehicles, setVehicles] = useState<VehicleProfile[]>([]);
   const [reports, setReports] = useState<DVIRInspectionReport[]>([]);
@@ -83,11 +88,11 @@ export function useDvirData() {
         }
       }
     } catch {
-      notification.notifyError('Erreur de chargement des données d’inspection.');
+      notifyRef.current.notifyError('Erreur de chargement des données d’inspection.');
     } finally {
       setIsLoading(false);
     }
-  }, [isDemoMode, notification]);
+  }, [isDemoMode]);
 
   const triggerOfflineSync = useCallback(async () => {
     const pending = await getPendingOfflineInspections();
@@ -127,13 +132,13 @@ export function useDvirData() {
     }
 
     if (syncedCount > 0) {
-      notification.notifySuccess(
+      notifyRef.current.notifySuccess(
         `${syncedCount} inspection${syncedCount > 1 ? 's' : ''} hors-ligne synchronisée${syncedCount > 1 ? 's' : ''} avec succès.`
       );
       loadData();
     }
     setIsSyncingOffline(false);
-  }, [isDemoMode, notification, loadData]);
+  }, [isDemoMode, loadData]);
 
   useEffect(() => {
     loadData();

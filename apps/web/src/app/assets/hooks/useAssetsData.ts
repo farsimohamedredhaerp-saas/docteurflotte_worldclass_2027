@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Asset, AssetCategory, AssetStatus, DataOrigin, MeterType } from '@docteurflotte/contracts';
 import { AuthClient } from '@/lib/api-auth';
 import { AssetClient } from '@/lib/api-assets';
@@ -12,6 +12,11 @@ import { CreateAssetFormData, EditAssetFormData, MeterReadingFormData } from '..
 export function useAssetsData() {
   const { isDemoMode } = useDemoMode();
   const notification = useNotification(5000);
+  const notifyErrorRef = useRef(notification.notifyError);
+
+  useEffect(() => {
+    notifyErrorRef.current = notification.notifyError;
+  }, [notification.notifyError]);
 
   const [token, setToken] = useState<string | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -26,13 +31,15 @@ export function useAssetsData() {
     try {
       const data = await AssetClient.listAssets(authToken);
       setAssets(data);
+      return data;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erreur de chargement des actifs.';
-      notification.notifyError(msg);
+      notifyErrorRef.current(msg);
+      return [];
     } finally {
       setIsLoading(false);
     }
-  }, [notification]);
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -58,7 +65,9 @@ export function useAssetsData() {
         }
       })();
     } else if (session.token) {
-      loadAssets(session.token);
+      loadAssets(session.token).then(() => {
+        if (isCancelled) return;
+      });
     } else {
       setAssets([]);
       setIsLoading(false);
