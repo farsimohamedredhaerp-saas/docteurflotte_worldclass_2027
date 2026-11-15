@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'destructive';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
@@ -25,7 +25,8 @@ export const Button: React.FC<ButtonProps> = ({
     lg: 'text-base py-2.5 px-6',
   }[size];
 
-  const variantClass = `df-btn-${variant}`;
+  const normalizedVariant = variant === 'destructive' ? 'danger' : variant;
+  const variantClass = `df-btn-${normalizedVariant}`;
 
   return (
     <button

@@ -4,7 +4,7 @@ import React from 'react';
 import { AlertCircle, AlertTriangle, CheckCircle2, Info, X } from 'lucide-react';
 import { NotificationState, NotificationType } from '@/lib/hooks/useNotification';
 import { feedbackContainerStyles, feedbackIconStyles } from '@/lib/utils/feedbackStyles';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '../../lib/utils/cn';
 
 export interface NotificationBannerProps {
   notification: NotificationState | null;

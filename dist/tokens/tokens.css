@@ -183,3 +183,19 @@ html.dark, [data-theme="dark"] {
   --df-overlay: rgba(8, 10, 15, 0.72);
   --df-halo: radial-gradient(1000px circle at 50% -20%, rgba(37, 99, 235, 0.06), transparent 70%);
 }
+
+/* ---- Focus Ring WCAG 2.2 AA+ (Cobalt Chirurgical §4.2) ---- */
+:focus-visible {
+  outline: var(--df-focus-ring-width, 2px) solid var(--df-brand-primary, #2563EB);
+  outline-offset: var(--df-focus-ring-offset, 2px);
+}
+
+/* ---- Accessibilité Motion Réduit (WCAG 2.2 AA+ §4.2) ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

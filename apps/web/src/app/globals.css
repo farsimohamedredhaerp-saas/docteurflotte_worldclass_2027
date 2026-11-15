@@ -427,18 +427,23 @@ a:hover {
   font-size: 0.85rem;
   font-weight: 600;
   padding: 0.52rem 1.15rem;
-  border-radius: var(--df-radius-sm);
+  border-radius: var(--df-radius-sm, 6px);
   border: 1px solid transparent;
   cursor: pointer;
   outline: none;
-  transition: all var(--df-transition-fast);
+  transition: all var(--df-dur-fast, 120ms) var(--df-ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1));
   user-select: none;
   white-space: nowrap;
 }
 
+.df-btn:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: 0 0 10px var(--df-brand-glow, rgba(37, 99, 235, 0.25));
+}
+
 .df-btn:focus-visible {
-  outline: 2px solid var(--df-accent-cyan);
-  outline-offset: 2px;
+  outline: var(--df-focus-ring-width, 2px) solid var(--df-brand-primary, #2563EB);
+  outline-offset: var(--df-focus-ring-offset, 2px);
 }
 
 .df-btn-primary {

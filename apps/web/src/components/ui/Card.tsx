@@ -1,11 +1,12 @@
 import React from 'react';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '../../lib/utils/cn';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   interactive?: boolean;
   variant?: 'default' | 'elevated' | 'glass' | 'subtle' | 'warning' | 'danger';
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  highlightTop?: boolean;
   className?: string;
 }
 
@@ -33,6 +34,7 @@ export const Card: React.FC<CardProps> = ({
   interactive = false,
   variant = 'default',
   padding = 'md',
+  highlightTop = false,
   className = '',
   ...props
 }) => {
@@ -42,7 +44,8 @@ export const Card: React.FC<CardProps> = ({
         'rounded-xl transition-all duration-150',
         variantStyles[variant],
         paddingStyles[padding],
-        interactive && 'hover:border-blue-500/50 hover:shadow-md cursor-pointer active:scale-[0.995]',
+        highlightTop && 'relative overflow-hidden before:absolute before:top-0 before:left-0 before:right-0 before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-blue-500/50 before:to-transparent',
+        interactive && 'hover:border-blue-500/50 hover:-translate-y-0.5 hover:shadow-md cursor-pointer active:scale-[0.995]',
         className
       )}
       {...props}

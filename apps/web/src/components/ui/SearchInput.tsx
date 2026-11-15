@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Search, X } from 'lucide-react';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '../../lib/utils/cn';
 
 export interface SearchInputProps {
   value: string;

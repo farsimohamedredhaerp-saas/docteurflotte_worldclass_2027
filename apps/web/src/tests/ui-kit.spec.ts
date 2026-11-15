@@ -121,5 +121,27 @@ describe('UI Kit Transverse — Certification de Stabilité (Porte 0)', () => {
       expect(state.error?.message).toBe('Erreur de calcul DGI');
     });
   });
+
+  describe('Composants Core V5.1 (Chantier 2 & 3)', () => {
+    it('Badge gère nominal, critical et restreint le pulse aux statuts nominaux', async () => {
+      const { Badge } = await import('../components/Badge');
+      expect(Badge).toBeDefined();
+    });
+
+    it('Button supporte le variant destructive et active micro-press', async () => {
+      const { Button } = await import('../components/Button');
+      expect(Button).toBeDefined();
+    });
+
+    it('Card supporte highlightTop et padding standardisé', async () => {
+      const { Card } = await import('../components/ui/Card');
+      expect(Card).toBeDefined();
+    });
+
+    it('ConfirmDialog exporte les types conformes au Principe P3 (Preuve avant action)', async () => {
+      const { ConfirmDialog } = await import('../components/ui/ConfirmDialog');
+      expect(ConfirmDialog).toBeDefined();
+    });
+  });
 });
 

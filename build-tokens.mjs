@@ -159,6 +159,22 @@ ${cssVarsBlock(chart)}
 
 /* ---- Thème (défaut : ${defaultTheme}) ---- */
 ${themeBlocks}
+
+/* ---- Focus Ring WCAG 2.2 AA+ (Cobalt Chirurgical §4.2) ---- */
+:focus-visible {
+  outline: var(${P}-focus-ring-width, 2px) solid var(${P}-brand-primary, #2563EB);
+  outline-offset: var(${P}-focus-ring-offset, 2px);
+}
+
+/* ---- Accessibilité Motion Réduit (WCAG 2.2 AA+ §4.2) ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 `;
 };
 

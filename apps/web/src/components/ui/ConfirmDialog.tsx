@@ -3,7 +3,7 @@
 import React from 'react';
 import { AlertCircle, AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { Modal } from './Modal';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '../../lib/utils/cn';
 
 export interface ConfirmDialogProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ export interface ConfirmDialogProps {
   cancelLabel?: string;
   variant?: 'danger' | 'warning' | 'info';
   isLoading?: boolean;
+  impactDzd?: number | string;
 }
 
 const variantConfig = {
@@ -51,6 +52,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   cancelLabel = 'Annuler',
   variant = 'danger',
   isLoading = false,
+  impactDzd,
 }) => {
   const config = variantConfig[variant];
   const IconComponent = config.icon;
@@ -73,6 +75,17 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <p className="mt-1 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
             {description}
           </p>
+          {impactDzd !== undefined && (
+            <div className="mt-3 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                Aperçu d&apos;impact financier (Principe P3)
+              </div>
+              <div className="text-sm font-bold font-mono tabular-nums mt-0.5 text-amber-900 dark:text-amber-100">
+                {typeof impactDzd === 'number' ? impactDzd.toLocaleString('fr-DZ') : impactDzd}{' '}
+                <span className="text-[11px] font-normal text-amber-600 dark:text-amber-400">DZD</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
