@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import './tokens.css';
 import './globals.css';
 import { ThemeProvider } from '../context/ThemeContext';
 import { DemoModeProvider } from '../context/DemoModeContext';

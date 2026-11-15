@@ -1,7 +1,28 @@
 import React from 'react';
 import { DigitalTwinOrganStatus } from '@docteurflotte/contracts';
+import { Droplet, Zap, Disc, Thermometer, Filter, Cog, Activity } from 'lucide-react';
 import { getChassisTemplate, HOTSPOT_DIMENSIONS } from './anatomy-config';
 import { useI18n } from '../../lib/i18n';
+
+function renderOrganIcon(name: string) {
+  const iconProps = { className: 'w-3.5 h-3.5 shrink-0' };
+  switch (name?.toLowerCase()) {
+    case 'droplet':
+      return <Droplet {...iconProps} />;
+    case 'zap':
+      return <Zap {...iconProps} />;
+    case 'disc':
+      return <Disc {...iconProps} />;
+    case 'thermometer':
+      return <Thermometer {...iconProps} />;
+    case 'filter':
+      return <Filter {...iconProps} />;
+    case 'cog':
+      return <Cog {...iconProps} />;
+    default:
+      return <Activity {...iconProps} />;
+  }
+}
 
 export interface AnatomyDiagramProps {
   organs: DigitalTwinOrganStatus[];
@@ -71,8 +92,8 @@ export const AnatomyDiagram: React.FC<AnatomyDiagramProps> = ({
                 transition: 'all 0.2s ease',
               }}
             >
-              <span>{organ.icon}</span>
-              <span>{organ.name.split(' ')[0]}</span>
+              {renderOrganIcon(organ.icon)}
+              <span>{organ.name.replace(/,/g, '').split(' ')[0]}</span>
             </button>
           );
         })}

@@ -1,10 +1,31 @@
 import React from 'react';
 import { DigitalTwinOrganStatus, VhiThresholds, DEFAULT_VHI_THRESHOLDS } from '@docteurflotte/contracts';
+import { Droplet, Zap, Disc, Thermometer, Filter, Cog, Activity } from 'lucide-react';
 import { CalculationProofButton } from '../decisions';
 import { getOrganStatusStyle } from '../../theme/organ-status';
 import { getVhiColor } from '../../lib/vhi-thresholds';
 import { formatNumber } from '../../lib/currency-formatter';
 import { useI18n } from '../../lib/i18n';
+
+function renderOrganIcon(name: string) {
+  const iconProps = { className: 'w-7 h-7 text-sky-400 shrink-0' };
+  switch (name?.toLowerCase()) {
+    case 'droplet':
+      return <Droplet {...iconProps} />;
+    case 'zap':
+      return <Zap {...iconProps} />;
+    case 'disc':
+      return <Disc {...iconProps} />;
+    case 'thermometer':
+      return <Thermometer {...iconProps} />;
+    case 'filter':
+      return <Filter {...iconProps} />;
+    case 'cog':
+      return <Cog {...iconProps} />;
+    default:
+      return <Activity {...iconProps} />;
+  }
+}
 
 export interface OrganAnalysisCardProps {
   organ: DigitalTwinOrganStatus;
@@ -43,9 +64,9 @@ export const OrganAnalysisCard: React.FC<OrganAnalysisCardProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '32px', background: 'rgba(255, 255, 255, 0.06)', borderRadius: '12px', padding: '8px' }}>
-            {organ.icon}
-          </span>
+          <div style={{ background: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '12px', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {renderOrganIcon(organ.icon)}
+          </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff' }}>{organ.name}</h2>

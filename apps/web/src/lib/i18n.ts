@@ -100,6 +100,10 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.simulation.climateMax": "1.70 (In Salah/HMD)",
     "digitalTwin.simulation.driverMin": "0.80 (Éco)",
     "digitalTwin.simulation.driverMax": "1.60 (Agressif)",
+    "digitalTwin.simulation.limits.climateMin": "1.00 (Tempéré)",
+    "digitalTwin.simulation.limits.climateMax": "1.70 (In Salah/HMD)",
+    "digitalTwin.simulation.limits.driverMin": "0.80 (Éco)",
+    "digitalTwin.simulation.limits.driverMax": "1.60 (Agressif)",
 
     "digitalTwin.ads.badge": "ADS ACTION AUTONOME",
     "digitalTwin.ads.title": "Réservation Prédictive Pièces & Substitution",
@@ -228,6 +232,10 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.simulation.climateMax": "1.70 (عين صالح/حاسي مسعود)",
     "digitalTwin.simulation.driverMin": "0.80 (اقتصادي)",
     "digitalTwin.simulation.driverMax": "1.60 (عنيف)",
+    "digitalTwin.simulation.limits.climateMin": "1.00 (معتدل)",
+    "digitalTwin.simulation.limits.climateMax": "1.70 (عين صالح/حاسي مسعود)",
+    "digitalTwin.simulation.limits.driverMin": "0.80 (اقتصادي)",
+    "digitalTwin.simulation.limits.driverMax": "1.60 (عنيف)",
 
     "digitalTwin.ads.badge": "إجراء ذاتي ADS",
     "digitalTwin.ads.title": "الحجز الاستباقي لقطع الغيار والاستبدال",
@@ -356,6 +364,10 @@ export const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     "digitalTwin.simulation.climateMax": "1.70 (In Salah/HMD)",
     "digitalTwin.simulation.driverMin": "0.80 (Eco)",
     "digitalTwin.simulation.driverMax": "1.60 (Aggressive)",
+    "digitalTwin.simulation.limits.climateMin": "1.00 (Temperate)",
+    "digitalTwin.simulation.limits.climateMax": "1.70 (In Salah/HMD)",
+    "digitalTwin.simulation.limits.driverMin": "0.80 (Eco)",
+    "digitalTwin.simulation.limits.driverMax": "1.60 (Aggressive)",
 
     "digitalTwin.ads.badge": "ADS AUTONOMOUS ACTION",
     "digitalTwin.ads.title": "Predictive Parts Reservation & Fleet Substitution",
