@@ -1,11 +1,10 @@
-/* ==========================================================================
-   DOCTEURFLOTTE — DESIGN SYSTEM TÉLÉMATIQUE DE CLASSE MONDIALE (v2.0)
-   Inspiré des standards d'opérations connectées Samsara & consoles Flespi
-   Thème : Carbon Space Cockpit (Dark) / Alpine High-Contrast Slate (Light)
-   ========================================================================== */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@import './tokens.css';
-@import './cockpit-utilities.css';
+/* ==========================================================================
+   DOCTEURFLOTTE — DESIGN SYSTEM TÉLÉMATIQUE DE CLASSE MONDIALE
+   ========================================================================== */
 
 :root {
   /* ==========================================================================
@@ -14,6 +13,7 @@
      ========================================================================== */
   color-scheme: light;
   --df-bg-base: #F8FAFC;
+  --df-bg-canvas: #F8FAFC;
   --df-bg-surface-1: #FFFFFF;
   --df-bg-surface-2: #F1F5F9;
   --df-bg-surface-3: #E2E8F0;
@@ -170,6 +170,7 @@ html.dark,
 [data-theme="dark"] {
   color-scheme: dark;
   --df-bg-base: #090D16;
+  --df-bg-canvas: #090D16;
   --df-bg-surface-1: #111827;
   --df-bg-surface-2: #161F30;
   --df-bg-surface-3: #1F2937;
@@ -370,6 +371,68 @@ a:hover {
   transform: translateY(-1px);
   border-color: var(--df-border-focus);
 }
+
+/* ==========================================================================
+   UTILITAIRES DE SURFACES ET TEXTES SÉMANTIQUES (RÉSOLUTION UNIVERSELLE)
+   ========================================================================== */
+
+[class*="bg-[var(--df-bg-canvas)]"],
+[class*="bg-[var(--df-bg-base)]"],
+.df-bg-canvas {
+  background-color: var(--df-bg-base);
+}
+
+[class*="bg-[var(--df-bg-surface-1)]"],
+[class*="bg-[var(--df-bg-card)]"],
+.df-bg-surface-1 {
+  background-color: var(--df-bg-surface-1);
+}
+
+[class*="bg-[var(--df-bg-surface-2)]"],
+.df-bg-surface-2 {
+  background-color: var(--df-bg-surface-2);
+}
+
+[class*="bg-[var(--df-bg-surface-3)]"],
+.df-bg-surface-3 {
+  background-color: var(--df-bg-surface-3);
+}
+
+[class*="bg-[var(--df-accent-blue)]"],
+.df-bg-accent-blue {
+  background-color: var(--df-accent-blue);
+  color: #FFFFFF;
+}
+
+[class*="bg-[var(--df-accent-blue-hover)]"]:hover {
+  background-color: var(--df-accent-blue-hover);
+}
+
+[class*="border-[var(--df-border-subtle)]"],
+.df-border-subtle {
+  border-color: var(--df-border-subtle);
+}
+
+[class*="border-[var(--df-border-medium)]"],
+.df-border-medium {
+  border-color: var(--df-border-medium);
+}
+
+[class*="text-[var(--df-text-main)]"],
+.df-text-main {
+  color: var(--df-text-main);
+}
+
+[class*="text-[var(--df-text-secondary)]"],
+.df-text-secondary {
+  color: var(--df-text-secondary);
+}
+
+[class*="text-[var(--df-text-muted)]"],
+.df-text-muted {
+  color: var(--df-text-muted);
+}
+
 
 /* ==========================================================================
    TYPOGRAPHIE & DONNÉES TÉLÉMATIQUES TABULAIRES

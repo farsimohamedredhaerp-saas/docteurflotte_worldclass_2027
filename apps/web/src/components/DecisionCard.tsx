@@ -4,6 +4,7 @@ import React from 'react';
 import { Badge } from './Badge';
 import { Button } from './Button';
 import { CalculationProofButton } from './decisions/CalculationProofButton';
+import { VehicleSilhouette } from './ui/VehicleSilhouette';
 import { IconCpu, IconActivity, IconZap } from './navigation/TechIcons';
 
 export interface DecisionCardProps {
@@ -66,29 +67,40 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
 
   return (
     <div
-      className={`group relative rounded-xl border ${statusBorderClass} bg-white dark:bg-[#111827] p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md transition-all duration-150 flex flex-col justify-between`}
+      className={`group relative rounded-[var(--df-radius-xl,14px)] border ${statusBorderClass} bg-[var(--df-bg-surface-1)] p-5 shadow-[var(--df-shadow-sm)] hover:border-[var(--df-border-medium)] hover:shadow-[var(--df-shadow-md)] transition-all duration-150 flex flex-col justify-between`}
     >
       <div>
-        {/* EN-TÊTE : NOM DU VÉHICULE, MATRICULE & BADGES */}
+        {/* EN-TÊTE : SILHOUETTE, NOM DU VÉHICULE, MATRICULE & BADGES */}
         <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="relative flex h-2 w-2 shrink-0">
-                {isDanger && (
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-                )}
-                <span className={`relative inline-flex rounded-full h-2 w-2 ${statusDotColor}`} />
-              </span>
-              <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100 truncate">
-                {assetName}
-              </h3>
-              <span className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700/60">
-                {assetId}
-              </span>
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="p-1.5 rounded-[var(--df-radius-md,8px)] bg-[var(--df-bg-surface-2)] border border-[var(--df-border-subtle)] shrink-0">
+              <VehicleSilhouette
+                brand={assetName.split(' ')[0]}
+                model={assetName.split(' ').slice(1).join(' ')}
+                category={assetCategory}
+                size="sm"
+                className="text-[var(--df-text-secondary)] opacity-85"
+              />
             </div>
-            <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-              Catégorie : <span className="text-slate-700 dark:text-slate-300">{assetCategory}</span>
-            </p>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className="relative flex h-2 w-2 shrink-0">
+                  {isDanger && (
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                  )}
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${statusDotColor}`} />
+                </span>
+                <h3 className="text-sm font-bold tracking-tight text-[var(--df-text-main)] truncate font-sans">
+                  {assetName}
+                </h3>
+                <span className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-[var(--df-radius-xs,4px)] bg-[var(--df-bg-surface-2)] text-[var(--df-text-main)] border border-[var(--df-border-subtle)]">
+                  {assetId}
+                </span>
+              </div>
+              <p className="text-[11px] font-medium text-[var(--df-text-muted)]">
+                Catégorie : <span className="text-[var(--df-text-secondary)]">{assetCategory}</span>
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
@@ -100,7 +112,7 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
         </div>
 
         {/* BANDEAU TÉLÉMATIQUE HAUTE PRÉCISION (STYLE CONSOLE FLESPI / TRACCAR) */}
-        <div className="flex items-center justify-between text-[11px] font-mono px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-[#161F30] border border-slate-200/80 dark:border-[#1F2937] text-slate-600 dark:text-slate-400 mb-3">
+        <div className="flex items-center justify-between text-[11px] font-mono px-3 py-1.5 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-bg-surface-2)] border border-[var(--df-border-subtle)] text-[var(--df-text-secondary)] mb-3">
           <div className="flex items-center gap-2">
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -137,33 +149,33 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
         </div>
 
         {/* DIAGNOSTIC MÉCANIQUE DÉTERMINISTE */}
-        <div className="p-3.5 rounded-lg bg-slate-50/80 dark:bg-[#161F30]/60 border border-slate-200/80 dark:border-[#1F2937] mb-3.5">
-          <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 mb-1 flex items-center gap-1.5">
-            <IconCpu size={14} className="text-blue-500 shrink-0" />
+        <div className="p-3.5 rounded-[var(--df-radius-md,8px)] bg-[var(--df-bg-surface-2)] border border-[var(--df-border-subtle)] mb-3.5">
+          <h4 className="text-xs font-bold text-[var(--df-text-main)] mb-1 flex items-center gap-1.5 font-sans">
+            <IconCpu size={14} className="text-[var(--df-accent-blue)] shrink-0" />
             <span>{anomalyTitle}</span>
           </h4>
-          <p className="text-[12px] text-slate-600 dark:text-slate-300 leading-relaxed">
+          <p className="text-[12px] text-[var(--df-text-secondary)] leading-relaxed font-sans">
             {anomalyDescription}
           </p>
         </div>
 
         {/* ARBITRAGE FINANCIER EN DINARS ALGÉRIENS (SAD -> ADS) */}
         <div className={`grid ${costInactionEstimate ? 'grid-cols-2' : 'grid-cols-1'} gap-2.5 mb-4`}>
-          <div className="p-2.5 rounded-lg bg-blue-50/70 dark:bg-blue-950/25 border border-blue-200/70 dark:border-blue-800/40">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
+          <div className="p-2.5 rounded-[var(--df-radius-md,8px)] bg-[var(--df-accent-blue-subtle)] border border-[var(--df-border-subtle)]">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--df-accent-blue)]">
               Coût Estimé Action
             </div>
-            <div className="font-mono text-base font-bold text-blue-800 dark:text-blue-300 mt-0.5">
+            <div className="font-mono text-base font-bold text-[var(--df-accent-blue)] mt-0.5 tabular-nums">
               {costEstimate}
             </div>
           </div>
 
           {costInactionEstimate && (
-            <div className="p-2.5 rounded-lg bg-rose-50/70 dark:bg-rose-950/25 border border-rose-200/70 dark:border-rose-800/40">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">
+            <div className="p-2.5 rounded-[var(--df-radius-md,8px)] bg-[var(--df-status-danger-bg)] border border-[var(--df-status-danger-border)]">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--df-status-danger-text)]">
                 Risque Financier Inaction
               </div>
-              <div className="font-mono text-base font-bold text-rose-700 dark:text-rose-300 mt-0.5">
+              <div className="font-mono text-base font-bold text-[var(--df-status-danger-text)] mt-0.5 tabular-nums">
                 {costInactionEstimate}
               </div>
             </div>
@@ -172,17 +184,17 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
       </div>
 
       {/* PIED DE CARTE : GAUGE D'EXPLICABILITÉ XAI & ACTIONS */}
-      <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2">
+      <div className="pt-3 border-t border-[var(--df-border-subtle)] flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+          <div className="w-12 h-1.5 bg-[var(--df-bg-surface-3)] rounded-full overflow-hidden">
             <div
-              className="h-full bg-emerald-500 rounded-full"
+              className="h-full bg-[var(--df-status-ok)] rounded-full"
               style={{ width: `${Math.min(100, Math.max(0, confidenceScore))}%` }}
             />
           </div>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">
+          <span className="text-[11px] text-[var(--df-text-muted)]">
             Fiabilité :{' '}
-            <strong className="font-mono text-slate-900 dark:text-slate-200">
+            <strong className="font-mono text-[var(--df-text-main)] tabular-nums">
               {confidenceScore}%
             </strong>
           </span>

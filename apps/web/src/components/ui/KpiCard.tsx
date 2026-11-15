@@ -155,18 +155,19 @@ export function KpiCard({
       </div>
 
       {/* Corps : Valeur Principale (JetBrains Mono 32px Tabular-Nums) + Sparkline */}
-      <div className="flex items-end justify-between gap-3 my-1">
-        <div className="flex items-baseline gap-1.5 min-w-0">
+      <div className="flex items-end justify-between gap-2 my-1">
+        <div className="flex items-baseline gap-1.5 min-w-0 flex-wrap">
           <span
             className={cn(
-              'text-[2rem] font-bold tracking-tight font-mono tabular-nums leading-none',
+              'font-bold tracking-tight font-mono tabular-nums leading-none whitespace-nowrap',
+              String(value).length > 7 ? 'text-[1.4rem]' : 'text-[1.75rem]',
               valueColorClass
             )}
           >
             {value}
           </span>
           {unit && (
-            <span className="text-[12px] font-mono font-medium text-[var(--df-text-muted)]">
+            <span className="text-[11.5px] font-mono font-medium text-[var(--df-text-muted)] whitespace-nowrap">
               {unit}
             </span>
           )}

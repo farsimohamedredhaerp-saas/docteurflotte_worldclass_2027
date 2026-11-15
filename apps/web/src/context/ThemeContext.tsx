@@ -13,13 +13,13 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('light');
+  const [theme, setThemeState] = useState<Theme>('dark');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Lecture du thème persisté (défaut 'light' pour clarté optimale)
+    // Lecture du thème persisté (défaut 'dark' cockpit industriel souverain)
     const saved = localStorage.getItem('df_theme') as Theme | null;
-    const initialTheme: Theme = saved === 'dark' ? 'dark' : 'light';
+    const initialTheme: Theme = saved === 'light' ? 'light' : 'dark';
 
     setThemeState(initialTheme);
     applyTheme(initialTheme);
@@ -57,8 +57,8 @@ export function useTheme(): ThemeContextType {
     // Valeur par défaut de repli si le composant est utilisé hors Provider
     return {
       theme: 'light',
-      toggleTheme: () => {},
-      setTheme: () => {},
+      toggleTheme: () => { },
+      setTheme: () => { },
     };
   }
   return context;

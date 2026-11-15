@@ -33,20 +33,26 @@ export default function RootLayout({
             __html: `
               try {
                 var savedTheme = localStorage.getItem('df_theme');
-                var activeTheme = savedTheme === 'dark' ? 'dark' : 'light';
+                var activeTheme = savedTheme === 'light' ? 'light' : 'dark';
                 document.documentElement.classList.add(activeTheme);
                 document.documentElement.setAttribute('data-theme', activeTheme);
               } catch (e) {}
-              if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').catch(function() {});
-                });
+              if ('serviceWorker' in navigator) {
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                  navigator.serviceWorker.getRegistrations().then(function(regs) {
+                    for (var r of regs) { r.unregister(); }
+                  });
+                } else if (window.location.protocol.startsWith('http')) {
+                  window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js').catch(function() {});
+                  });
+                }
               }
             `,
           }}
         />
       </head>
-      <body className="font-sans antialiased bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 min-h-screen transition-colors duration-150" suppressHydrationWarning>
+      <body className="font-sans antialiased bg-[var(--df-bg-base)] text-[var(--df-text-main)] min-h-screen transition-colors duration-150" suppressHydrationWarning>
         <ThemeProvider>
           <DemoModeProvider>
             <SystemConfigProvider>

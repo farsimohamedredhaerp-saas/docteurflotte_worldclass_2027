@@ -1,22 +1,20 @@
-// DocteurFlotte Sovereign PWA Service Worker (v1.0.0)
+// DocteurFlotte Sovereign PWA Service Worker (v1.1.0)
 // Conforme Loi 18-07 ANPDP : Zéro cache sortant, 100% hébergement local air-gapped
+// Stratégie : Network-First pour les navigations HTML (garantit zéro jank de mise à jour), Offline Fallback
 
-const CACHE_NAME = 'df-sovereign-cache-v1';
+const CACHE_NAME = 'df-sovereign-cache-v2';
 const OFFLINE_URL = '/dvir';
 
 const PRECACHE_ASSETS = [
   '/',
   '/dvir',
   '/manifest.webmanifest',
-  '/current_hud_screenshot.png',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_ASSETS).catch(() => {
-        // Tolérance si certaines ressources dynamiques ne sont pas encore construites
-      });
+      return cache.addAll(PRECACHE_ASSETS).catch(() => {});
     })
   );
   self.skipWaiting();
@@ -38,37 +36,39 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Éviter la mise en cache des requêtes d'API dynamiques / auth
-  if (url.pathname.startsWith('/api/')) {
+  // Ignorer les requêtes d'API dynamiques, HMR Turbopack et chunks internes Next.js
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/_next/')) {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(event.request)
-        .then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-            return networkResponse;
+  // Navigations HTML : Network-First systématique (fraîcheur garantie en ligne), fallback cache hors-ligne
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
           }
-
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-
-          return networkResponse;
+          return response;
         })
         .catch(() => {
-          // Fallback offline pour les navigations de pages
-          if (event.request.mode === 'navigate') {
-            return caches.match(OFFLINE_URL);
-          }
-        });
-    })
+          return caches.match(event.request).then((cached) => cached || caches.match(OFFLINE_URL));
+        })
+    );
+    return;
+  }
+
+  // Autres ressources : Network-First avec fallback cache
+  event.respondWith(
+    fetch(event.request)
+      .then((response) => {
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
-
