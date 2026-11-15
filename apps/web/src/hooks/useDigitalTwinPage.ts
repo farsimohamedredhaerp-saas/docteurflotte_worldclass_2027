@@ -54,7 +54,7 @@ export interface UseDigitalTwinPageReturn {
 }
 
 export function useDigitalTwinPage(): UseDigitalTwinPageReturn {
-  const { session } = useDemoMode();
+  const { session, isDemoMode } = useDemoMode();
   const sessionToken = session?.token || AuthClient.getSession().token;
 
   // Config UI chargée depuis l'API (avec fallback sur les constantes contrats)
@@ -161,31 +161,42 @@ export function useDigitalTwinPage(): UseDigitalTwinPageReturn {
         });
       setConfig(remoteConfig);
 
-      // 2. Récupération de la liste des actifs
-      const assetList = await AssetClient.listAssets(sessionToken || '').catch(async (err) => {
-        console.warn('[useDigitalTwinPage] AssetClient.listAssets a échoué, essai DigitalTwinClient.listTwins:', err);
-        const twins = await DigitalTwinClient.listTwins(sessionToken, ac.signal).catch((e) => {
-          console.error('[useDigitalTwinPage] Impossible de charger les jumeaux:', e);
-          return [];
+      // 2. Récupération de la liste des actifs (avec fallback Sandbox si démo ou indisponibilité API)
+      let resolvedAssets: Asset[] = [];
+      if (isDemoMode) {
+        const { getSimulationAssets } = await import('@/lib/simulation-sandbox');
+        resolvedAssets = await getSimulationAssets();
+      } else {
+        resolvedAssets = await AssetClient.listAssets(sessionToken || '').catch(async (err) => {
+          console.warn('[useDigitalTwinPage] AssetClient.listAssets a échoué, essai DigitalTwinClient.listTwins:', err);
+          const twins = await DigitalTwinClient.listTwins(sessionToken, ac.signal).catch((e) => {
+            console.error('[useDigitalTwinPage] Impossible de charger les jumeaux:', e);
+            return [];
+          });
+          return twins.map((t) => ({
+            id: t.assetId,
+            code: t.assetCode,
+            name: t.assetName,
+            category: t.category,
+            status: 'ACTIVE',
+          } as unknown as Asset));
         });
-        return twins.map((t) => ({
-          id: t.assetId,
-          code: t.assetCode,
-          name: t.assetName,
-          category: t.category,
-          status: 'ACTIVE',
-        } as unknown as Asset));
-      });
 
-      setAssets(assetList);
+        if (resolvedAssets.length === 0) {
+          const { getSimulationAssets } = await import('@/lib/simulation-sandbox');
+          resolvedAssets = await getSimulationAssets();
+        }
+      }
 
-      if (assetList.length === 0) {
+      setAssets(resolvedAssets);
+
+      if (resolvedAssets.length === 0) {
         setIsLoading(false);
         return;
       }
 
       // 3. Sélection du premier actif de la liste
-      const firstId = assetList[0].id;
+      const firstId = resolvedAssets[0].id;
       setSelectedAssetId(firstId);
 
       // 4. Chargement du jumeau numérique

@@ -68,11 +68,20 @@ export class DigitalTwinClient {
     token?: string | null,
     signal?: AbortSignal
   ): Promise<DigitalTwinAsset[]> {
-    const raw = await this.request<unknown[]>('/assets', token, { signal });
-    return (raw || []).map((item) => {
-      const parsed = DigitalTwinAssetSchema.safeParse(item);
-      return parsed.success ? parsed.data : (item as DigitalTwinAsset);
-    });
+    try {
+      const raw = await this.request<unknown[]>('/assets', token, { signal });
+      return (raw || []).map((item) => {
+        const parsed = DigitalTwinAssetSchema.safeParse(item);
+        return parsed.success ? parsed.data : (item as DigitalTwinAsset);
+      });
+    } catch (err: unknown) {
+      if ((err as Error)?.name === 'AbortError') {
+        throw err;
+      }
+      console.warn('[DigitalTwinClient] listTwins failed (API offline or unreachable), using simulation fallback:', err);
+      const { getSimulationDigitalTwinsList } = await import('@/lib/simulation-sandbox/digital-twin.mock');
+      return getSimulationDigitalTwinsList();
+    }
   }
 
   static async getTwin(
@@ -80,13 +89,22 @@ export class DigitalTwinClient {
     token?: string | null,
     signal?: AbortSignal
   ): Promise<DigitalTwinAsset> {
-    const data = await this.request<unknown>(`/assets/${encodeURIComponent(assetId)}`, token, { signal });
-    const parsed = DigitalTwinAssetSchema.safeParse(data);
-    if (!parsed.success) {
-      console.warn(`[DigitalTwinClient] Jumeau ${assetId} incomplet selon le schéma:`, parsed.error);
-      return data as DigitalTwinAsset;
+    try {
+      const data = await this.request<unknown>(`/assets/${encodeURIComponent(assetId)}`, token, { signal });
+      const parsed = DigitalTwinAssetSchema.safeParse(data);
+      if (!parsed.success) {
+        console.warn(`[DigitalTwinClient] Jumeau ${assetId} incomplet selon le schéma:`, parsed.error);
+        return data as DigitalTwinAsset;
+      }
+      return parsed.data;
+    } catch (err: unknown) {
+      if ((err as Error)?.name === 'AbortError') {
+        throw err;
+      }
+      console.warn(`[DigitalTwinClient] getTwin(${assetId}) failed, using simulation fallback:`, err);
+      const { getSimulationDigitalTwin } = await import('@/lib/simulation-sandbox/digital-twin.mock');
+      return getSimulationDigitalTwin(assetId);
     }
-    return parsed.data;
   }
 
   static async simulateTwin(
@@ -95,20 +113,35 @@ export class DigitalTwinClient {
     token?: string | null,
     signal?: AbortSignal
   ): Promise<DigitalTwinAsset> {
-    const data = await this.request<unknown>(
-      `/assets/${encodeURIComponent(assetId)}/simulate`,
-      token,
-      {
-        method: 'POST',
-        body: JSON.stringify(params),
-        signal,
+    try {
+      const data = await this.request<unknown>(
+        `/assets/${encodeURIComponent(assetId)}/simulate`,
+        token,
+        {
+          method: 'POST',
+          body: JSON.stringify(params),
+          signal,
+        }
+      );
+      const parsed = DigitalTwinAssetSchema.safeParse(data);
+      if (!parsed.success) {
+        console.warn(`[DigitalTwinClient] Simulation pour ${assetId} invalide selon schéma:`, parsed.error);
+        return data as DigitalTwinAsset;
       }
-    );
-    const parsed = DigitalTwinAssetSchema.safeParse(data);
-    if (!parsed.success) {
-      console.warn(`[DigitalTwinClient] Simulation pour ${assetId} invalide selon schéma:`, parsed.error);
-      return data as DigitalTwinAsset;
+      return parsed.data;
+    } catch (err: unknown) {
+      if ((err as Error)?.name === 'AbortError') {
+        throw err;
+      }
+      console.warn(`[DigitalTwinClient] simulateTwin(${assetId}) failed, calculating deterministic simulation:`, err);
+      const { getSimulationDigitalTwin } = await import('@/lib/simulation-sandbox/digital-twin.mock');
+      return getSimulationDigitalTwin(
+        assetId,
+        params.wilayaCode,
+        params.climateSeverityMultiplier,
+        params.driverAggressivenessMultiplier,
+        params.isDesertTransitScenario
+      );
     }
-    return parsed.data;
   }
 }

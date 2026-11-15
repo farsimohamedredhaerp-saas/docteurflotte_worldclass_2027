@@ -16,6 +16,7 @@ export * from './preventive.mock';
 export * from './tco.mock';
 export * from './compliance.mock';
 export * from './telematics.mock';
+export * from './digital-twin.mock';
 
 /**
  * Chargeurs asynchrones avec dynamic import pour code-splitting optimal (Tree-Shaking garanti en production).
