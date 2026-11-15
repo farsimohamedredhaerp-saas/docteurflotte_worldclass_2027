@@ -12,6 +12,7 @@
     "dev": "turbo run dev",
     "dev:api": "pnpm --filter @docteurflotte/api dev",
     "dev:web": "pnpm --filter @docteurflotte/web dev",
+    "tokens:build": "node scripts/build-tokens.cjs",
     "lint": "turbo run lint --concurrency=1",
     "lint:hardcode": "node scripts/guardrails/lint-decision-engine-hardcode.cjs",
     "bench": "pnpm --filter @docteurflotte/decision-engine build && node scripts/bench-decision-engine.cjs",

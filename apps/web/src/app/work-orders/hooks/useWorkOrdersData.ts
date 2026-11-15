@@ -145,13 +145,13 @@ export function useWorkOrdersData() {
         prev.map((w) =>
           w.id === id
             ? {
-                ...w,
-                title: data.title,
-                description: data.description,
-                priority: data.priority,
-                estimatedLaborHours: data.estimatedLaborHours,
-                assignedTo: data.assignedTo,
-              }
+              ...w,
+              title: data.title,
+              description: data.description,
+              priority: data.priority,
+              estimatedLaborHours: data.estimatedLaborHours,
+              assignedTo: data.assignedTo,
+            }
             : w
         )
       );
@@ -212,15 +212,15 @@ export function useWorkOrdersData() {
           prev.map((w) =>
             w.id === wo.id
               ? {
-                  ...w,
-                  status: WorkOrderStatus.COMPLETED,
-                  actualLaborHours: data.actualLaborHours,
-                  partsCost: data.partsCost,
-                  laborCost,
-                  totalCost,
-                  downtimeHours: data.downtimeHours,
-                  completedAt: new Date().toISOString(),
-                }
+                ...w,
+                status: WorkOrderStatus.COMPLETED,
+                actualLaborHours: data.actualLaborHours,
+                partsCost: data.partsCost,
+                laborCost,
+                totalCost,
+                downtimeHours: data.downtimeHours,
+                completedAt: new Date().toISOString(),
+              }
               : w
           )
         );

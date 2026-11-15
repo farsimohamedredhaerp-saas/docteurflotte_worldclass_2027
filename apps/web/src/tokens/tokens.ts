@@ -1,0 +1,175 @@
+/**
+ * DocteurFlotte Design Tokens (v5.0) — Typage et constantes TypeScript
+ * GÉNÉRÉ AUTOMATIQUEMENT PAR scripts/build-tokens.cjs
+ */
+
+export const DESIGN_TOKENS = {
+  "$schema": "https://json.schemastore.org/design-tokens.json",
+  "version": "5.0.0",
+  "name": "DocteurFlotte Design Tokens — Titanium & Sahara Calcite",
+  "description": "Design Operating System v5.0 — Source unique de vérité pour le thème et l'architecture UI",
+  "primitives": {
+    "spacing": {
+      "0": "0",
+      "1": "0.25rem",
+      "2": "0.5rem",
+      "3": "0.75rem",
+      "4": "1rem",
+      "5": "1.25rem",
+      "6": "1.5rem",
+      "8": "2rem",
+      "10": "2.5rem",
+      "12": "3rem",
+      "16": "4rem",
+      "20": "5rem"
+    },
+    "radius": {
+      "xs": "4px",
+      "sm": "6px",
+      "md": "8px",
+      "lg": "10px",
+      "xl": "14px",
+      "full": "9999px"
+    },
+    "zIndex": {
+      "base": 0,
+      "sticky": 10,
+      "dropdown": 100,
+      "overlay": 200,
+      "modal": 300,
+      "popover": 400,
+      "toast": 500,
+      "command": 600
+    },
+    "motion": {
+      "durations": {
+        "fast": "120ms",
+        "base": "200ms",
+        "slow": "320ms",
+        "xslow": "480ms"
+      },
+      "easings": {
+        "outQuint": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "inOut": "cubic-bezier(0.65, 0, 0.35, 1)",
+        "spring": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+      }
+    },
+    "typography": {
+      "fonts": {
+        "sans": "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        "mono": "'JetBrains Mono', 'Geist Mono', ui-monospace, SFMono-Regular, monospace",
+        "arabic": "'Noto Sans Arabic', 'IBM Plex Sans Arabic', sans-serif"
+      },
+      "sizes": {
+        "xs": "0.6875rem",
+        "sm": "0.75rem",
+        "base": "0.8125rem",
+        "lg": "0.9375rem",
+        "xl": "1.375rem",
+        "2xl": "2rem"
+      }
+    }
+  },
+  "semantic": {
+    "dark": {
+      "bg": {
+        "base": "#080A0F",
+        "surface1": "#0D111A",
+        "surface2": "#121824",
+        "surface3": "#182030"
+      },
+      "border": {
+        "hairline": "rgba(255, 255, 255, 0.08)",
+        "subtle": "#1E2638",
+        "medium": "#2A364F",
+        "highlight": "rgba(255, 255, 255, 0.12)"
+      },
+      "text": {
+        "primary": "#F8FAFC",
+        "secondary": "#94A3B8",
+        "muted": "#64748B",
+        "faint": "#334155",
+        "onBrand": "#FFFFFF"
+      },
+      "brand": {
+        "primary": "#2563EB",
+        "primaryHover": "#1D4ED8",
+        "glow": "rgba(37, 99, 235, 0.18)"
+      },
+      "telemetry": {
+        "cyan": "#0284C7",
+        "cyanSubtle": "rgba(2, 132, 199, 0.12)"
+      },
+      "status": {
+        "nominal": "#10B981",
+        "nominalBg": "rgba(16, 185, 129, 0.10)",
+        "warning": "#D97706",
+        "warningBg": "rgba(217, 119, 6, 0.12)",
+        "critical": "#DC2626",
+        "criticalBg": "rgba(220, 38, 38, 0.12)",
+        "neutral": "#64748B",
+        "neutralBg": "rgba(100, 116, 139, 0.10)"
+      }
+    },
+    "light": {
+      "bg": {
+        "base": "#F4F6F9",
+        "surface1": "#FFFFFF",
+        "surface2": "#EDF1F7",
+        "surface3": "#E2E8F0"
+      },
+      "border": {
+        "hairline": "#E2E8F0",
+        "subtle": "#CBD5E1",
+        "medium": "#94A3B8",
+        "highlight": "rgba(255, 255, 255, 0.8)"
+      },
+      "text": {
+        "primary": "#0F172A",
+        "secondary": "#334155",
+        "muted": "#64748B",
+        "faint": "#CBD5E1",
+        "onBrand": "#FFFFFF"
+      },
+      "brand": {
+        "primary": "#1D4ED8",
+        "primaryHover": "#1E40AF",
+        "glow": "rgba(29, 78, 216, 0.12)"
+      },
+      "telemetry": {
+        "cyan": "#0284C7",
+        "cyanSubtle": "rgba(2, 132, 199, 0.08)"
+      },
+      "status": {
+        "nominal": "#059669",
+        "nominalBg": "#ECFDF5",
+        "warning": "#B45309",
+        "warningBg": "#FFFBEB",
+        "critical": "#B91C1C",
+        "criticalBg": "#FEF2F2",
+        "neutral": "#64748B",
+        "neutralBg": "#F1F5F9"
+      }
+    }
+  },
+  "chart": {
+    "series": [
+      "#2563EB",
+      "#0284C7",
+      "#8B5CF6",
+      "#D97706",
+      "#10B981",
+      "#64748B"
+    ],
+    "grid": "rgba(148, 163, 184, 0.10)",
+    "axisText": "#64748B",
+    "tooltipBgDark": "#121824",
+    "tooltipBgLight": "#FFFFFF"
+  }
+} as const;
+
+export type DesignTokens = typeof DESIGN_TOKENS;
+export type SpacingToken = keyof typeof DESIGN_TOKENS.primitives.spacing;
+export type RadiusToken = keyof typeof DESIGN_TOKENS.primitives.radius;
+export type ZIndexToken = keyof typeof DESIGN_TOKENS.primitives.zIndex;
+export type ChartSeriesColor = typeof DESIGN_TOKENS.chart.series[number];
