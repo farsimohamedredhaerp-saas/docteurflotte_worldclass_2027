@@ -157,30 +157,60 @@ export default function ColdChainPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 transition-colors duration-150">
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)', color: 'var(--df-text-main)' }}>
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <main className="df-container" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
         {/* EN-TÊTE DE SECTION COCKPIT */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-6 shadow-sm">
+        <div
+          style={{
+            borderRadius: 'var(--df-radius-xl)',
+            border: '1px solid var(--df-border-subtle)',
+            backgroundColor: 'var(--df-bg-surface-1)',
+            padding: '1.5rem',
+            boxShadow: 'var(--df-shadow-sm)',
+            marginBottom: '1.5rem',
+          }}
+        >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
             <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/60">
+                <span
+                  style={{
+                    backgroundColor: 'var(--df-accent-blue-subtle)',
+                    color: 'var(--df-accent-blue)',
+                    border: '1px solid var(--df-accent-blue)',
+                  }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold"
+                >
                   <IconThermometer size={13} />
                   CHAÎNE DU FROID SOUVERAINE
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60">
+                <span
+                  style={{
+                    backgroundColor: 'var(--df-status-ok-bg)',
+                    color: 'var(--df-status-ok-text)',
+                    border: '1px solid var(--df-status-ok-border)',
+                  }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                >
                   Thermo King &amp; Carrier Transicold
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                <span
+                  style={{
+                    backgroundColor: 'var(--df-bg-surface-2)',
+                    color: 'var(--df-text-secondary)',
+                    border: '1px solid var(--df-border-subtle)',
+                  }}
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-mono"
+                >
                   Norme ATP &amp; HACCP
                 </span>
               </div>
-              <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+              <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--df-text-main)' }}>
                 Télémétrie Chaîne du Froid &amp; Groupes Frigo
               </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-3xl">
+              <p className="text-sm max-w-3xl" style={{ color: 'var(--df-text-secondary)' }}>
                 Surveillance continue des cargaisons sensibles (viande, produits laitiers, insuline, vaccins) sous climat saharien. Détection instantanée d’excursion thermique et chiffrage du risque de dépréciation en Dinars Algériens.
               </p>
             </div>
@@ -206,88 +236,162 @@ export default function ColdChainPage() {
         </div>
 
         {/* MÉTRIQUES CLÉS CONSOLIDÉES (BENTO KPIS) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-5 shadow-sm space-y-1">
-            <div className="flex items-center justify-between text-slate-400">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" style={{ marginBottom: '1.5rem' }}>
+          <div
+            style={{
+              borderRadius: 'var(--df-radius-xl)',
+              border: '1px solid var(--df-border-subtle)',
+              backgroundColor: 'var(--df-bg-surface-1)',
+              padding: '1.25rem',
+              boxShadow: 'var(--df-shadow-sm)',
+            }}
+            className="space-y-1"
+          >
+            <div className="flex items-center justify-between" style={{ color: 'var(--df-text-muted)' }}>
               <span className="text-[11px] font-bold uppercase tracking-wider">Groupes Connectés</span>
               <IconTruck size={16} />
             </div>
-            <div className="text-3xl font-black font-mono text-slate-900 dark:text-white mt-1">
+            <div className="text-3xl font-black font-mono mt-1" style={{ color: 'var(--df-text-main)' }}>
               {reefers.length}
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">
+            <div className="text-xs" style={{ color: 'var(--df-text-muted)' }}>
               Caisses frigorifiques télémétrie active
             </div>
           </div>
 
-          <div className={`rounded-2xl border p-5 shadow-sm space-y-1 ${
-            activeExcursionsCount > 0
-              ? 'border-rose-300 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/20'
-              : 'border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220]'
-          }`}>
+          <div
+            style={{
+              borderRadius: 'var(--df-radius-xl)',
+              border: activeExcursionsCount > 0
+                ? '1px solid var(--df-status-danger-border)'
+                : '1px solid var(--df-border-subtle)',
+              backgroundColor: activeExcursionsCount > 0
+                ? 'var(--df-status-danger-bg)'
+                : 'var(--df-bg-surface-1)',
+              padding: '1.25rem',
+              boxShadow: 'var(--df-shadow-sm)',
+            }}
+            className="space-y-1"
+          >
             <div className="flex items-center justify-between">
-              <span className={`text-[11px] font-bold uppercase tracking-wider ${
-                activeExcursionsCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'
-              }`}>
+              <span
+                style={{
+                  color: activeExcursionsCount > 0 ? 'var(--df-status-danger-text)' : 'var(--df-text-muted)',
+                }}
+                className="text-[11px] font-bold uppercase tracking-wider"
+              >
                 Excursions Thermiques
               </span>
-              <IconAlertTriangle size={16} className={activeExcursionsCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'} />
+              <IconAlertTriangle
+                size={16}
+                style={{
+                  color: activeExcursionsCount > 0 ? 'var(--df-status-danger)' : 'var(--df-text-muted)',
+                }}
+              />
             </div>
-            <div className={`text-3xl font-black font-mono mt-1 ${
-              activeExcursionsCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
-            }`}>
+            <div
+              className="text-3xl font-black font-mono mt-1"
+              style={{
+                color: activeExcursionsCount > 0 ? 'var(--df-status-danger)' : 'var(--df-status-ok)',
+              }}
+            >
               {activeExcursionsCount}
             </div>
-            <div className={`text-xs ${
-              activeExcursionsCount > 0 ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-slate-500 dark:text-slate-400'
-            }`}>
+            <div
+              className="text-xs"
+              style={{
+                color: activeExcursionsCount > 0 ? 'var(--df-status-danger-text)' : 'var(--df-text-muted)',
+              }}
+            >
               {activeExcursionsCount > 0 ? 'Ruptures thermiques en cours !' : '100% dans la plage réglementaire'}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-5 shadow-sm space-y-1">
-            <div className="flex items-center justify-between text-slate-400">
+          <div
+            style={{
+              borderRadius: 'var(--df-radius-xl)',
+              border: '1px solid var(--df-border-subtle)',
+              backgroundColor: 'var(--df-bg-surface-1)',
+              padding: '1.25rem',
+              boxShadow: 'var(--df-shadow-sm)',
+            }}
+            className="space-y-1"
+          >
+            <div className="flex items-center justify-between" style={{ color: 'var(--df-text-muted)' }}>
               <span className="text-[11px] font-bold uppercase tracking-wider">Valeur Fret Sous Froid</span>
               <IconBox size={16} />
             </div>
-            <div className="text-3xl font-black font-mono text-slate-900 dark:text-white mt-1">
-              {(totalMonitoredCargoDzd / 1_000_000).toFixed(1)} <span className="text-base font-normal text-slate-400">M DA</span>
+            <div className="text-3xl font-black font-mono mt-1" style={{ color: 'var(--df-text-main)' }}>
+              {(totalMonitoredCargoDzd / 1_000_000).toFixed(1)} <span className="text-base font-normal" style={{ color: 'var(--df-text-muted)' }}>M DA</span>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">
+            <div className="text-xs" style={{ color: 'var(--df-text-muted)' }}>
               Cargaisons sous température dirigée
             </div>
           </div>
 
-          <div className={`rounded-2xl border p-5 shadow-sm space-y-1 ${
-            totalExcursionRiskDzd > 0
-              ? 'border-amber-300 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/20'
-              : 'border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220]'
-          }`}>
+          <div
+            style={{
+              borderRadius: 'var(--df-radius-xl)',
+              border: totalExcursionRiskDzd > 0
+                ? '1px solid var(--df-status-warning-border)'
+                : '1px solid var(--df-border-subtle)',
+              backgroundColor: totalExcursionRiskDzd > 0
+                ? 'var(--df-status-warning-bg)'
+                : 'var(--df-bg-surface-1)',
+              padding: '1.25rem',
+              boxShadow: 'var(--df-shadow-sm)',
+            }}
+            className="space-y-1"
+          >
             <div className="flex items-center justify-between">
-              <span className={`text-[11px] font-bold uppercase tracking-wider ${
-                totalExcursionRiskDzd > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'
-              }`}>
+              <span
+                style={{
+                  color: totalExcursionRiskDzd > 0 ? 'var(--df-status-warning-text)' : 'var(--df-text-muted)',
+                }}
+                className="text-[11px] font-bold uppercase tracking-wider"
+              >
                 Risque Financier Actuel
               </span>
-              <IconShieldCheck size={16} className={totalExcursionRiskDzd > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'} />
+              <IconShieldCheck
+                size={16}
+                style={{
+                  color: totalExcursionRiskDzd > 0 ? 'var(--df-status-warning)' : 'var(--df-text-muted)',
+                }}
+              />
             </div>
-            <div className={`text-3xl font-black font-mono mt-1 ${
-              totalExcursionRiskDzd > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'
-            }`}>
-              {totalExcursionRiskDzd.toLocaleString('fr-DZ')} <span className="text-base font-normal text-slate-400">DA</span>
+            <div
+              className="text-3xl font-black font-mono mt-1"
+              style={{
+                color: totalExcursionRiskDzd > 0 ? 'var(--df-status-warning)' : 'var(--df-status-ok)',
+              }}
+            >
+              {totalExcursionRiskDzd.toLocaleString('fr-DZ')} <span className="text-base font-normal" style={{ color: 'var(--df-text-muted)' }}>DA</span>
             </div>
-            <div className={`text-xs ${
-              totalExcursionRiskDzd > 0 ? 'text-amber-600/80 dark:text-amber-400/80' : 'text-slate-500 dark:text-slate-400'
-            }`}>
+            <div
+              className="text-xs"
+              style={{
+                color: totalExcursionRiskDzd > 0 ? 'var(--df-status-warning-text)' : 'var(--df-text-muted)',
+              }}
+            >
               {totalExcursionRiskDzd > 0 ? 'Dépréciation financière en cours' : 'Zéro perte constatée'}
             </div>
           </div>
         </div>
 
         {/* BARRE DE FILTRES ET CONTRÔLES */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div
+          style={{
+            borderRadius: 'var(--df-radius-xl)',
+            border: '1px solid var(--df-border-subtle)',
+            backgroundColor: 'var(--df-bg-surface-1)',
+            padding: '1rem',
+            boxShadow: 'var(--df-shadow-sm)',
+            marginBottom: '1.5rem',
+          }}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+        >
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--df-text-muted)' }}>
               Filtrer par Denrée :
             </span>
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -303,11 +407,16 @@ export default function ColdChainPage() {
                   <button
                     key={c.id}
                     onClick={() => setFilterCargo(c.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs transition-all ${
-                      isSel
-                        ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-800 shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 border border-transparent font-medium'
-                    }`}
+                    style={{
+                      backgroundColor: isSel ? 'var(--df-accent-blue-subtle)' : 'transparent',
+                      color: isSel ? 'var(--df-accent-blue)' : 'var(--df-text-secondary)',
+                      border: isSel ? '1px solid var(--df-accent-blue)' : '1px solid transparent',
+                      fontWeight: isSel ? 700 : 500,
+                      borderRadius: 'var(--df-radius-md)',
+                      padding: '0.35rem 0.75rem',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer',
+                    }}
                   >
                     {c.label}
                   </button>
@@ -316,8 +425,8 @@ export default function ColdChainPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-            <IconShieldCheck size={14} className="text-emerald-500 shrink-0" />
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--df-text-secondary)' }}>
+            <IconShieldCheck size={14} style={{ color: 'var(--df-status-ok)' }} className="shrink-0" />
             <span>Protocole certifié HACCP &amp; Direction des Services Vétérinaires (DSV)</span>
           </div>
         </div>
@@ -325,16 +434,35 @@ export default function ColdChainPage() {
         {/* GRILLE DES GROUPES FRIGORIFIQUES */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredReefers.length === 0 ? (
-            <div className="col-span-full py-16 px-4 text-center rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220] shadow-sm">
-              <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 mb-3">
+            <div
+              style={{
+                borderRadius: 'var(--df-radius-xl)',
+                border: '1px solid var(--df-border-subtle)',
+                backgroundColor: 'var(--df-bg-surface-1)',
+                padding: '4rem 1rem',
+                textAlign: 'center',
+                boxShadow: 'var(--df-shadow-sm)',
+              }}
+              className="col-span-full"
+            >
+              <div
+                style={{
+                  backgroundColor: 'var(--df-accent-blue-subtle)',
+                  color: 'var(--df-accent-blue)',
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: 'var(--df-radius-lg)',
+                }}
+                className="inline-flex items-center justify-center mb-3"
+              >
                 <IconThermometer size={24} />
               </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
+              <h3 className="text-base font-bold mb-1" style={{ color: 'var(--df-text-main)' }}>
                 {reefers.length === 0
                   ? 'Aucun groupe frigorifique surveillé'
                   : 'Aucun groupe ne correspond à cette denrée'}
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-4">
+              <p className="text-xs max-w-md mx-auto mb-4" style={{ color: 'var(--df-text-muted)' }}>
                 {reefers.length === 0
                   ? 'Votre parc ne comporte aucun groupe frigorifique actif. Pour tester la surveillance ATP et HACCP, basculez en mode démo ou déclarez un groupe frigorifique dans vos actifs.'
                   : 'Modifiez le filtre de cargaison sélectionné.'}
@@ -354,11 +482,18 @@ export default function ColdChainPage() {
               return (
                 <div
                   key={reefer.assetId}
-                  className={`rounded-2xl border p-6 shadow-sm space-y-4 transition-all ${
-                    isAlert
-                      ? 'border-rose-300 dark:border-rose-900/80 bg-rose-50/20 dark:bg-rose-950/10'
-                      : 'border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0c1220]'
-                  }`}
+                  style={{
+                    borderRadius: 'var(--df-radius-xl)',
+                    border: isAlert
+                      ? '1px solid var(--df-status-danger-border)'
+                      : '1px solid var(--df-border-subtle)',
+                    backgroundColor: isAlert
+                      ? 'var(--df-status-danger-bg)'
+                      : 'var(--df-bg-surface-1)',
+                    padding: '1.5rem',
+                    boxShadow: 'var(--df-shadow-sm)',
+                  }}
+                  className="space-y-4 transition-all"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
@@ -369,13 +504,21 @@ export default function ColdChainPage() {
                         />
                       </div>
                       <div>
-                        <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                        <span
+                          style={{
+                            backgroundColor: 'var(--df-bg-surface-2)',
+                            color: 'var(--df-text-secondary)',
+                            borderRadius: 'var(--df-radius-xs)',
+                            border: '1px solid var(--df-border-subtle)',
+                          }}
+                          className="font-mono text-xs font-bold px-2 py-0.5"
+                        >
                           {reefer.assetCode}
                         </span>
-                        <h3 className="text-base font-black text-slate-900 dark:text-white mt-1.5">
+                        <h3 className="text-base font-black mt-1.5" style={{ color: 'var(--df-text-main)' }}>
                           {reefer.assetName}
                         </h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--df-text-muted)' }}>
                           {getCargoLabel(reefer.cargoType)}
                         </p>
                       </div>
@@ -387,26 +530,38 @@ export default function ColdChainPage() {
                   </div>
 
                   {/* CADRAN DIGITAL DE TEMPÉRATURE TÉLÉMÉTRIQUE */}
-                  <div className={`rounded-xl border p-5 text-center space-y-1 ${
-                    isAlert
-                      ? 'border-rose-200 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/30'
-                      : 'border-slate-200/60 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40'
-                  }`}>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                  <div
+                    style={{
+                      borderRadius: 'var(--df-radius-md)',
+                      border: isAlert
+                        ? '1px solid var(--df-status-danger-border)'
+                        : '1px solid var(--df-border-subtle)',
+                      backgroundColor: isAlert
+                        ? 'var(--df-status-danger-bg)'
+                        : 'var(--df-bg-surface-2)',
+                      padding: '1.25rem',
+                      textAlign: 'center',
+                    }}
+                    className="space-y-1"
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--df-text-muted)' }}>
                       Température de Reprise Frigo
                     </span>
                     <div className="flex items-baseline justify-center gap-1">
-                      <span className={`text-4xl font-black font-mono tracking-tight ${
-                        isAlert ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
-                      }`}>
+                      <span
+                        className="text-4xl font-black font-mono tracking-tight"
+                        style={{
+                          color: isAlert ? 'var(--df-status-danger)' : 'var(--df-status-ok)',
+                        }}
+                      >
                         {reefer.currentTempC > 0 ? `+${reefer.currentTempC}` : reefer.currentTempC}
                       </span>
-                      <span className="text-base font-bold text-slate-400">°C</span>
+                      <span className="text-base font-bold" style={{ color: 'var(--df-text-muted)' }}>°C</span>
                     </div>
 
-                    <div className="text-xs text-slate-500 dark:text-slate-400 pt-1">
+                    <div className="text-xs pt-1" style={{ color: 'var(--df-text-secondary)' }}>
                       Consigne :{' '}
-                      <strong className="font-mono text-slate-700 dark:text-slate-300">
+                      <strong className="font-mono" style={{ color: 'var(--df-text-main)' }}>
                         +{reefer.setpointTempC}°C
                       </strong>{' '}
                       (Écart : <span className="font-mono">{reefer.tempDeltaC}°C</span>)
@@ -414,12 +569,15 @@ export default function ColdChainPage() {
                   </div>
 
                   {/* DÉTAILS TECHNIQUES & CAPTEURS IOT */}
-                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+                  <div className="space-y-2 pt-2 border-t text-xs" style={{ borderColor: 'var(--df-border-subtle)' }}>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500">Capteur Porte Caisse :</span>
-                      <span className={`font-semibold inline-flex items-center gap-1.5 ${
-                        reefer.doorOpen ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
-                      }`}>
+                      <span style={{ color: 'var(--df-text-muted)' }}>Capteur Porte Caisse :</span>
+                      <span
+                        style={{
+                          color: reefer.doorOpen ? 'var(--df-status-danger)' : 'var(--df-status-ok)',
+                        }}
+                        className="font-semibold inline-flex items-center gap-1.5"
+                      >
                         {reefer.doorOpen ? (
                           <>
                             <IconAlertTriangle size={12} />
@@ -435,16 +593,16 @@ export default function ColdChainPage() {
                     </div>
 
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500">Alimentation Groupe :</span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-200 inline-flex items-center gap-1.5">
+                      <span style={{ color: 'var(--df-text-muted)' }}>Alimentation Groupe :</span>
+                      <span className="font-semibold inline-flex items-center gap-1.5" style={{ color: 'var(--df-text-main)' }}>
                         {reefer.powerMode === ReeferPowerMode.DIESEL ? (
                           <>
-                            <IconFuel size={12} className="text-amber-500" />
+                            <IconFuel size={12} style={{ color: 'var(--df-status-warning)' }} />
                             <span>Moteur Diesel Autonome</span>
                           </>
                         ) : reefer.powerMode === ReeferPowerMode.ELECTRIC_STANDBY ? (
                           <>
-                            <IconZap size={12} className="text-blue-500" />
+                            <IconZap size={12} style={{ color: 'var(--df-accent-blue)' }} />
                             <span>Prise Secteur 380V (Dépôt)</span>
                           </>
                         ) : (
@@ -454,22 +612,31 @@ export default function ColdChainPage() {
                     </div>
 
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500">Valeur Cargaison :</span>
-                      <span className="font-mono font-bold text-slate-900 dark:text-white">
+                      <span style={{ color: 'var(--df-text-muted)' }}>Valeur Cargaison :</span>
+                      <span className="font-mono font-bold" style={{ color: 'var(--df-text-main)' }}>
                         {(reefer.estimatedCargoValueDzd / 1_000_000).toFixed(2)} M DA
                       </span>
                     </div>
 
                     {isAlert && (
-                      <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 space-y-1">
+                      <div
+                        style={{
+                          borderRadius: 'var(--df-radius-sm)',
+                          backgroundColor: 'var(--df-status-danger-bg)',
+                          border: '1px solid var(--df-status-danger-border)',
+                          color: 'var(--df-status-danger-text)',
+                          padding: '0.75rem',
+                        }}
+                        className="text-xs space-y-1"
+                      >
                         <div className="font-bold flex items-center gap-1.5">
-                          <IconAlertTriangle size={13} className="text-rose-600 dark:text-rose-400 shrink-0" />
+                          <IconAlertTriangle size={13} style={{ color: 'var(--df-status-danger)' }} className="shrink-0" />
                           <span>Risque financier direct de dépréciation</span>
                         </div>
-                        <div className="text-[11px] text-rose-600/90 dark:text-rose-400/90">
+                        <div className="text-[11px]" style={{ opacity: 0.9 }}>
                           Excursion depuis : <strong className="font-mono">{reefer.excursionDurationMinutes} minutes</strong>
                         </div>
-                        <div className="text-[11px] text-rose-600/90 dark:text-rose-400/90">
+                        <div className="text-[11px]" style={{ opacity: 0.9 }}>
                           Pertes estimées :{' '}
                           <strong className="font-mono text-xs">
                             {reefer.financialRiskDzd.toLocaleString('fr-DZ')} DA
@@ -480,14 +647,15 @@ export default function ColdChainPage() {
                   </div>
 
                   {/* PIED DE CARTE & ACTIONS */}
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-                    <span className="font-mono text-[11px] text-slate-400">
-                      Relevé : {new Date(reefer.lastUpdate).toLocaleTimeString()}
+                  <div className="pt-3 border-t flex items-center justify-between text-xs" style={{ borderColor: 'var(--df-border-subtle)' }}>
+                    <span className="font-mono text-[11px]" style={{ color: 'var(--df-text-muted)' }}>
+                      Relevé : {new Date(reefer.lastUpdate).toLocaleTimeString('fr-DZ')}
                     </span>
                     <button
                       type="button"
                       onClick={() => setActiveProof(buildReeferProofData(reefer))}
-                      className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                      style={{ color: 'var(--df-accent-blue)' }}
+                      className="inline-flex items-center gap-1 font-bold hover:underline cursor-pointer"
                     >
                       <IconFileText size={13} />
                       <span>Preuve Thermotrace (HACCP / DSV)</span>

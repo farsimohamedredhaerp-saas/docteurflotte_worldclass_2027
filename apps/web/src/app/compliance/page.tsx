@@ -61,7 +61,7 @@ function ComplianceCockpitContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 transition-colors duration-150">
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)', color: 'var(--df-text-main)' }}>
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -148,7 +148,7 @@ export default function CompliancePage() {
   }
 
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-50 dark:bg-[#090D16]" />}>
+    <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)' }} />}>
       <ComplianceCockpitContent />
     </Suspense>
   );

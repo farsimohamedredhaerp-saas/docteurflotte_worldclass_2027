@@ -5,33 +5,35 @@ import React from 'react';
  */
 export default function WorkOrdersLoading() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 animate-pulse">
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)', color: 'var(--df-text-main)' }}>
       {/* Top Navbar Skeleton Placeholder */}
-      <div className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900" />
+      <div style={{ height: '3.5rem', borderBottom: '1px solid var(--df-border-subtle)', backgroundColor: 'var(--df-bg-surface-1)' }} />
 
       <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-16 space-y-6">
         {/* Header Skeleton */}
-        <div className="h-36 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] p-6" />
+        <div className="df-skeleton" style={{ height: '9rem', borderRadius: 'var(--df-radius-xl)', border: '1px solid var(--df-border-subtle)' }} />
 
         {/* KPIs Skeleton */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
-              className="h-20 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]"
+              className="df-skeleton"
+              style={{ height: '5rem', borderRadius: 'var(--df-radius-md)', border: '1px solid var(--df-border-subtle)' }}
             />
           ))}
         </div>
 
         {/* Filters Skeleton */}
-        <div className="h-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]" />
+        <div className="df-skeleton" style={{ height: '6rem', borderRadius: 'var(--df-radius-xl)', border: '1px solid var(--df-border-subtle)' }} />
 
         {/* Cards Grid Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              className="h-64 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]"
+              className="df-skeleton"
+              style={{ height: '16rem', borderRadius: 'var(--df-radius-lg)', border: '1px solid var(--df-border-subtle)' }}
             />
           ))}
         </div>

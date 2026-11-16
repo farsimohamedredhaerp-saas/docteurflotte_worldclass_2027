@@ -101,7 +101,7 @@ function DvirContainer() {
 
   return (
     <div
-      className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 transition-colors"
+      style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)', color: 'var(--df-text-main)' }}
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
       <Navbar />

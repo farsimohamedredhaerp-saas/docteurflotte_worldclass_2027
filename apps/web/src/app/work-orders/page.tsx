@@ -205,7 +205,7 @@ export default function WorkOrdersPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-50 dark:bg-[#090D16] flex items-center justify-center text-xs text-slate-400">
+        <div style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)', color: 'var(--df-text-muted)' }} className="flex items-center justify-center text-xs">
           Chargement de l’atelier connecté...
         </div>
       }

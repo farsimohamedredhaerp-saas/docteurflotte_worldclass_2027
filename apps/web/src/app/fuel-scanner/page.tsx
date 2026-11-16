@@ -93,7 +93,7 @@ function FuelScannerContainer() {
   }, [activeReceiptForReport, targetAsset, resolvePrice]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#090D16] dark:text-slate-100 transition-colors duration-150">
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)', color: 'var(--df-text-main)' }}>
       <Navbar />
 
       <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-16">
@@ -229,7 +229,7 @@ export default function FuelScannerPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-50 dark:bg-[#090D16] flex items-center justify-center text-xs text-slate-400">
+        <div style={{ minHeight: '100vh', backgroundColor: 'var(--df-bg-base)', color: 'var(--df-text-muted)' }} className="flex items-center justify-center text-xs">
           Chargement du scanner carburant Naftal...
         </div>
       }
