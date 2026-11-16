@@ -70,19 +70,19 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
   const getCategoryBadge = (cat: CalculationProofData['category']) => {
     switch (cat) {
       case 'FINANCIAL':
-        return { label: 'Arbitrage Économique SAD/ADS', bg: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '#10b981' };
+        return { label: 'Arbitrage Économique SAD/ADS', bg: 'var(--df-status-ok-bg)', color: 'var(--df-status-ok-text)', border: 'var(--df-status-ok-border)' };
       case 'PHYSICS_RUL':
-        return { label: 'Physique Déterministe RUL', bg: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '#38bdf8' };
+        return { label: 'Physique Déterministe RUL', bg: 'var(--df-accent-blue-subtle)', color: 'var(--df-accent-blue)', border: 'var(--df-accent-blue)' };
       case 'REGULATORY':
-        return { label: 'Conformité JORADP / ENACTA', bg: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', border: '#f59e0b' };
+        return { label: 'Conformité JORADP / ENACTA', bg: 'var(--df-status-warning-bg)', color: 'var(--df-status-warning-text)', border: 'var(--df-status-warning-border)' };
       case 'DISPATCH_TOPSIS':
-        return { label: 'Arbre des 4 Portes & TOPSIS', bg: 'rgba(168, 85, 247, 0.15)', color: '#a855f7', border: '#a855f7' };
+        return { label: 'Arbre des 4 Portes & TOPSIS', bg: 'var(--df-status-info-bg)', color: 'var(--df-status-info-text)', border: 'var(--df-status-info-border)' };
       case 'VHI':
-        return { label: 'Indice de Santé VHI (0-100)', bg: 'rgba(236, 72, 153, 0.15)', color: '#ec4899', border: '#ec4899' };
+        return { label: 'Indice de Santé VHI (0-100)', bg: 'var(--df-status-danger-bg)', color: 'var(--df-status-danger-text)', border: 'var(--df-status-danger-border)' };
       case 'TELEMATICS':
-        return { label: 'Télématique & IoT Traccar', bg: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '#3b82f6' };
+        return { label: 'Télématique & IoT Traccar', bg: 'var(--df-accent-blue-subtle)', color: 'var(--df-accent-blue)', border: 'var(--df-accent-blue)' };
       default:
-        return { label: 'Calcul Déterministe', bg: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8', border: '#94a3b8' };
+        return { label: 'Calcul Déterministe', bg: 'var(--df-bg-surface-2)', color: 'var(--df-text-secondary)', border: 'var(--df-border-subtle)' };
     }
   };
 
@@ -110,12 +110,12 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
           maxWidth: 780,
           maxHeight: '90vh',
           overflowY: 'auto',
-          background: 'linear-gradient(160deg, #0e1726 0%, #090e17 100%)',
-          border: '1px solid rgba(56, 189, 248, 0.35)',
-          borderRadius: 20,
+          backgroundColor: 'var(--df-bg-surface-1)',
+          border: '1px solid var(--df-border-subtle)',
+          borderRadius: 'var(--df-radius-xl)',
           padding: 28,
-          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(56, 189, 248, 0.2)',
-          color: '#f8fafc',
+          boxShadow: 'var(--df-shadow-lg)',
+          color: 'var(--df-text-main)',
           position: 'relative',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -127,9 +127,9 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
             position: 'absolute',
             top: 20,
             right: 20,
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            color: '#94a3b8',
+            backgroundColor: 'var(--df-bg-surface-2)',
+            border: '1px solid var(--df-border-subtle)',
+            color: 'var(--df-text-muted)',
             borderRadius: '50%',
             width: 32,
             height: 32,
@@ -162,15 +162,15 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
             >
               {badge.label}
             </span>
-            <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>
-              Règle : <strong style={{ color: '#fff' }}>{data.ruleId}</strong>
+            <span style={{ fontSize: 12, color: 'var(--df-text-muted)', fontWeight: 600 }}>
+              Règle : <strong style={{ color: 'var(--df-text-main)' }}>{data.ruleId}</strong>
             </span>
           </div>
 
-          <h2 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 4px', color: '#fff' }}>
+          <h2 style={{ fontSize: 22, fontWeight: 800, margin: '0 0 4px', color: 'var(--df-text-main)' }}>
             {data.title}
           </h2>
-          <div style={{ fontSize: 14, color: '#38bdf8', fontWeight: 600 }}>
+          <div style={{ fontSize: 14, color: 'var(--df-accent-blue)', fontWeight: 600 }}>
             Calcul explicable pour : {data.decisionOrMetricName}
           </div>
         </div>
@@ -178,61 +178,63 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
         {/* Règle & Formule Mathématique */}
         <div
           style={{
-            background: 'rgba(15, 23, 42, 0.7)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: 14,
+            backgroundColor: 'var(--df-bg-surface-2)',
+            border: '1px solid var(--df-border-subtle)',
+            borderRadius: 'var(--df-radius-md)',
             padding: '16px 20px',
             marginBottom: 20,
           }}
         >
-          <div style={{ fontSize: 12, textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <IconActivity size={14} className="text-cyan-400" /> Formule Mathématique Déterministe
+          <div style={{ fontSize: 12, textTransform: 'uppercase', color: 'var(--df-text-muted)', fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <IconActivity size={14} style={{ color: 'var(--df-accent-blue)' }} /> Formule Mathématique Déterministe
           </div>
           <div
+            className="df-mono"
             style={{
-              fontFamily: 'ui-monospace, monospace',
               fontSize: 15,
               fontWeight: 700,
-              color: '#38bdf8',
-              background: 'rgba(56, 189, 248, 0.08)',
+              color: 'var(--df-accent-blue)',
+              backgroundColor: 'var(--df-bg-surface-1)',
               padding: '10px 14px',
-              borderRadius: 8,
-              borderLeft: '3px solid #38bdf8',
+              borderRadius: 'var(--df-radius-sm)',
+              borderLeft: '3px solid var(--df-accent-blue)',
+              border: '1px solid var(--df-border-subtle)',
+              borderLeftWidth: '3px',
               marginBottom: 8,
             }}
           >
             {data.deterministicFormula}
           </div>
-          <p style={{ margin: 0, fontSize: 13, color: '#cbd5e1', lineHeight: 1.45 }}>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--df-text-secondary)', lineHeight: 1.45 }}>
             {data.formulaExplanation}
           </p>
         </div>
 
         {/* Variables d'Entrée & Télématique Réelle */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 12, textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <IconRadio size={14} className="text-blue-400" /> Données Observées Réelles & Hypothèses d&apos;Entrée
+          <div style={{ fontSize: 12, textTransform: 'uppercase', color: 'var(--df-text-muted)', fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <IconRadio size={14} style={{ color: 'var(--df-accent-blue)' }} /> Données Observées Réelles & Hypothèses d&apos;Entrée
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
             {data.variables.map((v, idx) => (
               <div
                 key={idx}
                 style={{
-                  background: 'rgba(30, 41, 59, 0.45)',
-                  border: '1px solid rgba(255, 255, 255, 0.06)',
-                  borderRadius: 10,
+                  backgroundColor: 'var(--df-bg-surface-2)',
+                  border: '1px solid var(--df-border-subtle)',
+                  borderRadius: 'var(--df-radius-sm)',
                   padding: '10px 14px',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 2 }}>
-                  <span style={{ fontSize: 12, color: '#94a3b8' }}>
-                    {v.name} {v.symbol && <strong style={{ color: '#38bdf8' }}>({v.symbol})</strong>}
+                  <span style={{ fontSize: 12, color: 'var(--df-text-muted)' }}>
+                    {v.name} {v.symbol && <strong style={{ color: 'var(--df-accent-blue)' }}>({v.symbol})</strong>}
                   </span>
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 2 }}>
-                  {v.value} {v.unit && <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>{v.unit}</span>}
+                <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--df-text-main)', marginBottom: 2 }}>
+                  {v.value} {v.unit && <span style={{ fontSize: 12, color: 'var(--df-text-muted)', fontWeight: 500 }}>{v.unit}</span>}
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b' }}>
+                <div style={{ fontSize: 11, color: 'var(--df-text-muted)' }}>
                   Source : {v.source}
                 </div>
               </div>
@@ -242,29 +244,29 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
 
         {/* Déroulement de la Preuve Pas-à-Pas */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 12, textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <IconFileText size={14} className="text-emerald-400" /> Démonstration Numérique Pas-à-Pas
+          <div style={{ fontSize: 12, textTransform: 'uppercase', color: 'var(--df-text-muted)', fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <IconFileText size={14} style={{ color: 'var(--df-status-ok)' }} /> Démonstration Numérique Pas-à-Pas
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {data.steps.map((st) => (
               <div
                 key={st.stepNumber}
                 style={{
-                  background: 'rgba(15, 23, 42, 0.55)',
-                  border: '1px solid rgba(255, 255, 255, 0.06)',
-                  borderRadius: 10,
+                  backgroundColor: 'var(--df-bg-surface-2)',
+                  border: '1px solid var(--df-border-subtle)',
+                  borderRadius: 'var(--df-radius-sm)',
                   padding: '12px 16px',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--df-text-main)' }}>
                     Étape {st.stepNumber} : {st.description}
                   </span>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: '#10b981' }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--df-status-ok)' }}>
                     = {st.intermediateResult}
                   </span>
                 </div>
-                <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, color: '#94a3b8' }}>
+                <div className="df-mono" style={{ fontSize: 12, color: 'var(--df-text-muted)' }}>
                   {st.calculation}
                 </div>
               </div>
@@ -275,9 +277,9 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
         {/* Résultat Final & Verdict */}
         <div
           style={{
-            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(56, 189, 248, 0.12) 100%)',
-            border: '1px solid rgba(16, 185, 129, 0.35)',
-            borderRadius: 14,
+            backgroundColor: 'var(--df-status-ok-bg)',
+            border: '1px solid var(--df-status-ok-border)',
+            borderRadius: 'var(--df-radius-md)',
             padding: '16px 20px',
             display: 'flex',
             justifyContent: 'space-between',
@@ -288,13 +290,13 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
           }}
         >
           <div>
-            <div style={{ fontSize: 11, textTransform: 'uppercase', color: '#10b981', fontWeight: 700, marginBottom: 2 }}>
+            <div style={{ fontSize: 11, textTransform: 'uppercase', color: 'var(--df-status-ok-text)', fontWeight: 700, marginBottom: 2 }}>
               Résultat Calculé Prouvé ({data.finalResult.label})
             </div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: '#fff' }}>
-              {data.finalResult.value} {data.finalResult.unit && <span style={{ fontSize: 15, color: '#94a3b8' }}>{data.finalResult.unit}</span>}
+            <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--df-text-main)' }}>
+              {data.finalResult.value} {data.finalResult.unit && <span style={{ fontSize: 15, color: 'var(--df-text-muted)' }}>{data.finalResult.unit}</span>}
             </div>
-            <div style={{ fontSize: 13, color: '#cbd5e1', marginTop: 4 }}>
+            <div style={{ fontSize: 13, color: 'var(--df-text-secondary)', marginTop: 4 }}>
               {data.finalResult.conclusion}
             </div>
           </div>
@@ -302,13 +304,13 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
           <div style={{ textAlign: 'right' }}>
             <span
               style={{
-                background: 'rgba(16, 185, 129, 0.2)',
-                color: '#10b981',
+                backgroundColor: 'var(--df-status-ok-bg)',
+                color: 'var(--df-status-ok-text)',
                 padding: '6px 14px',
                 borderRadius: 9999,
                 fontSize: 12,
                 fontWeight: 700,
-                border: '1px solid #10b981',
+                border: '1px solid var(--df-status-ok-border)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
@@ -320,12 +322,12 @@ export const CalculationProofModal: React.FC<CalculationProofModalProps> = ({
         </div>
 
         {/* Réf. Juridique et Garantie Déterministe */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: '#64748b', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: 'var(--df-text-muted)', borderTop: '1px solid var(--df-border-subtle)', paddingTop: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <IconFileText size={13} className="text-slate-400" /> Référence : <strong style={{ color: '#94a3b8' }}>{data.legalOrOemReference}</strong>
+            <IconFileText size={13} style={{ color: 'var(--df-text-muted)' }} /> Référence : <strong style={{ color: 'var(--df-text-secondary)' }}>{data.legalOrOemReference}</strong>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <IconLock size={13} className="text-emerald-400" /> RLS Fail-Closed • Zéro boîte noire
+            <IconLock size={13} style={{ color: 'var(--df-status-ok)' }} /> RLS Fail-Closed • Zéro boîte noire
           </div>
         </div>
       </div>

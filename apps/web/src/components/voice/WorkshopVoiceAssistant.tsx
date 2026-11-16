@@ -172,12 +172,12 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
   return (
     <div
       style={{
-        background: '#FFFFFF',
-        color: '#0F172A',
-        border: '1px solid #E2E8F0',
-        borderRadius: '16px',
+        backgroundColor: 'var(--df-bg-surface-1)',
+        color: 'var(--df-text-main)',
+        border: '1px solid var(--df-border-subtle)',
+        borderRadius: 'var(--df-radius-xl)',
         padding: '24px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+        boxShadow: 'var(--df-shadow-md)',
         display: 'flex',
         flexDirection: 'column',
         gap: '20px',
@@ -191,7 +191,7 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '12px',
-          borderBottom: '1px solid #E2E8F0',
+          borderBottom: '1px solid var(--df-border-subtle)',
           paddingBottom: '16px',
         }}
       >
@@ -201,19 +201,19 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
               width: '40px',
               height: '40px',
               borderRadius: '10px',
-              background: '#EFF6FF',
-              border: '1px solid #BFDBFE',
+              backgroundColor: 'var(--df-accent-blue-subtle)',
+              border: '1px solid var(--df-accent-blue)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#2563EB',
+              color: 'var(--df-accent-blue)',
             }}
           >
             <Mic size={22} />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--df-text-main)', margin: 0 }}>
                 Pilier 5 : Assistant Vocal Atelier &amp; Glossaire Darja Algérienne
               </h3>
               <span
@@ -222,15 +222,15 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
                   fontWeight: 800,
                   padding: '2px 8px',
                   borderRadius: '12px',
-                  background: '#ECFDF5',
-                  color: '#065F46',
-                  border: '1px solid #A7F3D0',
+                  backgroundColor: 'var(--df-status-ok-bg)',
+                  color: 'var(--df-status-ok-text)',
+                  border: '1px solid var(--df-status-ok-border)',
                 }}
               >
                 Short-Circuit Déterministe &lt; 50 ms
               </span>
             </div>
-            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--df-text-muted)', marginTop: '2px' }}>
               Mains libres pour mécaniciens en fosse d'atelier. Traduction phonétique Darja &rarr; Spécifications constructeurs exactes.
             </div>
           </div>
@@ -240,10 +240,10 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
         <div
           style={{
             display: 'flex',
-            backgroundColor: '#F1F5F9',
+            backgroundColor: 'var(--df-bg-surface-2)',
             padding: '4px',
             borderRadius: '10px',
-            border: '1px solid #CBD5E1',
+            border: '1px solid var(--df-border-subtle)',
             gap: '6px',
           }}
         >
@@ -254,12 +254,12 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
               fontSize: '11px',
               fontWeight: 800,
               borderRadius: '6px',
-              border: selectedVoiceLanguage === 'FR' ? '1px solid #1D4ED8' : '1px solid transparent',
+              border: selectedVoiceLanguage === 'FR' ? '1px solid var(--df-accent-blue)' : '1px solid transparent',
               cursor: 'pointer',
-              backgroundColor: selectedVoiceLanguage === 'FR' ? '#2563EB' : 'transparent',
+              backgroundColor: selectedVoiceLanguage === 'FR' ? 'var(--df-accent-blue)' : 'transparent',
             }}
           >
-            <span style={{ color: selectedVoiceLanguage === 'FR' ? '#FFFFFF' : '#334155', fontWeight: 800 }}>
+            <span style={{ color: selectedVoiceLanguage === 'FR' ? 'var(--df-text-on-accent)' : 'var(--df-text-secondary)', fontWeight: 800 }}>
               FR • Français Technique
             </span>
           </button>
@@ -270,12 +270,12 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
               fontSize: '11px',
               fontWeight: 800,
               borderRadius: '6px',
-              border: selectedVoiceLanguage === 'DARJA' ? '1px solid #065F46' : '1px solid transparent',
+              border: selectedVoiceLanguage === 'DARJA' ? '1px solid var(--df-status-ok)' : '1px solid transparent',
               cursor: 'pointer',
-              backgroundColor: selectedVoiceLanguage === 'DARJA' ? '#059669' : 'transparent',
+              backgroundColor: selectedVoiceLanguage === 'DARJA' ? 'var(--df-status-ok)' : 'transparent',
             }}
           >
-            <span style={{ color: selectedVoiceLanguage === 'DARJA' ? '#FFFFFF' : '#334155', fontWeight: 800 }}>
+            <span style={{ color: selectedVoiceLanguage === 'DARJA' ? 'var(--df-text-on-accent)' : 'var(--df-text-secondary)', fontWeight: 800 }}>
               DZ • Darja Phonétique
             </span>
           </button>
@@ -291,19 +291,19 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
               width: '48px',
               height: '48px',
               borderRadius: '12px',
-              backgroundColor: isListening ? '#DC2626' : '#2563EB',
-              color: '#FFFFFF',
+              backgroundColor: isListening ? 'var(--df-status-danger)' : 'var(--df-accent-blue)',
+              color: 'var(--df-text-on-accent)',
               border: 'none',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              boxShadow: isListening ? '0 0 12px rgba(220, 38, 38, 0.5)' : '0 2px 6px rgba(37, 99, 235, 0.3)',
+              boxShadow: isListening ? '0 0 12px var(--df-status-danger)' : '0 2px 6px rgba(0, 0, 0, 0.2)',
               flexShrink: 0,
             }}
             title={isListening ? 'Arrêter écoute' : 'Parler au micro'}
           >
-            {isListening ? <MicOff size={22} color="#FFFFFF" className="animate-pulse" /> : <Mic size={22} color="#FFFFFF" />}
+            {isListening ? <MicOff size={22} className="animate-pulse" /> : <Mic size={22} />}
           </button>
 
           <input
@@ -314,9 +314,9 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
             placeholder="Ex: kifech zeyer culasse kerax, chhal zit shacman, injecteur mgrippi..."
             style={{
               flex: 1,
-              background: '#F8FAFC',
-              color: '#0F172A',
-              border: '1px solid #CBD5E1',
+              backgroundColor: 'var(--df-bg-surface-2)',
+              color: 'var(--df-text-main)',
+              border: '1px solid var(--df-border-subtle)',
               borderRadius: '8px',
               padding: '12px 16px',
               fontSize: '14px',
@@ -330,9 +330,9 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
             disabled={isProcessing}
             style={{
               padding: '12px 22px',
-              backgroundColor: '#059669',
-              color: '#FFFFFF',
-              border: '1px solid #047857',
+              backgroundColor: 'var(--df-status-ok)',
+              color: 'var(--df-text-on-accent)',
+              border: '1px solid var(--df-status-ok)',
               borderRadius: '8px',
               fontSize: '13px',
               fontWeight: 800,
@@ -342,7 +342,7 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
               gap: '6px',
             }}
           >
-            <span style={{ color: '#FFFFFF', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ color: 'var(--df-text-on-accent)', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
               <Sparkles size={13} />
               {isProcessing ? 'Résolution...' : 'Interroger'}
             </span>
@@ -351,8 +351,8 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
 
         {/* Presets rapides de phrases Darja */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Wrench size={13} color="#475569" /> Phrases Terrains :
+          <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--df-text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Wrench size={13} style={{ color: 'var(--df-text-muted)' }} /> Phrases Terrains :
           </span>
           {DARJA_PRESET_PHRASES.map((preset, idx) => (
             <button
@@ -362,18 +362,18 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
                 handleSendVoiceQuery(preset.query);
               }}
               style={{
-                backgroundColor: '#F1F5F9',
-                color: '#0F172A',
-                border: '1px solid #94A3B8',
+                backgroundColor: 'var(--df-bg-surface-2)',
+                color: 'var(--df-text-main)',
+                border: '1px solid var(--df-border-subtle)',
                 borderRadius: '6px',
                 padding: '6px 12px',
                 fontSize: '11px',
                 fontWeight: 800,
                 cursor: 'pointer',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                boxShadow: 'var(--df-shadow-sm)',
               }}
             >
-              <span style={{ color: '#0F172A', fontWeight: 800 }}>{preset.label}</span>
+              <span style={{ color: 'var(--df-text-main)', fontWeight: 800 }}>{preset.label}</span>
             </button>
           ))}
         </div>
@@ -383,8 +383,8 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
       {result && (
         <div
           style={{
-            background: '#F8FAFC',
-            border: '1px solid #CBD5E1',
+            backgroundColor: 'var(--df-bg-surface-2)',
+            border: '1px solid var(--df-border-subtle)',
             borderRadius: '12px',
             padding: '20px',
             display: 'flex',
@@ -400,40 +400,40 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
               alignItems: 'center',
               flexWrap: 'wrap',
               gap: '8px',
-              borderBottom: '1px solid #E2E8F0',
+              borderBottom: '1px solid var(--df-border-subtle)',
               paddingBottom: '10px',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span
+                className="df-mono"
                 style={{
-                  background: '#1E293B',
-                  color: '#FFFFFF',
+                  backgroundColor: 'var(--df-bg-surface-3)',
+                  color: 'var(--df-text-main)',
                   fontSize: '11px',
                   fontWeight: 800,
                   padding: '3px 8px',
                   borderRadius: '6px',
-                  fontFamily: 'monospace',
                 }}
               >
                 {result.vehicleDetected || 'FLOTTE DZ'}
               </span>
-              <span style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A' }}>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--df-text-main)' }}>
                 {result.normalizedIntent}
               </span>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span
+                className="df-mono"
                 style={{
                   fontSize: '11px',
                   fontWeight: 800,
-                  fontFamily: 'monospace',
-                  background: '#ECFDF5',
-                  color: '#065F46',
+                  backgroundColor: 'var(--df-status-ok-bg)',
+                  color: 'var(--df-status-ok-text)',
                   padding: '2px 8px',
                   borderRadius: '4px',
-                  border: '1px solid #A7F3D0',
+                  border: '1px solid var(--df-status-ok-border)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px',
@@ -452,14 +452,14 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
                   fontSize: '11px',
                   fontWeight: 800,
                   borderRadius: '6px',
-                  backgroundColor: '#2563EB',
-                  color: '#FFFFFF',
+                  backgroundColor: 'var(--df-accent-blue)',
+                  color: 'var(--df-text-on-accent)',
                   border: 'none',
                   cursor: 'pointer',
                 }}
               >
-                <Volume2 size={13} color="#FFFFFF" />
-                <span style={{ color: '#FFFFFF' }}>{isSpeaking ? 'Lecture en cours...' : 'Réécouter'}</span>
+                <Volume2 size={13} />
+                <span style={{ color: 'var(--df-text-on-accent)' }}>{isSpeaking ? 'Lecture en cours...' : 'Réécouter'}</span>
               </button>
             </div>
           </div>
@@ -468,32 +468,32 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div
               style={{
-                background: '#FFFFFF',
-                border: '1px solid #BFDBFE',
+                backgroundColor: 'var(--df-bg-surface-1)',
+                border: '1px solid var(--df-accent-blue)',
                 borderRadius: '8px',
                 padding: '12px 14px',
               }}
             >
-              <div style={{ fontSize: '11px', fontWeight: 800, color: '#1D4ED8', marginBottom: '6px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--df-accent-blue)', marginBottom: '6px' }}>
                 Consigne Orale — Français Technique :
               </div>
-              <div style={{ fontSize: '13px', color: '#1E293B', lineHeight: '1.5', fontWeight: 500 }}>
+              <div style={{ fontSize: '13px', color: 'var(--df-text-main)', lineHeight: '1.5', fontWeight: 500 }}>
                 {result.spokenResponseFr}
               </div>
             </div>
 
             <div
               style={{
-                background: '#FFFFFF',
-                border: '1px solid #BBF7D0',
+                backgroundColor: 'var(--df-bg-surface-1)',
+                border: '1px solid var(--df-status-ok-border)',
                 borderRadius: '8px',
                 padding: '12px 14px',
               }}
             >
-              <div style={{ fontSize: '11px', fontWeight: 800, color: '#15803D', marginBottom: '6px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--df-status-ok-text)', marginBottom: '6px' }}>
                 Consigne Orale — Darja Phonétique :
               </div>
-              <div style={{ fontSize: '13px', color: '#1E293B', lineHeight: '1.5', fontWeight: 500 }}>
+              <div style={{ fontSize: '13px', color: 'var(--df-text-main)', lineHeight: '1.5', fontWeight: 500 }}>
                 {result.spokenResponseDarja}
               </div>
             </div>
@@ -506,14 +506,14 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
                 style={{
                   fontSize: '11px',
                   fontWeight: 800,
-                  color: '#475569',
+                  color: 'var(--df-text-muted)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
                   textTransform: 'uppercase',
                 }}
               >
-                <Gauge size={13} color="#059669" />
+                <Gauge size={13} style={{ color: 'var(--df-status-ok)' }} />
                 Données Numériques Officielles Extraites :
               </div>
               <div
@@ -527,8 +527,8 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
                   <div
                     key={k}
                     style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #E2E8F0',
+                      backgroundColor: 'var(--df-bg-surface-1)',
+                      border: '1px solid var(--df-border-subtle)',
                       borderRadius: '6px',
                       padding: '6px 10px',
                       display: 'flex',
@@ -536,10 +536,10 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
                       alignItems: 'center',
                     }}
                   >
-                    <span style={{ fontSize: '11px', color: '#64748B', fontFamily: 'monospace' }}>
+                    <span className="df-mono" style={{ fontSize: '11px', color: 'var(--df-text-muted)' }}>
                       {k.replace(/_/g, ' ')} :
                     </span>
-                    <strong style={{ fontSize: '12px', color: '#047857', fontFamily: 'monospace' }}>
+                    <strong className="df-mono" style={{ fontSize: '12px', color: 'var(--df-status-ok)' }}>
                       {String(v)}
                     </strong>
                   </div>
@@ -549,8 +549,8 @@ export function WorkshopVoiceAssistant({ token }: { token?: string }) {
           )}
 
           {result.sourceManualReference && (
-            <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <BookOpen size={13} color="#64748B" /> Source : <strong>{result.sourceManualReference}</strong>
+            <div style={{ fontSize: '11px', color: 'var(--df-text-muted)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <BookOpen size={13} style={{ color: 'var(--df-text-muted)' }} /> Source : <strong style={{ color: 'var(--df-text-main)' }}>{result.sourceManualReference}</strong>
             </div>
           )}
         </div>
