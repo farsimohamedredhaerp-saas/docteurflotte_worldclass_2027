@@ -60,11 +60,11 @@ export function InvoicesLedgerTable({ invoices }: InvoicesLedgerTableProps) {
                   <td style={{ padding: '0.75rem 1rem' }} className="df-mono">{inv.subtotalHtDzd.toLocaleString('fr-DZ')} DA</td>
                   <td style={{ padding: '0.75rem 1rem' }} className="df-mono">{inv.tvaAmountDzd.toLocaleString('fr-DZ')} DA</td>
                   <td style={{ padding: '0.75rem 1rem' }} className="df-mono">{inv.stampDutyDzd.toLocaleString('fr-DZ')} DA</td>
-                  <td style={{ padding: '0.75rem 1rem', fontWeight: 800, color: '#38bdf8' }} className="df-mono">
+                  <td style={{ padding: '0.75rem 1rem', fontWeight: 800, color: 'var(--df-accent-blue)' }} className="df-mono">
                     {inv.totalTtcDzd.toLocaleString('fr-DZ')} DA
                   </td>
                   <td style={{ padding: '0.75rem 1rem' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', background: 'rgba(34, 197, 94, 0.2)', color: '#86efac' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', background: 'var(--df-status-ok-bg)', color: 'var(--df-status-ok-text)' }}>
                       {inv.status}
                     </span>
                   </td>

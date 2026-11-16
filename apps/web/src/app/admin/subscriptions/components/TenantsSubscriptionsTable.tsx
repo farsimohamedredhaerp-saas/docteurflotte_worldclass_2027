@@ -82,7 +82,7 @@ export function TenantsSubscriptionsTable({
                         padding: '2px 6px',
                         borderRadius: '4px',
                         background: 'rgba(59, 130, 246, 0.15)',
-                        color: '#60a5fa',
+                        color: 'var(--df-accent-blue)',
                       }}
                     >
                       {sub.planName}
@@ -92,7 +92,7 @@ export function TenantsSubscriptionsTable({
                     {sub.billingModel}
                   </td>
                   <td style={{ padding: '0.75rem 1rem' }}>
-                    <span style={{ fontWeight: 700, color: '#34d399' }} className="df-mono">
+                    <span style={{ fontWeight: 700, color: 'var(--df-status-ok)' }} className="df-mono">
                       {sub.activeVehiclesCount}
                     </span>
                     <span style={{ color: 'var(--df-text-muted)' }}> / {sub.allocatedVehiclesLimit}</span>

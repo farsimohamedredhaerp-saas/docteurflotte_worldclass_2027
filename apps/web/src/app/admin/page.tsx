@@ -13,6 +13,8 @@ import {
   IconRadio,
   IconShieldCheck,
   IconAlertTriangle,
+  IconCreditCard,
+  IconZap,
 } from '../../components/navigation/TechIcons';
 
 export default function AdminOverviewPage() {
@@ -295,6 +297,54 @@ export default function AdminOverviewPage() {
           </div>
           <div style={{ fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.5 }}>
             Consultez les organisations abonnées, ajustez les quotas de véhicules/utilisateurs, modifiez le palier (Mode 0, Mode 1, Mode 2) et suspendez ou activez les accès.
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/subscriptions"
+          style={{
+            display: 'block',
+            padding: '24px',
+            borderRadius: '14px',
+            backgroundColor: 'var(--df-bg-surface-1)',
+            border: '1px solid var(--df-border-subtle)',
+            textDecoration: 'none',
+            color: 'inherit',
+            transition: 'transform 0.15s ease, border-color 0.15s ease',
+          }}
+        >
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--df-status-ok-bg)', border: '1px solid var(--df-status-ok-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--df-status-ok-text)', marginBottom: '14px' }}>
+            <IconCreditCard size={20} />
+          </div>
+          <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '6px' }}>
+            Plans &amp; Abonnements SaaS DZ
+          </div>
+          <div style={{ fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.5 }}>
+            Gérez les formules tarifaires par palier (Mode 0, 1, 2), la facturation officielle DGI (TVA 19% &amp; timbre fiscal), les remises négociées et le calcul au prorata des unités actives.
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/ai-observability"
+          style={{
+            display: 'block',
+            padding: '24px',
+            borderRadius: '14px',
+            backgroundColor: 'var(--df-bg-surface-1)',
+            border: '1px solid var(--df-border-subtle)',
+            textDecoration: 'none',
+            color: 'inherit',
+            transition: 'transform 0.15s ease, border-color 0.15s ease',
+          }}
+        >
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--df-status-warning-bg)', border: '1px solid var(--df-status-warning-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--df-status-warning-text)', marginBottom: '14px' }}>
+            <IconZap size={20} />
+          </div>
+          <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '6px' }}>
+            Observabilité IA Souveraine &amp; Copilot
+          </div>
+          <div style={{ fontSize: '13px', color: 'var(--df-text-secondary)', lineHeight: 1.5 }}>
+            Surveillez le cluster local Ollama Qwen 2.5 (latences, CPU threads), le short-circuit dialectal Darja (&lt;50ms), le RAG multimanuel 62 constructeurs et l&apos;audit anti-fuite ANPDP.
           </div>
         </Link>
 
