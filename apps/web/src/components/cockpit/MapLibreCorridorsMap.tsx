@@ -179,24 +179,24 @@ export function MapLibreCorridorsMap({
     switch (tier) {
       case TelemetryTier.MODE_2_CAN_J1939:
         return {
-          bg: '#D1FAE5',
-          color: '#065F46',
-          border: '#6EE7B7',
+          bg: 'var(--df-status-ok-bg)',
+          color: 'var(--df-status-ok-text)',
+          border: 'var(--df-status-ok-border)',
           label: 'Mode 2 · Full CAN J1939',
         };
       case TelemetryTier.MODE_1_GNSS:
         return {
-          bg: '#E0F2FE',
-          color: '#0369A1',
-          border: '#7DD3FC',
+          bg: 'var(--df-accent-blue-subtle)',
+          color: 'var(--df-accent-blue)',
+          border: 'var(--df-accent-blue)',
           label: 'Mode 1 · GNSS Standard',
         };
       case TelemetryTier.MODE_0_DECLARATIVE:
       default:
         return {
-          bg: '#F3F4F6',
-          color: '#374151',
-          border: '#D1D5DB',
+          bg: 'var(--df-bg-surface-2)',
+          color: 'var(--df-text-secondary)',
+          border: 'var(--df-border-subtle)',
           label: 'Mode 0 · Déclaratif (DVIR)',
         };
     }
@@ -213,24 +213,24 @@ export function MapLibreCorridorsMap({
           alignItems: 'center',
           gap: '12px',
           padding: '14px 18px',
-          backgroundColor: '#FFFFFF',
-          borderRadius: '10px',
-          border: '1px solid #E5E7EB',
+          backgroundColor: 'var(--df-bg-surface-1)',
+          borderRadius: 'var(--df-radius-md)',
+          border: '1px solid var(--df-border-subtle)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontWeight: 600, fontSize: '14px', color: '#111827' }}>Corridor Logistique :</span>
+          <span style={{ fontWeight: 600, fontSize: '14px', color: 'var(--df-text-main)' }}>Corridor Logistique :</span>
           <select
             value={activeCorridorId}
             onChange={(e) => setActiveCorridorId(e.target.value)}
             style={{
               padding: '6px 12px',
-              borderRadius: '6px',
-              border: '1px solid #D1D5DB',
+              borderRadius: 'var(--df-radius-sm)',
+              border: '1px solid var(--df-border-subtle)',
               fontSize: '13px',
               fontWeight: 500,
-              backgroundColor: '#F9FAFB',
-              color: '#1F2937',
+              backgroundColor: 'var(--df-bg-surface-2)',
+              color: 'var(--df-text-main)',
             }}
           >
             {ALGERIA_MAJOR_CORRIDORS.map((c) => (
@@ -242,7 +242,7 @@ export function MapLibreCorridorsMap({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '13px', color: '#4B5563', fontWeight: 500 }}>Palier Matériel :</span>
+          <span style={{ fontSize: '13px', color: 'var(--df-text-muted)', fontWeight: 500 }}>Palier Matériel :</span>
           {(['ALL', TelemetryTier.MODE_2_CAN_J1939, TelemetryTier.MODE_1_GNSS, TelemetryTier.MODE_0_DECLARATIVE] as const).map(
             (t) => {
               const isSelected = filterTier === t;
@@ -252,13 +252,13 @@ export function MapLibreCorridorsMap({
                   onClick={() => setFilterTier(t)}
                   style={{
                     padding: '4px 10px',
-                    borderRadius: '6px',
+                    borderRadius: 'var(--df-radius-sm)',
                     fontSize: '12px',
                     fontWeight: 500,
                     cursor: 'pointer',
-                    border: isSelected ? '1px solid #0284C7' : '1px solid #E5E7EB',
-                    backgroundColor: isSelected ? '#E0F2FE' : '#FFFFFF',
-                    color: isSelected ? '#0369A1' : '#4B5563',
+                    border: isSelected ? '1px solid var(--df-accent-blue)' : '1px solid var(--df-border-subtle)',
+                    backgroundColor: isSelected ? 'var(--df-accent-blue-subtle)' : 'var(--df-bg-surface-1)',
+                    color: isSelected ? 'var(--df-accent-blue)' : 'var(--df-text-secondary)',
                   }}
                 >
                   {t === 'ALL' ? 'Tous les Actifs' : t === TelemetryTier.MODE_2_CAN_J1939 ? 'Mode 2 (CAN)' : t === TelemetryTier.MODE_1_GNSS ? 'Mode 1 (GPS)' : 'Mode 0 (DVIR)'}
@@ -473,21 +473,21 @@ export function MapLibreCorridorsMap({
         {selectedVehicle && (
           <div
             style={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: '12px',
-              border: '1px solid #E5E7EB',
+              backgroundColor: 'var(--df-bg-surface-1)',
+              borderRadius: 'var(--df-radius-lg)',
+              border: '1px solid var(--df-border-subtle)',
               padding: '20px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+              boxShadow: 'var(--df-shadow-md)',
             }}
           >
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: '16px', color: '#111827' }}>{selectedVehicle.plate}</h4>
-                  <div style={{ fontSize: '13px', color: '#4B5563', marginTop: '2px' }}>
+                  <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--df-text-main)' }}>{selectedVehicle.plate}</h4>
+                  <div style={{ fontSize: '13px', color: 'var(--df-text-secondary)', marginTop: '2px' }}>
                     {selectedVehicle.brandModel}
                   </div>
                 </div>
@@ -497,7 +497,7 @@ export function MapLibreCorridorsMap({
                     background: 'none',
                     border: 'none',
                     fontSize: '18px',
-                    color: '#9CA3AF',
+                    color: 'var(--df-text-muted)',
                     cursor: 'pointer',
                   }}
                 >
@@ -514,7 +514,7 @@ export function MapLibreCorridorsMap({
                       style={{
                         display: 'inline-block',
                         padding: '4px 10px',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--df-radius-xs)',
                         backgroundColor: b.bg,
                         color: b.color,
                         border: `1px solid ${b.border}`,
@@ -537,30 +537,30 @@ export function MapLibreCorridorsMap({
                   marginTop: '16px',
                 }}
               >
-                <div style={{ backgroundColor: '#F9FAFB', padding: '10px', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '11px', color: '#6B7280' }}>Chauffeur (Loi 18-07)</div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#111827' }}>
+                <div style={{ backgroundColor: 'var(--df-bg-surface-2)', padding: '10px', borderRadius: 'var(--df-radius-sm)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--df-text-muted)' }}>Chauffeur (Loi 18-07)</div>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--df-text-main)' }}>
                     {selectedVehicle.driverPseudonym}
                   </div>
                 </div>
 
-                <div style={{ backgroundColor: '#F9FAFB', padding: '10px', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '11px', color: '#6B7280' }}>Position Wilaya</div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#111827' }}>
+                <div style={{ backgroundColor: 'var(--df-bg-surface-2)', padding: '10px', borderRadius: 'var(--df-radius-sm)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--df-text-muted)' }}>Position Wilaya</div>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--df-text-main)' }}>
                     {selectedVehicle.wilayaName} ({selectedVehicle.wilayaCode})
                   </div>
                 </div>
 
-                <div style={{ backgroundColor: '#F9FAFB', padding: '10px', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '11px', color: '#6B7280' }}>RUL Huile Restant</div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: selectedVehicle.oilRulRemainingKm < 5000 ? '#DC2626' : '#059669' }}>
-                    {selectedVehicle.oilRulRemainingKm.toLocaleString()} km
+                <div style={{ backgroundColor: 'var(--df-bg-surface-2)', padding: '10px', borderRadius: 'var(--df-radius-sm)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--df-text-muted)' }}>RUL Huile Restant</div>
+                  <div className="df-mono" style={{ fontSize: '13px', fontWeight: 700, color: selectedVehicle.oilRulRemainingKm < 5000 ? 'var(--df-status-danger)' : 'var(--df-status-ok)' }}>
+                    {selectedVehicle.oilRulRemainingKm.toLocaleString('fr-DZ')} km
                   </div>
                 </div>
 
-                <div style={{ backgroundColor: '#F9FAFB', padding: '10px', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '11px', color: '#6B7280' }}>Pente Valhalla</div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#111827' }}>
+                <div style={{ backgroundColor: 'var(--df-bg-surface-2)', padding: '10px', borderRadius: 'var(--df-radius-sm)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--df-text-muted)' }}>Pente Valhalla</div>
+                  <div className="df-mono" style={{ fontSize: '12px', fontWeight: 600, color: 'var(--df-text-main)' }}>
                     {selectedVehicle.roadGradePercent}%
                   </div>
                 </div>
@@ -571,18 +571,18 @@ export function MapLibreCorridorsMap({
                 style={{
                   marginTop: '16px',
                   padding: '12px',
-                  borderRadius: '8px',
-                  backgroundColor: selectedVehicle.hasCusumAlert ? '#FEF2F2' : '#F0FDF4',
-                  border: `1px solid ${selectedVehicle.hasCusumAlert ? '#FECACA' : '#BBF7D0'}`,
+                  borderRadius: 'var(--df-radius-sm)',
+                  backgroundColor: selectedVehicle.hasCusumAlert ? 'var(--df-status-danger-bg)' : 'var(--df-status-ok-bg)',
+                  border: `1px solid ${selectedVehicle.hasCusumAlert ? 'var(--df-status-danger-border)' : 'var(--df-status-ok-border)'}`,
                 }}
               >
-                <div style={{ fontSize: '12px', fontWeight: 600, color: selectedVehicle.hasCusumAlert ? '#991B1B' : '#166534' }}>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: selectedVehicle.hasCusumAlert ? 'var(--df-status-danger-text)' : 'var(--df-status-ok-text)' }}>
                   {selectedVehicle.hasCusumAlert ? 'Alerte CUSUM : Baisse anormale détectée' : 'Traçabilité Carburant : Intégrité conforme'}
                 </div>
-                <div style={{ fontSize: '11px', color: selectedVehicle.hasCusumAlert ? '#B91C1C' : '#15803D', marginTop: '4px' }}>
+                <div style={{ fontSize: '11px', color: selectedVehicle.hasCusumAlert ? 'var(--df-status-danger-text)' : 'var(--df-status-ok-text)', marginTop: '4px' }}>
                   {selectedVehicle.telemetryTier === TelemetryTier.MODE_0_DECLARATIVE
                     ? 'Mode 0 : Contrôle par réconciliation des tickets Naftal et odomètre Valhalla.'
-                    : `Compensation d assiette active pour pente de ${selectedVehicle.roadGradePercent}%. Faux positifs de ballottement éliminés.`}
+                    : `Compensation d'assiette active pour pente de ${selectedVehicle.roadGradePercent}%. Faux positifs de ballottement éliminés.`}
                 </div>
               </div>
             </div>
@@ -594,9 +594,9 @@ export function MapLibreCorridorsMap({
                   display: 'block',
                   textAlign: 'center',
                   padding: '9px 14px',
-                  borderRadius: '6px',
-                  backgroundColor: '#0284C7',
-                  color: '#FFFFFF',
+                  borderRadius: 'var(--df-radius-sm)',
+                  backgroundColor: 'var(--df-accent-blue)',
+                  color: 'var(--df-text-on-accent)',
                   fontWeight: 600,
                   fontSize: '13px',
                   textDecoration: 'none',
