@@ -88,6 +88,121 @@ export interface CreateAssetSiteAssignmentDto {
   notes?: string;
 }
 
+export enum ConsumableType {
+  GASOIL = 'GASOIL',
+  SIRGHAZ_GPL = 'SIRGHAZ_GPL',
+  ESSENCE_SP = 'ESSENCE_SP',
+  HUILE_HYDRAULIQUE_ISO46 = 'HUILE_HYDRAULIQUE_ISO46',
+  HUILE_HYDRAULIQUE_ISO68 = 'HUILE_HYDRAULIQUE_ISO68',
+  HUILE_MOTEUR_15W40 = 'HUILE_MOTEUR_15W40',
+  HUILE_PONT_80W90 = 'HUILE_PONT_80W90',
+  ADBLUE = 'ADBLUE',
+  LIQUIDE_REFROIDISSEMENT = 'LIQUIDE_REFROIDISSEMENT',
+  GRAISSE = 'GRAISSE',
+}
+
+export interface SiteConsumableTank {
+  id: string;
+  tenantId: string;
+  siteId: string;
+  tankCode: string;
+  name: string;
+  consumableType: ConsumableType;
+  capacityLiters: number;
+  currentLevelLiters: number;
+  alertLowLevelPct: number;
+  unitCostRefDzd: number;
+  lastDeliveryDate?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateSiteConsumableTankDto {
+  siteId: string;
+  tankCode: string;
+  name: string;
+  consumableType: ConsumableType;
+  capacityLiters: number;
+  currentLevelLiters?: number;
+  alertLowLevelPct?: number;
+  unitCostRefDzd?: number;
+}
+
+export interface SiteConsumableDelivery {
+  id: string;
+  tenantId: string;
+  siteId: string;
+  tankId?: string;
+  deliveryNoteRef: string;
+  deliveryDate: string;
+  supplierName: string;
+  supplierNif?: string;
+  consumableType: ConsumableType;
+  volumeLiters: number;
+  density?: number;
+  unitPriceHtDzd: number;
+  totalHtDzd: number;
+  vatRatePct: number;
+  vatAmountDzd: number;
+  totalTtcDzd: number;
+  sha256Proof: string;
+  createdAt: string;
+}
+
+export interface RecordSiteConsumableDeliveryDto {
+  siteId: string;
+  tankId?: string;
+  deliveryNoteRef: string;
+  deliveryDate?: string;
+  supplierName?: string;
+  supplierNif?: string;
+  consumableType: ConsumableType;
+  volumeLiters: number;
+  density?: number;
+  unitPriceHtDzd: number;
+  vatRatePct?: number;
+}
+
+export interface SiteWorkSituation {
+  id: string;
+  tenantId: string;
+  siteId: string;
+  situationNumber: string;
+  periodStart: string;
+  periodEnd: string;
+  monthWorkAmountHtDzd: number;
+  withholdingGuaranteeRatePct: number;
+  withholdingGuaranteeAmountDzd: number;
+  netWorkAmountHtDzd: number;
+  vatRatePct: number;
+  vatAmountDzd: number;
+  totalPayableTtcDzd: number;
+  status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'BILLED' | 'PAID';
+  clientName: string;
+  clientNif?: string;
+  vatTaxPoint: 'ENCAISSEMENT' | 'DEBIT';
+  isSettled: boolean;
+  settlementDate?: string;
+  notes?: string;
+  sha256Seal: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateSiteWorkSituationDto {
+  siteId: string;
+  situationNumber: string;
+  periodStart: string;
+  periodEnd: string;
+  monthWorkAmountHtDzd: number;
+  withholdingGuaranteeRatePct?: number;
+  vatRatePct?: number;
+  clientName: string;
+  clientNif?: string;
+  notes?: string;
+}
+
 export interface AssetEngineHourLog {
   id: string;
   tenantId: string;
@@ -97,8 +212,17 @@ export interface AssetEngineHourLog {
   hoursValue: number;
   deltaHoursSinceLast: number;
   source: EngineHourSource;
+  fuelType?: ConsumableType | string;
   fuelConsumedLiters?: number;
   fuelCostDzd?: number;
+  hydraulicOilLiters?: number;
+  hydraulicOilCostDzd?: number;
+  engineOilLiters?: number;
+  engineOilCostDzd?: number;
+  adblueLiters?: number;
+  adblueCostDzd?: number;
+  coolantLiters?: number;
+  totalConsumablesCostDzd?: number;
   workDescription?: string;
   operatorName?: string;
   isValidated: boolean;
@@ -110,7 +234,16 @@ export interface RecordEngineHourLogDto {
   siteId: string;
   hoursValue: number;
   source?: EngineHourSource;
+  fuelType?: ConsumableType | string;
   fuelConsumedLiters?: number;
+  fuelCostDzd?: number;
+  hydraulicOilLiters?: number;
+  hydraulicOilCostDzd?: number;
+  engineOilLiters?: number;
+  engineOilCostDzd?: number;
+  adblueLiters?: number;
+  adblueCostDzd?: number;
+  coolantLiters?: number;
   workDescription?: string;
   operatorName?: string;
 }

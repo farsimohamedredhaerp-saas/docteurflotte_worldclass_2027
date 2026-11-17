@@ -4,7 +4,7 @@ import { SiteProfitabilitySummary } from '@docteurflotte/contracts';
 
 @Injectable()
 export class SiteProfitabilityService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(private readonly db: DatabaseService) { }
 
   async getSiteProfitability(tenantId: string, siteId: string): Promise<SiteProfitabilitySummary> {
     // 1. Chantier
@@ -65,7 +65,7 @@ export class SiteProfitabilityService {
       `SELECT l.asset_id, a.code as asset_code,
               SUM(l.delta_hours_since_last) as total_hours,
               SUM(l.fuel_consumed_liters) as total_fuel,
-              SUM(l.fuel_cost_dzd) as total_cost
+              SUM(COALESCE(NULLIF(l.total_consumables_cost_dzd, 0), l.fuel_cost_dzd, 0)) as total_cost
        FROM asset_engine_hour_logs l
        JOIN assets a ON a.id = l.asset_id
        WHERE l.tenant_id = $1 AND l.site_id = $2

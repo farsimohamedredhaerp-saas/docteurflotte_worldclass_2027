@@ -6,7 +6,9 @@ import { AssetAssignmentService } from './services/asset-assignment.service';
 import { EngineHoursService } from './services/engine-hours.service';
 import { TransferChecklistService } from './services/transfer-checklist.service';
 import { SiteProfitabilityService } from './services/site-profitability.service';
-import { SiteStatus, EngineHourSource } from '@docteurflotte/contracts';
+import { SiteConsumablesService } from './services/site-consumables.service';
+import { WorkSituationsService } from './services/work-situations.service';
+import { SiteStatus, EngineHourSource, ConsumableType } from '@docteurflotte/contracts';
 
 describe('Module A — Chantiers & Engins BTP (Asset-Centric & Maintenance 5.0)', () => {
   let siteService: SiteWorkspaceService;
@@ -14,6 +16,8 @@ describe('Module A — Chantiers & Engins BTP (Asset-Centric & Maintenance 5.0)'
   let engineHoursService: EngineHoursService;
   let transferService: TransferChecklistService;
   let profitabilityService: SiteProfitabilityService;
+  let consumablesService: SiteConsumablesService;
+  let situationsService: WorkSituationsService;
 
   const tenantId = '00000000-0000-0000-0000-000000000001';
   const otherTenantId = '99999999-9999-9999-9999-999999999999';
@@ -34,6 +38,8 @@ describe('Module A — Chantiers & Engins BTP (Asset-Centric & Maintenance 5.0)'
         EngineHoursService,
         TransferChecklistService,
         SiteProfitabilityService,
+        SiteConsumablesService,
+        WorkSituationsService,
         { provide: DatabaseService, useValue: mockDb },
       ],
     }).compile();
@@ -43,8 +49,11 @@ describe('Module A — Chantiers & Engins BTP (Asset-Centric & Maintenance 5.0)'
     engineHoursService = module.get<EngineHoursService>(EngineHoursService);
     transferService = module.get<TransferChecklistService>(TransferChecklistService);
     profitabilityService = module.get<SiteProfitabilityService>(SiteProfitabilityService);
+    consumablesService = module.get<SiteConsumablesService>(SiteConsumablesService);
+    situationsService = module.get<WorkSituationsService>(WorkSituationsService);
 
     jest.clearAllMocks();
+    mockDb.query.mockReset();
   });
 
   describe('1. Intégrité Racine Asset & Affectations aux Chantiers', () => {
@@ -522,6 +531,218 @@ describe('Module A — Chantiers & Engins BTP (Asset-Centric & Maintenance 5.0)'
           amountHtDzd: -50,
         }),
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('6. Matrice Multi-Consommables & Fluides de Chantier (SiteConsumablesService)', () => {
+    it('crée une cuve de chantier pour huile hydraulique ISO 46 avec succès', async () => {
+      mockDb.query
+        .mockResolvedValueOnce({ rows: [{ id: siteId }] }) // check site
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'tank-01',
+              tenant_id: tenantId,
+              site_id: siteId,
+              tank_code: 'CUVE-HYD-01',
+              name: 'Cuve Huile Hydraulique Atelier',
+              consumable_type: ConsumableType.HUILE_HYDRAULIQUE_ISO46,
+              capacity_liters: '5000',
+              current_level_liters: '1200',
+              alert_low_level_pct: '15.00',
+              unit_cost_ref_dzd: '350.00',
+              last_delivery_date: null,
+              is_active: true,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+          ],
+        });
+
+      const tank = await consumablesService.createTank(tenantId, {
+        siteId,
+        tankCode: 'CUVE-HYD-01',
+        name: 'Cuve Huile Hydraulique Atelier',
+        consumableType: ConsumableType.HUILE_HYDRAULIQUE_ISO46,
+        capacityLiters: 5000,
+        currentLevelLiters: 1200,
+      });
+
+      expect(tank.tankCode).toBe('CUVE-HYD-01');
+      expect(tank.consumableType).toBe(ConsumableType.HUILE_HYDRAULIQUE_ISO46);
+      expect(tank.capacityLiters).toBe(5000);
+      expect(tank.currentLevelLiters).toBe(1200);
+    });
+
+    it('enregistre une livraison Naftal (BL) et met à jour le niveau de la cuve', async () => {
+      mockDb.query
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'del-01',
+              tenant_id: tenantId,
+              site_id: siteId,
+              tank_id: 'tank-01',
+              delivery_note_ref: 'BL-NAFTAL-2026-99',
+              delivery_date: new Date().toISOString(),
+              supplier_name: 'NAFTAL',
+              supplier_nif: '000016001234567',
+              consumable_type: ConsumableType.GASOIL,
+              volume_liters: '10000',
+              density: '0.8450',
+              unit_price_ht_dzd: '29.0100',
+              total_ht_dzd: '290100.00',
+              vat_rate_pct: '19.00',
+              vat_amount_dzd: '55119.00',
+              total_ttc_dzd: '345219.00',
+              sha256_proof: 'hash-proof-sha256',
+              created_at: new Date().toISOString(),
+            },
+          ],
+        }) // insert delivery
+        .mockResolvedValueOnce({ rowCount: 1 }); // update tank
+
+      const delivery = await consumablesService.recordDelivery(tenantId, {
+        siteId,
+        tankId: 'tank-01',
+        deliveryNoteRef: 'BL-NAFTAL-2026-99',
+        supplierName: 'NAFTAL',
+        consumableType: ConsumableType.GASOIL,
+        volumeLiters: 10000,
+        unitPriceHtDzd: 29.01,
+      });
+
+      expect(delivery.volumeLiters).toBe(10000);
+      expect(delivery.totalHtDzd).toBe(290100);
+      expect(delivery.totalTtcDzd).toBe(345219);
+      expect(delivery.sha256Proof).toBeDefined();
+    });
+  });
+
+  describe('7. Situations de Travaux BTPH & Retenue de Garantie (WorkSituationsService)', () => {
+    it('génère un DPM BTPH avec déduction automatique de la retenue de garantie 5% (Décret 15-247)', async () => {
+      mockDb.query
+        .mockResolvedValueOnce({ rows: [{ id: siteId, name: 'Chantier A1' }] }) // check site
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'sit-btph-01',
+              tenant_id: tenantId,
+              site_id: siteId,
+              situation_number: 'SIT-2026-CH01-01',
+              period_start: '2026-11-01',
+              period_end: '2026-11-30',
+              month_work_amount_ht_dzd: '10000000.00', // 10M DZD
+              withholding_guarantee_rate_pct: '5.00',
+              withholding_guarantee_amount_dzd: '500000.00', // 500k DZD
+              net_work_amount_ht_dzd: '9500000.00', // 9.5M DZD
+              vat_rate_pct: '19.00',
+              vat_amount_dzd: '1900000.00', // 1.9M DZD
+              total_payable_ttc_dzd: '11400000.00', // 9.5M + 1.9M = 11.4M DZD
+              status: 'DRAFT',
+              client_name: 'COSIDER TP',
+              client_nif: '000016009876543',
+              vat_tax_point: 'ENCAISSEMENT',
+              is_settled: false,
+              settlement_date: null,
+              notes: 'Travaux terrassement PK 12 à 25',
+              sha256_seal: 'seal-sha256-btph',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+          ],
+        });
+
+      const situation = await situationsService.createSituation(tenantId, {
+        siteId,
+        situationNumber: 'SIT-2026-CH01-01',
+        periodStart: '2026-11-01',
+        periodEnd: '2026-11-30',
+        monthWorkAmountHtDzd: 10000000,
+        withholdingGuaranteeRatePct: 5,
+        clientName: 'COSIDER TP',
+        clientNif: '000016009876543',
+      });
+
+      expect(situation.situationNumber).toBe('SIT-2026-CH01-01');
+      expect(situation.monthWorkAmountHtDzd).toBe(10000000);
+      expect(situation.withholdingGuaranteeAmountDzd).toBe(500000); // 5% déduit
+      expect(situation.netWorkAmountHtDzd).toBe(9500000); // 95%
+      expect(situation.vatTaxPoint).toBe('ENCAISSEMENT');
+      expect(situation.status).toBe('DRAFT');
+    });
+
+    it('permet de facturer et d’encaisser une situation avec basculement de statut', async () => {
+      // 1. Bill
+      mockDb.query
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'sit-01',
+              tenant_id: tenantId,
+              site_id: siteId,
+              situation_number: 'SIT-01',
+              month_work_amount_ht_dzd: '5000000.00',
+              client_name: 'Client Algérie',
+              client_nif: '000123456789012',
+              vat_rate_pct: '19.00',
+              vat_amount_dzd: '950000.00',
+              total_payable_ttc_dzd: '5700000.00',
+              withholding_guarantee_rate_pct: '5.00',
+              withholding_guarantee_amount_dzd: '250000.00',
+              sha256_seal: 'seal-01',
+            },
+          ],
+        }) // select
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'sit-01',
+              tenant_id: tenantId,
+              site_id: siteId,
+              situation_number: 'SIT-01',
+              period_start: '2026-11-01',
+              period_end: '2026-11-30',
+              month_work_amount_ht_dzd: '5000000.00',
+              withholding_guarantee_rate_pct: '5.00',
+              withholding_guarantee_amount_dzd: '250000.00',
+              net_work_amount_ht_dzd: '4750000.00',
+              vat_rate_pct: '19.00',
+              vat_amount_dzd: '950000.00',
+              total_payable_ttc_dzd: '5700000.00',
+              status: 'BILLED',
+              client_name: 'Client Algérie',
+              client_nif: '000123456789012',
+              vat_tax_point: 'ENCAISSEMENT',
+              is_settled: false,
+              settlement_date: null,
+              notes: null,
+              sha256_seal: 'seal-01',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+          ],
+        }) // update billed
+        .mockResolvedValueOnce({ rowCount: 1 }); // update site revenue
+
+      const billed = await situationsService.billSituation(tenantId, 'sit-01');
+      expect(billed.status).toBe('BILLED');
+
+      // 2. Settle (Encaissement)
+      mockDb.query.mockResolvedValueOnce({
+        rows: [
+          {
+            ...billed,
+            status: 'PAID',
+            is_settled: true,
+            settlement_date: '2026-11-20',
+          },
+        ],
+      });
+
+      const settled = await situationsService.settleSituation(tenantId, 'sit-01', '2026-11-20');
+      expect(settled.status).toBe('PAID');
+      expect(settled.isSettled).toBe(true);
     });
   });
 });

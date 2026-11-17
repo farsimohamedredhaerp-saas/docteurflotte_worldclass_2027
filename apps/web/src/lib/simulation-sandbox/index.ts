@@ -17,6 +17,7 @@ export * from './tco.mock';
 export * from './compliance.mock';
 export * from './telematics.mock';
 export * from './digital-twin.mock';
+export * from './chantiers.mock';
 
 /**
  * Chargeurs asynchrones avec dynamic import pour code-splitting optimal (Tree-Shaking garanti en production).
@@ -108,6 +109,18 @@ export async function getSimulationGeneralLedger() {
 export async function getSimulationEngineRules() {
   const mod = await import('./compliance.mock');
   return mod.MOCK_SANDBOX_ENGINE_RULES;
+}
+
+export async function getSimulationChantiersData() {
+  const mod = await import('./chantiers.mock');
+  return {
+    sites: mod.MOCK_SANDBOX_SITES,
+    assignments: mod.MOCK_SANDBOX_ASSIGNMENTS,
+    hourLogs: mod.MOCK_SANDBOX_HOUR_LOGS,
+    tanks: mod.MOCK_SANDBOX_TANKS,
+    deliveries: mod.MOCK_SANDBOX_DELIVERIES,
+    workSituations: mod.MOCK_SANDBOX_WORK_SITUATIONS,
+  };
 }
 
 

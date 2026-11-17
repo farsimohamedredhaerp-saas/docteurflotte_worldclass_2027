@@ -166,3 +166,4 @@ export interface UpdateEngineRuleParamDto {
 export interface BatchUpdateEngineRulesDto {
   params: UpdateEngineRuleParamDto[];
 }
+

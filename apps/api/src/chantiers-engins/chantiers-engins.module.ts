@@ -8,6 +8,8 @@ import { AssetAssignmentService } from './services/asset-assignment.service';
 import { EngineHoursService } from './services/engine-hours.service';
 import { TransferChecklistService } from './services/transfer-checklist.service';
 import { SiteProfitabilityService } from './services/site-profitability.service';
+import { SiteConsumablesService } from './services/site-consumables.service';
+import { WorkSituationsService } from './services/work-situations.service';
 
 @Module({
   imports: [DatabaseModule, AuthModule, FiscalComplianceModule],
@@ -18,6 +20,8 @@ import { SiteProfitabilityService } from './services/site-profitability.service'
     EngineHoursService,
     TransferChecklistService,
     SiteProfitabilityService,
+    SiteConsumablesService,
+    WorkSituationsService,
   ],
   exports: [
     SiteWorkspaceService,
@@ -25,6 +29,8 @@ import { SiteProfitabilityService } from './services/site-profitability.service'
     EngineHoursService,
     TransferChecklistService,
     SiteProfitabilityService,
+    SiteConsumablesService,
+    WorkSituationsService,
   ],
 })
 export class ChantiersEnginsModule {}

@@ -9,6 +9,13 @@ import {
   CreateAssetTransferChecklistDto,
   SiteProfitabilitySummary,
   RecordSiteSituationDto,
+  SiteConsumableTank,
+  CreateSiteConsumableTankDto,
+  SiteConsumableDelivery,
+  RecordSiteConsumableDeliveryDto,
+  SiteWorkSituation,
+  CreateSiteWorkSituationDto,
+  ConsumableType,
   FiscalDocument,
   FiscalEvent,
   SiteStatus,
@@ -234,6 +241,120 @@ export class ChantiersClient {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || 'Échec d’enregistrement de la situation de travaux.');
     }
+    return res.json();
+  }
+
+  // 5. Cuves & Gestion Multi-Fluides de Chantier
+  static async listTanks(token: string, siteId?: string): Promise<SiteConsumableTank[]> {
+    const url = new URL(`${API_BASE_URL}/sites/consumables/tanks`);
+    if (siteId) url.searchParams.set('siteId', siteId);
+
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Impossible de charger les cuves de chantier.');
+    return res.json();
+  }
+
+  static async createTank(dto: CreateSiteConsumableTankDto, token: string): Promise<SiteConsumableTank> {
+    const res = await fetch(`${API_BASE_URL}/sites/consumables/tanks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(dto),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Échec de création de la cuve.');
+    }
+    return res.json();
+  }
+
+  static async listDeliveries(token: string, siteId?: string): Promise<SiteConsumableDelivery[]> {
+    const url = new URL(`${API_BASE_URL}/sites/consumables/deliveries`);
+    if (siteId) url.searchParams.set('siteId', siteId);
+
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Impossible de charger les livraisons de fluides.');
+    return res.json();
+  }
+
+  static async recordDelivery(dto: RecordSiteConsumableDeliveryDto, token: string): Promise<SiteConsumableDelivery> {
+    const res = await fetch(`${API_BASE_URL}/sites/consumables/deliveries`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(dto),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Échec d’enregistrement du bon de livraison.');
+    }
+    return res.json();
+  }
+
+  // 6. Situations de Travaux BTPH (DPM)
+  static async listWorkSituations(token: string, siteId?: string): Promise<SiteWorkSituation[]> {
+    const url = new URL(`${API_BASE_URL}/sites/work-situations`);
+    if (siteId) url.searchParams.set('siteId', siteId);
+
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Impossible de charger les situations de travaux.');
+    return res.json();
+  }
+
+  static async createWorkSituation(dto: CreateSiteWorkSituationDto, token: string): Promise<SiteWorkSituation> {
+    const res = await fetch(`${API_BASE_URL}/sites/work-situations`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(dto),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Échec de création de la situation de travaux.');
+    }
+    return res.json();
+  }
+
+  static async approveWorkSituation(id: string, token: string): Promise<SiteWorkSituation> {
+    const res = await fetch(`${API_BASE_URL}/sites/work-situations/${id}/approve`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Échec d’approbation de la situation de travaux.');
+    return res.json();
+  }
+
+  static async billWorkSituation(id: string, token: string): Promise<SiteWorkSituation> {
+    const res = await fetch(`${API_BASE_URL}/sites/work-situations/${id}/bill`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Échec de facturation de la situation de travaux.');
+    return res.json();
+  }
+
+  static async settleWorkSituation(id: string, token: string, settlementDate?: string): Promise<SiteWorkSituation> {
+    const res = await fetch(`${API_BASE_URL}/sites/work-situations/${id}/settle`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ settlementDate }),
+    });
+    if (!res.ok) throw new Error('Échec d’encaissement de la situation de travaux.');
     return res.json();
   }
 }

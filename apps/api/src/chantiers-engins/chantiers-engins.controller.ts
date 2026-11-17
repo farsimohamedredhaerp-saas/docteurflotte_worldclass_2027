@@ -15,12 +15,17 @@ import { AssetAssignmentService } from './services/asset-assignment.service';
 import { EngineHoursService } from './services/engine-hours.service';
 import { TransferChecklistService } from './services/transfer-checklist.service';
 import { SiteProfitabilityService } from './services/site-profitability.service';
+import { SiteConsumablesService } from './services/site-consumables.service';
+import { WorkSituationsService } from './services/work-situations.service';
 import {
   CreateSiteWorkspaceDto,
   CreateAssetSiteAssignmentDto,
   RecordEngineHourLogDto,
   CreateAssetTransferChecklistDto,
   RecordSiteSituationDto,
+  CreateSiteConsumableTankDto,
+  RecordSiteConsumableDeliveryDto,
+  CreateSiteWorkSituationDto,
   SiteStatus,
   AssignmentStatus,
 } from '@docteurflotte/contracts';
@@ -34,6 +39,8 @@ export class ChantiersEnginsController {
     private readonly engineHoursService: EngineHoursService,
     private readonly transferChecklistService: TransferChecklistService,
     private readonly profitabilityService: SiteProfitabilityService,
+    private readonly consumablesService: SiteConsumablesService,
+    private readonly situationsService: WorkSituationsService,
   ) {}
 
   // 1. Chantiers / Sites Workspaces
@@ -195,5 +202,80 @@ export class ChantiersEnginsController {
       assetId,
       siteId,
     });
+  }
+
+  // 5. Cuves & Gestion Multi-Fluides de Chantier
+  @Get('consumables/tanks')
+  async listTanks(
+    @Req() req: AuthenticatedRequest,
+    @Query('siteId') siteId?: string,
+  ) {
+    return this.consumablesService.listTanks(req.tenantId, siteId);
+  }
+
+  @Post('consumables/tanks')
+  async createTank(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: CreateSiteConsumableTankDto,
+  ) {
+    return this.consumablesService.createTank(req.tenantId, dto);
+  }
+
+  @Get('consumables/deliveries')
+  async listDeliveries(
+    @Req() req: AuthenticatedRequest,
+    @Query('siteId') siteId?: string,
+  ) {
+    return this.consumablesService.listDeliveries(req.tenantId, siteId);
+  }
+
+  @Post('consumables/deliveries')
+  async recordDelivery(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: RecordSiteConsumableDeliveryDto,
+  ) {
+    return this.consumablesService.recordDelivery(req.tenantId, dto);
+  }
+
+  // 6. Situations de Travaux BTPH (DPM - Décomptes Provisoires Mensuels)
+  @Get('work-situations')
+  async listWorkSituations(
+    @Req() req: AuthenticatedRequest,
+    @Query('siteId') siteId?: string,
+  ) {
+    return this.situationsService.listSituations(req.tenantId, siteId);
+  }
+
+  @Post('work-situations')
+  async createWorkSituation(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: CreateSiteWorkSituationDto,
+  ) {
+    return this.situationsService.createSituation(req.tenantId, dto);
+  }
+
+  @Put('work-situations/:id/approve')
+  async approveWorkSituation(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
+    return this.situationsService.approveSituation(req.tenantId, id);
+  }
+
+  @Put('work-situations/:id/bill')
+  async billWorkSituation(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
+    return this.situationsService.billSituation(req.tenantId, id);
+  }
+
+  @Put('work-situations/:id/settle')
+  async settleWorkSituation(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body('settlementDate') settlementDate?: string,
+  ) {
+    return this.situationsService.settleSituation(req.tenantId, id, settlementDate);
   }
 }
