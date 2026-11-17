@@ -37,6 +37,9 @@ const MOBILE_CATEGORIES: MobileCategory[] = [
     icon: <IconTruck size={16} strokeWidth={1.75} />,
     items: [
       { title: 'Inventaire des Actifs', href: '/assets', badge: 'ACTIF' },
+      { title: 'Chantiers & Engins BTP', href: '/chantiers', badge: 'BTP & ENGINS' },
+      { title: 'Location & Rental Flotte', href: '/rental', badge: 'RENTAL DZD' },
+      { title: 'Logistique & POD (LVE)', href: '/logistics', badge: 'LVE DÉCRET' },
       { title: 'Compteurs & Métrologie', href: '/assets', badge: 'MÉTROLOGIE' },
       { title: 'Jumeau Numérique & RUL', href: '/digital-twin', badge: 'PHYSIQUE IA' },
       { title: 'Conducteurs & Affectations', href: '/drivers', badge: 'RH' },
@@ -50,6 +53,8 @@ const MOBILE_CATEGORIES: MobileCategory[] = [
     icon: <IconWrench size={16} strokeWidth={1.75} />,
     items: [
       { title: 'Cockpit Maintenance 5.0', href: '/preventive', badge: 'MAINTENANCE 5.0' },
+      { title: 'Maintenance 5.0 Cognitive', href: '/maintenance', badge: 'MONOPOLE' },
+      { title: 'Pièces & Magasins Atelier', href: '/parts', badge: 'STOCKS PDR' },
       { title: 'Ask DocteurFlotte (Copilote)', href: '/copilot', badge: 'COPILOT IA' },
       { title: 'DVIR Inspection Numérique', href: '/dvir', badge: 'OFFLINE-FIRST' },
       { title: 'Ordres de Travail (OT)', href: '/work-orders', badge: 'ACTIF' },
@@ -76,7 +81,10 @@ const MOBILE_CATEGORIES: MobileCategory[] = [
     label: 'Gestion & TCO',
     icon: <IconBarChart3 size={16} strokeWidth={1.75} />,
     items: [
+      { title: 'Conformité Fiscale & G50', href: '/fiscal', badge: 'SOUVERAIN DGI' },
       { title: 'TCO & Coût au km / h', href: '/tco', badge: 'ANALYTIQUE' },
+      { title: 'Sinistres, Amendes & Assurances', href: '/claims-fines', badge: 'RISQUES DZ' },
+      { title: 'Location & Rental Flotte', href: '/rental', badge: 'RENTAL DZD' },
       { title: 'Écarts Budgétaires', href: '/decisions', badge: 'ACTIF' },
       { title: 'Coût du Risque d’Inaction', href: '/decisions', badge: 'ARBITRAGE ADS' },
     ],

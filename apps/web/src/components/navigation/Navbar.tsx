@@ -71,7 +71,7 @@ export function Navbar({ onResetDemo }: NavbarProps) {
       style={{
         position: 'sticky',
         top: 0,
-        zIndex: 100,
+        zIndex: 1000,
         background: 'var(--df-bg-glass-elevated)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
@@ -97,7 +97,8 @@ export function Navbar({ onResetDemo }: NavbarProps) {
           flexWrap: 'nowrap',
           width: '100%',
           boxSizing: 'border-box',
-          overflow: 'hidden',
+          overflow: 'visible',
+          position: 'relative',
         }}
       >
         {/* SECTION GAUCHE : HAMBURGER MOBILE, LOGO & IDENTITÉ TENANT */}

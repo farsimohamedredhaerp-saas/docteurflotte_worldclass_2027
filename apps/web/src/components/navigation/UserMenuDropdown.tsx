@@ -181,7 +181,7 @@ export function UserMenuDropdown({ user, tenant, onLogout }: UserMenuDropdownPro
             position: 'absolute',
             top: 'calc(100% + 0.5rem)',
             right: 0,
-            zIndex: 100,
+            zIndex: 1200,
             width: '260px',
             background: 'var(--df-bg-glass-elevated)',
             backdropFilter: 'blur(20px)',

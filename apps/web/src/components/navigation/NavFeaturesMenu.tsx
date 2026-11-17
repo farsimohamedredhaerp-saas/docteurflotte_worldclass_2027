@@ -106,6 +106,12 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         badge: 'MAINTENANCE 5.0',
       },
       {
+        title: 'Pièces & Magasins Atelier',
+        desc: 'Inventaire des stocks PDR, seuils de réapprovisionnement et bons de commande fournisseurs.',
+        href: '/parts',
+        badge: 'STOCKS PDR',
+      },
+      {
         title: 'Ask DocteurFlotte (Copilote IA)',
         desc: 'Diagnostic conversationnel de panne, preuves physiques et arbitrage ADS.',
         href: '/copilot',
@@ -210,6 +216,12 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         desc: 'Décomposition des coûts directs de possession et d\'usage.',
         href: '/tco',
         badge: 'ANALYTIQUE',
+      },
+      {
+        title: 'Sinistres, Amendes & Assurances',
+        desc: 'Constats d\'accidents, suivi des contraventions de police et dossiers d\'indemnisation assurance.',
+        href: '/claims-fines',
+        badge: 'RISQUES DZ',
       },
       {
         title: 'Écarts Budgétaires',
@@ -381,7 +393,7 @@ export function NavFeaturesMenu() {
             >
               <span style={{ display: 'flex', color: 'var(--df-accent-blue)' }}>{cat.iconNode}</span>
               <span className="hidden 2xl:inline">{cat.label}</span>
-              <span className="hidden xl:inline 2xl:hidden">{cat.shortLabel || cat.label}</span>
+              <span className="hidden lg:inline 2xl:hidden">{cat.shortLabel || cat.label}</span>
               <span
                 style={{
                   display: 'flex',
@@ -407,8 +419,8 @@ export function NavFeaturesMenu() {
             top: 'calc(100% + 0.5rem)',
             left: '50%',
             transform: 'translateX(-50%)',
-            zIndex: 1000,
-            width: 'min(640px, calc(100vw - 2rem))',
+            zIndex: 1200,
+            width: 'min(680px, calc(100vw - 1.5rem))',
             background: 'var(--df-bg-surface-1)',
             border: '1px solid var(--df-border-focus)',
             borderRadius: 'var(--df-radius-lg)',

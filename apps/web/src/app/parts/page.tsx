@@ -14,6 +14,7 @@ import {
   fetchPurchaseOrders,
 } from '../../lib/api-parts';
 import { AuthClient } from '../../lib/api-auth';
+import { Navbar } from '../../components/navigation/Navbar';
 
 export default function PartsProcurementPage() {
   const [activeTab, setActiveTab] = useState<'items' | 'stock' | 'warehouses' | 'orders'>('items');
@@ -54,13 +55,15 @@ export default function PartsProcurementPage() {
   return (
     <div
       style={{
-        padding: '2rem',
+        padding: '0 2rem 2rem 2rem',
         backgroundColor: 'var(--df-bg-base)',
         minHeight: '100vh',
         color: 'var(--df-text-primary)',
         fontFamily: 'inherit',
       }}
     >
+      <Navbar />
+
       {/* En-tête du cockpit */}
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

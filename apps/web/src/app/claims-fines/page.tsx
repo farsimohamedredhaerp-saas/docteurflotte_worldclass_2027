@@ -16,6 +16,7 @@ import {
   contestTrafficFine,
 } from '../../lib/api-claims-fines';
 import { AuthClient } from '../../lib/api-auth';
+import { Navbar } from '../../components/navigation/Navbar';
 
 export default function ClaimsFinesPage() {
   const [activeTab, setActiveTab] = useState<'claims' | 'fines' | 'insurance' | 'risk'>('claims');
@@ -80,13 +81,15 @@ export default function ClaimsFinesPage() {
   return (
     <div
       style={{
-        padding: '2rem',
+        padding: '0 2rem 2rem 2rem',
         backgroundColor: 'var(--df-bg-base)',
         minHeight: '100vh',
         color: 'var(--df-text-primary)',
         fontFamily: 'inherit',
       }}
     >
+      <Navbar />
+
       {/* En-tête du cockpit */}
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
