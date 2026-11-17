@@ -8,6 +8,8 @@ import { FiscalEventService } from './services/fiscal-event.service';
 import { DeclarationDraftService } from './services/declaration-draft.service';
 import { FiscalAuditService } from './services/fiscal-audit.service';
 import { OperationalFiscalBridgeService } from './services/operational-fiscal-bridge.service';
+import { EInvoicingReadinessService } from './services/e-invoicing-readiness.service';
+import { PartnerAccountingExportService } from './services/partner-accounting-export.service';
 import { FiscalProfileConfiguredGuard } from './guards/fiscal-profile.guard';
 
 @Module({
@@ -20,6 +22,8 @@ import { FiscalProfileConfiguredGuard } from './guards/fiscal-profile.guard';
     DeclarationDraftService,
     FiscalAuditService,
     OperationalFiscalBridgeService,
+    EInvoicingReadinessService,
+    PartnerAccountingExportService,
     FiscalProfileConfiguredGuard,
   ],
   exports: [
@@ -29,6 +33,8 @@ import { FiscalProfileConfiguredGuard } from './guards/fiscal-profile.guard';
     DeclarationDraftService,
     FiscalAuditService,
     OperationalFiscalBridgeService,
+    EInvoicingReadinessService,
+    PartnerAccountingExportService,
   ],
 })
 export class FiscalComplianceModule {}

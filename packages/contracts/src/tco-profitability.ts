@@ -86,3 +86,27 @@ export const ALGERIA_TCO_BENCHMARKS = {
   TRANSFER_SAVINGS_RATIO: 0.25, // Économie estimée en rétrogradation sur circuit court (25%)
 } as const;
 
+export interface CostTwinSummary {
+  assetId: string;
+  assetCode: string;
+  category: string;
+  telemetryTier: 'MODE_0_DECLARATIVE' | 'MODE_1_GNSS' | 'MODE_2_CAN_J1939';
+  wilayaCode?: string;
+  period: string; // e.g. "2026-11"
+  distanceKm: number;
+  operatingHours: number;
+  fuelCostDzd: number;
+  maintenanceCostDzd: number;
+  fixedOverheadCostDzd: number;
+  totalCostDzd: number;
+  costPerKmDzd: number;
+  costPerHourDzd: number;
+  benchmarkCostPerKmDzd: number;
+  driftPercentage: number;
+  driftSeverity: 'NORMAL' | 'ELEVATED' | 'CRITICAL';
+  savingsOpportunityDzd: number;
+  actionableRecommendations: string[];
+  modeZeroConfidenceScore: number; // 0 à 100% de fiabilité déclarative
+}
+
+

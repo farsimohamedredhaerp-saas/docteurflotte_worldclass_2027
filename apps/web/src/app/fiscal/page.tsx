@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/navigation/Navbar';
+import { useDemoMode } from '@/context/DemoModeContext';
 import {
   IconShieldCheck,
   IconAlertTriangle,
@@ -12,6 +13,7 @@ import {
   IconRefreshCw,
   IconTruck,
   IconSearch,
+  IconDownload,
 } from '@/components/navigation/TechIcons';
 import { AuthClient } from '@/lib/api-auth';
 import { FiscalClient } from '@/lib/api-fiscal';
@@ -24,9 +26,12 @@ import type {
   FiscalDeclarationDraft,
   FiscalAuditSeal,
   Asset,
+  EInvoicingReadinessReport,
+  PartnerAccountingExport,
 } from '@docteurflotte/contracts';
 
 export default function FiscalCompliancePage() {
+  const { isDemoMode } = useDemoMode();
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<TenantFiscalProfile | null>(null);
@@ -35,7 +40,13 @@ export default function FiscalCompliancePage() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [draft, setDraft] = useState<FiscalDeclarationDraft | null>(null);
   const [seals, setSeals] = useState<FiscalAuditSeal[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'profile' | 'seals'>('overview');
+  const [eInvoicingReport, setEInvoicingReport] = useState<EInvoicingReadinessReport | null>(null);
+  const [partnerExport, setPartnerExport] = useState<PartnerAccountingExport | null>(null);
+  const [exportFormat, setExportFormat] = useState<'PC_COMPTA_DGI' | 'ODOO_ALMAWARID_JSON' | 'SAGE_CSV'>('PC_COMPTA_DGI');
+  const [exportYear, setExportYear] = useState<number>(new Date().getFullYear());
+  const [exportMonth, setExportMonth] = useState<number>(new Date().getMonth() + 1);
+  const [isExporting, setIsExporting] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'profile' | 'seals' | 'e-invoicing' | 'export-partner'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isAddingCnrc, setIsAddingCnrc] = useState(false);
@@ -60,13 +71,14 @@ export default function FiscalCompliancePage() {
     setLoading(true);
     setErrorMsg(null);
     try {
-      const [profData, cnrcData, docsData, assetsData, draftData, sealsData] = await Promise.all([
+      const [profData, cnrcData, docsData, assetsData, draftData, sealsData, eInvData] = await Promise.all([
         FiscalClient.getProfile(jwt).catch(() => null),
         FiscalClient.getCnrcActivities(jwt).catch(() => []),
         FiscalClient.listDocuments(jwt).catch(() => []),
         AssetClient.listAssets(jwt).catch(() => []),
         FiscalClient.getDeclarationDraft(currentYear, currentMonth, jwt).catch(() => null),
         FiscalClient.listSeals(jwt).catch(() => []),
+        FiscalClient.getEInvoicingReadiness(jwt).catch(() => null),
       ]);
 
       setProfile(profData);
@@ -75,12 +87,54 @@ export default function FiscalCompliancePage() {
       setAssets(assetsData);
       setDraft(draftData);
       setSeals(sealsData);
+
+      if (eInvData) {
+        setEInvoicingReport(eInvData);
+      } else if (isDemoMode) {
+        const { getSimulationEInvoicingReport } = await import('@/lib/simulation-sandbox');
+        const demoReport = await getSimulationEInvoicingReport();
+        setEInvoicingReport(demoReport);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erreur lors du chargement des données fiscales.';
       setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGeneratePartnerExport = async () => {
+    if (!token) return;
+    setIsExporting(true);
+    try {
+      const res = await FiscalClient.exportPartnerAccounting(
+        exportFormat,
+        exportYear,
+        exportMonth,
+        token,
+      );
+      setPartnerExport(res);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Échec de l\'export comptable';
+      setErrorMsg(msg);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleDownloadExport = () => {
+    if (!partnerExport) return;
+    const ext = partnerExport.format === 'ODOO_ALMAWARID_JSON' ? 'json' : partnerExport.format === 'PC_COMPTA_DGI' ? 'txt' : 'csv';
+    const mime = partnerExport.format === 'ODOO_ALMAWARID_JSON' ? 'application/json' : 'text/plain';
+    const blob = new Blob([partnerExport.rawContent], { type: `${mime};charset=utf-8` });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `DF_EXPORT_${partnerExport.format}_${partnerExport.periodYear}_${partnerExport.periodMonth || 'ALL'}.${ext}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   useEffect(() => {
@@ -328,6 +382,30 @@ export default function FiscalCompliancePage() {
               }`}
           >
             Journal des Scellés SHA-256 ({seals.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('e-invoicing')}
+            className={`px-4 py-3 text-sm font-semibold border-b-2 transition-all shrink-0 flex items-center gap-2 ${activeTab === 'e-invoicing'
+                ? 'border-amber-500 text-amber-500'
+                : 'border-transparent text-[var(--df-text-muted)] hover:text-[var(--df-text-main)]'
+              }`}
+          >
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20">
+              2027
+            </span>
+            Pack Préparation e-Facturation DGI
+          </button>
+          <button
+            onClick={() => setActiveTab('export-partner')}
+            className={`px-4 py-3 text-sm font-semibold border-b-2 transition-all shrink-0 flex items-center gap-2 ${activeTab === 'export-partner'
+                ? 'border-blue-500 text-blue-500'
+                : 'border-transparent text-[var(--df-text-muted)] hover:text-[var(--df-text-main)]'
+              }`}
+          >
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-600 border border-blue-500/20">
+              1-CLIC
+            </span>
+            Export ERP Partenaire (PC Compta / Odoo)
           </button>
         </div>
 
@@ -783,6 +861,308 @@ export default function FiscalCompliancePage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ONGLET PACK PRÉPARATION E-FACTURATION 2027 */}
+        {activeTab === 'e-invoicing' && (
+          <div className="space-y-6">
+            <div className="p-6 rounded-2xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-elevated)] space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                      DGI CTC 2027
+                    </span>
+                    <h2 className="text-lg font-bold text-[var(--df-text-main)]">
+                      Pack Préparation Facturation Électronique 2027
+                    </h2>
+                  </div>
+                  <p className="text-xs text-[var(--df-text-muted)] mt-1">
+                    Audit continu des transactions selon le standard DGI. Détection proactive des rejets fiscaux 18 mois avant l’obligation légale.
+                  </p>
+                </div>
+
+                {eInvoicingReport && (
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <div className="text-xs text-[var(--df-text-muted)] font-medium">Score d'Éligibilité DGI</div>
+                      <div className="text-2xl font-black text-[var(--df-text-main)]">
+                        {eInvoicingReport.readinessScore}%
+                      </div>
+                    </div>
+                    <span
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border ${
+                        eInvoicingReport.status === 'PRET_E_FACTURATION_2027'
+                          ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
+                          : eInvoicingReport.status === 'A_RISQUE'
+                          ? 'bg-amber-500/10 text-amber-600 border-amber-500/30'
+                          : 'bg-red-500/10 text-red-600 border-red-500/30'
+                      }`}
+                    >
+                      {eInvoicingReport.status === 'PRET_E_FACTURATION_2027'
+                        ? '✓ Conforme DGI 2027'
+                        : eInvoicingReport.status === 'A_RISQUE'
+                        ? '⚠ Attention Requise'
+                        : '⛔ Rejet Probable à la Source'}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* GRILLE DE MÉTRIQUES DE L'AUDIT */}
+              {eInvoicingReport && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-[var(--df-border-subtle)]">
+                  <div className="p-4 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)]">
+                    <div className="text-xs text-[var(--df-text-muted)] uppercase tracking-wider font-medium">Pièces Audités</div>
+                    <div className="text-xl font-bold text-[var(--df-text-main)] mt-1">
+                      {eInvoicingReport.compliantDocumentsCount} / {eInvoicingReport.totalDocumentsAudited}
+                    </div>
+                    <div className="text-[11px] text-emerald-600 mt-0.5">
+                      {eInvoicingReport.anomaliesCount === 0 ? '100% de pièces conformes' : `${eInvoicingReport.anomaliesCount} anomalie(s)`}
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)]">
+                    <div className="text-xs text-[var(--df-text-muted)] uppercase tracking-wider font-medium">TVA à Risque de Rejet</div>
+                    <div className="text-xl font-bold text-red-600 mt-1">
+                      {formatCurrency(eInvoicingReport.totalVatAtRiskDzd)}
+                    </div>
+                    <div className="text-[11px] text-[var(--df-text-muted)] mt-0.5">Droit à déduction menacé</div>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)]">
+                    <div className="text-xs text-[var(--df-text-muted)] uppercase tracking-wider font-medium">Espèces &gt; 1M DZD (Règle 5)</div>
+                    <div className="text-xl font-bold text-amber-600 mt-1">
+                      {formatCurrency(eInvoicingReport.totalCashOverCeilingDzd)}
+                    </div>
+                    <div className="text-[11px] text-[var(--df-text-muted)] mt-0.5">Dépassement du seuil légal</div>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)]">
+                    <div className="text-xs text-[var(--df-text-muted)] uppercase tracking-wider font-medium">Fournisseurs NIF Valides</div>
+                    <div className="text-xl font-bold text-[var(--df-text-main)] mt-1">
+                      {eInvoicingReport.suppliersSummary.compliantNifCount} / {eInvoicingReport.suppliersSummary.totalSuppliers}
+                    </div>
+                    <div className="text-[11px] text-[var(--df-text-muted)] mt-0.5">
+                      {eInvoicingReport.suppliersSummary.invalidOrMissingNifCount} NIF à corriger (Art. 64 CPF)
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* CHECKLIST DE CONFORMITÉ DIRECTION / DAF */}
+            {eInvoicingReport && (
+              <div className="p-6 rounded-2xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-elevated)] space-y-4">
+                <h3 className="text-sm font-bold text-[var(--df-text-main)] uppercase tracking-wider">
+                  Checklist Réglementaire & Piste d’Audit Fiable (DG / DAF)
+                </h3>
+                <div className="space-y-3">
+                  {eInvoicingReport.executiveChecklist.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-[var(--df-text-main)]">{item.rule}</span>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[var(--df-border-subtle)] text-[var(--df-text-muted)]">
+                            {item.legalReference}
+                          </span>
+                        </div>
+                        <p className="text-[var(--df-text-muted)]">{item.details}</p>
+                      </div>
+                      <span
+                        className={`px-3 py-1 rounded-full font-bold text-[11px] self-start md:self-center shrink-0 ${
+                          item.status === 'CONFORME'
+                            ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                            : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                        }`}
+                      >
+                        {item.status === 'CONFORME' ? '✓ Conforme' : '⚠ Action Requise'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TABLEAU DES ANOMALIES DÉTECTÉES */}
+            {eInvoicingReport && (
+              <div className="p-6 rounded-2xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-elevated)] space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-[var(--df-text-main)] uppercase tracking-wider">
+                    Anomalies & Actions Correctives Recommandées ({eInvoicingReport.anomalies.length})
+                  </h3>
+                </div>
+
+                {eInvoicingReport.anomalies.length === 0 ? (
+                  <div className="text-center py-8 text-emerald-600 text-sm">
+                    ✓ Aucune anomalie détectée. Vos données de facturation sont prêtes pour le contrôle continu DGI 2027.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b border-[var(--df-border-subtle)] text-[var(--df-text-muted)] uppercase tracking-wider">
+                          <th className="py-2.5 px-3">Sévérité</th>
+                          <th className="py-2.5 px-3">Pièce & Date</th>
+                          <th className="py-2.5 px-3">Tiers & NIF</th>
+                          <th className="py-2.5 px-3">Description de l'Anomalie</th>
+                          <th className="py-2.5 px-3">Recommandation Immédiate</th>
+                          <th className="py-2.5 px-3 text-right">Impact TVA</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[var(--df-border-subtle)]">
+                        {eInvoicingReport.anomalies.map((ano, idx) => (
+                          <tr key={idx} className="hover:bg-[var(--df-bg-surface-hover)]">
+                            <td className="py-2.5 px-3">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                  ano.severity === 'BLOCKING_DGI'
+                                    ? 'bg-red-500/10 text-red-600 border border-red-500/20'
+                                    : ano.severity === 'HIGH_RISK'
+                                    ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                                    : 'bg-blue-500/10 text-blue-600 border border-blue-500/20'
+                                }`}
+                              >
+                                {ano.severity}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <div className="font-semibold text-[var(--df-text-main)]">{ano.documentNumber || 'Non spécifié'}</div>
+                              <div className="text-[10px] text-[var(--df-text-muted)]">{ano.documentDate}</div>
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <div className="font-medium text-[var(--df-text-main)]">{ano.thirdPartyName}</div>
+                              <div className="text-[10px] font-mono text-[var(--df-text-muted)]">NIF: {ano.thirdPartyNif || 'Non renseigné'}</div>
+                            </td>
+                            <td className="py-2.5 px-3 max-w-xs text-[var(--df-text-muted)]">
+                              {ano.description}
+                            </td>
+                            <td className="py-2.5 px-3 max-w-xs text-blue-600 dark:text-blue-400 font-medium">
+                              {ano.recommendation}
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-bold text-red-600">
+                              {ano.impactDzd > 0 ? formatCurrency(ano.impactDzd) : '0 DA'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ONGLET EXPORT ERP PARTENAIRE */}
+        {activeTab === 'export-partner' && (
+          <div className="space-y-6">
+            <div className="p-6 rounded-2xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-elevated)] space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-500/10 text-blue-600 border border-blue-500/20">
+                  ALLIANCE ERP
+                </span>
+                <h2 className="text-lg font-bold text-[var(--df-text-main)]">
+                  Passerelle Universelle d’Export Comptable 1-Clic
+                </h2>
+              </div>
+              <p className="text-xs text-[var(--df-text-muted)]">
+                Exportez les écritures de la flotte directement vers le logiciel comptable de votre fiduciaire ou expert-comptable (PC Compta, Odoo, Almawarid, Sage) avec validation des comptes SCF et scellé d’intégrité SHA-256.
+              </p>
+
+              {/* SÉLECTEUR DE FORMAT ET PÉRIODE */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-4 border-t border-[var(--df-border-subtle)]">
+                <div>
+                  <label className="text-xs font-semibold text-[var(--df-text-muted)] block mb-1.5">
+                    Format Comptable Partenaire
+                  </label>
+                  <select
+                    value={exportFormat}
+                    onChange={(e) => setExportFormat(e.target.value as any)}
+                    className="w-full text-xs p-2.5 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)] text-[var(--df-text-main)] font-semibold"
+                  >
+                    <option value="PC_COMPTA_DGI">PC Compta DGI (Standard .txt/.csv)</option>
+                    <option value="ODOO_ALMAWARID_JSON">Odoo & Almawarid DZ (JSON REST)</option>
+                    <option value="SAGE_CSV">Sage 100 Algérie (.csv)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-[var(--df-text-muted)] block mb-1.5">
+                    Année Fiscale
+                  </label>
+                  <input
+                    type="number"
+                    value={exportYear}
+                    onChange={(e) => setExportYear(parseInt(e.target.value, 10))}
+                    className="w-full text-xs p-2.5 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)] text-[var(--df-text-main)] font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-[var(--df-text-muted)] block mb-1.5">
+                    Mois (Optionnel)
+                  </label>
+                  <select
+                    value={exportMonth}
+                    onChange={(e) => setExportMonth(parseInt(e.target.value, 10))}
+                    className="w-full text-xs p-2.5 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)] text-[var(--df-text-main)] font-semibold"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                      <option key={m} value={m}>
+                        Mois {m.toString().padStart(2, '0')}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={handleGeneratePartnerExport}
+                    disabled={isExporting}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isExporting ? <IconRefreshCw size={14} className="animate-spin" /> : <IconDownload size={14} />}
+                    {isExporting ? 'Génération...' : 'Générer l’Export'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* RÉSULTAT ET TÉLÉCHARGEMENT */}
+            {partnerExport && (
+              <div className="p-6 rounded-2xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-elevated)] space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-bold text-[var(--df-text-main)]">
+                      Export {partnerExport.format} Prêt ({partnerExport.entriesCount} écritures)
+                    </h3>
+                    <div className="text-[11px] font-mono text-[var(--df-text-muted)] mt-0.5">
+                      Empreinte SHA-256 : {partnerExport.checksumSha256}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDownloadExport}
+                    className="py-2 px-4 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all flex items-center gap-2"
+                  >
+                    <IconDownload size={14} />
+                    Télécharger le Fichier
+                  </button>
+                </div>
+
+                <div className="p-3 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)] overflow-x-auto">
+                  <pre className="text-[11px] font-mono text-[var(--df-text-main)] max-h-72 overflow-y-auto whitespace-pre">
+                    {partnerExport.rawContent}
+                  </pre>
+                </div>
               </div>
             )}
           </div>

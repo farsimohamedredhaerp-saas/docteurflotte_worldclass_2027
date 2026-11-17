@@ -8,8 +8,9 @@ import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
 import { VehicleSilhouette } from '../../components/ui/VehicleSilhouette';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { fetchFleetTcoSummary } from '../../lib/api-tco';
+import { fetchFleetTcoSummary, fetchFleetCostTwin } from '../../lib/api-tco';
 import { AuthClient } from '../../lib/api-auth';
+import type { CostTwinSummary } from '@docteurflotte/contracts';
 import {
   IconBarChart3,
   IconFuel,
@@ -49,6 +50,8 @@ export interface AssetTcoRecord {
 export default function TcoPage() {
   const { isDemoMode } = useDemoMode();
   const [tcoRecords, setTcoRecords] = useState<AssetTcoRecord[]>([]);
+  const [costTwins, setCostTwins] = useState<CostTwinSummary[]>([]);
+  const [activeView, setActiveView] = useState<'ANALYTICAL' | 'COST_TWIN'>('ANALYTICAL');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -60,12 +63,17 @@ export default function TcoPage() {
       import('@/lib/simulation-sandbox')
         .then((sandbox) => {
           setTcoRecords(sandbox.MOCK_SANDBOX_TCO);
+          setCostTwins(sandbox.MOCK_SANDBOX_COST_TWINS);
         })
         .finally(() => setIsLoading(false));
     } else {
       const session = AuthClient.getSession();
-      fetchFleetTcoSummary(session.token || undefined)
-        .then((summaries) => {
+      Promise.all([
+        fetchFleetTcoSummary(session.token || undefined).catch(() => []),
+        fetchFleetCostTwin(session.token || undefined).catch(() => []),
+      ])
+        .then(([summaries, twins]) => {
+          setCostTwins(twins);
           const records: AssetTcoRecord[] = summaries.map((s) => {
             const isEngin = s.category === 'ENGIN_BTP' || s.engineHoursRun > 0;
             return {
@@ -91,6 +99,7 @@ export default function TcoPage() {
         })
         .catch(() => {
           setTcoRecords([]);
+          setCostTwins([]);
         })
         .finally(() => setIsLoading(false));
     }
@@ -354,13 +363,59 @@ export default function TcoPage() {
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <Button variant="primary" size="sm" onClick={handleOpenAdd}>
-                  <IconPlus size={14} />
-                  <span>Nouvelle Fiche TCO</span>
-                </Button>
+              <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', background: 'var(--df-bg-surface-2)', padding: '3px', borderRadius: 'var(--df-radius-md)', border: '1px solid var(--df-border-subtle)' }}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveView('ANALYTICAL')}
+                    style={{
+                      padding: '0.40rem 0.75rem',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      borderRadius: 'var(--df-radius-sm)',
+                      background: activeView === 'ANALYTICAL' ? 'var(--df-accent-blue)' : 'transparent',
+                      color: activeView === 'ANALYTICAL' ? '#FFFFFF' : 'var(--df-text-secondary)',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Vue Analytique
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveView('COST_TWIN')}
+                    style={{
+                      padding: '0.40rem 0.75rem',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      borderRadius: 'var(--df-radius-sm)',
+                      background: activeView === 'COST_TWIN' ? 'var(--df-accent-blue)' : 'transparent',
+                      color: activeView === 'COST_TWIN' ? '#FFFFFF' : 'var(--df-text-secondary)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    <span style={{ fontSize: '9px', fontWeight: 800, padding: '1px 4px', borderRadius: '3px', background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>
+                      MODE 0 & 1
+                    </span>
+                    Jumeau de Coût DZD/km
+                  </button>
+                </div>
+                {activeView === 'ANALYTICAL' && (
+                  <Button variant="primary" size="sm" onClick={handleOpenAdd}>
+                    <IconPlus size={14} />
+                    <span>Nouvelle Fiche TCO</span>
+                  </Button>
+                )}
               </div>
             </div>
+
+            {/* VUE SELECTEUR */}
+            {activeView === 'ANALYTICAL' ? (
+              <>
 
             {/* SYNTHÈSE DES COÛTS */}
             <div
@@ -569,6 +624,248 @@ export default function TcoPage() {
                 </table>
               </div>
             </div>
+            </>
+            ) : (
+              /* VUE JUMEAU NUMÉRIQUE DE COÛT (MODE 0 & 1) */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {/* BANNIÈRE STRATÉGIQUE JUMEAU DE COÛT */}
+                <div
+                  style={{
+                    padding: '1.25rem',
+                    borderRadius: 'var(--df-radius-lg)',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                    background: 'rgba(245, 158, 11, 0.06)',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '1rem',
+                  }}
+                >
+                  <IconShieldCheck size={24} className="text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <h3 style={{ fontSize: '0.90rem', fontWeight: 800, margin: '0 0 0.25rem 0', color: 'var(--df-text-main)' }}>
+                      Jumeau Numérique de Coût (Mode 0 Zéro Capteur &amp; Mode 1 GNSS)
+                    </h3>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--df-text-secondary)', margin: 0, lineHeight: 1.45 }}>
+                      Contrairement aux télématiques passives qui exigent des capteurs propriétaires, DocteurFlotte valorise instantanément vos tickets Naftal, relevés odométriques et carnets d&apos;entretien pour calculer un coût au kilomètre et à l&apos;heure 100% déterministe en DZD, étalonné sur les 58 Wilayas d&apos;Algérie.
+                    </p>
+                  </div>
+                </div>
+
+                {/* SYNTHÈSE DES MÉTRIQUES DU JUMEAU */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                    gap: '1rem',
+                  }}
+                >
+                  <Card>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--df-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+                      Coût Moyen Réel Flotte
+                    </span>
+                    <div className="df-mono" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--df-text-main)', margin: '0.25rem 0' }}>
+                      {costTwins.length > 0
+                        ? (costTwins.reduce((acc, t) => acc + t.costPerKmDzd, 0) / costTwins.length).toFixed(1)
+                        : '0.00'} DA / km
+                    </div>
+                    <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)' }}>
+                      Sur {costTwins.reduce((acc, t) => acc + t.distanceKm, 0).toLocaleString('fr-DZ')} km parcourus
+                    </span>
+                  </Card>
+
+                  <Card>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--df-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+                      Indice Fiabilité Mode 0
+                    </span>
+                    <div className="df-mono" style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10B981', margin: '0.25rem 0' }}>
+                      {costTwins.length > 0
+                        ? Math.round(costTwins.reduce((acc, t) => acc + t.modeZeroConfidenceScore, 0) / costTwins.length)
+                        : 100}%
+                    </div>
+                    <span style={{ fontSize: '0.70rem', color: 'var(--df-status-ok)' }}>
+                      Réconciliation Odomètre / Naftal
+                    </span>
+                  </Card>
+
+                  <Card>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--df-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+                      Actifs en Dérive (&gt; +15%)
+                    </span>
+                    <div className="df-mono" style={{ fontSize: '1.5rem', fontWeight: 800, color: costTwins.some((t) => t.driftSeverity !== 'NORMAL') ? '#EF4444' : '#10B981', margin: '0.25rem 0' }}>
+                      {costTwins.filter((t) => t.driftSeverity !== 'NORMAL').length}
+                    </div>
+                    <span style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)' }}>
+                      Sur {costTwins.length} actifs suivis
+                    </span>
+                  </Card>
+
+                  <Card>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--df-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+                      Économie Nette Potentielle
+                    </span>
+                    <div className="df-mono" style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10B981', margin: '0.25rem 0' }}>
+                      +{costTwins.reduce((acc, t) => acc + t.savingsOpportunityDzd, 0).toLocaleString('fr-DZ')} DA
+                    </div>
+                    <span style={{ fontSize: '0.70rem', color: 'var(--df-status-ok)' }}>
+                      Gains par optimisation préventive
+                    </span>
+                  </Card>
+                </div>
+
+                {/* TABLEAU DES JUMEAUX DE COÛT PAR ACTIF */}
+                <div
+                  style={{
+                    background: 'var(--df-bg-surface-1)',
+                    border: '1px solid var(--df-border-subtle)',
+                    borderRadius: 'var(--df-radius-lg)',
+                    overflow: 'hidden',
+                    boxShadow: 'var(--df-shadow-sm)',
+                  }}
+                >
+                  <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--df-border-subtle)' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--df-text-main)' }}>
+                      Jumeaux de Coût Actifs ({costTwins.length})
+                    </div>
+                  </div>
+
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.80rem' }}>
+                      <thead>
+                        <tr style={{ background: 'var(--df-bg-surface-2)', borderBottom: '1px solid var(--df-border-subtle)', color: 'var(--df-text-secondary)', textTransform: 'uppercase', fontSize: '0.68rem' }}>
+                          <th style={{ padding: '0.75rem 1rem' }}>Actif &amp; Wilaya</th>
+                          <th style={{ padding: '0.75rem 1rem' }}>Palier Télématique</th>
+                          <th style={{ padding: '0.75rem 1rem' }}>Fiabilité Mode 0</th>
+                          <th style={{ padding: '0.75rem 1rem' }}>Distance / Heures</th>
+                          <th style={{ padding: '0.75rem 1rem' }}>Carburant Naftal</th>
+                          <th style={{ padding: '0.75rem 1rem' }}>Coût Réel DZD/km</th>
+                          <th style={{ padding: '0.75rem 1rem' }}>Barème Référence</th>
+                          <th style={{ padding: '0.75rem 1rem' }}>Écart / Dérive</th>
+                          <th style={{ padding: '0.75rem 1rem' }}>Recommandations DZD-First</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {costTwins.length === 0 ? (
+                          <tr>
+                            <td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: 'var(--df-text-muted)' }}>
+                              Aucun jumeau de coût disponible pour la période courante.
+                            </td>
+                          </tr>
+                        ) : (
+                          costTwins.map((twin) => (
+                            <tr
+                              key={twin.assetId}
+                              style={{
+                                borderBottom: '1px solid var(--df-border-subtle)',
+                                transition: 'background var(--df-transition-fast)',
+                              }}
+                            >
+                              <td style={{ padding: '0.75rem 1rem' }}>
+                                <div style={{ fontWeight: 700, color: 'var(--df-text-main)' }}>{twin.assetCode}</div>
+                                <div style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)' }}>
+                                  {twin.category} {twin.wilayaCode ? `• Wilaya ${twin.wilayaCode}` : ''}
+                                </div>
+                              </td>
+                              <td style={{ padding: '0.75rem 1rem' }}>
+                                <span
+                                  style={{
+                                    fontSize: '0.70rem',
+                                    fontWeight: 700,
+                                    padding: '2px 7px',
+                                    borderRadius: '4px',
+                                    background:
+                                      twin.telemetryTier === 'MODE_0_DECLARATIVE'
+                                        ? 'rgba(107, 114, 128, 0.15)'
+                                        : twin.telemetryTier === 'MODE_1_GNSS'
+                                        ? 'rgba(59, 130, 246, 0.15)'
+                                        : 'rgba(16, 185, 129, 0.15)',
+                                    color:
+                                      twin.telemetryTier === 'MODE_0_DECLARATIVE'
+                                        ? 'var(--df-text-muted)'
+                                        : twin.telemetryTier === 'MODE_1_GNSS'
+                                        ? '#3B82F6'
+                                        : '#10B981',
+                                  }}
+                                >
+                                  {twin.telemetryTier === 'MODE_0_DECLARATIVE'
+                                    ? 'Mode 0 (0 Boîtier)'
+                                    : twin.telemetryTier === 'MODE_1_GNSS'
+                                    ? 'Mode 1 (GNSS)'
+                                    : 'Mode 2 (CAN/J1939)'}
+                                </span>
+                              </td>
+                              <td style={{ padding: '0.75rem 1rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                  <div style={{ flex: 1, minWidth: '40px', height: '6px', background: 'var(--df-bg-surface-2)', borderRadius: '3px', overflow: 'hidden' }}>
+                                    <div
+                                      style={{
+                                        width: `${twin.modeZeroConfidenceScore}%`,
+                                        height: '100%',
+                                        background: twin.modeZeroConfidenceScore >= 80 ? '#10B981' : '#F59E0B',
+                                      }}
+                                    />
+                                  </div>
+                                  <span className="df-mono" style={{ fontSize: '0.70rem', fontWeight: 700 }}>
+                                    {twin.modeZeroConfidenceScore}%
+                                  </span>
+                                </div>
+                              </td>
+                              <td style={{ padding: '0.75rem 1rem' }}>
+                                <div className="df-mono" style={{ fontWeight: 600 }}>{twin.distanceKm.toLocaleString('fr-DZ')} km</div>
+                                <div style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)' }}>{twin.operatingHours} h</div>
+                              </td>
+                              <td style={{ padding: '0.75rem 1rem' }} className="df-mono">
+                                <div>{twin.fuelCostDzd.toLocaleString('fr-DZ')} DA</div>
+                                <div style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)' }}>
+                                  Maint: {twin.maintenanceCostDzd.toLocaleString('fr-DZ')} DA
+                                </div>
+                              </td>
+                              <td style={{ padding: '0.75rem 1rem' }}>
+                                <div className="df-mono" style={{ fontWeight: 800, color: twin.driftSeverity === 'CRITICAL' ? '#EF4444' : 'var(--df-text-main)' }}>
+                                  {twin.costPerKmDzd.toFixed(2)} DA / km
+                                </div>
+                                <div style={{ fontSize: '0.70rem', color: 'var(--df-text-muted)' }}>
+                                  {twin.costPerHourDzd.toFixed(2)} DA / h
+                                </div>
+                              </td>
+                              <td style={{ padding: '0.75rem 1rem' }} className="df-mono text-muted">
+                                {twin.benchmarkCostPerKmDzd.toFixed(2)} DA / km
+                              </td>
+                              <td style={{ padding: '0.75rem 1rem' }}>
+                                <span
+                                  className="df-mono"
+                                  style={{
+                                    fontSize: '0.74rem',
+                                    fontWeight: 700,
+                                    color:
+                                      twin.driftSeverity === 'CRITICAL'
+                                        ? '#EF4444'
+                                        : twin.driftSeverity === 'ELEVATED'
+                                        ? '#F59E0B'
+                                        : '#10B981',
+                                  }}
+                                >
+                                  {twin.driftPercentage > 0 ? `+${twin.driftPercentage}%` : `${twin.driftPercentage}%`}
+                                </span>
+                              </td>
+                              <td style={{ padding: '0.75rem 1rem', maxWidth: '280px' }}>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--df-text-secondary)', lineHeight: 1.35 }}>
+                                  {twin.actionableRecommendations[0] || 'Actif équilibré'}
+                                </div>
+                                {twin.savingsOpportunityDzd > 0 && (
+                                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#10B981', marginTop: '2px' }}>
+                                    Gain : +{twin.savingsOpportunityDzd.toLocaleString('fr-DZ')} DA/mois
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
           </main>
         </div>
       </div>

@@ -265,3 +265,50 @@ export interface AssetFiscalSummary {
   quinquennialAdjustmentRequired: boolean;
 }
 
+export interface EInvoicingReadinessAnomaly {
+  documentId?: string;
+  documentNumber?: string;
+  documentDate?: string;
+  thirdPartyName?: string;
+  thirdPartyNif?: string;
+  anomalyType: 'INVALID_NIF' | 'MISSING_RC' | 'MISSING_ARTICLE_IMPOSITION' | 'CASH_LIMIT_EXCEEDED' | 'AMBIGUOUS_TAX_POINT';
+  severity: 'BLOCKING_DGI' | 'HIGH_RISK' | 'WARNING';
+  description: string;
+  impactDzd: number;
+  recommendation: string;
+}
+
+export interface EInvoicingReadinessReport {
+  tenantId: string;
+  generatedAt: string;
+  readinessScore: number; // 0 à 100%
+  status: 'PRET_E_FACTURATION_2027' | 'A_RISQUE' | 'NON_CONFORME_CRITIQUE';
+  totalDocumentsAudited: number;
+  compliantDocumentsCount: number;
+  anomaliesCount: number;
+  totalVatAtRiskDzd: number;
+  totalCashOverCeilingDzd: number;
+  suppliersSummary: {
+    totalSuppliers: number;
+    compliantNifCount: number;
+    invalidOrMissingNifCount: number;
+  };
+  anomalies: EInvoicingReadinessAnomaly[];
+  executiveChecklist: {
+    rule: string;
+    status: 'CONFORME' | 'ACTION_REQUISE';
+    legalReference: string;
+    details: string;
+  }[];
+}
+
+export interface PartnerAccountingExport {
+  tenantId: string;
+  format: 'PC_COMPTA_DGI' | 'ODOO_ALMAWARID_JSON' | 'SAGE_CSV';
+  periodYear: number;
+  periodMonth?: number;
+  entriesCount: number;
+  checksumSha256: string;
+  rawContent: string;
+}
+

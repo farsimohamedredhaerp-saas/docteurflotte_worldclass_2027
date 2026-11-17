@@ -4,6 +4,7 @@ import { AuthModule } from '../auth/auth.module';
 import { CostCenterService } from './services/cost-center.service';
 import { TcoAggregationService } from './services/tco-aggregation.service';
 import { RepairVsReplaceSimulatorService } from './services/repair-vs-replace-simulator.service';
+import { CostTwinService } from './services/cost-twin.service';
 import { TcoProfitabilityController } from './tco-profitability.controller';
 
 @Module({
@@ -13,11 +14,13 @@ import { TcoProfitabilityController } from './tco-profitability.controller';
     CostCenterService,
     TcoAggregationService,
     RepairVsReplaceSimulatorService,
+    CostTwinService,
   ],
   exports: [
     CostCenterService,
     TcoAggregationService,
     RepairVsReplaceSimulatorService,
+    CostTwinService,
   ],
 })
 export class TcoProfitabilityModule {}

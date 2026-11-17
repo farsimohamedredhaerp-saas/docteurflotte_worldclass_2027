@@ -17,6 +17,8 @@ import { FiscalDocumentService } from './services/fiscal-document.service';
 import { FiscalEventService } from './services/fiscal-event.service';
 import { DeclarationDraftService } from './services/declaration-draft.service';
 import { FiscalAuditService } from './services/fiscal-audit.service';
+import { EInvoicingReadinessService } from './services/e-invoicing-readiness.service';
+import { PartnerAccountingExportService } from './services/partner-accounting-export.service';
 import { FiscalProfileConfiguredGuard } from './guards/fiscal-profile.guard';
 import {
   UpdateTenantFiscalProfileDto,
@@ -34,6 +36,8 @@ export class FiscalComplianceController {
     private readonly eventService: FiscalEventService,
     private readonly draftService: DeclarationDraftService,
     private readonly auditService: FiscalAuditService,
+    private readonly eInvoicingService: EInvoicingReadinessService,
+    private readonly partnerExportService: PartnerAccountingExportService,
   ) {}
 
   // 1. Profil Fiscal Tenant
@@ -200,6 +204,31 @@ export class FiscalComplianceController {
     @Param('assetId') assetId: string,
   ) {
     return this.auditService.getAssetFiscalSummary(req.tenantId, assetId);
+  }
+
+  // 7. Audit Flash & Préparation e-Facturation 2027 (Modèle DGI CTC)
+  @Get('e-invoicing/readiness')
+  async getEInvoicingReadiness(@Req() req: AuthenticatedRequest) {
+    return this.eInvoicingService.getReadinessReport(req.tenantId);
+  }
+
+  // 8. Passerelle d'Export Comptable Partenaire 1-Clic (PC Compta DGI / Odoo Almawarid / Sage)
+  @Get('partner-export')
+  async exportPartnerAccounting(
+    @Req() req: AuthenticatedRequest,
+    @Query('format') format?: 'PC_COMPTA_DGI' | 'ODOO_ALMAWARID_JSON' | 'SAGE_CSV',
+    @Query('year') year?: string,
+    @Query('month') month?: string,
+  ) {
+    const targetFormat = format || 'PC_COMPTA_DGI';
+    const periodYear = year ? parseInt(year, 10) : new Date().getFullYear();
+    const periodMonth = month ? parseInt(month, 10) : undefined;
+    return this.partnerExportService.exportAccounting(
+      req.tenantId,
+      targetFormat,
+      periodYear,
+      periodMonth,
+    );
   }
 }
 

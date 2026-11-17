@@ -9,6 +9,8 @@ import {
   FiscalAuditSeal,
   AssetFiscalSummary,
   Tableau9Scf,
+  EInvoicingReadinessReport,
+  PartnerAccountingExport,
 } from '@docteurflotte/contracts';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -164,6 +166,35 @@ export class FiscalClient {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || 'Impossible de générer le Tableau 9 SCF');
+    }
+    return res.json();
+  }
+
+  static async getEInvoicingReadiness(token: string): Promise<EInvoicingReadinessReport> {
+    const res = await fetch(`${API_BASE_URL}/fiscal/e-invoicing/readiness`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Impossible de charger l\'audit de préparation e-facturation 2027');
+    }
+    return res.json();
+  }
+
+  static async exportPartnerAccounting(
+    format: 'PC_COMPTA_DGI' | 'ODOO_ALMAWARID_JSON' | 'SAGE_CSV',
+    year: number,
+    month: number | undefined,
+    token: string,
+  ): Promise<PartnerAccountingExport> {
+    let url = `${API_BASE_URL}/fiscal/partner-export?format=${format}&year=${year}`;
+    if (month) url += `&month=${month}`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Échec de la génération de l\'export comptable partenaire');
     }
     return res.json();
   }

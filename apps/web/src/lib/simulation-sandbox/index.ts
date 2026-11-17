@@ -84,3 +84,14 @@ export async function getSimulationTelematics() {
     gatewayHealth: mod.MOCK_SANDBOX_GATEWAY_HEALTH,
   };
 }
+
+export async function getSimulationEInvoicingReport() {
+  const mod = await import('./compliance.mock');
+  return mod.MOCK_SANDBOX_E_INVOICING_REPORT;
+}
+
+export async function getSimulationCostTwins() {
+  const mod = await import('./tco.mock');
+  return mod.MOCK_SANDBOX_COST_TWINS;
+}
+

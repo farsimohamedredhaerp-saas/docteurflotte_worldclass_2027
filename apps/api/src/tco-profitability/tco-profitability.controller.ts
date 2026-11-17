@@ -12,6 +12,7 @@ import { JwtAuthGuard, AuthenticatedRequest } from '../auth/auth.guard';
 import { CostCenterService } from './services/cost-center.service';
 import { TcoAggregationService } from './services/tco-aggregation.service';
 import { RepairVsReplaceSimulatorService } from './services/repair-vs-replace-simulator.service';
+import { CostTwinService } from './services/cost-twin.service';
 
 @Controller('tco')
 @UseGuards(JwtAuthGuard)
@@ -20,6 +21,7 @@ export class TcoProfitabilityController {
     private readonly costCenterService: CostCenterService,
     private readonly tcoAggregationService: TcoAggregationService,
     private readonly simulatorService: RepairVsReplaceSimulatorService,
+    private readonly costTwinService: CostTwinService,
   ) {}
 
   // 1. Centres de Coûts & Budgets
@@ -87,6 +89,24 @@ export class TcoProfitabilityController {
       assetId,
       horizonMonths || 24,
     );
+  }
+
+  // 4. Jumeau Numérique de Coût (DZD/km & DZD/h) Mode 0 & Mode 1
+  @Get('cost-twin')
+  async getFleetCostTwin(
+    @Req() req: AuthenticatedRequest,
+    @Query('period') period?: string,
+  ) {
+    return this.costTwinService.getFleetCostTwin(req.tenantId, period);
+  }
+
+  @Get('cost-twin/asset/:assetId')
+  async getAssetCostTwin(
+    @Req() req: AuthenticatedRequest,
+    @Param('assetId') assetId: string,
+    @Query('period') period?: string,
+  ) {
+    return this.costTwinService.getAssetCostTwin(req.tenantId, assetId, period);
   }
 }
 

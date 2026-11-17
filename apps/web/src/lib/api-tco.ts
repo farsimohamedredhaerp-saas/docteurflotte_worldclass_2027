@@ -2,6 +2,7 @@ import {
   AssetCostCenter,
   AssetDirectCostsSummary,
   RepairVsReplaceSimulation,
+  CostTwinSummary,
 } from '@docteurflotte/contracts';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -84,4 +85,34 @@ export async function simulateRepairVsReplace(
   if (!res.ok) throw new Error('Erreur lors de l’exécution de la simulation Réparer vs Remplacer');
   return res.json();
 }
+
+export async function fetchFleetCostTwin(
+  token?: string,
+  period?: string,
+): Promise<CostTwinSummary[]> {
+  const query = new URLSearchParams();
+  if (period) query.set('period', period);
+
+  const res = await fetch(`${API_BASE}/tco/cost-twin?${query.toString()}`, {
+    headers: { Authorization: `Bearer ${token || ''}` },
+  });
+  if (!res.ok) throw new Error('Erreur lors du calcul du jumeau de coût de la flotte');
+  return res.json();
+}
+
+export async function fetchAssetCostTwin(
+  token: string,
+  assetId: string,
+  period?: string,
+): Promise<CostTwinSummary> {
+  const query = new URLSearchParams();
+  if (period) query.set('period', period);
+
+  const res = await fetch(`${API_BASE}/tco/cost-twin/asset/${assetId}?${query.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`Erreur lors du calcul du jumeau de coût de l'actif ${assetId}`);
+  return res.json();
+}
+
 
