@@ -662,20 +662,36 @@ export const DEFAULT_SUBSTITUTION_WEIGHTS: SubstitutionScoringWeights = {
 
 /**
  * Taux de TVA, Droit de Timbre et Barèmes Fiscaux Officiels Algériens (DGI / Code des Impôts Directs)
- * Conforme au Code des Taxes sur le Chiffre d'Affaires et Code du Timbre (Art. 252) (B6, m3)
+ * Conforme au Code des Taxes sur le Chiffre d'Affaires, Code des Impôts Directs (CIDTA) et Code du Timbre (LF 2024 à 2026)
  */
 export const ALGERIA_FISCAL_RATES = {
   STANDARD_VAT_RATE: 0.19, // TVA standard 19%
+  STANDARD_VAT_PERCENT: 19.0, // TVA standard en pourcentage
   REDUCED_VAT_RATE: 0.09, // TVA réduite 9%
-  CORPORATE_TAX_RATE: 0.19, // IBS taux standard production & services
+  REDUCED_VAT_PERCENT: 9.0, // TVA réduite en pourcentage
+  CORPORATE_TAX_RATE: 0.19, // IBS standard production & services
   CORPORATE_TAX_RATE_GOODS_SERVICES: 0.19, // IBS standard production et services (19%)
   CORPORATE_TAX_RATE_OTHER: 0.23, // IBS autres activités / BTP (23%)
-  PASSENGER_VEHICLE_AMORTIZATION_CEILING_DZD: 3_000_000, // Plafond amortissement VL Art. 141 CIDTA
+  CORPORATE_TAX_RATE_PRODUCTION_PERCENT: 19.0, // IBS production de biens (19% - Art. 150 CIDTA)
+  CORPORATE_TAX_RATE_BTPH_PERCENT: 23.0, // IBS BTPH et tourisme (23% - Art. 150 CIDTA)
+  CORPORATE_TAX_RATE_COMMERCE_SERVICES_PERCENT: 26.0, // IBS commerce, services, transport (26% - Art. 150 CIDTA)
+  IFU_RATE_PRODUCTION_PERCENT: 5.0, // IFU activités de production/vente (5% - Art. 282 bis CIDTA)
+  IFU_RATE_SERVICES_PERCENT: 12.0, // IFU prestations de services (12% - Art. 282 bis CIDTA)
+  IFU_RATE_AUTO_ENTREPRENEUR_PERCENT: 0.5, // IFU statut auto-entrepreneur (0.5% - LF 2024)
+  PASSENGER_VEHICLE_AMORTIZATION_CEILING_DZD: 3_000_000, // Plafond amortissement VL (Art. 141-2 CIDTA)
+  PASSENGER_VEHICLE_AMORTIZATION_DURATION_YEARS: 5, // Durée légale d'amortissement VP (5 ans)
+  PASSENGER_VEHICLE_ANNUAL_AMORTIZATION_CEILING_DZD: 600_000, // Plafond annuel déductible (3 000 000 / 5)
+  CASH_PAYMENT_LEGAL_CEILING_DZD: 1_000_000, // Seuil légal paiement en espèces (Art. 30 TCA & CIDTA LF 2024-2026)
+  WITHHOLDING_TAX_BTP_PERCENT: 5.0, // Retenue à la source travaux BTPH (5%)
+  WITHHOLDING_TAX_FOREIGN_PERCENT: 24.0, // Retenue de 24% prestataires étrangers (IBS non-résidents)
+  WITHHOLDING_TAX_UNREGISTERED_PERCENT: 30.0, // Retenue de 30% fournisseurs non immatriculés
+  GASOIL_REFERENCE_PRICE_LITER_DZD: 29.01, // Prix de référence national Gasoil Naftal (DZD TTC/L)
   CASH_STAMP_DUTY_RATE: 0.01, // Droit de timbre fiscal (1% pour règlements en espèces)
   CASH_STAMP_DUTY_MIN_DZD: 100, // Plancher légal 100 DA
   CASH_STAMP_DUTY_MAX_DZD: 2500, // Plafond légal 2 500 DA (Art. 252 Code du Timbre)
+  ACCOUNTING_PROFIT_RATIO_FALLBACK: 0.25, // Ratio moyen résultat comptable avant impôt (25%)
   asOf: '2026-01-01',
-  legalReference: 'Code des Impôts Directs et Taxes Assimilées & Code du Timbre',
+  legalReference: 'Code des Impôts Directs et Taxes Assimilées & Code des TCA & Code du Timbre',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -683,7 +699,7 @@ export const ALGERIA_FISCAL_RATES = {
 // ---------------------------------------------------------------------------
 export const algerianNifSchema = z
   .string()
-  .regex(/^[0-9]{15}$/, 'Le NIF algérien doit comporter exactement 15 chiffres');
+  .regex(/^([0-9]{15}|[0-9]{20})$/, 'Le NIF algérien doit comporter 15 ou 20 chiffres');
 
 export const algerianRcSchema = z
   .string()
@@ -702,6 +718,21 @@ export const algerianPlateSchema = z
 export const algerianArticleImpositionSchema = z
   .string()
   .regex(/^[0-9]{11}$/, "L'Article d'Imposition (AI) doit comporter exactement 11 chiffres");
+
+export function isValidAlgerianNif(nif?: string | null): boolean {
+  if (!nif) return false;
+  return /^([0-9]{15}|[0-9]{20})$/.test(nif.trim());
+}
+
+export function isValidAlgerianRc(rc?: string | null): boolean {
+  if (!rc) return false;
+  return rc.trim().length >= 4;
+}
+
+export function isValidAlgerianArticleImposition(ai?: string | null): boolean {
+  if (!ai) return false;
+  return ai.trim().length >= 4;
+}
 
 // ---------------------------------------------------------------------------
 // Tarifs Officiels ENACTA (Arrêté interministériel du 6 mai 2004) vs Provisions TCO (A)

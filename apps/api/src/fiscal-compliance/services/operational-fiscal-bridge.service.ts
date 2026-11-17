@@ -17,6 +17,7 @@ import {
   FiscalDocumentType,
   SiteWorkspace,
   SiteStatus,
+  ALGERIA_FISCAL_RATES,
 } from '@docteurflotte/contracts';
 
 function toIsoDate(d: unknown): string {
@@ -140,8 +141,9 @@ export class OperationalFiscalBridgeService {
 
     // 1. Calcul du montant TTC et décomposition HT / TVA (Gasoil TTC barème officiel Naftal)
     let totalTtc = Number(log.fuelCostDzd);
+    const standardVatPercent = ALGERIA_FISCAL_RATES.STANDARD_VAT_PERCENT;
     if (!totalTtc || totalTtc <= 0) {
-      let gasoilPrice = 29.01;
+      let gasoilPrice: number = ALGERIA_FISCAL_RATES.GASOIL_REFERENCE_PRICE_LITER_DZD;
       try {
         const priceRes = await this.db.query<{ price_per_liter_dzd: string | number }>(
           `SELECT price_per_liter_dzd FROM platform_fiscal_fuel_prices WHERE fuel_type = 'GASOIL' ORDER BY effective_date DESC LIMIT 1`,
@@ -155,7 +157,7 @@ export class OperationalFiscalBridgeService {
       totalTtc = Math.round(Number(log.fuelConsumedLiters) * gasoilPrice * 100) / 100;
     }
 
-    const amountHt = Math.round((totalTtc / 1.19) * 100) / 100;
+    const amountHt = Math.round((totalTtc / (1 + (standardVatPercent / 100))) * 100) / 100;
     const vatAmount = Math.round((totalTtc - amountHt) * 100) / 100;
     const docNumber = `BON-CARB-${log.id ? log.id.slice(0, 8).toUpperCase() : Math.random().toString(36).substring(2, 10).toUpperCase()}`;
     const docDate = toIsoDate(log.recordedAt);
@@ -186,7 +188,7 @@ export class OperationalFiscalBridgeService {
       thirdPartyName: 'NAFTAL / DISTRIBUTION CHANTIER',
       thirdPartyNif: '000016001205367',
       amountHtDzd: amountHt,
-      vatRatePct: 19.0,
+      vatRatePct: standardVatPercent,
       vatAmountDzd: vatAmount,
       stampDutyDzd: 0,
       totalTtcDzd: totalTtc,
@@ -276,7 +278,7 @@ export class OperationalFiscalBridgeService {
 
     // 4. Calculs fiscaux (HT, TVA, Retenue de garantie RAS)
     const amountHt = Number(dto.amountHtDzd);
-    const vatRate = dto.vatRatePct !== undefined ? Number(dto.vatRatePct) : 19.0;
+    const vatRate = dto.vatRatePct !== undefined ? Number(dto.vatRatePct) : ALGERIA_FISCAL_RATES.STANDARD_VAT_PERCENT;
     const vatAmount = Math.round(((amountHt * vatRate) / 100) * 100) / 100;
     const withholdingRate = dto.withholdingTaxRatePct ? Number(dto.withholdingTaxRatePct) : 0;
     const withholdingAmount = Math.round(((amountHt * withholdingRate) / 100) * 100) / 100;

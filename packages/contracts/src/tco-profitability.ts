@@ -71,3 +71,18 @@ export interface RepairVsReplaceSimulation {
   justificationDossier: string;
 }
 
+/**
+ * Barèmes économiques de référence TCO Algérie (Benchmarks Marché & Véhicules Neufs)
+ */
+export const ALGERIA_TCO_BENCHMARKS = {
+  DEFAULT_NEW_ASSET_COST_DZD: 18_500_000, // Coût moyen d'acquisition poids lourd neuf (18.5M DZD)
+  CONSTRUCTION_NEW_ASSET_COST_DZD: 24_000_000, // Coût moyen engin de chantier BTP neuf (24M DZD)
+  LIGHT_DUTY_NEW_ASSET_COST_DZD: 6_500_000, // Coût utilitaire léger neuf (6.5M DZD)
+  BASE_MONTHLY_MAINTENANCE_BURN_DZD: 35_000, // Taux d'usure mensuel de maintenance de base (35 000 DZD)
+  BASE_MONTHLY_FUEL_BENCHMARK_DZD: 95_000, // Consommation mensuelle carburant de référence (95 000 DZD)
+  NEW_ASSET_MONTHLY_WARRANTY_MAINTENANCE_DZD: 12_000, // Forfait mensuel entretien neuf sous garantie OEM
+  AMORTIZATION_PERIOD_MONTHS: 60, // Durée d'amortissement standard (60 mois / 5 ans)
+  REPLACEMENT_TCO_THRESHOLD_RATIO: 1.2, // Seuil de décision de remplacement (+20% de TCO)
+  TRANSFER_SAVINGS_RATIO: 0.25, // Économie estimée en rétrogradation sur circuit court (25%)
+} as const;
+

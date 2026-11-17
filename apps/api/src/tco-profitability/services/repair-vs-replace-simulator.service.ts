@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
-import { RepairVsReplaceSimulation } from '@docteurflotte/contracts';
+import { RepairVsReplaceSimulation, ALGERIA_TCO_BENCHMARKS } from '@docteurflotte/contracts';
 
 interface SimulationRow {
   id: string;
@@ -78,25 +78,26 @@ export class RepairVsReplaceSimulatorService {
     const estimatedImmediateRepairCostDzd = Math.max(openDamage, openWos * 45000);
 
     // 4. Projections TCO sur 24 mois pour l'actif existant
-    // Maintenance prévisionnelle : usure mécanique + vieillissement Arrhenius (35 000 DA/mois de base majoré de l'âge)
-    const monthlyMaintenanceBurnRate = 35000 * (1 + (ageYears * 0.15)) * (vhiScore < 60 ? 1.4 : 1.0);
+    // Maintenance prévisionnelle : usure mécanique + vieillissement Arrhenius (barème mensuel de base majoré de l'âge)
+    const monthlyMaintenanceBurnRate =
+      ALGERIA_TCO_BENCHMARKS.BASE_MONTHLY_MAINTENANCE_BURN_DZD * (1 + (ageYears * 0.15)) * (vhiScore < 60 ? 1.4 : 1.0);
     const projectedMaintenanceNext24mDzd = estimatedImmediateRepairCostDzd + (monthlyMaintenanceBurnRate * horizonMonths);
 
-    // Carburant sur 24 mois : surconsommation si moteur dégradé (+12% si VHI < 65)
-    const baseFuelMonthlyDzd = 95000;
+    // Carburant sur 24 mois : surconsommation si moteur dégradé (+15% si VHI < 65)
+    const baseFuelMonthlyDzd = ALGERIA_TCO_BENCHMARKS.BASE_MONTHLY_FUEL_BENCHMARK_DZD;
     const fuelDegradationMultiplier = vhiScore < 65 ? 1.15 : 1.0;
     const projectedFuelConsumptionNext24mDzd = baseFuelMonthlyDzd * fuelDegradationMultiplier * horizonMonths;
 
     const existingAssetTotalProjectedTco24mDzd = projectedMaintenanceNext24mDzd + projectedFuelConsumptionNext24mDzd;
 
     // 5. Coût d'acquisition et TCO d'un actif neuf équivalent
-    let newAssetAcquisitionCostDzd = 18500000; // 18 500 000 DA standard
-    if (asset.category === 'ENGIN_BTP') newAssetAcquisitionCostDzd = 24000000;
-    else if (asset.category === 'UTILITAIRE_LEGER') newAssetAcquisitionCostDzd = 6500000;
+    let newAssetAcquisitionCostDzd: number = ALGERIA_TCO_BENCHMARKS.DEFAULT_NEW_ASSET_COST_DZD;
+    if (asset.category === 'ENGIN_BTP') newAssetAcquisitionCostDzd = ALGERIA_TCO_BENCHMARKS.CONSTRUCTION_NEW_ASSET_COST_DZD;
+    else if (asset.category === 'UTILITAIRE_LEGER') newAssetAcquisitionCostDzd = ALGERIA_TCO_BENCHMARKS.LIGHT_DUTY_NEW_ASSET_COST_DZD;
 
-    // Amortissement 24 mois d'un actif neuf amorti sur 60 mois + maintenance neuve sous garantie (très basse) + carburant optimal
-    const newAssetAmortization24m = (newAssetAcquisitionCostDzd / 60) * horizonMonths;
-    const newAssetMaintenance24m = 12000 * horizonMonths; // Sous garantie OEM
+    // Amortissement 24 mois d'un actif neuf amorti sur 60 mois + maintenance neuve sous garantie + carburant optimal
+    const newAssetAmortization24m = (newAssetAcquisitionCostDzd / ALGERIA_TCO_BENCHMARKS.AMORTIZATION_PERIOD_MONTHS) * horizonMonths;
+    const newAssetMaintenance24m = ALGERIA_TCO_BENCHMARKS.NEW_ASSET_MONTHLY_WARRANTY_MAINTENANCE_DZD * horizonMonths; // Sous garantie OEM
     const newAssetFuel24m = baseFuelMonthlyDzd * horizonMonths;
     const newAssetProjectedTco24mDzd = newAssetAmortization24m + newAssetMaintenance24m + newAssetFuel24m;
 
@@ -106,14 +107,14 @@ export class RepairVsReplaceSimulatorService {
     let roiMonths = 0;
     let justificationDossier = '';
 
-    if (vhiScore < 45 || ageYears >= 9 || existingAssetTotalProjectedTco24mDzd > newAssetProjectedTco24mDzd * 1.2) {
+    if (vhiScore < 45 || ageYears >= 9 || existingAssetTotalProjectedTco24mDzd > newAssetProjectedTco24mDzd * ALGERIA_TCO_BENCHMARKS.REPLACEMENT_TCO_THRESHOLD_RATIO) {
       recommendedDecision = 'REPLACE_BY_NEW';
       netSavingsEstimateDzd = Math.abs(existingAssetTotalProjectedTco24mDzd - newAssetProjectedTco24mDzd);
       roiMonths = Number((newAssetAcquisitionCostDzd / (monthlyMaintenanceBurnRate + (baseFuelMonthlyDzd * 0.15))).toFixed(1));
       justificationDossier = `L'actif présente un VHI critique (${vhiScore}/100) et un âge d'exploitation de ${ageYears} ans. Les coûts de maintenance projetés (${projectedMaintenanceNext24mDzd.toLocaleString('fr-DZ')} DA) et la surconsommation énergétique dépassent le coût d'amortissement d'un matériel neuf sous garantie constructeur.`;
     } else if (vhiScore < 65 || ageYears >= 6) {
       recommendedDecision = 'TRANSFER_TO_LIGHT_DUTY';
-      netSavingsEstimateDzd = projectedMaintenanceNext24mDzd * 0.25;
+      netSavingsEstimateDzd = projectedMaintenanceNext24mDzd * ALGERIA_TCO_BENCHMARKS.TRANSFER_SAVINGS_RATIO;
       roiMonths = 12.0;
       justificationDossier = `L'actif présente une usure intermédiaire (VHI ${vhiScore}/100). Recommandation de rétrogradation hors corridors sahariens sévères vers des tournées locales / tell pour préserver la mécanique.`;
     } else {

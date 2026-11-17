@@ -11,6 +11,7 @@ import {
   FiscalDeclarationStatus,
   FiscalAuditSeal,
   Tableau9Scf,
+  ALGERIA_FISCAL_RATES,
 } from '@docteurflotte/contracts';
 
 export interface FiscalDeclarationDraftDbRow {
@@ -324,12 +325,12 @@ export class DeclarationDraftService {
       );
 
       // Résolution du taux d'IBS applicable (Art. 150 CIDTA)
-      let appliedIbsRatePct = 26; // Commerce / Services / Transport par défaut
+      let appliedIbsRatePct: number = ALGERIA_FISCAL_RATES.CORPORATE_TAX_RATE_COMMERCE_SERVICES_PERCENT; // Commerce / Services / Transport par défaut
       const activities = cnrcRes.rows;
       if (activities.some((a) => a.fiscal_segment === 'PRODUCTION')) {
-        appliedIbsRatePct = 19;
+        appliedIbsRatePct = ALGERIA_FISCAL_RATES.CORPORATE_TAX_RATE_PRODUCTION_PERCENT;
       } else if (activities.some((a) => a.fiscal_segment === 'BTPH_TOURISME')) {
-        appliedIbsRatePct = 23;
+        appliedIbsRatePct = ALGERIA_FISCAL_RATES.CORPORATE_TAX_RATE_BTPH_PERCENT;
       }
 
       // 2. Récupération des événements de réintégration de l'exercice
@@ -363,7 +364,9 @@ export class DeclarationDraftService {
       }
 
       // 3. Calcul de l'amortissement excédentaire sur les véhicules de tourisme (Art. 141-2 CIDTA)
-      // Plafond d'amortissement fiscal : 3 000 000 DZD amorti sur 5 ans (soit 600 000 DZD/an maximum)
+      // Plafond d'amortissement fiscal déductible résolu depuis ALGERIA_FISCAL_RATES
+      const vpFiscalCeilingDzd = ALGERIA_FISCAL_RATES.PASSENGER_VEHICLE_AMORTIZATION_CEILING_DZD;
+      const vpAmortizationDurationYears = ALGERIA_FISCAL_RATES.PASSENGER_VEHICLE_AMORTIZATION_DURATION_YEARS;
       const vpAssetsRes = await client.query(
         `SELECT id, code, category, physics_state FROM assets
          WHERE tenant_id = $1 AND category = 'ROAD_VEHICLE'`,
@@ -377,9 +380,9 @@ export class DeclarationDraftService {
         );
         if (!isCoreTool) {
           const acqCost = Number(asset.physics_state?.acquisition_cost_dzd || 0);
-          if (acqCost > 3000000) {
-            const annualAccountingDepr = acqCost / 5;
-            const annualFiscalCeiling = 3000000 / 5;
+          if (acqCost > vpFiscalCeilingDzd) {
+            const annualAccountingDepr = acqCost / vpAmortizationDurationYears;
+            const annualFiscalCeiling = vpFiscalCeilingDzd / vpAmortizationDurationYears;
             const excessAnnual = annualAccountingDepr - annualFiscalCeiling;
             excessDepreciationVpDzd += excessAnnual;
           }
@@ -395,8 +398,9 @@ export class DeclarationDraftService {
       );
       const totalRevenueYear = Number(draftsRes.rows[0]?.total_rev || 0);
 
-      // Résultat comptable estimé (base simplifiée : 25% de marge comptable avant impôt)
-      const accountingNetProfitDzd = Math.max(0, totalRevenueYear * 0.25);
+      // Résultat comptable estimé (base paramétrée dans ALGERIA_FISCAL_RATES)
+      const accountingProfitRatio = ALGERIA_FISCAL_RATES.ACCOUNTING_PROFIT_RATIO_FALLBACK;
+      const accountingNetProfitDzd = Math.max(0, totalRevenueYear * accountingProfitRatio);
 
       const totalReintegrationsDzd =
         penaltiesAndFinesDzd +

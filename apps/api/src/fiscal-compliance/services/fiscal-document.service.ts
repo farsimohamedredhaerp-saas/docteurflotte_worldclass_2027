@@ -13,6 +13,10 @@ import {
   FiscalDocumentType,
   FiscalVerificationStatus,
   AssetCategory,
+  ALGERIA_FISCAL_RATES,
+  isValidAlgerianNif,
+  isValidAlgerianRc,
+  isValidAlgerianArticleImposition,
 } from '@docteurflotte/contracts';
 
 export interface FiscalDocumentDbRow {
@@ -58,7 +62,7 @@ export interface FiscalDocumentDbRow {
 export class FiscalDocumentService {
   private readonly logger = new Logger(FiscalDocumentService.name);
 
-  constructor(private readonly db: DatabaseService) {}
+  constructor(private readonly db: DatabaseService) { }
 
   /**
    * Crée et qualifie fiscalement une pièce justificative rattachée à un actif racine.
@@ -100,7 +104,7 @@ export class FiscalDocumentService {
 
       // 3. Qualification Fiscale Déterministe basée sur la doctrine DGI & CIDTA
       const amountHt = Number(dto.amountHtDzd);
-      let vatRate = dto.vatRatePct != null ? Number(dto.vatRatePct) : 19.0;
+      let vatRate = dto.vatRatePct != null ? Number(dto.vatRatePct) : ALGERIA_FISCAL_RATES.STANDARD_VAT_PERCENT;
       let vatAmount = dto.vatAmountDzd != null ? Number(dto.vatAmountDzd) : (amountHt * vatRate) / 100;
       let stampDuty = dto.stampDutyDzd != null ? Number(dto.stampDutyDzd) : 0;
       let isDeductible = dto.isVatDeductible !== undefined ? dto.isVatDeductible : true;
@@ -152,12 +156,13 @@ export class FiscalDocumentService {
 
       // Règle 5 : Plafond légal de paiement en espèces (Art. 30 TCA & CIDTA LF 2024-2026)
       const paymentMethod = dto.paymentMethod || 'BANK_TRANSFER';
-      if (paymentMethod === 'CASH' && totalTtc > 1000000) {
+      const cashCeilingDzd = ALGERIA_FISCAL_RATES.CASH_PAYMENT_LEGAL_CEILING_DZD;
+      if (paymentMethod === 'CASH' && totalTtc > cashCeilingDzd) {
         isDeductible = false;
         verificationStatus = FiscalVerificationStatus.SUSPICIOUS;
         rejectionReason =
-          'CASH_THRESHOLD_EXCEEDED: Facture réglée en espèces excédant le seuil légal de 1 000 000 DZD TTC (Art. 30 TCA & CIDTA). Déductibilité TVA et charge réintégrée.';
-        rationale = 'Art. 30 TCA & CIDTA : Plafond espèces dépassé (> 1 000 000 DZD TTC). Exclusion du droit à déduction TVA et charge.';
+          `CASH_THRESHOLD_EXCEEDED: Facture réglée en espèces excédant le seuil légal de ${cashCeilingDzd.toLocaleString('fr-DZ')} DZD TTC (Art. 30 TCA & CIDTA). Déductibilité TVA et charge réintégrée.`;
+        rationale = `Art. 30 TCA & CIDTA : Plafond espèces dépassé (> ${cashCeilingDzd.toLocaleString('fr-DZ')} DZD TTC). Exclusion du droit à déduction TVA et charge.`;
       }
 
       // Règle 6 : Conformité des mentions légales obligatoires du Tiers (Art. 64 CPF)
@@ -173,9 +178,9 @@ export class FiscalDocumentService {
         const rcRaw = (dto.thirdPartyRc || '').trim();
         const aiRaw = (dto.articleImpositionThirdParty || '').trim();
 
-        const isNifValid = /^\d{15}$|^\d{20}$/.test(nifRaw);
-        const isRcValid = rcRaw.length >= 4;
-        const isAiValid = aiRaw.length >= 4;
+        const isNifValid = isValidAlgerianNif(nifRaw);
+        const isRcValid = isValidAlgerianRc(rcRaw);
+        const isAiValid = isValidAlgerianArticleImposition(aiRaw);
 
         if (!isNifValid || !isRcValid || !isAiValid) {
           isDeductible = false;
