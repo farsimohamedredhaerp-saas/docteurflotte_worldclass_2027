@@ -392,10 +392,15 @@ export const DEFAULT_ALGERIA_SCF_ACCOUNTS: Omit<ScfAccount, 'id'>[] = [
   { code: '401000', label: 'Fournisseurs de biens et services', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: false, isActive: true },
   { code: '404000', label: 'Fournisseurs d\'immobilisations', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: false, isActive: true },
   { code: '411000', label: 'Clients (Créances d\'exploitation)', accountClass: 4, accountCategory: 'ACTIF', isTaxAccount: false, isActive: true },
+  { code: '411700', label: 'Clients - Retenues de garantie BTPH (Décret 15-247)', accountClass: 4, accountCategory: 'ACTIF', isTaxAccount: false, isActive: true },
   { code: '445600', label: 'État, TVA déductible (Art. 30 TCA)', accountClass: 4, accountCategory: 'ACTIF', isTaxAccount: true, isActive: true },
+  { code: '445660', label: 'État, TVA déductible autoliquidée (Art. 83 CTCA)', accountClass: 4, accountCategory: 'ACTIF', isTaxAccount: true, isActive: true },
   { code: '445700', label: 'État, TVA collectée (Art. 21 TCA)', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: true, isActive: true },
+  { code: '445760', label: 'État, TVA due autoliquidée sur prestataires étrangers', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: true, isActive: true },
+  { code: '445780', label: 'État, TVA sur encaissements en attente (Art. 14 CTCA)', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: true, isActive: true },
   { code: '445790', label: 'Droit de timbre fiscal à reverser DGI', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: true, isActive: true },
   { code: '447000', label: 'Autres impôts et taxes (TAP / ENACTA)', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: true, isActive: true },
+  { code: '447200', label: 'État, Retenue à la source IBS prestataires étrangers (Art. 156 CIDTA)', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: true, isActive: true },
 
   // Classe 5 : Comptes Financiers
   { code: '512000', label: 'Banques nationales algériennes', accountClass: 5, accountCategory: 'ACTIF', isTaxAccount: false, isActive: true },

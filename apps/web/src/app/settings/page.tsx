@@ -13,18 +13,30 @@ import {
   IconCheck,
   IconAlertTriangle,
   IconShieldCheck,
+  IconLock,
+  IconRefreshCw,
 } from '../../components/navigation/TechIcons';
+import { EngineRulesClient } from '../../lib/api-engine-rules';
+import type { EngineRuleCategory, EngineRuleConfigEntry, EngineRuleCode } from '@docteurflotte/contracts';
+import { useDemoMode } from '@/context/DemoModeContext';
 
-type SettingsTab = 'regional' | 'operational' | 'economic' | 'data';
+type SettingsTab = 'regional' | 'operational' | 'economic' | 'data' | 'engine-rules';
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { isDemoMode } = useDemoMode();
   const [token, setToken] = useState<string | null>(null);
   const [tenantName, setTenantName] = useState('Mon Organisation');
   const [activeTab, setActiveTab] = useState<SettingsTab>('operational');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Moteurs Déterministes (Zéro Hardcode)
+  const [rulesList, setRulesList] = useState<EngineRuleConfigEntry[]>([]);
+  const [rulesCategory, setRulesCategory] = useState<EngineRuleCategory | 'ALL'>('ALL');
+  const [editingRule, setEditingRule] = useState<{ code: EngineRuleCode; key: string; value: string; category: EngineRuleCategory } | null>(null);
+  const [isUpdatingRule, setIsUpdatingRule] = useState(false);
 
   // Valeurs dynamiques éditables (aucune constante en dur)
   const [currency, setCurrency] = useState('DZD');
@@ -99,7 +111,63 @@ export default function SettingsPage() {
         setFeedback({ type: 'error', message: msg });
       })
       .finally(() => setIsLoading(false));
-  }, [router]);
+
+    // Chargement des paramètres déterministes (Zéro Hardcode)
+    EngineRulesClient.listRules(session.token)
+      .then((rules) => setRulesList(rules))
+      .catch(async () => {
+        if (isDemoMode) {
+          const { getSimulationEngineRules } = await import('@/lib/simulation-sandbox');
+          setRulesList(await getSimulationEngineRules());
+        }
+      });
+  }, [router, isDemoMode]);
+
+  const handleSaveRuleParam = async () => {
+    if (!token || !editingRule) return;
+    setIsUpdatingRule(true);
+    try {
+      let parsedValue: unknown = editingRule.value;
+      try {
+        parsedValue = JSON.parse(editingRule.value);
+      } catch {
+        // Keep string if not valid JSON
+      }
+
+      await EngineRulesClient.setTenantParam(
+        {
+          ruleCategory: editingRule.category,
+          ruleCode: editingRule.code,
+          paramKey: editingRule.key,
+          paramValue: parsedValue,
+        },
+        token,
+      );
+
+      setFeedback({ type: 'success', message: `Paramètre [${editingRule.key}] mis à jour avec succès.` });
+      setEditingRule(null);
+      const updated = await EngineRulesClient.listRules(token);
+      setRulesList(updated);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Échec de la mise à jour du paramètre.';
+      setFeedback({ type: 'error', message: msg });
+    } finally {
+      setIsUpdatingRule(false);
+    }
+  };
+
+  const handleResetRuleParam = async (ruleCode: EngineRuleCode, paramKey: string) => {
+    if (!token) return;
+    try {
+      await EngineRulesClient.resetTenantParam(ruleCode, paramKey, token);
+      setFeedback({ type: 'success', message: `Paramètre [${paramKey}] rétabli au standard national Algérie.` });
+      const updated = await EngineRulesClient.listRules(token);
+      setRulesList(updated);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Échec du rétablissement du paramètre.';
+      setFeedback({ type: 'error', message: msg });
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -237,6 +305,7 @@ export default function SettingsPage() {
             { id: 'economic', label: '2. Barèmes Financiers' },
             { id: 'regional', label: '3. Régionalisation & Marque' },
             { id: 'data', label: '4. Données & Démo' },
+            { id: 'engine-rules', label: '5. Moteurs Déterministes & Fiscalité' },
           ].map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -630,6 +699,182 @@ export default function SettingsPage() {
                     </Button>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Onglet 5 : Moteurs Déterministes & Fiscalité (Zéro Hardcode) */}
+            {activeTab === 'engine-rules' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{ padding: '16px 20px', borderRadius: '12px', backgroundColor: 'var(--df-bg-surface-elevated)', border: '1px solid var(--df-border-subtle)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <IconShieldCheck size={18} className="text-emerald-500" />
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--df-text-main)' }}>
+                      Matrice Dynamique des Règles de Contrôle Déterministes (14 Règles)
+                    </h3>
+                  </div>
+                  <p style={{ fontSize: '13px', color: 'var(--df-text-muted)', margin: 0 }}>
+                    Aucune constante n&apos;est codée en dur. Les seuils légaux DGI sont verrouillés par la loi, tandis que les paramètres d&apos;exploitation (ralenti, tolérance d&apos;arrondi, températures) sont ajustables pour votre organisation.
+                  </p>
+                </div>
+
+                {/* Filtres par Catégorie */}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {[
+                    { id: 'ALL', label: 'Tous' },
+                    { id: 'FISCAL', label: '⚖️ Fiscalité & SCF' },
+                    { id: 'TELEMATICS_PHYSICS', label: '🛰️ Télématique & Physique' },
+                    { id: 'REGULATORY', label: '📜 Réglementaire & Sécurité' },
+                    { id: 'PROCUREMENT_WORKSHOP', label: '🔧 Achats & Atelier' },
+                  ].map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setRulesCategory(cat.id as EngineRuleCategory | 'ALL')}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        border: '1px solid var(--df-border-subtle)',
+                        backgroundColor: rulesCategory === cat.id ? 'var(--df-brand-primary)' : 'var(--df-bg-surface)',
+                        color: rulesCategory === cat.id ? '#ffffff' : 'var(--df-text-muted)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Table des Règles Déterministes */}
+                <div style={{ overflowX: 'auto', borderRadius: '10px', border: '1px solid var(--df-border-subtle)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: 'var(--df-bg-surface-elevated)', borderBottom: '1px solid var(--df-border-subtle)', color: 'var(--df-text-muted)' }}>
+                        <th style={{ padding: '10px 14px' }}>Règle</th>
+                        <th style={{ padding: '10px 14px' }}>Paramètre</th>
+                        <th style={{ padding: '10px 14px' }}>Description &amp; Cadre Légal</th>
+                        <th style={{ padding: '10px 14px' }}>Valeur Active</th>
+                        <th style={{ padding: '10px 14px', textAlign: 'center' }}>Statut Légal</th>
+                        <th style={{ padding: '10px 14px', textAlign: 'right' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rulesList
+                        .filter((r) => rulesCategory === 'ALL' || r.ruleCategory === rulesCategory)
+                        .map((rule) => {
+                          const isEditingThis = editingRule?.code === rule.ruleCode && editingRule?.key === rule.paramKey;
+                          return (
+                            <tr key={`${rule.ruleCode}-${rule.paramKey}`} style={{ borderBottom: '1px solid var(--df-border-subtle)' }}>
+                              <td style={{ padding: '12px 14px', fontFamily: 'monospace', fontWeight: 700, color: 'var(--df-brand-primary)', fontSize: '11px' }}>
+                                {rule.ruleCode}
+                              </td>
+                              <td style={{ padding: '12px 14px', fontFamily: 'monospace', fontSize: '12px', color: 'var(--df-text-main)' }}>
+                                {rule.paramKey}
+                              </td>
+                              <td style={{ padding: '12px 14px', color: 'var(--df-text-muted)', fontSize: '12px', maxWidth: '300px' }}>
+                                {rule.description || '—'}
+                              </td>
+                              <td style={{ padding: '12px 14px', fontFamily: 'monospace', fontWeight: 600, color: 'var(--df-text-main)' }}>
+                                {isEditingThis ? (
+                                  <input
+                                    type="text"
+                                    value={editingRule.value}
+                                    onChange={(e) => setEditingRule({ ...editingRule, value: e.target.value })}
+                                    style={{
+                                      padding: '4px 8px',
+                                      borderRadius: '6px',
+                                      backgroundColor: 'var(--df-bg-surface)',
+                                      border: '1px solid var(--df-brand-primary)',
+                                      color: 'var(--df-text-main)',
+                                      fontSize: '12px',
+                                      fontFamily: 'monospace',
+                                      width: '120px',
+                                    }}
+                                  />
+                                ) : (
+                                  <span>{typeof rule.paramValue === 'object' ? JSON.stringify(rule.paramValue) : String(rule.paramValue)}</span>
+                                )}
+                              </td>
+                              <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                                {rule.isLockedByLaw ? (
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                                    <IconLock size={12} /> Ordre Public DGI
+                                  </span>
+                                ) : (
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                                    ✓ Personnalisable
+                                  </span>
+                                )}
+                              </td>
+                              <td style={{ padding: '12px 14px', textAlign: 'right' }}>
+                                {rule.isLockedByLaw ? (
+                                  <span style={{ fontSize: '11px', color: 'var(--df-text-muted)' }}>Non modifiable</span>
+                                ) : isEditingThis ? (
+                                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="primary"
+                                      isLoading={isUpdatingRule}
+                                      onClick={handleSaveRuleParam}
+                                    >
+                                      Enregistrer
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setEditingRule(null)}
+                                    >
+                                      Annuler
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() =>
+                                        setEditingRule({
+                                          code: rule.ruleCode,
+                                          key: rule.paramKey,
+                                          value: typeof rule.paramValue === 'object' ? JSON.stringify(rule.paramValue) : String(rule.paramValue),
+                                          category: rule.ruleCategory,
+                                        })
+                                      }
+                                    >
+                                      Modifier
+                                    </Button>
+                                    {rule.tenantId && (
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={() => handleResetRuleParam(rule.ruleCode, rule.paramKey)}
+                                        title="Rétablir la valeur du pack national Algérie"
+                                      >
+                                        <IconRefreshCw size={12} />
+                                      </Button>
+                                    )}
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      {rulesList.length === 0 && (
+                        <tr>
+                          <td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: 'var(--df-text-muted)' }}>
+                            Chargement des paramètres déterministes...
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>

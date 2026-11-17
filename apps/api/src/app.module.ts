@@ -25,6 +25,7 @@ import { LogisticsPodModule } from './logistics-pod/logistics-pod.module';
 import { ClaimsFinesModule } from './claims-fines/claims-fines.module';
 import { PartsProcurementModule } from './parts-procurement/parts-procurement.module';
 import { TcoProfitabilityModule } from './tco-profitability/tco-profitability.module';
+import { EngineRulesModule } from './engine-rules/engine-rules.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { TcoProfitabilityModule } from './tco-profitability/tco-profitability.mo
       envFilePath: ['.env.local', '.env', '../../.env.local', '../../.env'],
     }),
     HardwareLicenseModule,
+    EngineRulesModule,
     DatabaseModule,
     HealthModule,
     AuthModule,

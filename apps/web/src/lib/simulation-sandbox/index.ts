@@ -105,4 +105,10 @@ export async function getSimulationGeneralLedger() {
   return mod.MOCK_SANDBOX_GENERAL_LEDGER;
 }
 
+export async function getSimulationEngineRules() {
+  const mod = await import('./compliance.mock');
+  return mod.MOCK_SANDBOX_ENGINE_RULES;
+}
+
+
 

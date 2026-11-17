@@ -150,14 +150,36 @@ export class ScfGeneralLedgerService {
 
       if (isSale) {
         // Journal des Ventes (VTE)
-        // 1. Débit Client (411000) pour le total TTC
-        linesToInsert.push({
-          accountCode: '411000',
-          accountLabel: 'Clients (Créances d\'exploitation)',
-          description: `${assetPrefix}Facturation ${doc.document_number} — ${thirdParty}`,
-          debitDzd: totalTtc,
-          creditDzd: 0,
-        });
+        const withholdingAmount = Number(doc.withholding_tax_amount_dzd || 0);
+
+        if (withholdingAmount > 0) {
+          // Règle 10 : Retenue de garantie BTPH (5% Décret 15-247)
+          const clientNetTtc = totalTtc - withholdingAmount;
+          linesToInsert.push({
+            accountCode: '411000',
+            accountLabel: 'Clients (Créances d\'exploitation nettes)',
+            description: `${assetPrefix}Facturation nette ${doc.document_number} — ${thirdParty}`,
+            debitDzd: clientNetTtc,
+            creditDzd: 0,
+          });
+
+          linesToInsert.push({
+            accountCode: '411700',
+            accountLabel: 'Clients - Retenues de garantie BTPH',
+            description: `${assetPrefix}Retenue de garantie 5% sur ${doc.document_number}`,
+            debitDzd: withholdingAmount,
+            creditDzd: 0,
+          });
+        } else {
+          // 1. Débit Client standard (411000) pour le total TTC
+          linesToInsert.push({
+            accountCode: '411000',
+            accountLabel: 'Clients (Créances d\'exploitation)',
+            description: `${assetPrefix}Facturation ${doc.document_number} — ${thirdParty}`,
+            debitDzd: totalTtc,
+            creditDzd: 0,
+          });
+        }
 
         // 2. Crédit Compte de Produit (704000 BTP ou 706000 Services/Fret ou 708000 Location)
         let revenueAccount = '706000';
@@ -178,12 +200,18 @@ export class ScfGeneralLedgerService {
           creditDzd: amountHt,
         });
 
-        // 3. Crédit TVA Collectée (445700)
+        // 3. Crédit TVA Collectée (445700 ou 445780 si TVA en attente d'encaissement - Art. 14 TCA)
         if (vatAmount > 0) {
+          const isPendingEncaissement = doc.vat_tax_point === 'ENCAISSEMENT' && !doc.is_settled;
+          const vatAccount = isPendingEncaissement ? '445780' : '445700';
+          const vatLabel = isPendingEncaissement
+            ? 'État, TVA sur encaissements en attente (Art. 14 TCA)'
+            : 'État, TVA collectée (Art. 21 TCA)';
+
           linesToInsert.push({
-            accountCode: '445700',
-            accountLabel: 'État, TVA collectée (Art. 21 TCA)',
-            description: `${assetPrefix}TVA collectée ${doc.vat_rate_pct}% sur ${doc.document_number}`,
+            accountCode: vatAccount,
+            accountLabel: vatLabel,
+            description: `${assetPrefix}${vatLabel} ${doc.vat_rate_pct}% sur ${doc.document_number}`,
             debitDzd: 0,
             creditDzd: vatAmount,
           });
@@ -239,14 +267,35 @@ export class ScfGeneralLedgerService {
           });
         }
 
-        // 3. Crédit Fournisseur (401000) pour le total TTC
-        linesToInsert.push({
-          accountCode: '401000',
-          accountLabel: 'Fournisseurs de biens et services',
-          description: `${assetPrefix}Fournisseur ${thirdParty} — Pièce ${doc.document_number}`,
-          debitDzd: 0,
-          creditDzd: totalTtc,
-        });
+        // 3. Crédit Fournisseur (401000) et Retenue à la source (447200) si applicable
+        const withholdingAmount = Number(doc.withholding_tax_amount_dzd || 0);
+        if (withholdingAmount > 0) {
+          // Règle 9 : Retenue à la source IBS (30% Art. 156 CIDTA)
+          const supplierNetPayable = totalTtc - withholdingAmount;
+          linesToInsert.push({
+            accountCode: '401000',
+            accountLabel: 'Fournisseurs (Net à payer)',
+            description: `${assetPrefix}Fournisseur net ${thirdParty} — Pièce ${doc.document_number}`,
+            debitDzd: 0,
+            creditDzd: supplierNetPayable,
+          });
+
+          linesToInsert.push({
+            accountCode: '447200',
+            accountLabel: 'État, Retenue à la source IBS étrangers (Art. 156 CIDTA)',
+            description: `${assetPrefix}Retenue à la source IBS sur ${doc.document_number}`,
+            debitDzd: 0,
+            creditDzd: withholdingAmount,
+          });
+        } else {
+          linesToInsert.push({
+            accountCode: '401000',
+            accountLabel: 'Fournisseurs de biens et services',
+            description: `${assetPrefix}Fournisseur ${thirdParty} — Pièce ${doc.document_number}`,
+            debitDzd: 0,
+            creditDzd: totalTtc,
+          });
+        }
       }
 
       // 6. Validation de l'Équilibre Mathématique Débit === Crédit
@@ -539,3 +588,4 @@ export class ScfGeneralLedgerService {
     };
   }
 }
+

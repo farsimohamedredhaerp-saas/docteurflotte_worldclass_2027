@@ -4,8 +4,10 @@ import {
   BadRequestException,
   ConflictException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
+import { EngineRulesConfigService } from '../../engine-rules/engine-rules.service';
 import { createHash } from 'crypto';
 import {
   FiscalDocument,
@@ -62,7 +64,10 @@ export interface FiscalDocumentDbRow {
 export class FiscalDocumentService {
   private readonly logger = new Logger(FiscalDocumentService.name);
 
-  constructor(private readonly db: DatabaseService) { }
+  constructor(
+    private readonly db: DatabaseService,
+    @Optional() private readonly rulesConfig?: EngineRulesConfigService,
+  ) { }
 
   /**
    * Crée et qualifie fiscalement une pièce justificative rattachée à un actif racine.
@@ -155,8 +160,38 @@ export class FiscalDocumentService {
       let rejectionReason: string | null = null;
 
       // Règle 5 : Plafond légal de paiement en espèces (Art. 30 TCA & CIDTA LF 2024-2026)
+      // Récupération dynamique depuis engine_rules_config (Zéro Hardcode)
+      const stampParams = this.rulesConfig
+        ? await this.rulesConfig.getStampDutyParams(tenantId)
+        : {
+            cashTaxDeductionCeilingDzd: ALGERIA_FISCAL_RATES.CASH_PAYMENT_LEGAL_CEILING_DZD,
+            stampDutyBrackets: [
+              { min: 0, max: 300, rate: 0.0 },
+              { min: 301, max: 30000, rate: 0.01 },
+              { min: 30001, max: 100000, rate: 0.015 },
+              { min: 100001, max: null, rate: 0.02 },
+            ],
+            stampDutyMinDzd: 5,
+            stampDutyMaxDzd: 10000,
+            accountStampDuty: '445790',
+          };
+
+      // Calcul automatique du droit de timbre progressif pour les règlements en espèces sans timbre renseigné
       const paymentMethod = dto.paymentMethod || 'BANK_TRANSFER';
-      const cashCeilingDzd = ALGERIA_FISCAL_RATES.CASH_PAYMENT_LEGAL_CEILING_DZD;
+      if (paymentMethod === 'CASH' && dto.stampDutyDzd == null && amountHt > 300) {
+        let computedStamp = 0;
+        for (const b of stampParams.stampDutyBrackets) {
+          if (amountHt >= b.min && (b.max === null || amountHt <= b.max)) {
+            computedStamp = Math.round(amountHt * b.rate);
+            break;
+          }
+        }
+        if (computedStamp < stampParams.stampDutyMinDzd) computedStamp = stampParams.stampDutyMinDzd;
+        if (computedStamp > stampParams.stampDutyMaxDzd) computedStamp = stampParams.stampDutyMaxDzd;
+        stampDuty = computedStamp;
+      }
+
+      const cashCeilingDzd = stampParams.cashTaxDeductionCeilingDzd;
       if (paymentMethod === 'CASH' && totalTtc > cashCeilingDzd) {
         isDeductible = false;
         verificationStatus = FiscalVerificationStatus.SUSPICIOUS;
@@ -193,6 +228,41 @@ export class FiscalDocumentService {
           rejectionReason = `MISSING_LEGAL_MENTIONS_ART_64_CPF: Mentions légales du tiers non conformes (${missingDetails.join(', ')} selon Art. 64 CPF).`;
           rationale = 'Art. 64 CPF : Mentions légales obligatoires du tiers manquantes ou non conformes. Droit à déduction TVA suspendu.';
         }
+
+        // Règle 13 : Forclusion du droit à déduction TVA (Art. 34 CTCA - Règle du 20 Décembre N+1)
+        const vatForfeitureParams = this.rulesConfig
+          ? await this.rulesConfig.getVatForfeitureParams(tenantId)
+          : { vatForfeitureDeadlineMonth: 12, vatForfeitureDeadlineDay: 20, vatForfeitureAdditionalYears: 1 };
+
+        const docDate = new Date(dto.documentDate);
+        if (!isNaN(docDate.getTime())) {
+          const docYear = docDate.getFullYear();
+          const forfeitureYear = docYear + vatForfeitureParams.vatForfeitureAdditionalYears;
+          const forfeitureDeadline = new Date(
+            forfeitureYear,
+            vatForfeitureParams.vatForfeitureDeadlineMonth - 1,
+            vatForfeitureParams.vatForfeitureDeadlineDay,
+            23, 59, 59
+          );
+          if (new Date() > forfeitureDeadline && isDeductible) {
+            isDeductible = false;
+            verificationStatus = FiscalVerificationStatus.SUSPICIOUS;
+            rejectionReason = `VAT_STATUTE_BARRED: Forclusion du droit à déduction TVA (Art. 34 CTCA). Délai légal dépassé (20 décembre N+1 échu).`;
+            rationale = `Art. 34 CTCA : Forclusion de déduction TVA au 20 décembre ${forfeitureYear}. Montant TVA transféré en charge non déductible.`;
+          }
+        }
+      }
+
+      // Règle 10 : Retenue de garantie BTPH sur situation de travaux (Décret 15-247)
+      let withholdingTaxRate = dto.withholdingTaxRatePct != null ? Number(dto.withholdingTaxRatePct) : 0;
+      let withholdingTaxAmount = dto.withholdingTaxAmountDzd != null ? Number(dto.withholdingTaxAmountDzd) : 0;
+
+      if (dto.documentType === FiscalDocumentType.SITUATION_TRAVAUX && withholdingTaxRate === 0) {
+        const guaranteeParams = this.rulesConfig
+          ? await this.rulesConfig.getGuaranteeWithholdingParams(tenantId)
+          : { guaranteeWithholdingRate: 0.05, guaranteeReleaseMonths: 12, accountGuarantee: '411700', accountVatPending: '445780' };
+        withholdingTaxRate = guaranteeParams.guaranteeWithholdingRate * 100;
+        withholdingTaxAmount = (totalTtc * withholdingTaxRate) / 100;
       }
 
       // Règle 7 : Fait générateur de la TVA hybride (Débit vs Encaissement - Art. 13 & 14 Code TCA)
@@ -272,8 +342,8 @@ export class FiscalDocumentService {
           Boolean(dto.isVatExemptF20),
           dto.f20CertificateNumber || null,
           isDeductible,
-          dto.withholdingTaxRatePct || 0,
-          dto.withholdingTaxAmountDzd || 0,
+          withholdingTaxRate,
+          withholdingTaxAmount,
           vatTaxPoint,
           isSettled,
           settlementDate,

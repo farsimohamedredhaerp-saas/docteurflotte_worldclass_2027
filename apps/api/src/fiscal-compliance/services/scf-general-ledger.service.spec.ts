@@ -133,3 +133,4 @@ describe('ScfGeneralLedgerService — Cœur Comptable Grand Livre & Balance Gén
     expect(balance.accounts.length).toBe(6);
   });
 });
+
