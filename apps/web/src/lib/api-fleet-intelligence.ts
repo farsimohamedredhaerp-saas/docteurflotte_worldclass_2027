@@ -25,6 +25,10 @@ import {
   DVIRInspectionType,
   ReeferLiveStatus,
   ReeferTelemetryPayload,
+  ReeferUnit,
+  CreateReeferUnitDto,
+  ReeferHaccpCertificate,
+  GenerateHaccpCertificateDto,
   ReeferCargoType,
   ReeferPowerMode,
   RegulatoryMissionOrderData,
@@ -61,6 +65,10 @@ export type {
   DVIRChecklistItem,
   ReeferLiveStatus,
   ReeferTelemetryPayload,
+  ReeferUnit,
+  CreateReeferUnitDto,
+  ReeferHaccpCertificate,
+  GenerateHaccpCertificateDto,
   RegulatoryMissionOrderData,
 };
 
@@ -496,57 +504,90 @@ export class FleetIntelligenceClient {
       return [];
     }
 
-    const kUnit = 1000;
-    return [
-      {
-        assetId: 'reefer-01',
-        assetCode: 'FRIGO-16-01',
-        assetName: 'Semi Lamberet Carrier Vector 1550 (Lait Soummam)',
-        cargoType: ReeferCargoType.DAIRY,
-        currentTempC: 3.2,
-        setpointTempC: 3.0,
-        tempDeltaC: 0.2,
-        isWithinSafeRange: true,
-        doorOpen: false,
-        powerMode: ReeferPowerMode.DIESEL,
-        lastUpdate: new Date().toISOString(),
-        excursionDurationMinutes: 0,
-        estimatedCargoValueDzd: 3800 * kUnit,
-        financialRiskDzd: 0,
-      },
-      {
-        assetId: 'reefer-02',
-        assetCode: 'FRIGO-31-02',
-        assetName: 'Semi Chereau Thermo King SLXi (Viande Bovine Oran)',
-        cargoType: ReeferCargoType.FRESH_MEAT,
-        currentTempC: 6.8,
-        setpointTempC: 1.5,
-        tempDeltaC: 5.3,
-        isWithinSafeRange: false,
-        doorOpen: true,
-        powerMode: ReeferPowerMode.DIESEL,
-        lastUpdate: new Date().toISOString(),
-        excursionDurationMinutes: 42,
-        estimatedCargoValueDzd: 7200 * kUnit,
-        financialRiskDzd: 580 * kUnit,
-      },
-      {
-        assetId: 'reefer-03',
-        assetCode: 'FRIGO-09-03',
-        assetName: 'Porteur Renault Master Frigo (Vaccins / Insuline Saidal)',
-        cargoType: ReeferCargoType.PHARMA,
-        currentTempC: 4.5,
-        setpointTempC: 4.0,
-        tempDeltaC: 0.5,
-        isWithinSafeRange: true,
-        doorOpen: false,
-        powerMode: ReeferPowerMode.ELECTRIC_STANDBY,
-        lastUpdate: new Date().toISOString(),
-        excursionDurationMinutes: 0,
-        estimatedCargoValueDzd: 12500 * kUnit,
-        financialRiskDzd: 0,
-      },
-    ];
+    const { getSimulationColdChainData } = await import('@/lib/simulation-sandbox');
+    const demoData = await getSimulationColdChainData();
+    return demoData.reefers;
+  }
+
+  static async listReeferUnits(token?: string): Promise<ReeferUnit[]> {
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${API_BASE_URL}/api/v1/cold-chain/units`, {
+        method: 'GET',
+        headers,
+      });
+
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {
+      // Repli gracieux
+    }
+    return [];
+  }
+
+  static async createReeferUnit(dto: CreateReeferUnitDto, token?: string): Promise<ReeferUnit> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE_URL}/api/v1/cold-chain/units`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(dto),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Échec de déclaration de l’unité frigorifique.');
+    }
+    return res.json();
+  }
+
+  static async generateHaccpCertificate(
+    dto: GenerateHaccpCertificateDto,
+    token?: string,
+  ): Promise<ReeferHaccpCertificate> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE_URL}/api/v1/cold-chain/certificates/generate`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(dto),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Échec de génération du certificat HACCP.');
+    }
+    return res.json();
+  }
+
+  static async listHaccpCertificates(
+    token?: string,
+    reeferUnitId?: string,
+  ): Promise<ReeferHaccpCertificate[]> {
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const url = new URL(`${API_BASE_URL}/api/v1/cold-chain/certificates`);
+      if (reeferUnitId) url.searchParams.set('reeferUnitId', reeferUnitId);
+
+      const res = await fetch(url.toString(), {
+        method: 'GET',
+        headers,
+      });
+
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {
+      // Repli gracieux
+    }
+    return [];
   }
 
   static async submitColdChainTelemetry(dto: ReeferTelemetryPayload, token?: string): Promise<ReeferLiveStatus> {
