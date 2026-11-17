@@ -56,6 +56,12 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         badge: 'AGRI SAHARA',
       },
       {
+        title: 'Mines, Carrières & Pneus OTR',
+        desc: 'Dumpers miniers 100T, calcul physique TKPH anti-éclatement et coût DZD/Tonne.',
+        href: '/mining',
+        badge: 'MINES OTR',
+      },
+      {
         title: 'Compteurs & Métrologie',
         desc: 'Suivi kilométrique, heures moteur et cycles sans saut négatif.',
         href: '/assets',

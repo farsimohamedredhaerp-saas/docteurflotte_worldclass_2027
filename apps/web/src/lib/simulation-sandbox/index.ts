@@ -20,6 +20,7 @@ export * from './digital-twin.mock';
 export * from './chantiers.mock';
 export * from './cold-chain.mock';
 export * from './agriculture.mock';
+export * from './mining.mock';
 
 /**
  * Chargeurs asynchrones avec dynamic import pour code-splitting optimal (Tree-Shaking garanti en production).
@@ -142,6 +143,16 @@ export async function getSimulationAgricultureData() {
     harvestLogs: mod.MOCK_SANDBOX_HARVEST_LOGS,
   };
 }
+
+export async function getSimulationMiningData() {
+  const mod = await import('./mining.mock');
+  return {
+    sites: mod.MOCK_SANDBOX_MINING_SITES,
+    tires: mod.MOCK_SANDBOX_OTR_TIRES,
+    cycles: mod.MOCK_SANDBOX_HAULING_CYCLES,
+  };
+}
+
 
 
 
