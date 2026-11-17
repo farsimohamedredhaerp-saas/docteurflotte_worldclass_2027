@@ -19,6 +19,7 @@ import { DeclarationDraftService } from './services/declaration-draft.service';
 import { FiscalAuditService } from './services/fiscal-audit.service';
 import { EInvoicingReadinessService } from './services/e-invoicing-readiness.service';
 import { PartnerAccountingExportService } from './services/partner-accounting-export.service';
+import { ScfGeneralLedgerService } from './services/scf-general-ledger.service';
 import { FiscalProfileConfiguredGuard } from './guards/fiscal-profile.guard';
 import {
   UpdateTenantFiscalProfileDto,
@@ -38,6 +39,7 @@ export class FiscalComplianceController {
     private readonly auditService: FiscalAuditService,
     private readonly eInvoicingService: EInvoicingReadinessService,
     private readonly partnerExportService: PartnerAccountingExportService,
+    private readonly ledgerService: ScfGeneralLedgerService,
   ) {}
 
   // 1. Profil Fiscal Tenant
@@ -229,6 +231,68 @@ export class FiscalComplianceController {
       periodYear,
       periodMonth,
     );
+  }
+
+  // 9. Grand Livre Général SCF & Écritures en Partie Double
+  @Get('ledger')
+  async getGeneralLedger(
+    @Req() req: AuthenticatedRequest,
+    @Query('journal') journalCode?: string,
+    @Query('assetId') assetId?: string,
+    @Query('siteId') siteId?: string,
+    @Query('account') accountCode?: string,
+    @Query('year') year?: string,
+    @Query('month') month?: string,
+  ) {
+    const y = year ? parseInt(year, 10) : undefined;
+    const m = month ? parseInt(month, 10) : undefined;
+    return this.ledgerService.getGeneralLedger(req.tenantId, {
+      journalCode,
+      assetId,
+      siteId,
+      accountCode,
+      year: y,
+      month: m,
+    });
+  }
+
+  // 10. Balance Générale des Comptes SCF (Comptes 1 à 7)
+  @Get('ledger/balance')
+  async getTrialBalance(
+    @Req() req: AuthenticatedRequest,
+    @Query('year') year?: string,
+    @Query('month') month?: string,
+  ) {
+    const y = year ? parseInt(year, 10) : new Date().getFullYear();
+    const m = month ? parseInt(month, 10) : undefined;
+    return this.ledgerService.getTrialBalance(req.tenantId, y, m);
+  }
+
+  // 11. Grand Livre par Actif Racine (P&L Analytique Asset)
+  @Get('ledger/asset/:assetId')
+  async getAssetLedger(
+    @Req() req: AuthenticatedRequest,
+    @Param('assetId') assetId: string,
+    @Query('year') year?: string,
+  ) {
+    const y = year ? parseInt(year, 10) : new Date().getFullYear();
+    return this.ledgerService.getAssetLedger(req.tenantId, assetId, y);
+  }
+
+  // 12. Génération Forcée d'Écriture Grand Livre depuis une Pièce Justificative
+  @Post('ledger/post-document/:documentId')
+  async postDocumentToLedger(
+    @Req() req: AuthenticatedRequest,
+    @Param('documentId') documentId: string,
+  ) {
+    return this.ledgerService.postDocumentToLedger(req.tenantId, documentId);
+  }
+
+  // 13. Amorçage du Plan de Comptes Officiel SCF
+  @Post('ledger/seed-chart-of-accounts')
+  async seedChartOfAccounts() {
+    const count = await this.ledgerService.seedChartOfAccountsIfEmpty();
+    return { success: true, insertedAccountsCount: count };
   }
 }
 

@@ -10,6 +10,7 @@ import { FiscalAuditService } from './services/fiscal-audit.service';
 import { OperationalFiscalBridgeService } from './services/operational-fiscal-bridge.service';
 import { EInvoicingReadinessService } from './services/e-invoicing-readiness.service';
 import { PartnerAccountingExportService } from './services/partner-accounting-export.service';
+import { ScfGeneralLedgerService } from './services/scf-general-ledger.service';
 import { FiscalProfileConfiguredGuard } from './guards/fiscal-profile.guard';
 
 @Module({
@@ -24,6 +25,7 @@ import { FiscalProfileConfiguredGuard } from './guards/fiscal-profile.guard';
     OperationalFiscalBridgeService,
     EInvoicingReadinessService,
     PartnerAccountingExportService,
+    ScfGeneralLedgerService,
     FiscalProfileConfiguredGuard,
   ],
   exports: [
@@ -35,6 +37,7 @@ import { FiscalProfileConfiguredGuard } from './guards/fiscal-profile.guard';
     OperationalFiscalBridgeService,
     EInvoicingReadinessService,
     PartnerAccountingExportService,
+    ScfGeneralLedgerService,
   ],
 })
 export class FiscalComplianceModule {}

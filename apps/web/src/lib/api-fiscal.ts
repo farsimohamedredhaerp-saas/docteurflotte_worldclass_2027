@@ -11,6 +11,9 @@ import {
   Tableau9Scf,
   EInvoicingReadinessReport,
   PartnerAccountingExport,
+  LedgerEntry,
+  ScfTrialBalance,
+  AccountingJournalCode,
 } from '@docteurflotte/contracts';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -195,6 +198,71 @@ export class FiscalClient {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || 'Échec de la génération de l\'export comptable partenaire');
+    }
+    return res.json();
+  }
+
+  static async getGeneralLedger(
+    token: string,
+    params?: { journal?: AccountingJournalCode; assetId?: string; year?: number; month?: number },
+  ): Promise<LedgerEntry[]> {
+    const url = new URL(`${API_BASE_URL}/fiscal/ledger`);
+    if (params?.journal) url.searchParams.set('journal', params.journal);
+    if (params?.assetId) url.searchParams.set('assetId', params.assetId);
+    if (params?.year) url.searchParams.set('year', String(params.year));
+    if (params?.month) url.searchParams.set('month', String(params.month));
+
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Impossible de charger le Grand Livre SCF');
+    return res.json();
+  }
+
+  static async getTrialBalance(
+    year: number,
+    token: string,
+    month?: number,
+  ): Promise<ScfTrialBalance> {
+    const url = new URL(`${API_BASE_URL}/fiscal/ledger/balance`);
+    url.searchParams.set('year', String(year));
+    if (month) url.searchParams.set('month', String(month));
+
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Impossible de charger la Balance Générale SCF');
+    return res.json();
+  }
+
+  static async getAssetLedger(
+    assetId: string,
+    year: number,
+    token: string,
+  ): Promise<{
+    assetId: string;
+    year: number;
+    revenueDzd: number;
+    expenseDzd: number;
+    netOperatingMarginDzd: number;
+    entriesCount: number;
+    entries: LedgerEntry[];
+  }> {
+    const res = await fetch(`${API_BASE_URL}/fiscal/ledger/asset/${assetId}?year=${year}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Impossible de charger le compte d\'exploitation de l\'actif');
+    return res.json();
+  }
+
+  static async postDocumentToLedger(documentId: string, token: string): Promise<LedgerEntry[]> {
+    const res = await fetch(`${API_BASE_URL}/fiscal/ledger/post-document/${documentId}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Échec de la comptabilisation au Grand Livre');
     }
     return res.json();
   }

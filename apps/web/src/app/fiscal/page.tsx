@@ -28,6 +28,9 @@ import type {
   Asset,
   EInvoicingReadinessReport,
   PartnerAccountingExport,
+  LedgerEntry,
+  ScfTrialBalance,
+  AccountingJournalCode,
 } from '@docteurflotte/contracts';
 
 export default function FiscalCompliancePage() {
@@ -46,7 +49,10 @@ export default function FiscalCompliancePage() {
   const [exportYear, setExportYear] = useState<number>(new Date().getFullYear());
   const [exportMonth, setExportMonth] = useState<number>(new Date().getMonth() + 1);
   const [isExporting, setIsExporting] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'profile' | 'seals' | 'e-invoicing' | 'export-partner'>('overview');
+  const [trialBalance, setTrialBalance] = useState<ScfTrialBalance | null>(null);
+  const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([]);
+  const [selectedJournal, setSelectedJournal] = useState<AccountingJournalCode | 'ALL'>('ALL');
+  const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'ledger' | 'profile' | 'seals' | 'e-invoicing' | 'export-partner'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isAddingCnrc, setIsAddingCnrc] = useState(false);
@@ -71,7 +77,7 @@ export default function FiscalCompliancePage() {
     setLoading(true);
     setErrorMsg(null);
     try {
-      const [profData, cnrcData, docsData, assetsData, draftData, sealsData, eInvData] = await Promise.all([
+      const [profData, cnrcData, docsData, assetsData, draftData, sealsData, eInvData, tbData, ledgerData] = await Promise.all([
         FiscalClient.getProfile(jwt).catch(() => null),
         FiscalClient.getCnrcActivities(jwt).catch(() => []),
         FiscalClient.listDocuments(jwt).catch(() => []),
@@ -79,6 +85,8 @@ export default function FiscalCompliancePage() {
         FiscalClient.getDeclarationDraft(currentYear, currentMonth, jwt).catch(() => null),
         FiscalClient.listSeals(jwt).catch(() => []),
         FiscalClient.getEInvoicingReadiness(jwt).catch(() => null),
+        FiscalClient.getTrialBalance(currentYear, jwt, currentMonth).catch(() => null),
+        FiscalClient.getGeneralLedger(jwt, { year: currentYear, month: currentMonth }).catch(() => []),
       ]);
 
       setProfile(profData);
@@ -87,6 +95,20 @@ export default function FiscalCompliancePage() {
       setAssets(assetsData);
       setDraft(draftData);
       setSeals(sealsData);
+
+      if (tbData) {
+        setTrialBalance(tbData);
+      } else if (isDemoMode) {
+        const { getSimulationTrialBalance } = await import('@/lib/simulation-sandbox');
+        setTrialBalance(await getSimulationTrialBalance());
+      }
+
+      if (ledgerData && ledgerData.length > 0) {
+        setLedgerEntries(ledgerData);
+      } else if (isDemoMode) {
+        const { getSimulationGeneralLedger } = await import('@/lib/simulation-sandbox');
+        setLedgerEntries(await getSimulationGeneralLedger());
+      }
 
       if (eInvData) {
         setEInvoicingReport(eInvData);
@@ -366,6 +388,18 @@ export default function FiscalCompliancePage() {
             Pièces Comptables par Actif ({documents.length})
           </button>
           <button
+            onClick={() => setActiveTab('ledger')}
+            className={`px-4 py-3 text-sm font-semibold border-b-2 transition-all shrink-0 flex items-center gap-2 ${activeTab === 'ledger'
+                ? 'border-emerald-500 text-emerald-500'
+                : 'border-transparent text-[var(--df-text-muted)] hover:text-[var(--df-text-main)]'
+              }`}
+          >
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+              SCF
+            </span>
+            Grand Livre & Balance ({ledgerEntries.length})
+          </button>
+          <button
             onClick={() => setActiveTab('profile')}
             className={`px-4 py-3 text-sm font-semibold border-b-2 transition-all shrink-0 ${activeTab === 'profile'
                 ? 'border-[var(--df-brand-primary)] text-[var(--df-brand-primary)]'
@@ -604,6 +638,299 @@ export default function FiscalCompliancePage() {
                 </table>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ONGLET GRAND LIVRE SCF & BALANCE */}
+        {activeTab === 'ledger' && (
+          <div className="space-y-6">
+            {/* EN-TÊTE DU COEUR COMPTABLE */}
+            <div className="p-6 rounded-2xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-elevated)] space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                      SCF ALGÉRIE
+                    </span>
+                    <h2 className="text-lg font-bold text-[var(--df-text-main)]">
+                      Grand Livre &amp; Balance Générale des Comptes (Partie Double Stricte)
+                    </h2>
+                  </div>
+                  <p className="text-xs text-[var(--df-text-muted)] mt-1">
+                    Système Comptable Financier (Loi 07-11) — Chaque événement d’exploitation et facture est transformé en écritures équilibrées (Débit = Crédit) avec chaînage cryptographique SHA-256 infalsifiable.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 ${
+                    trialBalance?.isBalanced
+                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600'
+                      : 'border-red-500/30 bg-red-500/10 text-red-600'
+                  }`}>
+                    {trialBalance?.isBalanced ? (
+                      <>
+                        <IconCheck size={14} />
+                        ÉQUILIBRE VALIDÉ (Écart: 0 DZD)
+                      </>
+                    ) : (
+                      <>
+                        <IconAlertTriangle size={14} />
+                        DÉSÉQUILIBRE (Écart: {formatCurrency(trialBalance?.discrepancyDzd || 0)})
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* STATS DE LA BALANCE */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+                <div className="p-4 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)]">
+                  <span className="text-xs font-medium text-[var(--df-text-muted)] uppercase tracking-wider">
+                    Total Débits Cumulés
+                  </span>
+                  <div className="text-xl font-bold text-[var(--df-text-main)] mt-1">
+                    {formatCurrency(trialBalance?.totalDebitSumDzd || 0)}
+                  </div>
+                  <span className="text-[11px] text-[var(--df-text-muted)]">Comptes d’actif et de charges</span>
+                </div>
+
+                <div className="p-4 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)]">
+                  <span className="text-xs font-medium text-[var(--df-text-muted)] uppercase tracking-wider">
+                    Total Crédits Cumulés
+                  </span>
+                  <div className="text-xl font-bold text-[var(--df-text-main)] mt-1">
+                    {formatCurrency(trialBalance?.totalCreditSumDzd || 0)}
+                  </div>
+                  <span className="text-[11px] text-[var(--df-text-muted)]">Comptes de passif et de produits</span>
+                </div>
+
+                <div className="p-4 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)]">
+                  <span className="text-xs font-medium text-[var(--df-text-muted)] uppercase tracking-wider">
+                    Comptes SCF Mouvementés
+                  </span>
+                  <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mt-1">
+                    {trialBalance?.accounts.length || 0}
+                  </div>
+                  <span className="text-[11px] text-[var(--df-text-muted)]">Classes 2, 4, 5, 6 et 7</span>
+                </div>
+
+                <div className="p-4 rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)]">
+                  <span className="text-xs font-medium text-[var(--df-text-muted)] uppercase tracking-wider">
+                    Écritures Journalisées
+                  </span>
+                  <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+                    {ledgerEntries.length}
+                  </div>
+                  <span className="text-[11px] text-[var(--df-text-muted)]">Chaînées sous SHA-256</span>
+                </div>
+              </div>
+            </div>
+
+            {/* TABLE DE LA BALANCE GÉNÉRALE */}
+            <div className="p-6 rounded-2xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-elevated)] space-y-4">
+              <h3 className="text-sm font-bold text-[var(--df-text-main)] flex items-center gap-2">
+                <IconFileText size={16} className="text-emerald-600" />
+                Balance Générale des Comptes (Exercice {currentYear})
+              </h3>
+
+              <div className="overflow-x-auto rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)]">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-[var(--df-bg-surface-elevated)] border-b border-[var(--df-border-subtle)] text-xs text-[var(--df-text-muted)] uppercase tracking-wider">
+                    <tr>
+                      <th className="py-3 px-4">N° Compte</th>
+                      <th className="py-3 px-4">Intitulé du Compte SCF</th>
+                      <th className="py-3 px-4 text-center">Classe</th>
+                      <th className="py-3 px-4 text-right">Total Débit (DZD)</th>
+                      <th className="py-3 px-4 text-right">Total Crédit (DZD)</th>
+                      <th className="py-3 px-4 text-right">Solde Débiteur</th>
+                      <th className="py-3 px-4 text-right">Solde Créditeur</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--df-border-subtle)]">
+                    {trialBalance && trialBalance.accounts.length > 0 ? (
+                      trialBalance.accounts.map((acc) => (
+                        <tr key={acc.accountCode} className="hover:bg-[var(--df-bg-surface-hover)] transition-colors">
+                          <td className="py-3 px-4 font-mono font-bold text-xs text-blue-600 dark:text-blue-400">
+                            {acc.accountCode}
+                          </td>
+                          <td className="py-3 px-4 font-medium text-xs text-[var(--df-text-main)]">
+                            {acc.accountLabel}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[var(--df-bg-surface-elevated)] border border-[var(--df-border-subtle)]">
+                              Cl. {acc.accountClass}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono text-xs">
+                            {acc.totalDebitDzd > 0 ? formatCurrency(acc.totalDebitDzd) : '—'}
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono text-xs">
+                            {acc.totalCreditDzd > 0 ? formatCurrency(acc.totalCreditDzd) : '—'}
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                            {acc.debitBalanceDzd > 0 ? formatCurrency(acc.debitBalanceDzd) : '—'}
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono text-xs font-semibold text-amber-600 dark:text-amber-400">
+                            {acc.creditBalanceDzd > 0 ? formatCurrency(acc.creditBalanceDzd) : '—'}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={7} className="py-8 text-center text-xs text-[var(--df-text-muted)]">
+                          Aucun compte mouvementé sur cet exercice.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                  {trialBalance && trialBalance.accounts.length > 0 && (
+                    <tfoot className="bg-[var(--df-bg-surface-elevated)] border-t-2 border-[var(--df-border-subtle)] font-bold text-xs">
+                      <tr>
+                        <td colSpan={3} className="py-3 px-4 text-[var(--df-text-main)] uppercase tracking-wider">
+                          Totaux &amp; Équilibre Balance
+                        </td>
+                        <td className="py-3 px-4 text-right font-mono text-[var(--df-text-main)]">
+                          {formatCurrency(trialBalance.totalDebitSumDzd)}
+                        </td>
+                        <td className="py-3 px-4 text-right font-mono text-[var(--df-text-main)]">
+                          {formatCurrency(trialBalance.totalCreditSumDzd)}
+                        </td>
+                        <td colSpan={2} className="py-3 px-4 text-center text-emerald-600">
+                          {trialBalance.isBalanced ? '✓ Partie double équilibrée' : '⚠️ Écart détecté'}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  )}
+                </table>
+              </div>
+            </div>
+
+            {/* JOURNAL DES ÉCRITURES */}
+            <div className="p-6 rounded-2xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-elevated)] space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h3 className="text-sm font-bold text-[var(--df-text-main)] flex items-center gap-2">
+                  <IconFileText size={16} className="text-blue-600" />
+                  Journal des Écritures du Grand Livre
+                </h3>
+
+                {/* FILTRES PAR JOURNAL */}
+                <div className="flex items-center gap-1 bg-[var(--df-bg-surface)] p-1 rounded-xl border border-[var(--df-border-subtle)] overflow-x-auto">
+                  {(['ALL', 'ACH', 'VTE', 'BQ', 'CA', 'OD'] as (AccountingJournalCode | 'ALL')[]).map((jnl) => (
+                    <button
+                      key={jnl}
+                      type="button"
+                      onClick={() => setSelectedJournal(jnl)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                        selectedJournal === jnl
+                          ? 'bg-[var(--df-brand-primary)] text-white shadow-sm'
+                          : 'text-[var(--df-text-muted)] hover:text-[var(--df-text-main)]'
+                      }`}
+                    >
+                      {jnl === 'ALL' ? 'Tous' : jnl}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* TABLE DES ÉCRITURES */}
+              <div className="overflow-x-auto rounded-xl border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface)]">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-[var(--df-bg-surface-elevated)] border-b border-[var(--df-border-subtle)] text-xs text-[var(--df-text-muted)] uppercase tracking-wider">
+                    <tr>
+                      <th className="py-3 px-4">N° Écriture</th>
+                      <th className="py-3 px-4">Date</th>
+                      <th className="py-3 px-4 text-center">Jnl</th>
+                      <th className="py-3 px-4">Compte SCF</th>
+                      <th className="py-3 px-4">Libellé &amp; Tiers</th>
+                      <th className="py-3 px-4">Actif Rattaché</th>
+                      <th className="py-3 px-4 text-right">Débit (DZD)</th>
+                      <th className="py-3 px-4 text-right">Crédit (DZD)</th>
+                      <th className="py-3 px-4 text-center">Scellé SHA-256</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--df-border-subtle)]">
+                    {ledgerEntries
+                      .filter((entry) => selectedJournal === 'ALL' || entry.journalCode === selectedJournal)
+                      .filter((entry) => {
+                        if (!searchQuery) return true;
+                        const q = searchQuery.toLowerCase();
+                        return (
+                          entry.entryNumber.toLowerCase().includes(q) ||
+                          entry.description.toLowerCase().includes(q) ||
+                          entry.accountCode.includes(q) ||
+                          (entry.thirdPartyName && entry.thirdPartyName.toLowerCase().includes(q))
+                        );
+                      })
+                      .map((entry) => (
+                        <tr key={entry.id} className="hover:bg-[var(--df-bg-surface-hover)] transition-colors">
+                          <td className="py-3 px-4 font-mono font-bold text-xs text-blue-600 dark:text-blue-400">
+                            {entry.entryNumber}
+                          </td>
+                          <td className="py-3 px-4 text-xs font-mono text-[var(--df-text-muted)]">
+                            {entry.entryDate}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-600 border border-blue-500/20">
+                              {entry.journalCode}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="font-mono text-xs font-bold text-[var(--df-text-main)]">
+                              {entry.accountCode}
+                            </div>
+                            <div className="text-[11px] text-[var(--df-text-muted)] truncate max-w-xs">
+                              {entry.accountLabel}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="text-xs font-medium text-[var(--df-text-main)]">{entry.description}</div>
+                            {entry.thirdPartyName && (
+                              <div className="text-[11px] text-[var(--df-text-muted)] flex items-center gap-1">
+                                <span>{entry.thirdPartyName}</span>
+                                {entry.thirdPartyNif && (
+                                  <span className="font-mono text-[10px] bg-[var(--df-bg-surface-elevated)] px-1 rounded">
+                                    NIF: {entry.thirdPartyNif}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-xs">
+                            {entry.assetId ? (
+                              <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-[var(--df-bg-surface-elevated)] border border-[var(--df-border-subtle)]">
+                                {assets.find((a) => a.id === entry.assetId)?.code || entry.assetId}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-[var(--df-text-muted)]">—</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                            {entry.debitDzd > 0 ? formatCurrency(entry.debitDzd) : '—'}
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono text-xs font-semibold text-amber-600 dark:text-amber-400">
+                            {entry.creditDzd > 0 ? formatCurrency(entry.creditDzd) : '—'}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <div
+                              className="font-mono text-[10px] text-[var(--df-text-muted)] bg-[var(--df-bg-surface-elevated)] px-1.5 py-0.5 rounded border border-[var(--df-border-subtle)] inline-block cursor-help"
+                              title={`Empreinte SHA-256 : ${entry.sha256Hash}\nPrécédent : ${entry.previousEntryHash || 'Racine'}`}
+                            >
+                              {entry.sha256Hash.substring(0, 8)}...
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    {ledgerEntries.length === 0 && (
+                      <tr>
+                        <td colSpan={9} className="py-8 text-center text-xs text-[var(--df-text-muted)]">
+                          Aucune écriture comptable enregistrée.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
 

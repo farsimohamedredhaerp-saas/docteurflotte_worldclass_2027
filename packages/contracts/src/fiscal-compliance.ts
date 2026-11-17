@@ -312,3 +312,112 @@ export interface PartnerAccountingExport {
   rawContent: string;
 }
 
+export interface ScfAccount {
+  id?: string;
+  code: string;
+  label: string;
+  accountClass: number; // 1 à 7
+  accountCategory: 'ACTIF' | 'PASSIF' | 'CHARGE' | 'PRODUIT' | 'CAPITAUX';
+  isTaxAccount: boolean;
+  isActive: boolean;
+}
+
+export type AccountingJournalCode = 'ACH' | 'VTE' | 'BQ' | 'CA' | 'OD';
+
+export interface AccountingJournal {
+  id?: string;
+  code: AccountingJournalCode | string;
+  name: string;
+  journalType: 'ACHATS' | 'VENTES' | 'BANQUE' | 'CAISSE' | 'OPERATIONS_DIVERSES';
+  defaultAccount?: string;
+  isSystem: boolean;
+}
+
+export interface LedgerEntry {
+  id: string;
+  tenantId: string;
+  entryNumber: string;
+  journalCode: string;
+  entryDate: string;
+  fiscalDocumentId?: string | null;
+  assetId?: string | null;
+  assetCode?: string | null;
+  siteId?: string | null;
+  siteCode?: string | null;
+  cnrcActivityId?: string | null;
+  cnrcActivityCode?: string | null;
+  accountCode: string;
+  accountLabel: string;
+  description: string;
+  debitDzd: number;
+  creditDzd: number;
+  thirdPartyName?: string | null;
+  thirdPartyNif?: string | null;
+  isValidated: boolean;
+  sha256Hash: string;
+  previousEntryHash?: string | null;
+  createdAt: string;
+}
+
+export interface ScfTrialBalanceAccount {
+  accountCode: string;
+  accountLabel: string;
+  accountClass: number;
+  totalDebitDzd: number;
+  totalCreditDzd: number;
+  debitBalanceDzd: number;
+  creditBalanceDzd: number;
+}
+
+export interface ScfTrialBalance {
+  tenantId: string;
+  periodYear: number;
+  periodMonth?: number;
+  generatedAt: string;
+  accounts: ScfTrialBalanceAccount[];
+  totalDebitSumDzd: number;
+  totalCreditSumDzd: number;
+  isBalanced: boolean; // Total Débit === Total Crédit (Partie double stricte)
+  discrepancyDzd: number;
+}
+
+export const DEFAULT_ALGERIA_SCF_ACCOUNTS: Omit<ScfAccount, 'id'>[] = [
+  // Classe 2 : Immobilisations
+  { code: '215000', label: 'Installations techniques, matériel et outillage BTP', accountClass: 2, accountCategory: 'ACTIF', isTaxAccount: false, isActive: true },
+  { code: '218200', label: 'Matériel de transport (Flotte)', accountClass: 2, accountCategory: 'ACTIF', isTaxAccount: false, isActive: true },
+  { code: '281500', label: 'Amortissement matériel de chantier BTP', accountClass: 2, accountCategory: 'ACTIF', isTaxAccount: false, isActive: true },
+  { code: '281820', label: 'Amortissement matériel de transport', accountClass: 2, accountCategory: 'ACTIF', isTaxAccount: false, isActive: true },
+
+  // Classe 4 : Comptes de Tiers
+  { code: '401000', label: 'Fournisseurs de biens et services', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: false, isActive: true },
+  { code: '404000', label: 'Fournisseurs d\'immobilisations', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: false, isActive: true },
+  { code: '411000', label: 'Clients (Créances d\'exploitation)', accountClass: 4, accountCategory: 'ACTIF', isTaxAccount: false, isActive: true },
+  { code: '445600', label: 'État, TVA déductible (Art. 30 TCA)', accountClass: 4, accountCategory: 'ACTIF', isTaxAccount: true, isActive: true },
+  { code: '445700', label: 'État, TVA collectée (Art. 21 TCA)', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: true, isActive: true },
+  { code: '445790', label: 'Droit de timbre fiscal à reverser DGI', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: true, isActive: true },
+  { code: '447000', label: 'Autres impôts et taxes (TAP / ENACTA)', accountClass: 4, accountCategory: 'PASSIF', isTaxAccount: true, isActive: true },
+
+  // Classe 5 : Comptes Financiers
+  { code: '512000', label: 'Banques nationales algériennes', accountClass: 5, accountCategory: 'ACTIF', isTaxAccount: false, isActive: true },
+  { code: '530000', label: 'Caisse centrale (Espèces)', accountClass: 5, accountCategory: 'ACTIF', isTaxAccount: false, isActive: true },
+
+  // Classe 6 : Comptes de Charges
+  { code: '605000', label: 'Achats de matériel, équipements et fournitures BTP', accountClass: 6, accountCategory: 'CHARGE', isTaxAccount: false, isActive: true },
+  { code: '606100', label: 'Carburant Naftal (Gasoil, Essence, Sirghaz)', accountClass: 6, accountCategory: 'CHARGE', isTaxAccount: false, isActive: true },
+  { code: '606200', label: 'Lubrifiants et consommables mécaniques', accountClass: 6, accountCategory: 'CHARGE', isTaxAccount: false, isActive: true },
+  { code: '613000', label: 'Locations d\'engins et véhicules de transport', accountClass: 6, accountCategory: 'CHARGE', isTaxAccount: false, isActive: true },
+  { code: '615000', label: 'Entretien et réparations d\'atelier', accountClass: 6, accountCategory: 'CHARGE', isTaxAccount: false, isActive: true },
+  { code: '616000', label: 'Primes d\'assurances flotte (SAA, CAAT, CASH)', accountClass: 6, accountCategory: 'CHARGE', isTaxAccount: false, isActive: true },
+  { code: '624000', label: 'Transports de biens et fret inter-wilayas', accountClass: 6, accountCategory: 'CHARGE', isTaxAccount: false, isActive: true },
+  { code: '625000', label: 'Frais de route, déplacements et missions chauffeurs', accountClass: 6, accountCategory: 'CHARGE', isTaxAccount: false, isActive: true },
+  { code: '635000', label: 'Taxes et vignettes automobiles DGI', accountClass: 6, accountCategory: 'CHARGE', isTaxAccount: false, isActive: true },
+  { code: '658000', label: 'Charges diverses, amendes et pénalités (Art. 169 CIDTA)', accountClass: 6, accountCategory: 'CHARGE', isTaxAccount: false, isActive: true },
+  { code: '681000', label: 'Dotations aux amortissements des actifs roulants', accountClass: 6, accountCategory: 'CHARGE', isTaxAccount: false, isActive: true },
+
+  // Classe 7 : Comptes de Produits
+  { code: '704000', label: 'Travaux BTPH et situations de chantier', accountClass: 7, accountCategory: 'PRODUIT', isTaxAccount: false, isActive: true },
+  { code: '706000', label: 'Prestations de transport de fret et logistique', accountClass: 7, accountCategory: 'PRODUIT', isTaxAccount: false, isActive: true },
+  { code: '708000', label: 'Locations d\'engins et mises à disposition de matériel', accountClass: 7, accountCategory: 'PRODUIT', isTaxAccount: false, isActive: true },
+];
+
+

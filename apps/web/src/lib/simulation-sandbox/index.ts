@@ -95,3 +95,14 @@ export async function getSimulationCostTwins() {
   return mod.MOCK_SANDBOX_COST_TWINS;
 }
 
+export async function getSimulationTrialBalance() {
+  const mod = await import('./compliance.mock');
+  return mod.MOCK_SANDBOX_TRIAL_BALANCE;
+}
+
+export async function getSimulationGeneralLedger() {
+  const mod = await import('./compliance.mock');
+  return mod.MOCK_SANDBOX_GENERAL_LEDGER;
+}
+
+
