@@ -19,6 +19,7 @@ export * from './telematics.mock';
 export * from './digital-twin.mock';
 export * from './chantiers.mock';
 export * from './cold-chain.mock';
+export * from './agriculture.mock';
 
 /**
  * Chargeurs asynchrones avec dynamic import pour code-splitting optimal (Tree-Shaking garanti en production).
@@ -131,6 +132,17 @@ export async function getSimulationColdChainData() {
     certificates: mod.MOCK_SANDBOX_HACCP_CERTIFICATES,
   };
 }
+
+export async function getSimulationAgricultureData() {
+  const mod = await import('./agriculture.mock');
+  return {
+    farms: mod.MOCK_SANDBOX_FARMS,
+    pivots: mod.MOCK_SANDBOX_PIVOTS,
+    telemetry: mod.MOCK_SANDBOX_PIVOT_TELEMETRY,
+    harvestLogs: mod.MOCK_SANDBOX_HARVEST_LOGS,
+  };
+}
+
 
 
 

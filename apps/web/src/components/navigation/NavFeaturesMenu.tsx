@@ -50,6 +50,12 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         badge: 'BTP & ENGINS',
       },
       {
+        title: 'Agriculture Saharienne & Forages',
+        desc: 'Pivots d’irrigation albiens (L/h), suivi déterministe et moisson à la tâche (CCLS).',
+        href: '/agriculture',
+        badge: 'AGRI SAHARA',
+      },
+      {
         title: 'Compteurs & Métrologie',
         desc: 'Suivi kilométrique, heures moteur et cycles sans saut négatif.',
         href: '/assets',

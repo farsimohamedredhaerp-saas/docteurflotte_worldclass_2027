@@ -26,6 +26,7 @@ import { ClaimsFinesModule } from './claims-fines/claims-fines.module';
 import { PartsProcurementModule } from './parts-procurement/parts-procurement.module';
 import { TcoProfitabilityModule } from './tco-profitability/tco-profitability.module';
 import { EngineRulesModule } from './engine-rules/engine-rules.module';
+import { SaharanAgricultureModule } from './saharan-agriculture/saharan-agriculture.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { EngineRulesModule } from './engine-rules/engine-rules.module';
     ClaimsFinesModule,
     PartsProcurementModule,
     TcoProfitabilityModule,
+    SaharanAgricultureModule,
   ],
 })
 export class AppModule {}
