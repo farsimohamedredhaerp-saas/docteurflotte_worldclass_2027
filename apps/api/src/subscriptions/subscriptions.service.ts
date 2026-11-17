@@ -178,6 +178,41 @@ const DEFAULT_PLANS: SubscriptionPlan[] = [
     updatedAt: new Date().toISOString(),
   },
   {
+    id: 'plan-erp-enterprise',
+    code: 'PLAN-ERP-ENTERPRISE',
+    name: 'ERP Flotte Intégral World-Class (7 Modules Métiers)',
+    description: 'Suite ERP souveraine complète pour parcs mixtes (Camions, BTP, Engins). Intègre la fiscalité G50, chantiers, rental, logistique LVE, sinistres, stock pièces et TCO prédictif.',
+    billingModel: 'ANNUAL_INVOICE',
+    pricePerAssetDzd: 58000,
+    baseFeeDzd: 50000,
+    billingIntervalMonths: 12,
+    minAssets: 10,
+    maxAssets: null,
+    supportedModes: ['MODE_0', 'MODE_1', 'MODE_2'],
+    features: [
+      'Conformité Fiscale & G50 (Art. 30 TCA)',
+      'Chantiers & Engins BTP (CAN J1939)',
+      'Location Flotte & Check-In/Out Numérique',
+      'Logistique & POD (LVE Décret 03-223)',
+      'Sinistres, Amendes & Imputation Chauffeur',
+      'Stock Pièces & Approvisionnement Atelier',
+      'TCO & Simulateur Réparer vs Remplacer',
+      '6 Algorithmes Physiques Déterministes & RUL',
+      'Huissier Juridique CUSUM Anti-Siphonnage',
+      'IA Copilot Ollama Qwen 2.5 Locale',
+      'Assistant Vocal d Atelier Darja',
+    ],
+    isActive: true,
+    isPublic: true,
+    discountTiers: [
+      { minVehicles: 20, discountPercent: 15 },
+      { minVehicles: 50, discountPercent: 25 },
+      { minVehicles: 100, discountPercent: 35 },
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
     id: 'plan-audit-choc',
     code: 'PLAN-AUDIT-CHOC',
     name: 'Pack Choc — Audit Anti-Fraude & Rétention 90 Jours',
@@ -537,6 +572,13 @@ export class SubscriptionsService {
 
     this.memorySubscriptions.set(tenantId, updated);
     return updated;
+  }
+
+  async isFeatureEnabledForTenant(tenantId: string, featureName: string): Promise<boolean> {
+    const sub = await this.getTenantSubscription(tenantId);
+    const plan = await this.getPlanById(sub.planId);
+    if (!plan || !plan.isActive) return false;
+    return plan.features.some((f) => f.toLowerCase().includes(featureName.toLowerCase()));
   }
 
   // =========================================================================

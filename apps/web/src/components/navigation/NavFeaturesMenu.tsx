@@ -44,6 +44,12 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         badge: 'ACTIF',
       },
       {
+        title: 'Chantiers & Engins BTP',
+        desc: 'Affectations, suivi horaire anti-dérive (CAN J1939) et rentabilité par site.',
+        href: '/chantiers',
+        badge: 'BTP & ENGINS',
+      },
+      {
         title: 'Compteurs & Métrologie',
         desc: 'Suivi kilométrique, heures moteur et cycles sans saut négatif.',
         href: '/assets',
@@ -66,6 +72,12 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         desc: 'Machine à états Gate DZ, restrictions 58 Wilayas et jetons QR cryptographiques HMAC-256.',
         href: '/dispatch',
         badge: 'OFFICIEL DZ',
+      },
+      {
+        title: 'Logistique & POD (LVE)',
+        desc: 'Lettres de voiture Décret 03-223, preuves de livraison mobile et score OTIF.',
+        href: '/logistics',
+        badge: 'LVE DÉCRET',
       },
       {
         title: 'Référentiel & Scraper OEM RMI',
@@ -181,6 +193,18 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
     shortLabel: 'Gestion',
     iconNode: <IconBarChart3 size={14} strokeWidth={1.75} />,
     subfeatures: [
+      {
+        title: 'Conformité Fiscale & G50',
+        desc: 'Qualification déterministe Loi de Finances, Art. 30 TCA et scellement SHA-256.',
+        href: '/fiscal',
+        badge: 'SOUVERAIN DGI',
+      },
+      {
+        title: 'Location & Rental Flotte',
+        desc: 'Contrats, plannings, check-in/out numériques et facturation TVA 19%.',
+        href: '/rental',
+        badge: 'RENTAL DZD',
+      },
       {
         title: 'TCO & Coût au km / h',
         desc: 'Décomposition des coûts directs de possession et d\'usage.',
@@ -301,16 +325,19 @@ export function NavFeaturesMenu() {
   }, []);
 
   return (
-    <nav ref={menuRef} style={{ position: 'relative' }} aria-label="Navigation principale">
+    <nav ref={menuRef} style={{ position: 'relative', maxWidth: '100%' }} aria-label="Navigation principale">
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.25rem',
+          gap: '0.2rem',
           background: 'var(--df-bg-surface-2)',
-          padding: '0.25rem 0.35rem',
+          padding: '0.2rem 0.3rem',
           borderRadius: 'var(--df-radius-md)',
           border: '1px solid var(--df-border-subtle)',
+          maxWidth: '100%',
+          overflowX: 'auto',
+          scrollbarWidth: 'none',
         }}
       >
         {FEATURE_CATEGORIES.map((cat) => {
@@ -326,8 +353,8 @@ export function NavFeaturesMenu() {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.28rem',
-                padding: '0.24rem 0.50rem',
+                gap: '0.25rem',
+                padding: '0.22rem 0.45rem',
                 borderRadius: 'var(--df-radius-sm)',
                 background: isOpen ? 'var(--df-bg-surface-3)' : 'transparent',
                 color: isOpen ? 'var(--df-text-main)' : 'var(--df-text-secondary)',
@@ -354,7 +381,7 @@ export function NavFeaturesMenu() {
             >
               <span style={{ display: 'flex', color: 'var(--df-accent-blue)' }}>{cat.iconNode}</span>
               <span className="hidden 2xl:inline">{cat.label}</span>
-              <span className="inline 2xl:hidden">{cat.shortLabel || cat.label}</span>
+              <span className="hidden xl:inline 2xl:hidden">{cat.shortLabel || cat.label}</span>
               <span
                 style={{
                   display: 'flex',

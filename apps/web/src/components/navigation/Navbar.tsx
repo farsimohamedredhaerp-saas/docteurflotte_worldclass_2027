@@ -89,18 +89,19 @@ export function Navbar({ onResetDemo }: NavbarProps) {
         style={{
           maxWidth: '100%',
           margin: '0 auto',
-          padding: '0.45rem 1.5rem',
+          padding: '0.45rem 1rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '0.75rem',
+          gap: '0.5rem',
           flexWrap: 'nowrap',
           width: '100%',
           boxSizing: 'border-box',
+          overflow: 'hidden',
         }}
       >
         {/* SECTION GAUCHE : HAMBURGER MOBILE, LOGO & IDENTITÉ TENANT */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 1, minWidth: 0 }}>
           {/* BOUTON MENU MOBILE (< 1024px) */}
           <button
             type="button"
@@ -213,7 +214,8 @@ export function Navbar({ onResetDemo }: NavbarProps) {
           style={{
             alignItems: 'center',
             justifyContent: 'center',
-            flexShrink: 0,
+            flexShrink: 1,
+            minWidth: 0,
             position: 'relative',
           }}
         >
@@ -221,7 +223,7 @@ export function Navbar({ onResetDemo }: NavbarProps) {
         </div>
 
         {/* SECTION DROITE : RACCOURCIS CRITIQUES, THÈME & PROFIL */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
           {/* BOUTON COMMAND PALETTE ⌘K */}
           <button
             type="button"
@@ -232,20 +234,21 @@ export function Navbar({ onResetDemo }: NavbarProps) {
               background: 'var(--df-bg-surface-2)',
               border: '1px solid var(--df-border-subtle)',
               color: 'var(--df-text-secondary)',
-              padding: '0.24rem 0.65rem',
+              padding: '0.24rem 0.5rem',
               borderRadius: 'var(--df-radius-sm)',
               fontSize: '0.72rem',
               fontWeight: 500,
               display: 'flex',
               alignItems: 'center',
-              gap: '0.45rem',
+              gap: '0.35rem',
               cursor: 'pointer',
               transition: 'all var(--df-transition-fast)',
             }}
           >
             <IconSearch size={12} strokeWidth={2} style={{ color: 'var(--df-text-muted)' }} />
-            <span className="hidden sm:inline" style={{ color: 'var(--df-text-muted)' }}>Rechercher...</span>
+            <span className="hidden xl:inline" style={{ color: 'var(--df-text-muted)' }}>Rechercher...</span>
             <kbd
+              className="hidden 2xl:inline"
               style={{
                 fontFamily: 'var(--df-font-mono)',
                 fontSize: '0.62rem',

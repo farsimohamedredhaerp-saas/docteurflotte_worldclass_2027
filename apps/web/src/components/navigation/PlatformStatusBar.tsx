@@ -44,6 +44,7 @@ export function PlatformStatusBar({ userRole }: PlatformStatusBarProps) {
         fontSize: '0.70rem',
         color: 'var(--df-text-muted)',
         letterSpacing: '-0.01em',
+        overflow: 'hidden',
       }}
     >
       <div
@@ -51,7 +52,7 @@ export function PlatformStatusBar({ userRole }: PlatformStatusBarProps) {
           maxWidth: '100%',
           width: '100%',
           margin: '0 auto',
-          padding: '0.2rem 1.5rem',
+          padding: '0.2rem 1rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -172,10 +173,11 @@ export function PlatformStatusBar({ userRole }: PlatformStatusBarProps) {
               border: '1px solid rgba(16, 185, 129, 0.2)',
               fontSize: '0.66rem',
               letterSpacing: '0.02em',
+              whiteSpace: 'nowrap',
             }}
             title="Conformité et hébergement souverain sur le territoire national algérien (Loi 18-07 ANPDP)"
           >
-            Souverain Algérie • Loi 18-07 ANPDP
+            <span className="hidden sm:inline">Souverain Algérie • </span>Loi 18-07 ANPDP
           </span>
         </div>
       </div>

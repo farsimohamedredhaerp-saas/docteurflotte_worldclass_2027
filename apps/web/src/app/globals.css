@@ -284,6 +284,8 @@ html {
   color-scheme: light;
   scroll-behavior: smooth;
   min-height: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 html.dark {
@@ -296,6 +298,8 @@ body {
   color: var(--df-text-main);
   line-height: 1.55;
   min-height: 100vh;
+  max-width: 100%;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
@@ -314,6 +318,15 @@ a {
 a:hover {
   color: var(--df-accent-blue-hover);
   text-decoration: underline;
+}
+
+/* Utilitaires de défilement horizontal fluide et discret */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 
 /* ==========================================================================

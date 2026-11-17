@@ -151,13 +151,13 @@ export function UserMenuDropdown({ user, tenant, onLogout }: UserMenuDropdownPro
         >
           {initials}
         </div>
-        <div style={{ textAlign: 'left', lineHeight: 1.2 }}>
+        <div className="hidden xl:block" style={{ textAlign: 'left', lineHeight: 1.2 }}>
           <span
             style={{
               display: 'block',
               fontSize: '0.78rem',
               fontWeight: 700,
-              maxWidth: '120px',
+              maxWidth: '110px',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',

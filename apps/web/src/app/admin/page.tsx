@@ -313,7 +313,7 @@ export default function AdminOverviewPage() {
             transition: 'transform 0.15s ease, border-color 0.15s ease',
           }}
         >
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--df-status-ok-bg)', border: '1px solid var(--df-status-ok-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--df-status-ok-text)', marginBottom: '14px' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#34d399', marginBottom: '14px' }}>
             <IconCreditCard size={20} />
           </div>
           <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '6px' }}>
@@ -337,7 +337,7 @@ export default function AdminOverviewPage() {
             transition: 'transform 0.15s ease, border-color 0.15s ease',
           }}
         >
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--df-status-warning-bg)', border: '1px solid var(--df-status-warning-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--df-status-warning-text)', marginBottom: '14px' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(234, 179, 8, 0.12)', border: '1px solid rgba(234, 179, 8, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#facc15', marginBottom: '14px' }}>
             <IconZap size={20} />
           </div>
           <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '6px' }}>

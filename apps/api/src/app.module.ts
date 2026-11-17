@@ -18,6 +18,13 @@ import { SovereignRagModule } from './sovereign-rag/sovereign-rag.module';
 import { WorkshopVoiceModule } from './workshop-voice/workshop-voice.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { HardwareLicenseModule } from './security/hardware-license/hardware-license.module';
+import { FiscalComplianceModule } from './fiscal-compliance/fiscal-compliance.module';
+import { ChantiersEnginsModule } from './chantiers-engins/chantiers-engins.module';
+import { RentalModule } from './rental/rental.module';
+import { LogisticsPodModule } from './logistics-pod/logistics-pod.module';
+import { ClaimsFinesModule } from './claims-fines/claims-fines.module';
+import { PartsProcurementModule } from './parts-procurement/parts-procurement.module';
+import { TcoProfitabilityModule } from './tco-profitability/tco-profitability.module';
 
 @Module({
   imports: [
@@ -43,6 +50,13 @@ import { HardwareLicenseModule } from './security/hardware-license/hardware-lice
     SovereignRagModule,
     WorkshopVoiceModule,
     SubscriptionsModule,
+    FiscalComplianceModule,
+    ChantiersEnginsModule,
+    RentalModule,
+    LogisticsPodModule,
+    ClaimsFinesModule,
+    PartsProcurementModule,
+    TcoProfitabilityModule,
   ],
 })
 export class AppModule {}

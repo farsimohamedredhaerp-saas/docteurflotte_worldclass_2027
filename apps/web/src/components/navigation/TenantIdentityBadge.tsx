@@ -109,7 +109,7 @@ export function TenantIdentityBadge({ tenant }: TenantIdentityBadgeProps) {
             fontSize: '0.74rem',
             fontWeight: 600,
             color: 'var(--df-text-main)',
-            maxWidth: '130px',
+            maxWidth: '110px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -142,6 +142,7 @@ export function TenantIdentityBadge({ tenant }: TenantIdentityBadgeProps) {
 
       {/* Étiquette d'Environnement (DÉMO ou PRODUCTION SOUVERAINE) */}
       <span
+        className="hidden xl:inline-flex"
         style={{
           fontSize: '0.66rem',
           fontWeight: 600,
@@ -153,7 +154,6 @@ export function TenantIdentityBadge({ tenant }: TenantIdentityBadgeProps) {
           letterSpacing: '0.04em',
           textTransform: 'uppercase',
           whiteSpace: 'nowrap',
-          display: 'inline-flex',
           alignItems: 'center',
           gap: '0.3rem',
         }}

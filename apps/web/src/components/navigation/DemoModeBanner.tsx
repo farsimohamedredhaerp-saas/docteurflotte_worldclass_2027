@@ -32,6 +32,8 @@ export function DemoModeBanner() {
         zIndex: 95,
         position: 'relative',
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+        maxWidth: '100%',
+        overflow: 'hidden',
       }}
     >
       {/* Côté Gauche : Icône & Message Explicite */}

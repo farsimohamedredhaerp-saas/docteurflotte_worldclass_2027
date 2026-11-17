@@ -8,6 +8,8 @@ import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
 import { VehicleSilhouette } from '../../components/ui/VehicleSilhouette';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { fetchFleetTcoSummary } from '../../lib/api-tco';
+import { AuthClient } from '../../lib/api-auth';
 import {
   IconBarChart3,
   IconFuel,
@@ -53,16 +55,44 @@ export default function TcoPage() {
   const [notification, setNotification] = useState<string | null>(null);
 
   useEffect(() => {
+    setIsLoading(true);
     if (isDemoMode) {
-      setIsLoading(true);
       import('@/lib/simulation-sandbox')
         .then((sandbox) => {
           setTcoRecords(sandbox.MOCK_SANDBOX_TCO);
         })
         .finally(() => setIsLoading(false));
     } else {
-      setTcoRecords([]);
-      setIsLoading(false);
+      const session = AuthClient.getSession();
+      fetchFleetTcoSummary(session.token || undefined)
+        .then((summaries) => {
+          const records: AssetTcoRecord[] = summaries.map((s) => {
+            const isEngin = s.category === 'ENGIN_BTP' || s.engineHoursRun > 0;
+            return {
+              id: s.assetId,
+              registrationNumber: s.assetCode,
+              makeModel: s.assetCode,
+              category: isEngin ? 'ENGIN_BTP' : 'PL_BENNE',
+              categoryLabel: s.category || (isEngin ? 'Engin BTP' : 'Poids Lourd'),
+              kmOrHoursPeriod: isEngin ? s.engineHoursRun : s.distanceKmRun,
+              unitType: isEngin ? 'h' : 'km',
+              fuelCostDzd: s.fuelCostNaftalDzd,
+              maintenanceCostDzd: s.maintenancePartsCostDzd + s.maintenanceLaborCostDzd,
+              driverCostDzd: 65000,
+              tiresAndOtherDzd: s.tiresAndWearCostDzd + s.highwayTollsDzd,
+              totalCostDzd: s.totalDirectCostDzd,
+              costPerUnitDzd: isEngin ? s.actualCostPerHourDzd : s.actualCostPerKmDzd,
+              targetBudgetPerUnitDzd: isEngin ? 250 : 75.0,
+              variancePercent: s.variancePct,
+              status: s.isOverTargetBudget ? 'OVER_BUDGET' : s.variancePct < -5 ? 'OPTIMAL' : 'ON_TRACK',
+            };
+          });
+          setTcoRecords(records);
+        })
+        .catch(() => {
+          setTcoRecords([]);
+        })
+        .finally(() => setIsLoading(false));
     }
   }, [isDemoMode]);
 

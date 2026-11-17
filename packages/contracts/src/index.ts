@@ -22,6 +22,13 @@ export * from './deterministic-physics';
 export * from './telemetry-tiers';
 export * from './oem-technical-specs';
 export * from './erp-export-schemas';
+export * from './fiscal-compliance';
+export * from './chantiers-engins';
+export * from './rental';
+export * from './logistics-pod';
+export * from './claims-fines-insurance';
+export * from './parts-procurement';
+export * from './tco-profitability';
 
 // Explicit re-exports of runtime constants for bundlers (Turbopack / Webpack / Vite)
 export {
