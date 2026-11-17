@@ -31,10 +31,24 @@ CREATE INDEX IF NOT EXISTS idx_site_workspaces_wilaya ON site_workspaces(wilaya_
 CREATE INDEX IF NOT EXISTS idx_site_workspaces_status ON site_workspaces(status);
 
 ALTER TABLE site_workspaces ENABLE ROW LEVEL SECURITY;
+ALTER TABLE site_workspaces FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS site_workspaces_tenant_isolation ON site_workspaces;
 CREATE POLICY site_workspaces_tenant_isolation ON site_workspaces
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON site_workspaces TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON site_workspaces TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 2. Affectations d'Actifs aux Chantiers (Asset-Centric)
@@ -62,10 +76,24 @@ CREATE INDEX IF NOT EXISTS idx_asset_site_assignments_site_id ON asset_site_assi
 CREATE INDEX IF NOT EXISTS idx_asset_site_assignments_status ON asset_site_assignments(status);
 
 ALTER TABLE asset_site_assignments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_site_assignments FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS asset_site_assignments_tenant_isolation ON asset_site_assignments;
 CREATE POLICY asset_site_assignments_tenant_isolation ON asset_site_assignments
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON asset_site_assignments TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON asset_site_assignments TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 3. Relevés d'Heures Moteur & Consommations Chantiers (Mode 0 Manuel & Mode 2 CAN J1939)
@@ -92,10 +120,24 @@ CREATE INDEX IF NOT EXISTS idx_asset_engine_hour_logs_site_id ON asset_engine_ho
 CREATE INDEX IF NOT EXISTS idx_asset_engine_hour_logs_recorded_at ON asset_engine_hour_logs(recorded_at);
 
 ALTER TABLE asset_engine_hour_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_engine_hour_logs FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS asset_engine_hour_logs_tenant_isolation ON asset_engine_hour_logs;
 CREATE POLICY asset_engine_hour_logs_tenant_isolation ON asset_engine_hour_logs
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON asset_engine_hour_logs TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON asset_engine_hour_logs TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 4. Checklists de Transfert Inter-Chantiers (Offline-First, Photos, Signatures, Contrôle d'état)
@@ -126,8 +168,22 @@ CREATE INDEX IF NOT EXISTS idx_asset_transfer_checklists_from_site ON asset_tran
 CREATE INDEX IF NOT EXISTS idx_asset_transfer_checklists_to_site ON asset_transfer_checklists(to_site_id);
 
 ALTER TABLE asset_transfer_checklists ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_transfer_checklists FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS asset_transfer_checklists_tenant_isolation ON asset_transfer_checklists;
 CREATE POLICY asset_transfer_checklists_tenant_isolation ON asset_transfer_checklists
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON asset_transfer_checklists TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON asset_transfer_checklists TO df_tenant_role;
+    END IF;
+END $$;
 

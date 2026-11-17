@@ -33,10 +33,24 @@ CREATE INDEX IF NOT EXISTS idx_rental_contracts_asset_id ON asset_rental_contrac
 CREATE INDEX IF NOT EXISTS idx_rental_contracts_status ON asset_rental_contracts(status);
 
 ALTER TABLE asset_rental_contracts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_rental_contracts FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS rental_contracts_tenant_isolation ON asset_rental_contracts;
 CREATE POLICY rental_contracts_tenant_isolation ON asset_rental_contracts
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON asset_rental_contracts TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON asset_rental_contracts TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 2. États des Lieux Check-In / Check-Out Numériques (Photos, Scellés SHA-256)
@@ -65,10 +79,24 @@ CREATE INDEX IF NOT EXISTS idx_rental_check_ins_outs_contract ON asset_rental_ch
 CREATE INDEX IF NOT EXISTS idx_rental_check_ins_outs_asset_id ON asset_rental_check_ins_outs(asset_id);
 
 ALTER TABLE asset_rental_check_ins_outs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_rental_check_ins_outs FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS rental_check_ins_outs_tenant_isolation ON asset_rental_check_ins_outs;
 CREATE POLICY rental_check_ins_outs_tenant_isolation ON asset_rental_check_ins_outs
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON asset_rental_check_ins_outs TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON asset_rental_check_ins_outs TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 3. Factures de Location (Moteur Fiscal DGI TVA 19% + Timbre Fiscal)
@@ -103,10 +131,24 @@ CREATE INDEX IF NOT EXISTS idx_rental_invoices_contract ON asset_rental_invoices
 CREATE INDEX IF NOT EXISTS idx_rental_invoices_asset_id ON asset_rental_invoices(asset_id);
 
 ALTER TABLE asset_rental_invoices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_rental_invoices FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS rental_invoices_tenant_isolation ON asset_rental_invoices;
 CREATE POLICY rental_invoices_tenant_isolation ON asset_rental_invoices
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON asset_rental_invoices TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON asset_rental_invoices TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 4. Litiges & Contentieux de Location (Opposabilité Juridique Algérie)
@@ -130,8 +172,22 @@ CREATE INDEX IF NOT EXISTS idx_rental_disputes_contract ON asset_rental_disputes
 CREATE INDEX IF NOT EXISTS idx_rental_disputes_asset_id ON asset_rental_disputes(asset_id);
 
 ALTER TABLE asset_rental_disputes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_rental_disputes FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS rental_disputes_tenant_isolation ON asset_rental_disputes;
 CREATE POLICY rental_disputes_tenant_isolation ON asset_rental_disputes
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON asset_rental_disputes TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON asset_rental_disputes TO df_tenant_role;
+    END IF;
+END $$;
 

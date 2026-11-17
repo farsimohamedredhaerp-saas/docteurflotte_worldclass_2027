@@ -35,10 +35,24 @@ CREATE INDEX IF NOT EXISTS idx_accident_claims_status ON asset_accident_claims(s
 CREATE INDEX IF NOT EXISTS idx_accident_claims_wilaya ON asset_accident_claims(wilaya_code);
 
 ALTER TABLE asset_accident_claims ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_accident_claims FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS accident_claims_tenant_isolation ON asset_accident_claims;
 CREATE POLICY accident_claims_tenant_isolation ON asset_accident_claims
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON asset_accident_claims TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON asset_accident_claims TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 2. Dossiers d'Assurances & Remboursements
@@ -63,10 +77,24 @@ CREATE INDEX IF NOT EXISTS idx_insurance_cases_claim ON asset_insurance_cases(cl
 CREATE INDEX IF NOT EXISTS idx_insurance_cases_asset_id ON asset_insurance_cases(asset_id);
 
 ALTER TABLE asset_insurance_cases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_insurance_cases FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS insurance_cases_tenant_isolation ON asset_insurance_cases;
 CREATE POLICY insurance_cases_tenant_isolation ON asset_insurance_cases
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON asset_insurance_cases TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON asset_insurance_cases TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 3. Procès-Verbaux & Amendes Routières (Imputation Chauffeur à l'instant t)
@@ -98,8 +126,22 @@ CREATE INDEX IF NOT EXISTS idx_traffic_fines_driver ON asset_traffic_fines(attri
 CREATE INDEX IF NOT EXISTS idx_traffic_fines_infraction_date ON asset_traffic_fines(infraction_date);
 
 ALTER TABLE asset_traffic_fines ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_traffic_fines FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS traffic_fines_tenant_isolation ON asset_traffic_fines;
 CREATE POLICY traffic_fines_tenant_isolation ON asset_traffic_fines
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON asset_traffic_fines TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON asset_traffic_fines TO df_tenant_role;
+    END IF;
+END $$;
 

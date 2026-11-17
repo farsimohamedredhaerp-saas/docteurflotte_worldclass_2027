@@ -37,10 +37,24 @@ CREATE INDEX IF NOT EXISTS idx_lve_shipper_wilaya ON logistics_consignment_notes
 CREATE INDEX IF NOT EXISTS idx_lve_consignee_wilaya ON logistics_consignment_notes(consignee_wilaya_code);
 
 ALTER TABLE logistics_consignment_notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE logistics_consignment_notes FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS lve_tenant_isolation ON logistics_consignment_notes;
 CREATE POLICY lve_tenant_isolation ON logistics_consignment_notes
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON logistics_consignment_notes TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON logistics_consignment_notes TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 2. Preuves de Livraison (POD Mobile Offline-First)
@@ -70,10 +84,24 @@ CREATE INDEX IF NOT EXISTS idx_pod_lve_id ON logistics_proof_of_delivery(lve_id)
 CREATE INDEX IF NOT EXISTS idx_pod_asset_id ON logistics_proof_of_delivery(asset_id);
 
 ALTER TABLE logistics_proof_of_delivery ENABLE ROW LEVEL SECURITY;
+ALTER TABLE logistics_proof_of_delivery FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS pod_tenant_isolation ON logistics_proof_of_delivery;
 CREATE POLICY pod_tenant_isolation ON logistics_proof_of_delivery
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON logistics_proof_of_delivery TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON logistics_proof_of_delivery TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 3. Litiges de Livraison (Avaries, Manquants, Blocage Facturation)
@@ -98,8 +126,22 @@ CREATE INDEX IF NOT EXISTS idx_delivery_disputes_lve ON logistics_delivery_dispu
 CREATE INDEX IF NOT EXISTS idx_delivery_disputes_asset_id ON logistics_delivery_disputes(asset_id);
 
 ALTER TABLE logistics_delivery_disputes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE logistics_delivery_disputes FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS delivery_disputes_tenant_isolation ON logistics_delivery_disputes;
 CREATE POLICY delivery_disputes_tenant_isolation ON logistics_delivery_disputes
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON logistics_delivery_disputes TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON logistics_delivery_disputes TO df_tenant_role;
+    END IF;
+END $$;
 

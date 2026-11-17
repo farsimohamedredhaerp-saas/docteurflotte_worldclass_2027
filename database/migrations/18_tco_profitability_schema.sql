@@ -22,10 +22,24 @@ CREATE INDEX IF NOT EXISTS idx_cost_centers_tenant ON asset_cost_centers(tenant_
 CREATE INDEX IF NOT EXISTS idx_cost_centers_asset_id ON asset_cost_centers(asset_id);
 
 ALTER TABLE asset_cost_centers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_cost_centers FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS cost_centers_tenant_isolation ON asset_cost_centers;
 CREATE POLICY cost_centers_tenant_isolation ON asset_cost_centers
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON asset_cost_centers TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON asset_cost_centers TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 2. Simulations Décisionnelles Formelles "Réparer vs Remplacer" (12/24 mois)
@@ -54,8 +68,22 @@ CREATE INDEX IF NOT EXISTS idx_decision_simulations_asset_id ON asset_decision_s
 CREATE INDEX IF NOT EXISTS idx_decision_simulations_date ON asset_decision_simulations(simulation_date);
 
 ALTER TABLE asset_decision_simulations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_decision_simulations FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS decision_simulations_tenant_isolation ON asset_decision_simulations;
 CREATE POLICY decision_simulations_tenant_isolation ON asset_decision_simulations
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON asset_decision_simulations TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON asset_decision_simulations TO df_tenant_role;
+    END IF;
+END $$;
 

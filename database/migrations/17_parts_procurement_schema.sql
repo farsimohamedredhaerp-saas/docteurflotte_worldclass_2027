@@ -28,10 +28,24 @@ CREATE INDEX IF NOT EXISTS idx_parts_inventory_number ON parts_inventory(part_nu
 CREATE INDEX IF NOT EXISTS idx_parts_inventory_category ON parts_inventory(category);
 
 ALTER TABLE parts_inventory ENABLE ROW LEVEL SECURITY;
+ALTER TABLE parts_inventory FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS parts_inventory_tenant_isolation ON parts_inventory;
 CREATE POLICY parts_inventory_tenant_isolation ON parts_inventory
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON parts_inventory TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON parts_inventory TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 2. Dépôts & Magasins de Stockage par Wilaya
@@ -52,10 +66,24 @@ CREATE INDEX IF NOT EXISTS idx_parts_warehouses_tenant ON parts_warehouses(tenan
 CREATE INDEX IF NOT EXISTS idx_parts_warehouses_wilaya ON parts_warehouses(wilaya_code);
 
 ALTER TABLE parts_warehouses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE parts_warehouses FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS parts_warehouses_tenant_isolation ON parts_warehouses;
 CREATE POLICY parts_warehouses_tenant_isolation ON parts_warehouses
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON parts_warehouses TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON parts_warehouses TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 3. Niveaux de Stock Multi-Dépôts & Seuils d'Alerte
@@ -78,10 +106,24 @@ CREATE INDEX IF NOT EXISTS idx_parts_stock_levels_part ON parts_stock_levels(par
 CREATE INDEX IF NOT EXISTS idx_parts_stock_levels_warehouse ON parts_stock_levels(warehouse_id);
 
 ALTER TABLE parts_stock_levels ENABLE ROW LEVEL SECURITY;
+ALTER TABLE parts_stock_levels FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS parts_stock_levels_tenant_isolation ON parts_stock_levels;
 CREATE POLICY parts_stock_levels_tenant_isolation ON parts_stock_levels
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON parts_stock_levels TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON parts_stock_levels TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 4. Imputation de Pièces sur Ordres de Travail & Actif Racine (asset_id)
@@ -105,10 +147,24 @@ CREATE INDEX IF NOT EXISTS idx_wo_parts_wo_id ON work_order_parts_consumption(wo
 CREATE INDEX IF NOT EXISTS idx_wo_parts_part_id ON work_order_parts_consumption(part_id);
 
 ALTER TABLE work_order_parts_consumption ENABLE ROW LEVEL SECURITY;
+ALTER TABLE work_order_parts_consumption FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS wo_parts_consumption_tenant_isolation ON work_order_parts_consumption;
 CREATE POLICY wo_parts_consumption_tenant_isolation ON work_order_parts_consumption
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON work_order_parts_consumption TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON work_order_parts_consumption TO df_tenant_role;
+    END IF;
+END $$;
 
 
 -- 5. Bons de Commande d'Achat (Multi-Devises DZD, EUR, USD)
@@ -135,8 +191,22 @@ CREATE INDEX IF NOT EXISTS idx_parts_po_tenant ON parts_purchase_orders(tenant_i
 CREATE INDEX IF NOT EXISTS idx_parts_po_status ON parts_purchase_orders(status);
 
 ALTER TABLE parts_purchase_orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE parts_purchase_orders FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS parts_po_tenant_isolation ON parts_purchase_orders;
 CREATE POLICY parts_po_tenant_isolation ON parts_purchase_orders
-    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+    USING (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    )
+    WITH CHECK (
+        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
+        OR (current_user <> 'df_tenant_role' AND current_setting('app.system_context', true) = 'true')
+    );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON parts_purchase_orders TO df_tenant_role;
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'df_tenant_role') THEN
+        GRANT SELECT, INSERT, UPDATE, DELETE ON parts_purchase_orders TO df_tenant_role;
+    END IF;
+END $$;
 
