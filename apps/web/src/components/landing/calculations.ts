@@ -26,7 +26,7 @@ export interface RoiResult {
 export function computeRoi(fleetSize: number, monthlyKm: number, fleetSector: FleetSector): RoiResult {
   const sector = SECTORS.find((s) => s.id === fleetSector);
   const fuelRatePer100Km = sector ? sector.fuelRate : 31;
-  const nationalFuelCostDzd = 29.0; // Barème national administré Gasoil
+  const nationalFuelCostDzd = 31.0; // Barème national administré Gasoil (31 DA / L)
 
   // 1. Économie carburant & siphonnage (réduction de 8.5% du litrage via CUSUM + suppression du ralenti abusif)
   const annualLiters = (fleetSize * monthlyKm * 12 * fuelRatePer100Km) / 100;
@@ -61,9 +61,9 @@ export function computeRoi(fleetSize: number, monthlyKm: number, fleetSector: Fl
     platformAnnualCostDzd,
     netRoiRatio,
     fuelExplanationFr:
-      "-8,5 % de litrage évité via contrôle CUSUM anti-siphonnage et régulation du ralenti abusif (tarif national administré Gasoil 29 DZD/L).",
+      "-8,5 % de litrage évité via contrôle CUSUM anti-siphonnage et régulation du ralenti abusif (tarif national administré Gasoil 31 DZD/L).",
     fuelExplanationAr:
-      "وفر 8.5% من الحجم الإجمالي عبر كشف السحب غير المشروع CUSUM وضبط السكون المفرط (السعر الوطني للمازوت 29 دج/ل).",
+      "وفر 8.5% من الحجم الإجمالي عبر كشف السحب غير المشروع CUSUM وضبط السكون المفرط (السعر الوطني للمازوت 31 دج/ل).",
     breakdownExplanationFr:
       "Protection culasse, turbo et injection par anticipation thermique différentielle EWMA (base unitaire 480 000 DZD par casse lourde).",
     breakdownExplanationAr:

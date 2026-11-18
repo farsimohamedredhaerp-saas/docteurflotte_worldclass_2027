@@ -100,6 +100,7 @@
   /* Typographie */
   --df-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --df-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --df-font-arabic: 'Cairo', 'Readex Pro', 'Tajawal', 'IBM Plex Sans Arabic', 'Segoe UI Arabic', 'Segoe UI', Tahoma, -apple-system, sans-serif;
 
   /* ==========================================================================
      COCKPIT TÉLÉMATIQUE HAUTE DENSITÉ (VARIABLES SÉMANTIQUES DÉDIÉES)
@@ -734,13 +735,45 @@ a:hover {
    ========================================================================== */
 
 :root {
-  --df-font-arabic: 'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+  --df-font-arabic: 'Cairo', 'Readex Pro', 'Tajawal', 'IBM Plex Sans Arabic', 'Segoe UI Arabic', 'Segoe UI', Tahoma, -apple-system, sans-serif;
 }
 
-[dir="rtl"] {
+[dir="rtl"],
+[lang="ar"],
+.font-arabic {
   direction: rtl;
   text-align: right;
-  font-family: var(--df-font-arabic), var(--df-font-sans);
+  font-family: var(--df-font-arabic);
+  letter-spacing: 0;
+}
+
+/* Typographie arabe moderne : neutraliser le letter-spacing qui brise les liaisons cursives et optimiser la hauteur de ligne */
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] h4,
+[dir="rtl"] h5,
+[dir="rtl"] h6,
+[lang="ar"] h1,
+[lang="ar"] h2,
+[lang="ar"] h3,
+[lang="ar"] h4,
+[lang="ar"] h5,
+[lang="ar"] h6 {
+  font-family: var(--df-font-arabic);
+  line-height: 1.35;
+  letter-spacing: 0 !important;
+}
+
+[dir="rtl"] button,
+[dir="rtl"] input,
+[dir="rtl"] select,
+[dir="rtl"] textarea,
+[lang="ar"] button,
+[lang="ar"] input,
+[lang="ar"] select,
+[lang="ar"] textarea {
+  font-family: var(--df-font-arabic);
 }
 
 /* Les chiffres, métriques monétaires DZD, VIN et identifiants télématiques

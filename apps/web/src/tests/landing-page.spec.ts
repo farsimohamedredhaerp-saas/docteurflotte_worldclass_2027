@@ -80,11 +80,11 @@ describe('Landing Page — World-Class Sovereign Showcase (Zero Third-Party)', (
   });
 
   it('should accurately calculate deterministic ROI in DZD without arbitrary figures', () => {
-    // Calcul pour flotte de 45 véhicules, 8500 km/mois, Fret (31 L/100km, Gasoil national 29 DZD/L)
+    // Calcul pour flotte de 45 véhicules, 8500 km/mois, Fret (31 L/100km, Gasoil national 31 DZD/L)
     const fleetSize = 45;
     const monthlyKm = 8500;
     const fuelRatePer100Km = 31;
-    const nationalFuelCostDzd = 29.0;
+    const nationalFuelCostDzd = 31.0;
     const annualLiters = (fleetSize * monthlyKm * 12 * fuelRatePer100Km) / 100;
     const fuelSavingsDzd = Math.round(annualLiters * 0.085 * nationalFuelCostDzd);
 
@@ -103,18 +103,19 @@ describe('Landing Page — World-Class Sovereign Showcase (Zero Third-Party)', (
   });
 
   it('should scale accurately up to 1 000 rolling assets with minimal breakdown explanations', () => {
-    // Vérification de la présence des paliers jusqu'à 1 000 véhicules et des explications
+    // Vérification de la présence des paliers jusqu'à 1 000 véhicules et des explications au tarif 31 DZD/L
     expect(sourceCode).toContain('1 000 Actifs Roulants');
     expect(sourceCode).toContain('max={1000}');
     expect(sourceCode).toContain('-8,5 % de litrage évité via contrôle CUSUM anti-siphonnage');
+    expect(sourceCode).toContain('31 DZD/L');
     expect(sourceCode).toContain('Protection culasse, turbo et injection par anticipation thermique différentielle EWMA');
     expect(sourceCode).toContain('Continuité d\'exploitation : 4,5 jours d\'arrêt d\'atelier épargnés');
 
-    // Simulation pour 1 000 véhicules, 8 500 km/mois, Fret (31 L/100km, Gasoil national 29 DZD/L)
+    // Simulation pour 1 000 véhicules, 8 500 km/mois, Fret (31 L/100km, Gasoil national 31 DZD/L)
     const fleetSize = 1000;
     const monthlyKm = 8500;
     const fuelRatePer100Km = 31;
-    const nationalFuelCostDzd = 29.0;
+    const nationalFuelCostDzd = 31.0;
     const annualLiters = (fleetSize * monthlyKm * 12 * fuelRatePer100Km) / 100;
     const annualLitersSaved = Math.round(annualLiters * 0.085);
     const fuelSavingsDzd = Math.round(annualLitersSaved * nationalFuelCostDzd);

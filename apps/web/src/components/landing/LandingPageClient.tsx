@@ -283,8 +283,11 @@ export function LandingPageClient() {
     <div
       dir={isAr ? 'rtl' : 'ltr'}
       lang={isAr ? 'ar' : 'fr'}
-      className="min-h-screen w-full flex flex-col font-sans transition-colors duration-200"
+      className={`min-h-screen w-full flex flex-col transition-colors duration-200 ${
+        isAr ? 'font-arabic' : 'font-sans'
+      }`}
       style={{
+        fontFamily: isAr ? 'var(--df-font-arabic)' : 'var(--df-font-sans)',
         backgroundColor: isLight ? '#F8FAFC' : '#070A10',
         color: isLight ? '#0F172A' : '#F1F5F9',
         overflowX: 'hidden',
