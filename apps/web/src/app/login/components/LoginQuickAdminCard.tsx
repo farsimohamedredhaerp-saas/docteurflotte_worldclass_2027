@@ -12,9 +12,19 @@ export function LoginQuickAdminCard({
   onQuickFillAdmin,
   onEnterDemoMode,
 }: LoginQuickAdminCardProps) {
+  // Raccourci admin : développement uniquement. Démo : développement, ou production si NEXT_PUBLIC_ENABLE_DEMO_MODE=true.
+  const showAdminShortcut = process.env.NODE_ENV !== 'production';
+  const showDemo =
+    process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === 'true';
+
+  if (!showAdminShortcut && !showDemo) {
+    return null;
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
       {/* 1-Clic Démo Interactive pour Prospects & DAF */}
+      {showDemo && (
       <button
         type="button"
         onClick={onEnterDemoMode}
@@ -39,8 +49,10 @@ export function LoginQuickAdminCard({
         <IconZap size={16} className="text-emerald-400" />
         <span>⚡ Explorer la Démo Interactive (Accès Libre)</span>
       </button>
+      )}
 
-      {/* Raccourci Compte Administrateur Plateforme */}
+      {/* Raccourci Compte Administrateur Plateforme (développement uniquement) */}
+      {showAdminShortcut && (
       <div
         style={{
           background: 'rgba(56, 189, 248, 0.08)',
@@ -90,6 +102,7 @@ export function LoginQuickAdminCard({
           Pré-remplir
         </button>
       </div>
+      )}
     </div>
   );
 }

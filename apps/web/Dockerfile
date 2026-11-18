@@ -17,8 +17,10 @@ FROM base AS builder
 WORKDIR /app
 ARG NEXT_PUBLIC_API_URL=http://localhost:3001
 ARG NEXT_PUBLIC_NEST_API_URL=http://localhost:3001
+ARG NEXT_PUBLIC_ENABLE_DEMO_MODE=false
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_NEST_API_URL=$NEXT_PUBLIC_NEST_API_URL
+ENV NEXT_PUBLIC_ENABLE_DEMO_MODE=$NEXT_PUBLIC_ENABLE_DEMO_MODE
 
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/packages/contracts/node_modules ./packages/contracts/node_modules

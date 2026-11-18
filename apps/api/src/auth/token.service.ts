@@ -18,6 +18,13 @@ export class TokenService {
       );
     }
 
+    // Refuse les secrets-modèles copiés tels quels depuis les fichiers .env d'exemple.
+    if (isProd && configuredSecret && /CHANGE_?ME|Cle_Secrete|Definir_Un/i.test(configuredSecret)) {
+      throw new Error(
+        'FATAL SECURITY: JWT_SECRET contient encore la valeur du fichier modèle. Générez un secret aléatoire (openssl rand -base64 48).',
+      );
+    }
+
     this.secret =
       configuredSecret ||
       'docteurflotte_dev_jwt_secret_must_be_set_in_production_environment_32chars';

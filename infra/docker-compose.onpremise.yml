@@ -18,7 +18,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-docteurflotte}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Securite_ANPDP_2027_Souveraine!}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Veuillez définir POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-docteurflotte_prod}
     ports:
       - "5434:5432"
@@ -107,13 +107,16 @@ services:
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       DATABASE_USER: ${POSTGRES_USER:-docteurflotte}
-      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-Securite_ANPDP_2027_Souveraine!}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:?Veuillez définir POSTGRES_PASSWORD}
       DATABASE_NAME: ${POSTGRES_DB:-docteurflotte_prod}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       VALHALLA_URL: http://valhalla:8002
       OLLAMA_URL: http://ollama:11434
       TRACCAR_API_URL: http://traccar:8082
+      JWT_SECRET: ${JWT_SECRET:?Veuillez définir JWT_SECRET}
+      MISSION_ORDER_SIGNING_SECRET: ${MISSION_ORDER_SIGNING_SECRET:?Veuillez définir MISSION_ORDER_SIGNING_SECRET}
+      TRACCAR_WEBHOOK_SECRET: ${TRACCAR_WEBHOOK_SECRET:?Veuillez définir TRACCAR_WEBHOOK_SECRET}
     ports:
       - "3001:3001"
     depends_on:

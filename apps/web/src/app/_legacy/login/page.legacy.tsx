@@ -17,10 +17,13 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleQuickFillAdmin = () => {
-    setEmail('admin@farsi.dz');
-    setPassword('Admin@2027!');
-    setTenantSlug('entreprise-bth');
-    setError(null);
+    // Développement uniquement : aucun identifiant n'est embarqué dans le bundle de production.
+    if (process.env.NODE_ENV !== 'production') {
+      setEmail('admin@farsi.dz');
+      setPassword('Admin@2027!');
+      setTenantSlug('entreprise-bth');
+      setError(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -79,7 +79,7 @@ services:
       TRACCAR_URL: http://traccar:8082
       TRACCAR_USER: ${TRACCAR_USER:-admin}
       TRACCAR_PASSWORD: ${TRACCAR_PASSWORD:?Veuillez définir TRACCAR_PASSWORD}
-      TRACCAR_WEBHOOK_SECRET: ${TRACCAR_WEBHOOK_SECRET:-}
+      TRACCAR_WEBHOOK_SECRET: ${TRACCAR_WEBHOOK_SECRET:?Veuillez définir TRACCAR_WEBHOOK_SECRET}
       FLESPI_WEBHOOK_TOKEN: ${FLESPI_WEBHOOK_TOKEN:-}
       OLLAMA_BASE_URL: http://ollama:11434
     depends_on:
@@ -125,6 +125,7 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-https://api.votreflotte.dz}
         NEXT_PUBLIC_NEST_API_URL: ${PUBLIC_API_URL:-https://api.votreflotte.dz}
+        NEXT_PUBLIC_ENABLE_DEMO_MODE: ${NEXT_PUBLIC_ENABLE_DEMO_MODE:-false}
     container_name: docteurflotte_web_prod
     restart: unless-stopped
     environment:

@@ -20,9 +20,13 @@ const DemoModeContext = createContext<DemoModeContextType | undefined>(undefined
 
 const DEMO_STORAGE_KEY = 'df_demo_mode_active';
 
+// Démo : toujours possible en développement ; en production, uniquement si NEXT_PUBLIC_ENABLE_DEMO_MODE=true (valeur fixée au build).
+const DEMO_ALLOWED =
+  process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === 'true';
+
 export function DemoModeProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<NavbarSession>({ token: null, user: null, tenant: null });
-  const [isDemoMode, setIsDemoMode] = useState<boolean>(true); // Démarre en démo tant que session non résolue
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(DEMO_ALLOWED); // Démarre en démo (si autorisée) tant que session non résolue
   const [isGuest, setIsGuest] = useState<boolean>(true);
   const [mounted, setMounted] = useState(false);
 
@@ -33,13 +37,13 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
     setIsGuest(guestState);
 
     if (guestState) {
-      // Les visiteurs sans connexion sont toujours en Mode Démonstration
-      setIsDemoMode(true);
+      // Les visiteurs sans connexion sont en Mode Démonstration (si la démo est autorisée)
+      setIsDemoMode(DEMO_ALLOWED);
     } else {
       // Pour les clients connectés, mode réel par défaut sauf s'ils ont explicitement activé le toggle démo
       if (typeof window !== 'undefined') {
         const savedPref = localStorage.getItem(DEMO_STORAGE_KEY);
-        if (currentSession.tenant?.dataOrigin === 'USER_ENTRY' && savedPref !== 'true') {
+        if (!DEMO_ALLOWED || (currentSession.tenant?.dataOrigin === 'USER_ENTRY' && savedPref !== 'true')) {
           setIsDemoMode(false);
         } else {
           setIsDemoMode(savedPref === 'true');
@@ -71,8 +75,8 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
 
   const toggleDemoMode = useCallback((forceState?: boolean) => {
     if (isGuest) {
-      // Un visiteur sans compte reste en mode démo
-      setIsDemoMode(true);
+      // Un visiteur sans compte reste en mode démo (si la démo est autorisée)
+      setIsDemoMode(DEMO_ALLOWED);
       return;
     }
 
@@ -88,7 +92,7 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
   return (
     <DemoModeContext.Provider
       value={{
-        isDemoMode: mounted ? isDemoMode : true,
+        isDemoMode: mounted ? isDemoMode : DEMO_ALLOWED,
         isGuest: mounted ? isGuest : true,
         toggleDemoMode,
         session,

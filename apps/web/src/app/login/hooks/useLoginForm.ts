@@ -41,17 +41,25 @@ export function useLoginForm(): UseLoginFormReturn {
   }, []);
 
   const handleQuickFillAdmin = useCallback(() => {
-    setFormData({
-      email: 'admin@farsi.dz',
-      password: 'Admin@2027!',
-      tenantSlug: 'entreprise-bth',
-      rememberMe: true,
-    });
-    setError(null);
-    setIsOfflineError(false);
+    // Raccourci réservé au développement local : le bloc est supprimé du bundle de production
+    // (Next.js remplace process.env.NODE_ENV au build), aucun identifiant n'est embarqué.
+    if (process.env.NODE_ENV !== 'production') {
+      setFormData({
+        email: 'admin@farsi.dz',
+        password: 'Admin@2027!',
+        tenantSlug: 'entreprise-bth',
+        rememberMe: true,
+      });
+      setError(null);
+      setIsOfflineError(false);
+    }
   }, []);
 
   const handleEnterDemoMode = useCallback(() => {
+    // Mode démo : actif en développement, ou en production uniquement si NEXT_PUBLIC_ENABLE_DEMO_MODE=true.
+    const demoEnabled =
+      process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === 'true';
+    if (!demoEnabled) return;
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('df_demo_mode_active', 'true');
     }

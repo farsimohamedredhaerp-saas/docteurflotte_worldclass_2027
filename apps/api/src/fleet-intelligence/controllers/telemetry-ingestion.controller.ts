@@ -26,6 +26,13 @@ export class TelemetryIngestionController {
 
   private verifyWebhookSecret(providedToken: string | undefined, expectedSecret: string | undefined, sourceName: string): void {
     if (!expectedSecret) {
+      // Fail-closed en production : sans secret configuré, le webhook est refusé
+      // (sinon n'importe qui pourrait injecter de la télémétrie).
+      if (process.env.NODE_ENV === 'production') {
+        throw new UnauthorizedException(
+          `Webhook ${sourceName} désactivé : secret non configuré côté serveur.`,
+        );
+      }
       return;
     }
     if (!providedToken) {

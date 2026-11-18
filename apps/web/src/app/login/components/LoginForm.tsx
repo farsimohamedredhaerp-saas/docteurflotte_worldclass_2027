@@ -26,6 +26,9 @@ export function LoginForm({ form }: LoginFormProps) {
     handleEnterDemoMode,
   } = form;
 
+  const demoEnabled =
+    process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === 'true';
+
   return (
     <div>
       {error && (
@@ -46,7 +49,7 @@ export function LoginForm({ form }: LoginFormProps) {
             <span>{error}</span>
           </div>
 
-          {isOfflineError && (
+          {isOfflineError && demoEnabled && (
             <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(239, 68, 68, 0.2)' }}>
               <button
                 type="button"

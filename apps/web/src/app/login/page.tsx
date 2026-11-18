@@ -14,7 +14,9 @@ const LegacyLoginPage = dynamic(
 );
 
 export default function LoginPage() {
-  const isRefactorEnabled = process.env.NEXT_PUBLIC_FF_REFACTOR_LOGIN !== 'false';
+  // En production, l'ancienne page de login (qui embarque un raccourci admin) n'est jamais servie.
+  const isRefactorEnabled =
+    process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_FF_REFACTOR_LOGIN !== 'false';
   const form = useLoginForm();
 
   if (!isRefactorEnabled) {

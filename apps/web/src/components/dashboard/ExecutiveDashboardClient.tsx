@@ -9,8 +9,8 @@ import { Button } from '../Button';
 import { ApiStatusPanel } from '../ApiStatusPanel';
 import { HighDensityKpiGrid, KpiMetricItem } from '../density/HighDensityKpiGrid';
 import { FleetHighDensityTable, FleetUnitRecord, VehicleOperationalStatus } from '../density/FleetHighDensityTable';
-import { TrendChart, DataPoint, SeriesConfig, CostArbitrationBars, CostArbitrationItem } from '../ui';
-import { SEED_FLEET_UNITS } from '../../lib/simulation-sandbox/fleet-table.mock';
+import { TrendChart, SeriesConfig, CostArbitrationBars } from '../ui';
+import type { ExecutiveDashboardDemoData } from '../../lib/simulation-sandbox/executive-dashboard.mock';
 import { useDemoMode } from '../../context/DemoModeContext';
 import { AuthClient } from '../../lib/api-auth';
 import { AssetClient } from '../../lib/api-assets';
@@ -30,7 +30,7 @@ import {
   IconTruck,
 } from '../navigation/TechIcons';
 
-interface DecisionItem {
+export interface DecisionItem {
   id: string;
   assetId: string;
   assetName: string;
@@ -98,117 +98,6 @@ function mapAssetToFleetUnit(asset: Asset, idx: number): FleetUnitRecord {
   };
 }
 
-const INITIAL_DECISIONS: DecisionItem[] = [
-  {
-    id: 'DEC-001',
-    assetId: 'PL-16-042-DZ',
-    assetName: 'Tracteur Routier Scania R450',
-    assetCategory: 'Poids Lourds',
-    urgency: 'danger',
-    anomalyTitle: 'Échéance de révision critique dépassée (+1 250 km)',
-    anomalyDescription:
-      'Le compteur kilométrique validé (181 250 km) a franchi le seuil de vidange moteur et remplacement filtre. Risque d\'usure prématurée du turbocompresseur en cas de maintien en mission.',
-    costEstimate: '68 000 DA',
-    costInactionEstimate: '380 000 DA (Casse turbo/moteur)',
-    confidenceScore: 98,
-    isDemo: true,
-    telemetryDetails: {
-      lastPing: '< 45s',
-      ignition: 'ON',
-      gpsFix: true,
-      currentSpeed: 72,
-    },
-  },
-  {
-    id: 'DEC-002',
-    assetId: 'ENG-23-018-DZ',
-    assetName: 'Pelle Hydraulique Caterpillar 320D',
-    assetCategory: 'Engins BTP',
-    urgency: 'warning',
-    anomalyTitle: 'Seuil de maintenance hydraulique atteint (512 h / 500 h)',
-    anomalyDescription:
-      'L\'analyse du compteur horaire télématique indique un franchissement du cycle préventif de filtration hydraulique. Intervention recommandée sous 48h pour éviter l\'immobilisation sur chantier.',
-    costEstimate: '45 000 DA',
-    costInactionEstimate: '290 000 DA (Arrêt de chantier)',
-    confidenceScore: 96,
-    isDemo: true,
-    telemetryDetails: {
-      lastPing: '< 1 min',
-      ignition: 'ON',
-      gpsFix: true,
-      currentSpeed: 0,
-    },
-  },
-  {
-    id: 'DEC-003',
-    assetId: 'VL-09-114-DZ',
-    assetName: 'Toyota Hilux 2.4 D-4D',
-    assetCategory: 'Véhicules Légers',
-    urgency: 'info',
-    anomalyTitle: 'Permutation et contrôle géométrie pneumatiques',
-    anomalyDescription:
-      'Recommandation préventive suite à un différentiel de consommation et 20 000 km parcourus depuis la dernière inspection du train roulant.',
-    costEstimate: '18 000 DA',
-    confidenceScore: 94,
-    isDemo: true,
-    telemetryDetails: {
-      lastPing: '< 3 min',
-      ignition: 'OFF',
-      gpsFix: true,
-      currentSpeed: 0,
-    },
-  },
-];
-
-const DEMO_ARBITRATIONS: CostArbitrationItem[] = [
-  {
-    id: 'arb-001',
-    assetLabel: 'Scania R450 (02319-122-31) — A1 Oran',
-    actionCostDzd: 68000,
-    inactionRiskDzd: 380000,
-    breakdown: {
-      mechanicalDamageDzd: 280000,
-      towingCostDzd: 35000,
-      downtimeLossDzd: 65000,
-    },
-    preventiveActionLabel: 'Vidange Arrhenius + Remplacement Filtre Huile',
-  },
-  {
-    id: 'arb-002',
-    assetLabel: 'CAT 336D2 L (ENG-336-030) — Chantier Hassi Messaoud',
-    actionCostDzd: 45000,
-    inactionRiskDzd: 410000,
-    breakdown: {
-      mechanicalDamageDzd: 260000,
-      towingCostDzd: 75000,
-      downtimeLossDzd: 75000,
-    },
-    preventiveActionLabel: 'Filtration Hydraulique & Analyse Particules',
-  },
-  {
-    id: 'arb-003',
-    assetLabel: 'Shacman X3000 (09124-118-23) — Port Annaba',
-    actionCostDzd: 38000,
-    inactionRiskDzd: 295000,
-    breakdown: {
-      mechanicalDamageDzd: 210000,
-      towingCostDzd: 35000,
-      downtimeLossDzd: 50000,
-    },
-    preventiveActionLabel: 'Régénération Forcée FAP + Remplacement Sonde',
-  },
-];
-
-const FLEET_TREND_DATA: DataPoint[] = [
-  { timestamp: '15 Oct', vhiScore: 89, fuelL100: 34.2 },
-  { timestamp: '20 Oct', vhiScore: 87, fuelL100: 33.8 },
-  { timestamp: '25 Oct', vhiScore: 88, fuelL100: 33.1 },
-  { timestamp: '30 Oct', vhiScore: 86, fuelL100: 32.5 },
-  { timestamp: '05 Nov', vhiScore: 91, fuelL100: 32.0 },
-  { timestamp: '10 Nov', vhiScore: 93, fuelL100: 31.8 },
-  { timestamp: '15 Nov', vhiScore: 95, fuelL100: 31.4 },
-];
-
 const FLEET_SERIES: SeriesConfig[] = [
   { key: 'vhiScore', label: 'Indice Santé Flotte (VHI / 100)', unit: 'pts', colorVar: 'var(--df-chart-1)' },
   { key: 'fuelL100', label: 'Conso Moyenne (L/100km)', unit: 'L', colorVar: 'var(--df-chart-2)' },
@@ -222,13 +111,33 @@ export function ExecutiveDashboardClient() {
   const [decisions, setDecisions] = useState<DecisionItem[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'PL' | 'BTP' | 'VL'>('ALL');
   const [notification, setNotification] = useState<string | null>(null);
+  const [demoData, setDemoData] = useState<ExecutiveDashboardDemoData | null>(null);
+  // Démo : active en développement, ou en production uniquement si NEXT_PUBLIC_ENABLE_DEMO_MODE=true.
+  const demoEnabled =
+    process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === 'true';
+
+  // Les données de démonstration sont chargées à la demande (hors bundle principal).
+  useEffect(() => {
+    if (!isDemoMode) {
+      setDemoData(null);
+      return undefined;
+    }
+    let cancelled = false;
+    import('../../lib/simulation-sandbox/executive-dashboard.mock').then((mod) => {
+      if (cancelled) return;
+      setDemoData(mod.EXECUTIVE_DEMO_DATA);
+      setDecisions(mod.EXECUTIVE_DEMO_DATA.decisions);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isDemoMode]);
 
   useEffect(() => {
     const s = AuthClient.getSession();
     setSession({ token: s.token, tenantName: s.tenant?.name });
 
     if (isDemoMode) {
-      setDecisions(INITIAL_DECISIONS);
       setIsLoadingAssets(false);
       return;
     }
@@ -272,7 +181,7 @@ export function ExecutiveDashboardClient() {
   };
 
   const handleResetDemo = () => {
-    setDecisions(INITIAL_DECISIONS);
+    if (demoData) setDecisions(demoData.decisions);
     setNotification('Données de démonstration réinitialisées avec succès.');
     setTimeout(() => setNotification(null), 4000);
   };
@@ -287,80 +196,7 @@ export function ExecutiveDashboardClient() {
 
   const metrics = useMemo<KpiMetricItem[]>(() => {
     if (isDemoMode) {
-      return [
-        {
-          id: 'active_assets',
-          label: 'Unités en Mission Active',
-          value: '142',
-          unit: '/ 160',
-          trend: { value: '+4.2%', isPositive: true, label: 'vs hier' },
-          status: 'nominal',
-          iconType: 'fleet',
-        },
-        {
-          id: 'live_telemetry_flow',
-          label: 'Flux CAN-bus / Télémétrie',
-          value: '99.8',
-          unit: '%',
-          trend: { value: '< 24ms', isPositive: true, label: 'latence p95' },
-          status: 'nominal',
-          iconType: 'activity',
-        },
-        {
-          id: 'critical_dtc_alerts',
-          label: 'Codes Défauts Critiques (DTC)',
-          value: '3',
-          unit: 'actifs',
-          trend: { value: '-2', isPositive: true, label: 'depuis 24h' },
-          status: 'critical',
-          iconType: 'alert',
-        },
-        {
-          id: 'roi_preventive_savings',
-          label: 'Économie Nette Préventive',
-          value: '1 420 000',
-          unit: 'DA',
-          trend: { value: '+340 000 DA', isPositive: true, label: 'ce mois' },
-          status: 'nominal',
-          iconType: 'compliance',
-        },
-        {
-          id: 'fuel_theft_cusum',
-          label: 'Anti-Fraude CUSUM (Naftal)',
-          value: '0 Vol',
-          unit: 'CUSUM OK',
-          trend: { value: '100%', isPositive: true, label: 'pleins réconciliés' },
-          status: 'nominal',
-          iconType: 'fuel',
-        },
-        {
-          id: 'fuel_efficiency',
-          label: 'Conso Moyenne Flotte',
-          value: '31.4',
-          unit: 'L/100km',
-          trend: { value: '-1.8%', isPositive: true, label: 'optimisé' },
-          status: 'nominal',
-          iconType: 'fuel',
-        },
-        {
-          id: 'preventive_due_soon',
-          label: 'Échéances Préventives (< 48h)',
-          value: '7',
-          unit: 'engins',
-          trend: { value: '+3', isPositive: false, label: 'horamètre BTPH' },
-          status: 'warning',
-          iconType: 'maintenance',
-        },
-        {
-          id: 'dto_availability_rate',
-          label: 'Disponibilité Technique (DTO)',
-          value: '94.6',
-          unit: '%',
-          trend: { value: '+0.8%', isPositive: true, label: 'SLA garanti' },
-          status: 'nominal',
-          iconType: 'compliance',
-        },
-      ];
+      return demoData ? demoData.metrics : [];
     }
 
     const total = assets.length;
@@ -442,12 +278,12 @@ export function ExecutiveDashboardClient() {
         iconType: 'compliance',
       },
     ];
-  }, [isDemoMode, assets]);
+  }, [isDemoMode, assets, demoData]);
 
   const tableUnits = useMemo<FleetUnitRecord[]>(() => {
-    if (isDemoMode) return SEED_FLEET_UNITS;
+    if (isDemoMode) return demoData ? demoData.fleetUnits : [];
     return assets.map((a, idx) => mapAssetToFleetUnit(a, idx));
-  }, [isDemoMode, assets]);
+  }, [isDemoMode, assets, demoData]);
 
   return (
     <div className="min-h-screen bg-[var(--df-bg-canvas)] text-[var(--df-text-main)] transition-colors duration-[var(--df-dur-base,200ms)]">
@@ -639,30 +475,32 @@ export function ExecutiveDashboardClient() {
                   <IconFuel size={15} className="text-amber-500" />
                   <span>Scanner Reçu Naftal (Mode 0)</span>
                 </Link>
+                {demoEnabled && (
                 <button
                   onClick={() => toggleDemoMode(true)}
                   className="inline-flex items-center gap-2 px-3 py-2.5 rounded-[var(--df-radius-sm,6px)] bg-[var(--df-status-warning-bg)] text-[var(--df-status-warning-text)] text-xs font-semibold border border-[var(--df-status-warning-border)] transition-colors cursor-pointer"
                 >
                   <span>Explorer la Démo 58 Wilayas</span>
                 </button>
+                )}
               </div>
             </div>
           </section>
-        ) : (
+        ) : isDemoMode && demoData ? (
           <section className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Graphique temporel Recharts/SVG unifié */}
             <TrendChart
               title="Tendance Télématique & Santé Flotte (30 Jours)"
               subtitle="Indice composite VHI vs Consommation moyenne aux 100 km"
-              data={FLEET_TREND_DATA}
+              data={demoData.trendData}
               series={FLEET_SERIES}
               height={270}
             />
 
             {/* Actuariat Financier SAD -> ADS DZD */}
-            <CostArbitrationBars items={DEMO_ARBITRATIONS} />
+            <CostArbitrationBars items={demoData.arbitrations} />
           </section>
-        )}
+        ) : null}
 
         {/* 5. PARADIGME INDUSTRIEL : LES 5 GÉNÉRATIONS DE MAINTENANCE */}
         <section className="mb-8 rounded-[var(--df-radius-xl,14px)] border border-[var(--df-border-subtle)] bg-[var(--df-bg-surface-1)] p-5 sm:p-6 shadow-[var(--df-shadow-sm)]">
