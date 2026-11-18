@@ -66,3 +66,4 @@ export interface LegalIdentityProfile {
     readonly sectorActivityCode?: string;                      // Code d'activité CNRC / NAA
   };
 }
+

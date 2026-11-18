@@ -84,3 +84,4 @@ export interface BusinessParameterDefinition {
   readonly tenantOverridable: boolean;
   readonly descriptionFr?: string;
 }
+

@@ -421,3 +421,4 @@ export const DZ_BUSINESS_DEFAULTS_PACK: Record<string, BusinessParameterDefiniti
     descriptionFr: 'Perte d\'exploitation journalière en cas de panne mécanique non anticipée',
   },
 };
+

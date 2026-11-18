@@ -29,6 +29,7 @@ import { EngineRulesModule } from './engine-rules/engine-rules.module';
 import { SaharanAgricultureModule } from './saharan-agriculture/saharan-agriculture.module';
 import { MiningQuarriesModule } from './mining-quarries/mining-quarries.module';
 import { TmdAdrModule } from './tmd-adr/tmd-adr.module';
+import { RegulatoryStudioModule } from './regulatory-studio/regulatory-studio.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { TmdAdrModule } from './tmd-adr/tmd-adr.module';
     SaharanAgricultureModule,
     MiningQuarriesModule,
     TmdAdrModule,
+    RegulatoryStudioModule,
   ],
 })
 export class AppModule {}
