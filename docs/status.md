@@ -53,10 +53,10 @@
 
 ## 3. Métrologie de Qualité & Conformité (Preuves Factuelles)
 
-- **Suites de Tests Automatisés :** **719 tests au vert (100% PASS)**
+- **Suites de Tests Automatisés :** **721 tests au vert (100% PASS)**
   - `@docteurflotte/decision-engine` : 15 suites, 139 tests
   - `@docteurflotte/api` : 59 suites, 432 tests
-  - `@docteurflotte/web` : 25 suites, 138 tests
+  - `@docteurflotte/web` : 25 suites, 140 tests
   - `@docteurflotte/client` : 1 suite, 6 tests
   - `@docteurflotte/rule-studio` : 1 suite, 4 tests
 - **Étanchéité Multi-Tenant (RLS) :** **100%** des tables avec `tenant_id` (69/69) ont `rowsecurity = true` et fail-closed sous le rôle `df_tenant_role`.
