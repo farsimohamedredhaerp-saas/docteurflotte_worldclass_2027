@@ -213,3 +213,4 @@ describe('RegulatoryStudioService — Contrôle & Administration des RegPacks', 
     expect(state.getParameterDecimal('CASNOS_ASSIETTE_MINIMALE').toFixed(2)).toBe('288000.00');
   });
 });
+

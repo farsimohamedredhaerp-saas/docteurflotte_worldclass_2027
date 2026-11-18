@@ -12,3 +12,4 @@ import { RegulatoryStudioService } from './regulatory-studio.service';
   exports: [RegulatoryStudioService],
 })
 export class RegulatoryStudioModule {}
+

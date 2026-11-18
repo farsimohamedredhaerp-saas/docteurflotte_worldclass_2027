@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SetupStepper } from '../../components/setup/SetupStepper';
 import { PackSelector } from '../../components/setup/PackSelector';
+import { RegimeArbitrageStep } from '../../components/setup/RegimeArbitrageStep';
 import { AuthClient } from '../../lib/api-auth';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
@@ -19,6 +20,9 @@ export default function SetupPage() {
 
   // État de la configuration
   const [activityPack, setActivityPack] = useState<ActivityPack>(ActivityPack.TRANSPORT);
+  const [taxRegime, setTaxRegime] = useState<string>('SARL_EURL_IBS');
+  const [legalPersonalityType, setLegalPersonalityType] = useState<'PERSONNE_PHYSIQUE' | 'PERSONNE_MORALE'>('PERSONNE_MORALE');
+  const [legalForm, setLegalForm] = useState<string>('SARL');
   const [measurementSystem, setMeasurementSystem] = useState<'METRIC' | 'IMPERIAL'>('METRIC');
   const [currency, setCurrency] = useState('DZD');
   const [enableDemoData, setEnableDemoData] = useState(false);
@@ -53,6 +57,9 @@ export default function SetupPage() {
           measurementSystem,
           currency,
           enableDemoData,
+          legalPersonalityType,
+          taxRegime,
+          legalForm,
         },
         token,
       );
@@ -131,7 +138,7 @@ export default function SetupPage() {
             Configuration Initiale du Parc
           </h1>
           <p style={{ fontSize: '14px', color: 'var(--df-text-secondary)', margin: 0 }}>
-            Personnalisez votre console décisionnelle en 3 étapes sans écran blanc
+            Personnalisez votre console décisionnelle en 4 étapes sans écran blanc
           </p>
         </div>
 
@@ -181,11 +188,27 @@ export default function SetupPage() {
             </div>
           )}
 
-          {/* Étape 2 : Métrologie & Devise */}
+          {/* Étape 2 : Régime Juridique & Fiscal Algérien */}
           {currentStep === 2 && (
+            <RegimeArbitrageStep
+              activityPack={activityPack}
+              token={token}
+              selectedRegime={taxRegime}
+              legalPersonalityType={legalPersonalityType}
+              legalForm={legalForm}
+              onSelectRegime={(reg) => {
+                setTaxRegime(reg.regimeCode);
+                setLegalPersonalityType(reg.personalityType);
+                setLegalForm(reg.legalForm);
+              }}
+            />
+          )}
+
+          {/* Étape 3 : Métrologie & Devise */}
+          {currentStep === 3 && (
             <div>
               <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '8px' }}>
-                Étape 2 : Unités Métrologiques & Devise de Référence
+                Étape 3 : Unités Métrologiques & Devise de Référence
               </h2>
               <p style={{ fontSize: '14px', color: 'var(--df-text-muted)', marginBottom: '24px' }}>
                 Définissez les standards de calcul pour le TCO, les coûts d&apos;inaction et les relevés de capteurs.
@@ -263,11 +286,11 @@ export default function SetupPage() {
             </div>
           )}
 
-          {/* Étape 3 : Mode d'Activation & Démo */}
-          {currentStep === 3 && (
+          {/* Étape 4 : Mode d'Activation & Démo */}
+          {currentStep === 4 && (
             <div>
               <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--df-text-main)', marginBottom: '8px' }}>
-                Étape 3 : Mode de Démarrage & Données Démo
+                Étape 4 : Mode de Démarrage & Données Démo
               </h2>
               <p style={{ fontSize: '14px', color: 'var(--df-text-muted)', marginBottom: '24px' }}>
                 Conformément à la règle <em>Activation-First</em>, démarrez immédiatement avec des exemples concrets ou commencez avec vos données.
@@ -343,40 +366,40 @@ export default function SetupPage() {
           )}
         </div>
 
-          {/* Boutons de navigation */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            {currentStep > 1 ? (
-              <Button
-                variant="outline"
-                size="md"
-                onClick={() => setCurrentStep(currentStep - 1)}
-              >
-                ← Précédent
-              </Button>
-            ) : <div />}
+        {/* Boutons de navigation */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+          {currentStep > 1 ? (
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => setCurrentStep(currentStep - 1)}
+            >
+              ← Précédent
+            </Button>
+          ) : <div />}
 
-            {currentStep < 3 ? (
-              <Button
-                variant="primary"
-                size="md"
-                onClick={() => setCurrentStep(currentStep + 1)}
-              >
-                Suivant →
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                size="lg"
-                isLoading={isLoading}
-                onClick={handleFinishSetup}
-                style={{ backgroundColor: 'var(--df-status-ok)', borderColor: 'var(--df-status-ok)' }}
-              >
-                {isLoading ? 'Activation en cours...' : 'Finaliser & Accéder au Tableau de Bord'}
-              </Button>
-            )}
-          </div>
+          {currentStep < 4 ? (
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => setCurrentStep(currentStep + 1)}
+            >
+              Suivant →
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              size="lg"
+              isLoading={isLoading}
+              onClick={handleFinishSetup}
+              style={{ backgroundColor: 'var(--df-status-ok)', borderColor: 'var(--df-status-ok)' }}
+            >
+              {isLoading ? 'Activation en cours...' : 'Finaliser & Accéder au Tableau de Bord'}
+            </Button>
+          )}
         </div>
       </div>
     </div>
+  </div>
   );
 }

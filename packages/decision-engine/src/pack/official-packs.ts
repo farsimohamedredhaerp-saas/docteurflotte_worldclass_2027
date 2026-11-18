@@ -383,7 +383,14 @@ export const DZ_LF_2027_DRAFT: RegPackDefinition = {
  * Administré par le SuperAdmin avec plages de tolérance [Min, Max]
  * et personnalisable par le Tenant dans sa plage autorisée.
  */
+export const ALL_OFFICIAL_REG_PACKS: RegPackDefinition[] = [
+  DZ_LF_2025_OFFICIAL,
+  DZ_LF_2026_OFFICIAL,
+  DZ_LF_2027_DRAFT,
+];
+
 export const DZ_BUSINESS_DEFAULTS_PACK: Record<string, BusinessParameterDefinition> = {
+
   FLEET_TOWING_FORFAIT_SUD_DZD: {
     parameterKey: 'FLEET_TOWING_FORFAIT_SUD_DZD',
     labelFr: 'Forfait de remorquage lourd - Wilayas du Sud / Sahara',

@@ -81,6 +81,9 @@ export interface TenantSetupDto {
   measurementSystem: 'METRIC' | 'IMPERIAL';
   currency: string;
   enableDemoData: boolean;
+  legalPersonalityType?: 'PERSONNE_PHYSIQUE' | 'PERSONNE_MORALE';
+  taxRegime?: string;
+  legalForm?: string;
 }
 
 export interface TenantSetupResponse {

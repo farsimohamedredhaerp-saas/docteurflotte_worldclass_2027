@@ -19,11 +19,17 @@ import {
   TenantSettings,
   TenantSetupResponse,
 } from '@docteurflotte/contracts';
+import { RegulatoryStudioService } from '../regulatory-studio/regulatory-studio.service';
+import { RegimeArbitrageDto } from '../regulatory-studio/dto/regulatory-studio.dto';
+import { RegimeArbitrageEvaluation } from '@docteurflotte/decision-engine';
 
 @Controller('tenants')
 @UseGuards(JwtAuthGuard)
 export class TenantsController {
-  constructor(private readonly tenantsService: TenantsService) { }
+  constructor(
+    private readonly tenantsService: TenantsService,
+    private readonly regulatoryStudioService: RegulatoryStudioService,
+  ) { }
 
   @Post('setup')
   @HttpCode(HttpStatus.OK)
@@ -59,5 +65,21 @@ export class TenantsController {
   @HttpCode(HttpStatus.OK)
   async purgeDemo(@Req() req: AuthenticatedRequest): Promise<PurgeDemoDataResponse> {
     return this.tenantsService.purgeDemoData(req.tenantId);
+  }
+
+  /**
+   * Simuler l'arbitrage prescriptif des 4 régimes fiscaux pour une organisation connectée
+   */
+  @Post('arbitrage-regimes')
+  @HttpCode(HttpStatus.OK)
+  async simulateRegimeArbitrage(
+    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    dto: RegimeArbitrageDto,
+  ): Promise<RegimeArbitrageEvaluation> {
+    const fiscalYear = dto.fiscalYear || new Date().getFullYear();
+    return this.regulatoryStudioService.evaluateRegimeArbitrage({
+      ...dto,
+      fiscalYear,
+    });
   }
 }

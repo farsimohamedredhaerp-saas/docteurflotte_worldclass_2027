@@ -24,6 +24,9 @@ import {
   RegPackResolver,
   RegPackService,
   RegPackStatus,
+  RegimeArbitrageEngine,
+  RegimeArbitrageInput,
+  RegimeArbitrageEvaluation,
   ResolvedPackState,
   VerificationStatus,
 } from '@docteurflotte/decision-engine';
@@ -436,5 +439,13 @@ export class RegulatoryStudioService {
     };
 
     return RegPackResolver.resolve(allPacks, query);
+  }
+
+  /**
+   * Évalue et arbitre les régimes fiscaux pour un entrepreneur ou une organisation
+   */
+  evaluateRegimeArbitrage(input: RegimeArbitrageInput, asOf?: string): RegimeArbitrageEvaluation {
+    const state = this.resolveActiveState(asOf);
+    return RegimeArbitrageEngine.evaluate(input, state);
   }
 }

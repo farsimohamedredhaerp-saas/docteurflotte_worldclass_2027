@@ -70,17 +70,30 @@ export class TenantsService {
       }
 
       // Mise à jour des paramètres RLS du tenant
-      const settingsRes = await client.query(
-        `UPDATE tenant_settings
+      let updateSettingsQuery = `UPDATE tenant_settings
          SET activity_pack = $1,
              measurement_system = $2,
              currency = $3,
              is_setup_completed = true,
-             updated_at = NOW()
-         WHERE tenant_id = $4
-         RETURNING *`,
-        [dto.activityPack, dto.measurementSystem, dto.currency.toUpperCase(), tenantId],
-      );
+             updated_at = NOW()`;
+      const settingsParams: any[] = [dto.activityPack, dto.measurementSystem, dto.currency.toUpperCase()];
+
+      if (dto.taxRegime || dto.legalPersonalityType || dto.legalForm) {
+        updateSettingsQuery += `, branding = COALESCE(branding, '{}'::jsonb) || $4::jsonb WHERE tenant_id = $5 RETURNING *`;
+        settingsParams.push(
+          JSON.stringify({
+            legalPersonalityType: dto.legalPersonalityType,
+            taxRegime: dto.taxRegime,
+            legalForm: dto.legalForm,
+          }),
+          tenantId,
+        );
+      } else {
+        updateSettingsQuery += ` WHERE tenant_id = $4 RETURNING *`;
+        settingsParams.push(tenantId);
+      }
+
+      const settingsRes = await client.query(updateSettingsQuery, settingsParams);
 
       const tRow = tenantRes.rows[0];
       const sRow = settingsRes.rows[0];

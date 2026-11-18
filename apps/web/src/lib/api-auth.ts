@@ -9,6 +9,8 @@ import {
   UpdateTenantSettingsDto,
   PurgeDemoDataResponse,
   UserProfileResponse,
+  RegimeArbitrageInputDto,
+  RegimeArbitrageEvaluation,
 } from '@docteurflotte/contracts';
 
 export interface NavbarSession {
@@ -120,6 +122,26 @@ export class AuthClient {
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.message || 'Échec de la purge des données de démo.');
+    }
+    return data;
+  }
+
+  static async simulateRegimeArbitrage(
+    dto: RegimeArbitrageInputDto,
+    token: string,
+  ): Promise<RegimeArbitrageEvaluation> {
+    const res = await fetch(`${API_BASE_URL}/tenants/arbitrage-regimes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(dto),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || 'Échec de la simulation d’arbitrage fiscal.');
     }
     return data;
   }

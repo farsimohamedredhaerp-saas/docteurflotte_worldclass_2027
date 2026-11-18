@@ -14,6 +14,7 @@ import { PlatformAdminGuard } from '../admin/guards/platform-admin.guard';
 import {
   CloneRegPackDto,
   PublishRegPackDto,
+  RegimeArbitrageDto,
   SimulateRegPackDto,
   UpdateRegulatoryParameterDto,
 } from './dto/regulatory-studio.dto';
@@ -22,7 +23,7 @@ import {
   PackSummary,
   SimulationResult,
 } from './regulatory-studio.service';
-import { RegPackDefinition } from '@docteurflotte/decision-engine';
+import { RegPackDefinition, RegimeArbitrageEvaluation } from '@docteurflotte/decision-engine';
 
 @Controller('api/v1/superadmin/regulatory-packs')
 @UseGuards(JwtAuthGuard, PlatformAdminGuard)
@@ -115,4 +116,18 @@ export class RegulatoryStudioController {
   ): RegPackDefinition {
     return this.studioService.publish(packCode, dto);
   }
+
+  /**
+   * Simuler l'arbitrage prescriptif des 4 régimes fiscaux pour une organisation
+   */
+  @Post('arbitrage-regimes')
+  simulateRegimeArbitrage(
+    @Body() dto: RegimeArbitrageDto
+  ): RegimeArbitrageEvaluation {
+    return this.studioService.evaluateRegimeArbitrage({
+      ...dto,
+      fiscalYear: dto.fiscalYear || new Date().getFullYear(),
+    });
+  }
 }
+

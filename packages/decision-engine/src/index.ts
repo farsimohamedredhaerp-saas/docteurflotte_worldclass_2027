@@ -39,6 +39,7 @@ export * from './dgi/ibs-engine';
 export * from './dgi/tva-engine';
 export * from './dgi/tap-engine';
 export * from './dgi/ifu-anae-engine';
+export * from './dgi/regime-arbitrage-engine';
 export * from './dgi/tax-audit-simulator';
 export * from './audit';
 export * from './management';

@@ -8,8 +8,9 @@ interface SetupStepperProps {
 export const SetupStepper: React.FC<SetupStepperProps> = ({ currentStep }) => {
   const steps = [
     { num: 1, title: 'Pack Métier' },
-    { num: 2, title: 'Métrologie & Devise' },
-    { num: 3, title: 'Activation' },
+    { num: 2, title: 'Régime Fiscal & Statut' },
+    { num: 3, title: 'Métrologie & Devise' },
+    { num: 4, title: 'Activation' },
   ];
 
   return (

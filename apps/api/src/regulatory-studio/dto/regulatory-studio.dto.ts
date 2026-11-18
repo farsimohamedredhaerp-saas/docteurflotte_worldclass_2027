@@ -1,11 +1,14 @@
 import {
   IsArray,
-  IsEnum,
+  IsIn,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
+  Min,
 } from 'class-validator';
 import {
+  ActivitySectorCategory,
   ParameterUnit,
   RegulatoryParameterType,
   TrancheDefinition,
@@ -107,3 +110,38 @@ export class PublishRegPackDto {
   @IsOptional()
   approverEmail?: string;
 }
+
+export class RegimeArbitrageDto {
+  @IsOptional()
+  @IsNumber()
+  fiscalYear?: number;
+
+  @IsString()
+  @IsIn(['SERVICES', 'COMMERCE', 'PRODUCTION', 'BTPH'])
+  activityCategory!: ActivitySectorCategory;
+
+  @IsString()
+  @IsNotEmpty()
+  projectedAnnualRevenueGoods!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  projectedAnnualRevenueServices!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  operatingExpenses!: string;
+
+  @IsNumber()
+  @Min(0)
+  employeeCount!: number;
+
+  @IsString()
+  @IsNotEmpty()
+  totalGrossPayroll!: string;
+
+  @IsOptional()
+  @IsString()
+  desiredManagerRemuneration?: string;
+}
+

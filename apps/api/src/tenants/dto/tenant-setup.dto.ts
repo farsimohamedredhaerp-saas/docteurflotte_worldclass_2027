@@ -1,4 +1,4 @@
-import { IsBoolean, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ActivityPack, TenantSetupDto as ITenantSetupDto } from '@docteurflotte/contracts';
 
 export class TenantSetupDto implements ITenantSetupDto {
@@ -16,4 +16,16 @@ export class TenantSetupDto implements ITenantSetupDto {
 
   @IsBoolean()
   enableDemoData!: boolean;
+
+  @IsOptional()
+  @IsString()
+  legalPersonalityType?: 'PERSONNE_PHYSIQUE' | 'PERSONNE_MORALE';
+
+  @IsOptional()
+  @IsString()
+  taxRegime?: string;
+
+  @IsOptional()
+  @IsString()
+  legalForm?: string;
 }
