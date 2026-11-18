@@ -158,3 +158,4 @@ export class MiningClient {
     return res.json();
   }
 }
+

@@ -28,6 +28,7 @@ import { TcoProfitabilityModule } from './tco-profitability/tco-profitability.mo
 import { EngineRulesModule } from './engine-rules/engine-rules.module';
 import { SaharanAgricultureModule } from './saharan-agriculture/saharan-agriculture.module';
 import { MiningQuarriesModule } from './mining-quarries/mining-quarries.module';
+import { TmdAdrModule } from './tmd-adr/tmd-adr.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { MiningQuarriesModule } from './mining-quarries/mining-quarries.module';
     TcoProfitabilityModule,
     SaharanAgricultureModule,
     MiningQuarriesModule,
+    TmdAdrModule,
   ],
 })
 export class AppModule {}

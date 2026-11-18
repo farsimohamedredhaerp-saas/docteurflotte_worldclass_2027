@@ -21,6 +21,7 @@ export * from './chantiers.mock';
 export * from './cold-chain.mock';
 export * from './agriculture.mock';
 export * from './mining.mock';
+export * from './tmd.mock';
 
 /**
  * Chargeurs asynchrones avec dynamic import pour code-splitting optimal (Tree-Shaking garanti en production).
@@ -152,6 +153,16 @@ export async function getSimulationMiningData() {
     cycles: mod.MOCK_SANDBOX_HAULING_CYCLES,
   };
 }
+
+export async function getSimulationTmdData() {
+  const mod = await import('./tmd.mock');
+  return {
+    drivers: mod.MOCK_SANDBOX_TMD_DRIVERS,
+    compartments: mod.MOCK_SANDBOX_TANKER_COMPARTMENTS,
+    missions: mod.MOCK_SANDBOX_TMD_MISSIONS,
+  };
+}
+
 
 
 

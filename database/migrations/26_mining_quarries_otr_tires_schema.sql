@@ -126,3 +126,4 @@ CREATE POLICY dumper_hauling_cycles_tenant_isolation ON dumper_hauling_cycles
     );
 
 COMMIT;
+

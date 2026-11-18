@@ -62,6 +62,12 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
         badge: 'MINES OTR',
       },
       {
+        title: 'Transport TMD & Hydrocarbures',
+        desc: 'Citernes 36 000L Magyar, brevets TMD DTW, tests APAVE et vannes géofencées.',
+        href: '/tmd',
+        badge: 'TMD DÉCRET',
+      },
+      {
         title: 'Compteurs & Métrologie',
         desc: 'Suivi kilométrique, heures moteur et cycles sans saut négatif.',
         href: '/assets',

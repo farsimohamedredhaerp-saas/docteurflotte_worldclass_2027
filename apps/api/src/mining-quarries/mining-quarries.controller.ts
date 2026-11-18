@@ -112,3 +112,4 @@ export class MiningQuarriesController {
     return this.haulingService.recordCycle(tenantId, dto);
   }
 }
+

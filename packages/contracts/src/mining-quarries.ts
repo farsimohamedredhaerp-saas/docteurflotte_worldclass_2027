@@ -130,3 +130,4 @@ export interface RecordHaulingCycleDto {
   ambientTempC?: number;
   nominalTkph?: number;
 }
+

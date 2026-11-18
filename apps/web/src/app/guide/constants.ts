@@ -24,7 +24,7 @@ export const SECTIONS: DocSection[] = [
   { id: 'tech-innovations', title: '5. Innovations Technologiques de Rupture (Monopole 0 $ / 0 DA)', badge: 'BREVETABLE', Icon: IconZap },
   { id: 'ai-sovereign', title: '6. IA Souveraine & Les 7 Piliers d\'Observabilité', badge: '7 PILIERS IA', Icon: IconSparkles },
   { id: 'digital-twin', title: '7. Jumeau Numérique & Multi-Climats', badge: 'STRESS 58 WILAYAS', Icon: IconRadio },
-  { id: 'field-modules', title: '8. Télémétrie Terrain : Naftal, Froid, Dispatch', badge: 'OPÉRATIONNEL', Icon: IconBox },
+  { id: 'field-modules', title: '8. Télémétrie & 5 Métiers Stratégiques Algériens', badge: 'MULTI-MÉTIERS DZ', Icon: IconBox },
   { id: 'tech-architecture', title: '9. Architecture Système & Pipeline', badge: 'FULL-STACK', Icon: IconTerminal },
   { id: 'security-compliance', title: '10. Souveraineté & Loi 18-07 ANPDP', badge: 'JORADP / RLS', Icon: IconShieldCheck },
   { id: 'competitive-matrix', title: '11. Benchmark Mondial vs Samsara / Geotab', badge: 'CONCURRENCE', Icon: IconTrendingUp },

@@ -38,6 +38,9 @@ const MOBILE_CATEGORIES: MobileCategory[] = [
     items: [
       { title: 'Inventaire des Actifs', href: '/assets', badge: 'ACTIF' },
       { title: 'Chantiers & Engins BTP', href: '/chantiers', badge: 'BTP & ENGINS' },
+      { title: 'Agriculture Saharienne & Forages', href: '/agriculture', badge: 'AGRI SAHARA' },
+      { title: 'Mines, Carrières & Pneus OTR', href: '/mining', badge: 'MINES OTR' },
+      { title: 'Transport TMD & Hydrocarbures', href: '/tmd', badge: 'TMD DÉCRET' },
       { title: 'Location & Rental Flotte', href: '/rental', badge: 'RENTAL DZD' },
       { title: 'Logistique & POD (LVE)', href: '/logistics', badge: 'LVE DÉCRET' },
       { title: 'Compteurs & Métrologie', href: '/assets', badge: 'MÉTROLOGIE' },

@@ -32,6 +32,7 @@ export * from './tco-profitability';
 export * from './engine-rules-config';
 export * from './saharan-agriculture';
 export * from './mining-quarries';
+export * from './tmd-adr';
 
 // Explicit re-exports of runtime constants for bundlers (Turbopack / Webpack / Vite)
 export {

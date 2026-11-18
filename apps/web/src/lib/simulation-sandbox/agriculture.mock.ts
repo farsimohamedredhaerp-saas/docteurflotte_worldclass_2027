@@ -249,3 +249,4 @@ export const MOCK_SANDBOX_HARVEST_LOGS: HarvestCampaignLog[] = [
     createdAt: '2026-05-15T11:00:00Z',
   },
 ];
+

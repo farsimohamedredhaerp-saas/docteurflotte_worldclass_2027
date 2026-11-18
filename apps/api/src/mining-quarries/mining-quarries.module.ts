@@ -12,3 +12,4 @@ import { DumperHaulingService } from './services/dumper-hauling.service';
   exports: [MiningSitesService, OtrTiresService, DumperHaulingService],
 })
 export class MiningQuarriesModule {}
+
