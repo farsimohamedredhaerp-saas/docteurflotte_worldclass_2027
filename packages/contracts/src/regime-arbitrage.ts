@@ -50,3 +50,4 @@ export interface RegimeArbitrageEvaluation {
   annualSavingsVsWorstDzd: string;
   actionableSummaryFr: string;
 }
+

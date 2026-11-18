@@ -2,9 +2,34 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import type { Request, Response, NextFunction } from 'express';
 import * as crypto from 'crypto';
+import Redis from 'ioredis';
 import { AppModule } from './app.module';
 
-// Registre de Rate Limiting anti-brute force en mémoire (IP -> { count, resetTime })
+// Client Redis optionnel pour Rate Limiting distribué multi-instances
+let redisRateLimiter: Redis | null = null;
+if (process.env.REDIS_HOST) {
+  try {
+    redisRateLimiter = new Redis({
+      host: process.env.REDIS_HOST,
+      port: Number(process.env.REDIS_PORT) || 6379,
+      password: process.env.REDIS_PASSWORD || undefined,
+      lazyConnect: true,
+      maxRetriesPerRequest: 1,
+      connectTimeout: 2000,
+      enableOfflineQueue: false,
+    });
+    redisRateLimiter.connect().catch(() => {
+      redisRateLimiter = null;
+    });
+    redisRateLimiter.on('error', () => {
+      // En cas de déconnexion Redis, fallback silencieux vers le registre en mémoire
+    });
+  } catch {
+    redisRateLimiter = null;
+  }
+}
+
+// Registre de secours de Rate Limiting anti-brute force en mémoire (IP -> { count, resetTime })
 const authRateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 function cleanupRateLimitMap() {
@@ -78,14 +103,49 @@ async function bootstrap() {
     next();
   });
 
-  // Protection Anti-Brute Force ciblée sur les routes d'authentification
-  app.use((req: Request, res: Response, next: NextFunction) => {
+  // Protection Anti-Brute Force ciblée sur les routes d'authentification (Distribuée Redis + Mémoire)
+  app.use(async (req: Request, res: Response, next: NextFunction) => {
     if (req.method === 'POST' && (req.path.endsWith('/auth/login') || req.path.endsWith('/auth/register-tenant'))) {
       const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+      const limitWindowSeconds = 60; // 1 minute
+      const maxAttempts = req.path.endsWith('/auth/login') ? 15 : 6;
+
+      // 1. Essai d'utilisation du stockage distribué Redis (multi-instances)
+      if (redisRateLimiter && redisRateLimiter.status === 'ready') {
+        try {
+          const redisKey = `ratelimit:${clientIp}:${req.path}`;
+          const currentCount = await redisRateLimiter.incr(redisKey);
+          if (currentCount === 1) {
+            await redisRateLimiter.expire(redisKey, limitWindowSeconds);
+          }
+          const ttl = await redisRateLimiter.ttl(redisKey);
+          const remaining = Math.max(0, maxAttempts - currentCount);
+
+          res.setHeader('X-RateLimit-Limit', maxAttempts.toString());
+          res.setHeader('X-RateLimit-Remaining', remaining.toString());
+          res.setHeader('X-RateLimit-Reset', Math.ceil(Date.now() / 1000 + (ttl > 0 ? ttl : limitWindowSeconds)).toString());
+
+          if (currentCount > maxAttempts) {
+            const retryAfterSeconds = ttl > 0 ? ttl : limitWindowSeconds;
+            res.setHeader('Retry-After', retryAfterSeconds.toString());
+            res.status(429).json({
+              statusCode: 429,
+              message: 'Trop de tentatives sur cette ressource. Veuillez patienter avant de réessayer.',
+              error: 'Too Many Requests',
+              retryAfterSeconds,
+            });
+            return;
+          }
+          return next();
+        } catch {
+          // En cas d'erreur de communication Redis à chaud, on poursuit avec le fallback mémoire
+        }
+      }
+
+      // 2. Fallback de secours en mémoire vive
       const key = `${clientIp}:${req.path}`;
       const now = Date.now();
-      const limitWindowMs = 60 * 1000; // 1 minute
-      const maxAttempts = req.path.endsWith('/auth/login') ? 15 : 6;
+      const limitWindowMs = limitWindowSeconds * 1000;
 
       const record = authRateLimitMap.get(key) || { count: 0, resetTime: now + limitWindowMs };
 
@@ -122,6 +182,8 @@ async function bootstrap() {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none';");
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
     res.setHeader('X-XSS-Protection', '0');
     res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(self), microphone=()');
     if (isProd) {

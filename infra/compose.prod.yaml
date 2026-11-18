@@ -17,6 +17,27 @@ services:
       - ../database/migrations/05_sovereign_knowledge_vault.sql:/docker-entrypoint-initdb.d/006-05_sovereign_knowledge_vault.sql:ro
       - ../database/migrations/06_anomaly_cooldown_ledger.sql:/docker-entrypoint-initdb.d/007-06_anomaly_cooldown_ledger.sql:ro
       - ../database/migrations/07_saas_subscription_plans.sql:/docker-entrypoint-initdb.d/008-07_saas_subscription_plans.sql:ro
+      - ../database/migrations/08_reg_packs_control_plane.sql:/docker-entrypoint-initdb.d/009-08_reg_packs_control_plane.sql:ro
+      - ../database/migrations/09_data_plane_ledger_events.sql:/docker-entrypoint-initdb.d/010-09_data_plane_ledger_events.sql:ro
+      - ../database/migrations/10_telemetry_tiers_and_naftal.sql:/docker-entrypoint-initdb.d/011-10_telemetry_tiers_and_naftal.sql:ro
+      - ../database/migrations/11_oem_technical_specifications.sql:/docker-entrypoint-initdb.d/012-11_oem_technical_specifications.sql:ro
+      - ../database/migrations/11b_enable_rls_naftal_and_pins.sql:/docker-entrypoint-initdb.d/013-11b_enable_rls_naftal_and_pins.sql:ro
+      - ../database/migrations/12_fiscal_compliance_schema.sql:/docker-entrypoint-initdb.d/014-12_fiscal_compliance_schema.sql:ro
+      - ../database/migrations/13_chantiers_engins_schema.sql:/docker-entrypoint-initdb.d/015-13_chantiers_engins_schema.sql:ro
+      - ../database/migrations/14_rental_schema.sql:/docker-entrypoint-initdb.d/016-14_rental_schema.sql:ro
+      - ../database/migrations/15_logistics_pod_schema.sql:/docker-entrypoint-initdb.d/017-15_logistics_pod_schema.sql:ro
+      - ../database/migrations/16_claims_fines_insurance_schema.sql:/docker-entrypoint-initdb.d/018-16_claims_fines_insurance_schema.sql:ro
+      - ../database/migrations/17_parts_procurement_schema.sql:/docker-entrypoint-initdb.d/019-17_parts_procurement_schema.sql:ro
+      - ../database/migrations/18_tco_profitability_schema.sql:/docker-entrypoint-initdb.d/020-18_tco_profitability_schema.sql:ro
+      - ../database/migrations/19_fiscal_multi_activities_cnrc.sql:/docker-entrypoint-initdb.d/021-19_fiscal_multi_activities_cnrc.sql:ro
+      - ../database/migrations/20_fiscal_rules_control_5_8.sql:/docker-entrypoint-initdb.d/022-20_fiscal_rules_control_5_8.sql:ro
+      - ../database/migrations/21_scf_general_ledger_schema.sql:/docker-entrypoint-initdb.d/023-21_scf_general_ledger_schema.sql:ro
+      - ../database/migrations/22_engine_rules_config_schema.sql:/docker-entrypoint-initdb.d/024-22_engine_rules_config_schema.sql:ro
+      - ../database/migrations/23_multi_consumables_and_work_situations.sql:/docker-entrypoint-initdb.d/025-23_multi_consumables_and_work_situations.sql:ro
+      - ../database/migrations/24_cold_chain_reefer_schema.sql:/docker-entrypoint-initdb.d/026-24_cold_chain_reefer_schema.sql:ro
+      - ../database/migrations/25_saharan_agriculture_pivots_schema.sql:/docker-entrypoint-initdb.d/027-25_saharan_agriculture_pivots_schema.sql:ro
+      - ../database/migrations/26_mining_quarries_otr_tires_schema.sql:/docker-entrypoint-initdb.d/028-26_mining_quarries_otr_tires_schema.sql:ro
+      - ../database/migrations/27_tmd_adr_fuel_tankers_schema.sql:/docker-entrypoint-initdb.d/029-27_tmd_adr_fuel_tankers_schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-docteurflotte_app} -d ${POSTGRES_DB:-docteurflotte_prod}"]
       interval: 10s
