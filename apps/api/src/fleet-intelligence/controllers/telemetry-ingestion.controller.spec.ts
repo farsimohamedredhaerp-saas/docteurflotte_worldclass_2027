@@ -36,7 +36,7 @@ describe('TelemetryIngestionController — authentification des webhooks', () =>
 
   it('refuse un jeton invalide quand un secret est configuré', async () => {
     process.env.NODE_ENV = 'production';
-    process.env.TRACCAR_WEBHOOK_SECRET = 'secret-de-test-suffisamment-long-0123456789';
+    process.env.TRACCAR_WEBHOOK_SECRET = 'mock_webhook_secret_for_test_0123456789';
 
     await expect(
       controller.ingestTraccarWebhook(traccarPayload, 'mauvais-jeton'),
@@ -46,14 +46,15 @@ describe('TelemetryIngestionController — authentification des webhooks', () =>
 
   it('accepte un jeton valide et poursuit vers la résolution de l\'IMEI', async () => {
     process.env.NODE_ENV = 'production';
-    process.env.TRACCAR_WEBHOOK_SECRET = 'secret-de-test-suffisamment-long-0123456789';
+    const mockValidSecret = 'mock_webhook_secret_for_test_0123456789';
+    process.env.TRACCAR_WEBHOOK_SECRET = mockValidSecret;
     storage.resolveImeiToVehicle.mockResolvedValue({ tenantId: 't-1', vehicleId: 'v-1' });
     normalizer.fromTraccarWebhook.mockReturnValue({ id: 'evt-1' });
 
     await expect(
       controller.ingestTraccarWebhook(
         traccarPayload,
-        'secret-de-test-suffisamment-long-0123456789',
+        mockValidSecret,
       ),
     ).resolves.toEqual({ id: 'evt-1' });
     expect(storage.persistCanonicalEvent).toHaveBeenCalledTimes(1);
