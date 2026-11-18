@@ -283,15 +283,13 @@ export function LandingPageClient() {
     <div
       dir={isAr ? 'rtl' : 'ltr'}
       lang={isAr ? 'ar' : 'fr'}
-      className={`min-h-screen w-full flex flex-col transition-colors duration-200 ${
+      className={`min-h-screen w-full flex flex-col transition-colors duration-200 bg-slate-50 dark:bg-[#070A10] text-slate-900 dark:text-slate-100 overflow-x-hidden ${
         isAr ? 'font-arabic' : 'font-sans'
       }`}
       style={{
         fontFamily: isAr ? 'var(--df-font-arabic)' : 'var(--df-font-sans)',
-        backgroundColor: isLight ? '#F8FAFC' : '#070A10',
-        color: isLight ? '#0F172A' : '#F1F5F9',
-        overflowX: 'hidden',
       }}
+      suppressHydrationWarning
     >
       <JsonLd />
 
@@ -1601,13 +1599,17 @@ export function LandingPageClient() {
                     backgroundColor: isLight ? '#F8FAFC' : '#070A10',
                     borderColor: isLight ? '#CBD5E1' : '#1E293B',
                   }}
+                  suppressHydrationWarning
                 >
                   <div>
                     <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800">
                       <span className="text-xs font-mono font-bold text-slate-500 uppercase">
                         {isAr ? 'التقدير المالي المبرهن للأرباح السنوية' : 'Bilan Financier & Justification Actuarielle'}
                       </span>
-                      <span className="text-xs font-mono font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                      <span
+                        className="text-xs font-mono font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20"
+                        suppressHydrationWarning
+                      >
                         ROI {calculatedSavings.netRoiRatio}x
                       </span>
                     </div>
@@ -1618,11 +1620,17 @@ export function LandingPageClient() {
                         <div className="flex justify-between items-center mb-1">
                           <div className="flex items-center gap-1.5 font-sans font-semibold text-slate-700 dark:text-slate-300">
                             <span>{isAr ? 'توفير استهلاك وسحب الوقود :' : 'Économie Carburant & Siphonnage :'}</span>
-                            <span className="text-[10px] font-mono text-sky-600 dark:text-sky-400 bg-sky-500/10 px-1.5 py-0.2 rounded font-normal">
+                            <span
+                              className="text-[10px] font-mono text-sky-600 dark:text-sky-400 bg-sky-500/10 px-1.5 py-0.2 rounded font-normal"
+                              suppressHydrationWarning
+                            >
                               ~{calculatedSavings.annualLitersSaved.toLocaleString()} L/an
                             </span>
                           </div>
-                          <span className="font-bold text-sm text-slate-900 dark:text-white">
+                          <span
+                            className="font-bold text-sm text-slate-900 dark:text-white"
+                            suppressHydrationWarning
+                          >
                             {calculatedSavings.fuelSavingsDzd.toLocaleString()} DZD
                           </span>
                         </div>
@@ -1636,11 +1644,17 @@ export function LandingPageClient() {
                         <div className="flex justify-between items-center mb-1">
                           <div className="flex items-center gap-1.5 font-sans font-semibold text-slate-700 dark:text-slate-300">
                             <span>{isAr ? 'كوارث ميكانيكية متفادية :' : 'Casses Moteur & Organes Évitées :'}</span>
-                            <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded font-normal">
+                            <span
+                              className="text-[10px] font-mono text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded font-normal"
+                              suppressHydrationWarning
+                            >
                               {calculatedSavings.criticalBreakdownsAvoidedPerYear} {isAr ? 'عطب جسيم' : 'avaries'}
                             </span>
                           </div>
-                          <span className="font-bold text-sm text-slate-900 dark:text-white">
+                          <span
+                            className="font-bold text-sm text-slate-900 dark:text-white"
+                            suppressHydrationWarning
+                          >
                             {calculatedSavings.breakdownSavingsDzd.toLocaleString()} DZD
                           </span>
                         </div>
@@ -1654,11 +1668,17 @@ export function LandingPageClient() {
                         <div className="flex justify-between items-center mb-1">
                           <div className="flex items-center gap-1.5 font-sans font-semibold text-slate-700 dark:text-slate-300">
                             <span>{isAr ? 'أيام توقف مسترجعة :' : 'Jours d\'Immobilisation Sauvegardés :'}</span>
-                            <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded font-normal">
+                            <span
+                              className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded font-normal"
+                              suppressHydrationWarning
+                            >
                               {calculatedSavings.daysDowntimeSaved} {isAr ? 'يوم' : 'jours'}
                             </span>
                           </div>
-                          <span className="font-bold text-sm text-slate-900 dark:text-white">
+                          <span
+                            className="font-bold text-sm text-slate-900 dark:text-white"
+                            suppressHydrationWarning
+                          >
                             {calculatedSavings.downtimeSavingsDzd.toLocaleString()} DZD
                           </span>
                         </div>
@@ -1678,7 +1698,10 @@ export function LandingPageClient() {
                         {isAr ? 'بعد خصم تكاليف المنصة' : 'Net de redevance'}
                       </span>
                     </div>
-                    <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+                    <div
+                      className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono"
+                      suppressHydrationWarning
+                    >
                       {calculatedSavings.totalSavingsDzd.toLocaleString()} DZD
                     </div>
                     <p className="text-[11px] text-slate-500 mt-2 font-sans leading-relaxed">
