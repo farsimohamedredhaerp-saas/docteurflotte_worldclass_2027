@@ -12,6 +12,8 @@ import {
   IconAlertOctagon,
   IconMoon,
   IconSun,
+  IconMountain,
+  IconGlobe,
 } from '../navigation/TechIcons';
 import { SovereignMapLibre } from './SovereignMapLibre';
 import { useTheme } from '../../context/ThemeContext';
@@ -221,14 +223,21 @@ export function FleetMap({
   const [showBreadcrumbs, setShowBreadcrumbs] = useState(true);
   const [showCorridors, setShowCorridors] = useState(true);
   const [showHubs, setShowHubs] = useState(true);
-  const [mapStyle, setMapStyle] = useState<'DARK' | 'OSM'>(() => (theme === 'light' ? 'OSM' : 'DARK'));
+  // Types de calques en mode tuiles connecté : Nuit, Jour, Satellite HD, Relief Topo
+  const [mapTileLayer, setMapTileLayer] = useState<'OSM_DARK' | 'OSM_LIGHT' | 'SATELLITE' | 'RELIEF_TOPO'>(() =>
+    theme === 'light' ? 'OSM_LIGHT' : 'OSM_DARK'
+  );
   const [mapEngine, setMapEngine] = useState<'SOVEREIGN_LOCAL' | 'OSM_TILES' | 'PMTILES'>('OSM_TILES');
 
   useEffect(() => {
-    setMapStyle(theme === 'light' ? 'OSM' : 'DARK');
+    setMapTileLayer((prev) => {
+      if (prev === 'OSM_DARK' && theme === 'light') return 'OSM_LIGHT';
+      if (prev === 'OSM_LIGHT' && theme === 'dark') return 'OSM_DARK';
+      return prev;
+    });
   }, [theme]);
 
-  // Mode OpenStreetMap actif si sélectionné
+  // Mode tuiles connecté actif si sélectionné
   const isOsmActive = mapEngine === 'OSM_TILES';
 
   // Référence directe vers le HUD des coordonnées (zéro re-render au survol souris)
@@ -307,7 +316,9 @@ export function FleetMap({
   const visibleTiles = useMemo(() => {
     if (!isOsmActive) return [];
 
-    const intZoom = Math.floor(zoom);
+    // OpenTopoMap plafonne nativement à zoom 17 ; au-delà, étirement fluide sans erreur 404
+    const maxNativeZ = mapTileLayer === 'RELIEF_TOPO' ? 17 : 19;
+    const intZoom = Math.min(maxNativeZ, Math.floor(zoom));
     const scale = Math.pow(2, zoom - intZoom);
     const tileSize = 256 * scale;
 
@@ -341,20 +352,37 @@ export function FleetMap({
       }
     }
     return tiles;
-  }, [centerLat, centerLng, zoom, dims.width, dims.height, isOsmActive]);
+  }, [centerLat, centerLng, zoom, dims.width, dims.height, isOsmActive, mapTileLayer]);
 
-  // Fournisseur de tuiles cartographiques configurable (Auto-hébergé / Tuiles dédiées / Fallback OSM)
-  const getTileUrl = (x: number, y: number, z: number) => {
-    const template =
-      process.env.NEXT_PUBLIC_OSM_TILE_SERVER_URL ||
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    const subdomains = ['a', 'b', 'c'];
-    const s = subdomains[(x + y) % subdomains.length];
-    return template
-      .replace('{s}', s)
-      .replace('{z}', String(z))
-      .replace('{x}', String(x))
-      .replace('{y}', String(y));
+  // Fournisseur de tuiles cartographiques dynamique (OSM / Satellite Orthophoto / Relief Topo)
+  const getTileUrl = (x: number, y: number, z: number, layer: 'OSM_DARK' | 'OSM_LIGHT' | 'SATELLITE' | 'RELIEF_TOPO') => {
+    switch (layer) {
+      case 'SATELLITE':
+        // Imagerie Satellite ESRI World Imagery HD (Format REST {z}/{y}/{x})
+        return `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
+
+      case 'RELIEF_TOPO': {
+        // Relief OpenTopoMap (Courbes de niveau, dénivelés & altimétrie SRTM)
+        const subdomains = ['a', 'b', 'c'];
+        const s = subdomains[(x + y) % subdomains.length];
+        return `https://${s}.tile.opentopomap.org/${z}/${x}/${y}.png`;
+      }
+
+      case 'OSM_LIGHT':
+      case 'OSM_DARK':
+      default: {
+        const template =
+          process.env.NEXT_PUBLIC_OSM_TILE_SERVER_URL ||
+          'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        const subdomains = ['a', 'b', 'c'];
+        const s = subdomains[(x + y) % subdomains.length];
+        return template
+          .replace('{s}', s)
+          .replace('{z}', String(z))
+          .replace('{x}', String(x))
+          .replace('{y}', String(y));
+      }
+    }
   };
 
   // Interactions Souris : Pan / Drag
@@ -568,7 +596,7 @@ export function FleetMap({
         />
       ) : (
         <>
-          {/* 1. FOND DE TUILES CARTOGRAPHIQUES OPENSTREETMAP (MODE CONNECTÉ) */}
+          {/* 1. FOND DE TUILES CARTOGRAPHIQUES DYNAMIQUE (MODE CONNECTÉ) */}
           {isOsmActive && (
             <div
               style={{
@@ -577,15 +605,15 @@ export function FleetMap({
                 overflow: 'hidden',
                 pointerEvents: 'none',
                 filter:
-                  mapStyle === 'DARK'
+                  mapTileLayer === 'OSM_DARK'
                     ? 'invert(100%) hue-rotate(180deg) brightness(85%) contrast(125%)'
                     : 'none',
               }}
             >
               {visibleTiles.map((t) => (
                 <img
-                  key={`${t.z}-${t.x}-${t.y}`}
-                  src={getTileUrl(t.x, t.y, t.z)}
+                  key={`${mapTileLayer}-${t.z}-${t.x}-${t.y}`}
+                  src={getTileUrl(t.x, t.y, t.z, mapTileLayer)}
                   alt=""
                   loading="lazy"
                   style={{
@@ -593,7 +621,7 @@ export function FleetMap({
                     left: `${t.left}px`,
                     top: `${t.top}px`,
                     width: `${t.size}px`,
-                    opacity: mapStyle === 'DARK' ? 0.88 : 1,
+                    opacity: mapTileLayer === 'OSM_DARK' ? 0.88 : 1,
                     pointerEvents: 'none',
                   }}
                 />
@@ -1357,33 +1385,109 @@ export function FleetMap({
             </button>
           </div>
 
-          {/* Style de carte OSM (si activé) */}
+          {/* Sélecteur de Calques Cartographiques (Nuit / Jour / Satellite / Relief) */}
           {mapEngine === 'OSM_TILES' && (
-            <button
-              onClick={() => setMapStyle(mapStyle === 'DARK' ? 'OSM' : 'DARK')}
-              style={{
-                padding: '3px 8px',
-                borderRadius: '3px',
-                border: `1px solid ${isLight ? '#CBD5E1' : '#475569'}`,
-                background: isLight ? '#F1F5F9' : '#1E293B',
-                color: isLight ? '#0F172A' : '#F8FAFC',
-                fontWeight: 600,
-                cursor: 'pointer',
-                fontSize: '10px',
-                flexShrink: 0,
-              }}
-              title="Basculer entre Cockpit Nuit et Rues Jour"
-            >
-              {mapStyle === 'DARK' ? (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconMoon size={11} /> Nuit OSM
-                </span>
-              ) : (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <IconSun size={11} /> Jour OSM
-                </span>
-              )}
-            </button>
+            <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
+              <button
+                onClick={() => setMapTileLayer('OSM_DARK')}
+                aria-label="Mode cartographique Cockpit Nuit"
+                title="Cockpit Nuit (OSM sombre haute lisibilité)"
+                style={{
+                  padding: '3px 7px',
+                  borderRadius: '3px',
+                  border: `1px solid ${mapTileLayer === 'OSM_DARK' ? '#38BDF8' : isLight ? '#CBD5E1' : '#334155'}`,
+                  background: mapTileLayer === 'OSM_DARK'
+                    ? (isLight ? '#E0F2FE' : '#0C4A6E')
+                    : (isLight ? '#F1F5F9' : '#111827'),
+                  color: mapTileLayer === 'OSM_DARK'
+                    ? (isLight ? '#0369A1' : '#BAE6FD')
+                    : (isLight ? '#475569' : '#94A3B8'),
+                  fontWeight: mapTileLayer === 'OSM_DARK' ? 700 : 500,
+                  cursor: 'pointer',
+                  fontSize: '10px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <IconMoon size={11} /> Nuit
+              </button>
+
+              <button
+                onClick={() => setMapTileLayer('OSM_LIGHT')}
+                aria-label="Mode cartographique Rues Jour"
+                title="Rues Jour (OpenStreetMap classique)"
+                style={{
+                  padding: '3px 7px',
+                  borderRadius: '3px',
+                  border: `1px solid ${mapTileLayer === 'OSM_LIGHT' ? '#38BDF8' : isLight ? '#CBD5E1' : '#334155'}`,
+                  background: mapTileLayer === 'OSM_LIGHT'
+                    ? (isLight ? '#E0F2FE' : '#0C4A6E')
+                    : (isLight ? '#F1F5F9' : '#111827'),
+                  color: mapTileLayer === 'OSM_LIGHT'
+                    ? (isLight ? '#0369A1' : '#BAE6FD')
+                    : (isLight ? '#475569' : '#94A3B8'),
+                  fontWeight: mapTileLayer === 'OSM_LIGHT' ? 700 : 500,
+                  cursor: 'pointer',
+                  fontSize: '10px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <IconSun size={11} /> Rues
+              </button>
+
+              <button
+                onClick={() => setMapTileLayer('SATELLITE')}
+                aria-label="Mode cartographique Vue Satellite Orthophoto"
+                title="Imagerie Satellite Orthophoto Haute Définition (Esri / Maxar)"
+                style={{
+                  padding: '3px 7px',
+                  borderRadius: '3px',
+                  border: `1px solid ${mapTileLayer === 'SATELLITE' ? '#10B981' : isLight ? '#CBD5E1' : '#334155'}`,
+                  background: mapTileLayer === 'SATELLITE'
+                    ? (isLight ? '#ECFDF5' : '#064E3B')
+                    : (isLight ? '#F1F5F9' : '#111827'),
+                  color: mapTileLayer === 'SATELLITE'
+                    ? (isLight ? '#065F46' : '#A7F3D0')
+                    : (isLight ? '#475569' : '#94A3B8'),
+                  fontWeight: mapTileLayer === 'SATELLITE' ? 700 : 500,
+                  cursor: 'pointer',
+                  fontSize: '10px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <IconGlobe size={11} /> Satellite
+              </button>
+
+              <button
+                onClick={() => setMapTileLayer('RELIEF_TOPO')}
+                aria-label="Mode cartographique Relief et Topographie"
+                title="Relief Topographique, Courbes de niveau & Dénivelés (OpenTopoMap / SRTM)"
+                style={{
+                  padding: '3px 7px',
+                  borderRadius: '3px',
+                  border: `1px solid ${mapTileLayer === 'RELIEF_TOPO' ? '#F59E0B' : isLight ? '#CBD5E1' : '#334155'}`,
+                  background: mapTileLayer === 'RELIEF_TOPO'
+                    ? (isLight ? '#FEF3C7' : '#78350F')
+                    : (isLight ? '#F1F5F9' : '#111827'),
+                  color: mapTileLayer === 'RELIEF_TOPO'
+                    ? (isLight ? '#B45309' : '#FDE68A')
+                    : (isLight ? '#475569' : '#94A3B8'),
+                  fontWeight: mapTileLayer === 'RELIEF_TOPO' ? 700 : 500,
+                  cursor: 'pointer',
+                  fontSize: '10px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <IconMountain size={11} /> Relief Topo
+              </button>
+            </div>
           )}
 
           {/* Toggle Pôles & Hubs Stratégiques */}
@@ -1518,7 +1622,19 @@ export function FleetMap({
             {isOsmActive && (
               <>
                 <span style={{ fontSize: '9px', color: isLight ? '#64748B' : '#94A3B8', whiteSpace: 'nowrap' }}>
-                  © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', color: 'inherit' }}>OpenStreetMap</a>
+                  {mapTileLayer === 'SATELLITE' ? (
+                    <>
+                      Imagerie © <a href="https://www.esri.com" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', color: 'inherit' }}>Esri</a>, Maxar, Earthstar
+                    </>
+                  ) : mapTileLayer === 'RELIEF_TOPO' ? (
+                    <>
+                      Relief © <a href="https://opentopomap.org" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', color: 'inherit' }}>OpenTopoMap</a> &amp; OSM
+                    </>
+                  ) : (
+                    <>
+                      © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', color: 'inherit' }}>OpenStreetMap</a>
+                    </>
+                  )}
                 </span>
                 <span style={{ color: isLight ? '#CBD5E1' : '#475569' }}>•</span>
               </>

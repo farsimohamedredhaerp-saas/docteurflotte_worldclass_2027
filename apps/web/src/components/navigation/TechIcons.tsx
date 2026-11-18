@@ -631,6 +631,24 @@ export function IconUnlink({ size = 16, strokeWidth = 1.75, ...props }: TechIcon
   );
 }
 
+export function IconMountain({ size = 16, strokeWidth = 1.75, ...props }: TechIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...defaultProps} strokeWidth={strokeWidth} {...props}>
+      <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
+    </svg>
+  );
+}
+
+export function IconGlobe({ size = 16, strokeWidth = 1.75, ...props }: TechIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...defaultProps} strokeWidth={strokeWidth} {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+      <path d="M2 12h20" />
+    </svg>
+  );
+}
+
 
 
 
