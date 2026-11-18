@@ -43,15 +43,20 @@
    - Mines & Carrières (indice TKPH pour pneumatiques OTR, coût par tonne transportée).
    - Agriculture Saharienne (pivots d'irrigation, consommation L/h, campagnes à la tâche).
    - TMD / ADR Citernes Hydrocarbures (visites citernes, protocoles de sécurité, corridors obligatoires).
+7. **Vitrine Souveraine & Landing Page Mondiale (Lot Marketing & Acquisition) :**
+   - Landing page de niveau mondial (`/` et `/landing`), bilingue FR/AR (RTL natif), zéro citation d'entreprise tierce (auditée par test regex automatisé).
+   - Simulateur actuarial interactif de rentabilité nette et ROI en Dinars Algériens (DZD).
+   - Sélecteur interactif des 3 paliers d'exploitation (Mode 0 Zéro-Boîtier, Mode 1 GNSS, Mode 2 Bus CAN) et des 6 organes physiques XAI.
+   - Démonstration interactive du terminal d'atelier vocal/dialectal local sans cloud (< 50 ms).
 
 ---
 
 ## 3. Métrologie de Qualité & Conformité (Preuves Factuelles)
 
-- **Suites de Tests Automatisés :** **716 tests au vert (100% PASS)**
+- **Suites de Tests Automatisés :** **719 tests au vert (100% PASS)**
   - `@docteurflotte/decision-engine` : 15 suites, 139 tests
   - `@docteurflotte/api` : 59 suites, 432 tests
-  - `@docteurflotte/web` : 24 suites, 135 tests
+  - `@docteurflotte/web` : 25 suites, 138 tests
   - `@docteurflotte/client` : 1 suite, 6 tests
   - `@docteurflotte/rule-studio` : 1 suite, 4 tests
 - **Étanchéité Multi-Tenant (RLS) :** **100%** des tables avec `tenant_id` (69/69) ont `rowsecurity = true` et fail-closed sous le rôle `df_tenant_role`.

@@ -77,15 +77,28 @@ export default function RegisterPage() {
             textAlign: 'center',
             fontSize: '13px',
             color: 'var(--df-text-muted)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
           }}
         >
-          Déjà un compte ?{' '}
-          <Link
-            href="/login"
-            style={{ color: 'var(--df-accent-cyan)', textDecoration: 'none', fontWeight: 600 }}
-          >
-            Se connecter
-          </Link>
+          <div>
+            Déjà un compte ?{' '}
+            <Link
+              href="/login"
+              style={{ color: 'var(--df-accent-cyan)', textDecoration: 'none', fontWeight: 600 }}
+            >
+              Se connecter
+            </Link>
+          </div>
+          <div>
+            <Link
+              href="/landing"
+              style={{ color: 'var(--df-text-muted)', textDecoration: 'none', fontSize: '11px' }}
+            >
+              ← Découvrir la présentation de la plateforme
+            </Link>
+          </div>
         </div>
       </div>
     </div>

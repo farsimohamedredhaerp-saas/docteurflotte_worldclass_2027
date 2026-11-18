@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useTheme } from '../../context/ThemeContext';
 import { ThemeToggle } from '../ThemeToggle';
+import { AuthClient } from '../../lib/api-auth';
 import {
   IconActivity,
   IconShieldCheck,
@@ -31,6 +32,26 @@ export function LandingPageClient() {
   // Sélecteur de langue bilingue (Français / Arabe avec support RTL)
   const [lang, setLang] = useState<'FR' | 'AR'>('FR');
   const isAr = lang === 'AR';
+
+  // Détection de session active pour personnalisation de l'accueil
+  const [activeSession, setActiveSession] = useState<{
+    token: string | null;
+    tenantName?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    try {
+      const sess = AuthClient.getSession();
+      if (sess.token) {
+        setActiveSession({
+          token: sess.token,
+          tenantName: sess.tenant?.name || sess.user?.email || undefined,
+        });
+      }
+    } catch {
+      // Ignorer si non disponible en SSR
+    }
+  }, []);
 
   // 1. État du sélecteur de mode télématique (Mode 0 / Mode 1 / Mode 2)
   const [activeTier, setActiveTier] = useState<0 | 1 | 2>(2);
@@ -234,17 +255,26 @@ export function LandingPageClient() {
             {/* Bascule Thème Sombre / Clair */}
             <ThemeToggle />
 
-            {/* Lien Connexion */}
-            <Link
-              href="/login"
-              className="hidden sm:inline-flex px-3 py-1.5 rounded text-xs font-semibold transition-colors"
-              style={{
-                color: isLight ? '#334155' : '#CBD5E1',
-                textDecoration: 'none',
-              }}
-            >
-              {isAr ? 'تسجيل الدخول' : 'Connexion'}
-            </Link>
+            {/* Lien Connexion ou Espace Client */}
+            {activeSession?.token ? (
+              <Link
+                href="/dashboard"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 text-decoration-none"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span>{activeSession.tenantName ? activeSession.tenantName : (isAr ? 'حسابي' : 'Mon Espace')}</span>
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden sm:inline-flex px-3 py-1.5 rounded text-xs font-semibold transition-colors text-decoration-none"
+                style={{
+                  color: isLight ? '#334155' : '#CBD5E1',
+                }}
+              >
+                {isAr ? 'تسجيل الدخول' : 'Connexion'}
+              </Link>
+            )}
 
             {/* CTA Cockpit Direct */}
             <Link

@@ -83,15 +83,28 @@ export default function LoginPage() {
             textAlign: 'center',
             fontSize: '13px',
             color: 'var(--df-text-muted)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
           }}
         >
-          Nouvelle organisation ?{' '}
-          <Link
-            href="/register"
-            style={{ color: 'var(--df-accent-cyan)', textDecoration: 'none', fontWeight: 600 }}
-          >
-            Créer un compte entreprise
-          </Link>
+          <div>
+            Nouvelle organisation ?{' '}
+            <Link
+              href="/register"
+              style={{ color: 'var(--df-accent-cyan)', textDecoration: 'none', fontWeight: 600 }}
+            >
+              Créer un compte entreprise
+            </Link>
+          </div>
+          <div>
+            <Link
+              href="/landing"
+              style={{ color: 'var(--df-text-muted)', textDecoration: 'none', fontSize: '11px' }}
+            >
+              ← Découvrir la présentation de la plateforme
+            </Link>
+          </div>
         </div>
       </div>
     </div>
