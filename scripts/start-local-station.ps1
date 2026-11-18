@@ -42,6 +42,10 @@ try {
     Write-Warning "Docker non accessible ou en cours de démarrage."
 }
 
+if (-not $infraRunning) {
+    Write-Warning "L'infrastructure de données locale (PostgreSQL / Redis) n'a pas pu être confirmée."
+}
+
 # 3. Vérification ou Compilation des Contrats
 if ($BuildFirst) {
     Write-Host "`n[2/4] Compilation des paquets et contrats..." -ForegroundColor Yellow
@@ -97,3 +101,4 @@ if (-not $NoBrowser) {
     Write-Host "Ouverture du navigateur par défaut sur le cockpit..." -ForegroundColor Gray
     Start-Process "http://localhost:3000"
 }
+
