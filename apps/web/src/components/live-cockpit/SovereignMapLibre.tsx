@@ -127,6 +127,8 @@ export function SovereignMapLibre({
           style: styleObj,
           center: [3.0588, 36.7538], // Alger
           zoom: 6.2,
+          minZoom: 4,
+          maxZoom: 19,
           pitch: 20,
           maxBounds: [
             [-9.5, 18.0],

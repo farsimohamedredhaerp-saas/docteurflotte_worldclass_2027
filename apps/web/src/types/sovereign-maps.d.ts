@@ -6,6 +6,8 @@ declare module 'maplibre-gl' {
     style?: string | Record<string, unknown>;
     center?: [number, number];
     zoom?: number;
+    minZoom?: number;
+    maxZoom?: number;
     pitch?: number;
     bearing?: number;
     maxBounds?: [[number, number], [number, number]];

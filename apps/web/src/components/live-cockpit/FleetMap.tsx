@@ -23,13 +23,18 @@ interface FleetMapProps {
   geofences: GeofenceZone[];
 }
 
-// Projection standard Web Mercator (EPSG:3857)
+// Constantes et bornes souveraines Web Mercator (EPSG:3857)
+export const MERCATOR_MAX_LAT = 85.05112878;
+export const MIN_ZOOM = 4.5;
+export const MAX_ZOOM = 19.0;
+
 function lon2tile(lon: number, zoom: number): number {
   return ((lon + 180) / 360) * Math.pow(2, zoom);
 }
 
 function lat2tile(lat: number, zoom: number): number {
-  const latRad = (lat * Math.PI) / 180;
+  const clampedLat = Math.max(-MERCATOR_MAX_LAT, Math.min(MERCATOR_MAX_LAT, lat));
+  const latRad = (clampedLat * Math.PI) / 180;
   return (
     ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) *
     Math.pow(2, zoom)
@@ -42,7 +47,8 @@ function tile2lon(x: number, zoom: number): number {
 
 function tile2lat(y: number, zoom: number): number {
   const n = Math.PI - (2 * Math.PI * y) / Math.pow(2, zoom);
-  return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+  const lat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+  return Math.max(-MERCATOR_MAX_LAT, Math.min(MERCATOR_MAX_LAT, lat));
 }
 
 // Corridors logistiques souverains en Algérie
@@ -211,26 +217,34 @@ export function FleetMap({
   const [followVehicle, setFollowVehicle] = useState(true);
 
   // Calques
-  const [showTiles, setShowTiles] = useState(true); // Réactivé par défaut : OpenStreetMap en ligne
   const [showGeofences, setShowGeofences] = useState(true);
   const [showBreadcrumbs, setShowBreadcrumbs] = useState(true);
   const [showCorridors, setShowCorridors] = useState(true);
   const [showHubs, setShowHubs] = useState(true);
-  const [mapStyle, setMapStyle] = useState<'DARK' | 'OSM'>(theme === 'light' ? 'OSM' : 'DARK');
+  const [mapStyle, setMapStyle] = useState<'DARK' | 'OSM'>(() => (theme === 'light' ? 'OSM' : 'DARK'));
   const [mapEngine, setMapEngine] = useState<'SOVEREIGN_LOCAL' | 'OSM_TILES' | 'PMTILES'>('OSM_TILES');
 
   useEffect(() => {
     setMapStyle(theme === 'light' ? 'OSM' : 'DARK');
   }, [theme]);
 
-  // Mode OpenStreetMap actif si sélectionné et activé
-  const isOsmActive = mapEngine === 'OSM_TILES' && showTiles;
+  // Mode OpenStreetMap actif si sélectionné
+  const isOsmActive = mapEngine === 'OSM_TILES';
 
-  // Curseur GPS
-  const [cursorGeo, setCursorGeo] = useState<{ lat: number; lng: number } | null>(null);
+  // Référence directe vers le HUD des coordonnées (zéro re-render au survol souris)
+  const cursorCoordsRef = useRef<HTMLSpanElement>(null);
+  const rafIdRef = useRef<number | null>(null);
 
   // Dimensions dynamiques
   const [dims, setDims] = useState({ width: 900, height: 700 });
+
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const updateSize = () => {
@@ -247,13 +261,15 @@ export function FleetMap({
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  // Suivi verrouillé du véhicule sélectionné
+  // Suivi verrouillé du véhicule sélectionné (dépendances scalaires stables)
+  const targetLat = selectedVehicle?.gps?.latitude;
+  const targetLng = selectedVehicle?.gps?.longitude;
   useEffect(() => {
-    if (followVehicle && selectedVehicle) {
-      setCenterLat(selectedVehicle.gps.latitude);
-      setCenterLng(selectedVehicle.gps.longitude);
+    if (followVehicle && targetLat !== undefined && targetLng !== undefined) {
+      setCenterLat(targetLat);
+      setCenterLng(targetLng);
     }
-  }, [followVehicle, selectedVehicle?.gps.latitude, selectedVehicle?.gps.longitude]);
+  }, [followVehicle, targetLat, targetLng]);
 
   // Conversion GPS -> Pixels écran (coordonnées entières stables pour éviter les écarts d'hydratation SSR)
   const projectGeoToPixel = useCallback(
@@ -327,12 +343,18 @@ export function FleetMap({
     return tiles;
   }, [centerLat, centerLng, zoom, dims.width, dims.height, isOsmActive]);
 
-  // URL des tuiles cartographiques souveraines (100% libre, zéro clé API requise, zéro filigrane)
+  // Fournisseur de tuiles cartographiques configurable (Auto-hébergé / Tuiles dédiées / Fallback OSM)
   const getTileUrl = (x: number, y: number, z: number) => {
-    // Rotation équilibrée des sous-domaines OpenStreetMap gratuits sans clé API
+    const template =
+      process.env.NEXT_PUBLIC_OSM_TILE_SERVER_URL ||
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     const subdomains = ['a', 'b', 'c'];
     const s = subdomains[(x + y) % subdomains.length];
-    return `https://${s}.tile.openstreetmap.org/${z}/${x}/${y}.png`;
+    return template
+      .replace('{s}', s)
+      .replace('{z}', String(z))
+      .replace('{x}', String(x))
+      .replace('{y}', String(y));
   };
 
   // Interactions Souris : Pan / Drag
@@ -340,14 +362,19 @@ export function FleetMap({
     if (e.button !== 0) return;
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
+    containerRef.current?.focus();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const px = e.clientX - rect.left;
-      const py = e.clientY - rect.top;
-      setCursorGeo(unprojectPixelToGeo(px, py));
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+
+    // Mise à jour directe du DOM des coordonnées du curseur sans aucun re-render React
+    if (cursorCoordsRef.current) {
+      const geo = unprojectPixelToGeo(px, py);
+      cursorCoordsRef.current.textContent = `${geo.lat.toFixed(4)}°N, ${geo.lng.toFixed(4)}°E`;
     }
 
     if (!isDragging) return;
@@ -356,21 +383,105 @@ export function FleetMap({
     const dy = e.clientY - dragStart.y;
     setDragStart({ x: e.clientX, y: e.clientY });
 
-    setFollowVehicle(false); // Désactive le verrouillage si l'utilisateur navigue manuellement
+    if (followVehicle) {
+      setFollowVehicle(false);
+    }
 
-    const centerTileX = lon2tile(centerLng, zoom) - dx / 256;
-    const centerTileY = lat2tile(centerLat, zoom) - dy / 256;
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current);
+    }
 
-    setCenterLng(tile2lon(centerTileX, zoom));
-    setCenterLat(tile2lat(centerTileY, zoom));
+    rafIdRef.current = requestAnimationFrame(() => {
+      const centerTileX = lon2tile(centerLng, zoom) - dx / 256;
+      const centerTileY = lat2tile(centerLat, zoom) - dy / 256;
+
+      const newLng = tile2lon(centerTileX, zoom);
+      const newLat = tile2lat(centerTileY, zoom);
+
+      setCenterLng(newLng);
+      setCenterLat(Math.max(-MERCATOR_MAX_LAT, Math.min(MERCATOR_MAX_LAT, newLat)));
+    });
   };
 
   const handleMouseUp = () => setIsDragging(false);
 
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const zoomDelta = e.deltaY < 0 ? 0.2 : -0.2;
-    setZoom((prev) => Math.max(4.5, Math.min(14, prev + zoomDelta)));
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    if (cursorCoordsRef.current) {
+      cursorCoordsRef.current.textContent = 'Survolez la carte pour les coordonnées';
+    }
+  };
+
+  // Zoom molette natif avec { passive: false } pour empêcher le scroll de page (P0 React 17+)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleNativeWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const zoomDelta = e.deltaY < 0 ? 0.25 : -0.25;
+
+      const rect = el.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+
+      setZoom((prevZoom) => {
+        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prevZoom + zoomDelta));
+        if (Math.abs(newZoom - prevZoom) < 0.001) return prevZoom;
+
+        // Position géographique exacte sous le curseur avant redimensionnement
+        const centerTileX = lon2tile(centerLng, prevZoom);
+        const centerTileY = lat2tile(centerLat, prevZoom);
+        const cursorTileX = centerTileX + (px - dims.width / 2) / 256;
+        const cursorTileY = centerTileY + (py - dims.height / 2) / 256;
+        const cursorLat = tile2lat(cursorTileY, prevZoom);
+        const cursorLng = tile2lon(cursorTileX, prevZoom);
+
+        // Repositionnement dynamique du centre pour ancrer le point sous le curseur
+        const newCenterTileX = lon2tile(cursorLng, newZoom) - (px - dims.width / 2) / 256;
+        const newCenterTileY = lat2tile(cursorLat, newZoom) - (py - dims.height / 2) / 256;
+
+        setCenterLng(tile2lon(newCenterTileX, newZoom));
+        setCenterLat(Math.max(-MERCATOR_MAX_LAT, Math.min(MERCATOR_MAX_LAT, tile2lat(newCenterTileY, newZoom))));
+
+        return newZoom;
+      });
+
+      setFollowVehicle(false);
+    };
+
+    el.addEventListener('wheel', handleNativeWheel, { passive: false });
+    return () => {
+      el.removeEventListener('wheel', handleNativeWheel);
+    };
+  }, [centerLat, centerLng, dims.width, dims.height]);
+
+  // Navigation accessible au clavier (Flèches pour pan, +/- pour zoom)
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    const panStep = 0.05 / Math.pow(2, Math.max(0, zoom - 6));
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setFollowVehicle(false);
+      setCenterLat((lat) => Math.min(MERCATOR_MAX_LAT, lat + panStep));
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setFollowVehicle(false);
+      setCenterLat((lat) => Math.max(-MERCATOR_MAX_LAT, lat - panStep));
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setFollowVehicle(false);
+      setCenterLng((lng) => lng - panStep);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setFollowVehicle(false);
+      setCenterLng((lng) => lng + panStep);
+    } else if (e.key === '+' || e.key === '=') {
+      e.preventDefault();
+      setZoom((z) => Math.min(MAX_ZOOM, z + 0.5));
+    } else if (e.key === '-' || e.key === '_') {
+      e.preventDefault();
+      setZoom((z) => Math.max(MIN_ZOOM, z - 0.5));
+    }
   };
 
   const recenterAlgeria = () => {
@@ -380,15 +491,55 @@ export function FleetMap({
     setZoom(6.2);
   };
 
+  // Tracé mémoïsé du contour national souverain de l'Algérie
+  const algeriaPath = useMemo(() => {
+    return (
+      ALGERIA_TERRITORY_POLYGON.map((pt, idx) => {
+        const { x, y } = projectGeoToPixel(pt.lat, pt.lng);
+        return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+      }).join(' ') + ' Z'
+    );
+  }, [projectGeoToPixel]);
+
+  // Tracés mémoïsés des corridors logistiques stratégiques
+  const renderedCorridors = useMemo(() => {
+    return STRATEGIC_CORRIDORS.map((corridor) => ({
+      name: corridor.name,
+      pathData: corridor.points
+        .map((pt, pIdx) => {
+          const { x, y } = projectGeoToPixel(pt.lat, pt.lng);
+          return `${pIdx === 0 ? 'M' : 'L'} ${x} ${y}`;
+        })
+        .join(' '),
+    }));
+  }, [projectGeoToPixel]);
+
+  // Coordonnées mémoïsées des pôles et hubs stratégiques
+  const renderedHubs = useMemo(() => {
+    return STRATEGIC_HUBS.map((hub, idx) => {
+      const { x, y } = projectGeoToPixel(hub.lat, hub.lng);
+      return {
+        ...hub,
+        key: idx,
+        x,
+        y,
+        isOffscreen: x < -100 || x > dims.width + 100 || y < -100 || y > dims.height + 100,
+      };
+    });
+  }, [projectGeoToPixel, dims.width, dims.height]);
+
   return (
     <div
       ref={containerRef}
+      tabIndex={0}
+      role="region"
+      aria-label="Console cartographique temps réel de la flotte"
       suppressHydrationWarning
+      onKeyDown={handleKeyDown}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onWheel={handleWheel}
+      onMouseLeave={handleMouseLeave}
       style={{
         position: 'relative',
         flex: 1,
@@ -400,6 +551,7 @@ export function FleetMap({
         overflow: 'hidden',
         userSelect: 'none',
         cursor: isDragging ? 'grabbing' : 'grab',
+        outline: 'none',
         transition: 'background-color 0.2s ease-in-out',
       }}
     >
@@ -412,14 +564,24 @@ export function FleetMap({
           onFallbackRequested={(target) => {
             const next = target || 'OSM_TILES';
             setMapEngine(next);
-            setShowTiles(next === 'OSM_TILES');
           }}
         />
       ) : (
         <>
           {/* 1. FOND DE TUILES CARTOGRAPHIQUES OPENSTREETMAP (MODE CONNECTÉ) */}
           {isOsmActive && (
-            <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                overflow: 'hidden',
+                pointerEvents: 'none',
+                filter:
+                  mapStyle === 'DARK'
+                    ? 'invert(100%) hue-rotate(180deg) brightness(85%) contrast(125%)'
+                    : 'none',
+              }}
+            >
               {visibleTiles.map((t) => (
                 <img
                   key={`${t.z}-${t.x}-${t.y}`}
@@ -432,10 +594,6 @@ export function FleetMap({
                     top: `${t.top}px`,
                     width: `${t.size}px`,
                     opacity: mapStyle === 'DARK' ? 0.88 : 1,
-                    filter:
-                      mapStyle === 'DARK'
-                        ? 'invert(100%) hue-rotate(180deg) brightness(85%) contrast(125%)'
-                        : 'none',
                     pointerEvents: 'none',
                   }}
                 />
@@ -472,63 +630,50 @@ export function FleetMap({
               opacity={isOsmActive ? 0.12 : 1}
             />
 
-            {/* Masse continentale souveraine de l'Algérie (100% Hors-Ligne, 0 dépendance externe) */}
-            {(() => {
-              const algeriaPath =
-                ALGERIA_TERRITORY_POLYGON.map((pt, idx) => {
-                  const { x, y } = projectGeoToPixel(pt.lat, pt.lng);
-                  return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
-                }).join(' ') + ' Z';
+            {/* Masse continentale souveraine de l'Algérie (mémoïsée) */}
+            <g id="sovereign-dz-landmass">
+              <path
+                d={algeriaPath}
+                fill={isOsmActive ? 'transparent' : (isLight ? '#FFFFFF' : '#080E1A')}
+                stroke={isOsmActive ? (isLight ? '#2563EB' : '#38BDF8') : (isLight ? '#2563EB' : '#1E3A8A')}
+                strokeWidth={isOsmActive ? '2' : (isLight ? '2' : '2.5')}
+                strokeLinejoin="round"
+                style={{
+                  filter: isOsmActive
+                    ? 'none'
+                    : (isLight
+                      ? 'drop-shadow(0 2px 10px rgba(37, 99, 235, 0.15))'
+                      : 'drop-shadow(0 0 20px rgba(30, 58, 138, 0.45))'),
+                }}
+              />
+              <path
+                d={algeriaPath}
+                fill="none"
+                stroke={isLight ? '#3B82F6' : '#38BDF8'}
+                strokeWidth="1.2"
+                strokeDasharray="6,4"
+                strokeLinejoin="round"
+                opacity={isLight ? '0.6' : '0.75'}
+              />
+            </g>
 
-              return (
-                <g id="sovereign-dz-landmass">
-                  {/* Fond terrestre contrasté (transparent si tuiles OSM actives pour ne pas masquer les rues) */}
-                  <path
-                    d={algeriaPath}
-                    fill={isOsmActive ? 'transparent' : (isLight ? '#FFFFFF' : '#080E1A')}
-                    stroke={isOsmActive ? (isLight ? '#2563EB' : '#38BDF8') : (isLight ? '#2563EB' : '#1E3A8A')}
-                    strokeWidth={isOsmActive ? '2' : (isLight ? '2' : '2.5')}
-                    strokeLinejoin="round"
-                    style={{
-                      filter: isOsmActive
-                        ? 'none'
-                        : (isLight
-                          ? 'drop-shadow(0 2px 10px rgba(37, 99, 235, 0.15))'
-                          : 'drop-shadow(0 0 20px rgba(30, 58, 138, 0.45))'),
-                    }}
-                  />
-                  {/* Ligne frontière pointillée souveraine */}
-                  <path
-                    d={algeriaPath}
-                    fill="none"
-                    stroke={isLight ? '#3B82F6' : '#38BDF8'}
-                    strokeWidth="1.2"
-                    strokeDasharray="6,4"
-                    strokeLinejoin="round"
-                    opacity={isLight ? '0.6' : '0.75'}
-                  />
-                </g>
-              );
-            })()}
-
-            {/* Pôles et Hubs Logistiques Stratégiques */}
+            {/* Pôles et Hubs Logistiques Stratégiques (mémoïsés) */}
             {showHubs &&
-              STRATEGIC_HUBS.map((hub, idx) => {
-                const { x, y } = projectGeoToPixel(hub.lat, hub.lng);
-                if (x < -100 || x > dims.width + 100 || y < -100 || y > dims.height + 100) return null;
+              renderedHubs.map((hub) => {
+                if (hub.isOffscreen) return null;
 
                 const isPort = hub.type === 'PORT';
                 const isEnergy = hub.type === 'ENERGY';
                 const color = isPort ? '#38BDF8' : isEnergy ? '#F59E0B' : '#10B981';
 
                 return (
-                  <g key={idx} opacity={zoom >= 5.2 ? 0.95 : 0.4}>
-                    <circle cx={x} cy={y} r="3" fill={color} />
-                    <circle cx={x} cy={y} r="8" fill="none" stroke={color} strokeWidth="0.75" opacity="0.6" />
+                  <g key={hub.key} opacity={zoom >= 5.2 ? 0.95 : 0.4}>
+                    <circle cx={hub.x} cy={hub.y} r="3" fill={color} />
+                    <circle cx={hub.x} cy={hub.y} r="8" fill="none" stroke={color} strokeWidth="0.75" opacity="0.6" />
                     {zoom >= 6.0 && (
                       <text
-                        x={x + 10}
-                        y={y + 3}
+                        x={hub.x + 10}
+                        y={hub.y + 3}
                         fill={isLight ? '#334155' : '#94A3B8'}
                         fontSize="10"
                         fontFamily="JetBrains Mono, monospace"
@@ -542,132 +687,132 @@ export function FleetMap({
                 );
               })}
 
-        {/* Tracé des Corridors Routiers Stratégiques */}
-        {showCorridors &&
-          STRATEGIC_CORRIDORS.map((corridor, idx) => {
-            const pathData = corridor.points
-              .map((pt, pIdx) => {
-                const { x, y } = projectGeoToPixel(pt.lat, pt.lng);
-                return `${pIdx === 0 ? 'M' : 'L'} ${x} ${y}`;
-              })
-              .join(' ');
+            {/* Tracé des Corridors Routiers Stratégiques (mémoïsés) */}
+            {showCorridors &&
+              renderedCorridors.map((corridor, idx) => (
+                <g key={idx}>
+                  <path
+                    d={corridor.pathData}
+                    fill="none"
+                    stroke={isLight ? 'rgba(37, 99, 235, 0.25)' : 'rgba(37, 99, 235, 0.4)'}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d={corridor.pathData}
+                    fill="none"
+                    stroke={isLight ? '#2563EB' : '#38BDF8'}
+                    strokeWidth="1.5"
+                    strokeDasharray="4,4"
+                    strokeLinecap="round"
+                  />
+                </g>
+              ))}
 
-            return (
-              <g key={idx}>
-                {/* Lueur extérieure du corridor */}
-                <path
-                  d={pathData}
-                  fill="none"
-                  stroke={isLight ? 'rgba(37, 99, 235, 0.25)' : 'rgba(37, 99, 235, 0.4)'}
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                {/* Axe central pointillé */}
-                <path
-                  d={pathData}
-                  fill="none"
-                  stroke={isLight ? '#2563EB' : '#38BDF8'}
-                  strokeWidth="1.5"
-                  strokeDasharray="4,4"
-                  strokeLinecap="round"
-                />
+            {/* Zones de Géorepérage (Geofences Souveraines) */}
+            {showGeofences &&
+              geofences.map((geo) => {
+                const { x, y } = projectGeoToPixel(geo.centerLat, geo.centerLng);
+                const edgePoint = projectGeoToPixel(
+                  geo.centerLat,
+                  geo.centerLng + (geo.radiusKm / (111.32 * Math.cos((geo.centerLat * Math.PI) / 180)))
+                );
+                const radiusPx = Math.max(4, Math.abs(edgePoint.x - x));
+
+                return (
+                  <g key={geo.id}>
+                    <circle cx={x} cy={y} r={radiusPx} fill={geo.colorHex} fillOpacity="0.12" />
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={radiusPx}
+                      fill="none"
+                      stroke={geo.colorHex}
+                      strokeWidth="1.5"
+                      strokeDasharray="4,3"
+                    />
+                    <text
+                      x={x}
+                      y={y - radiusPx - 6}
+                      textAnchor="middle"
+                      fill={geo.colorHex}
+                      fontSize="11"
+                      fontFamily="JetBrains Mono, monospace"
+                      fontWeight="bold"
+                    >
+                      {geo.name}
+                    </text>
+                  </g>
+                );
+              })}
+
+            {/* Trace Historique 15 min (Breadcrumbs) du Véhicule Sélectionné */}
+            {showBreadcrumbs && selectedVehicle?.breadcrumbs && selectedVehicle.breadcrumbs.length > 1 && (
+              <g>
+                {selectedVehicle.breadcrumbs.map((pt, index) => {
+                  if (index === 0) return null;
+                  const prev = selectedVehicle.breadcrumbs![index - 1];
+                  if (!prev) return null;
+                  const p1 = projectGeoToPixel(prev.latitude, prev.longitude);
+                  const p2 = projectGeoToPixel(pt.latitude, pt.longitude);
+                  const opacity = 0.3 + (index / selectedVehicle.breadcrumbs!.length) * 0.7;
+
+                  return (
+                    <line
+                      key={index}
+                      x1={p1.x}
+                      y1={p1.y}
+                      x2={p2.x}
+                      y2={p2.y}
+                      stroke="#10B981"
+                      strokeWidth="3"
+                      strokeOpacity={opacity}
+                      strokeLinecap="round"
+                    />
+                  );
+                })}
               </g>
-            );
-          })}
+            )}
+          </svg>
 
-        {/* Zones de Géorepérage (Geofences Souveraines) */}
-        {showGeofences &&
-          geofences.map((geo) => {
-            const { x, y } = projectGeoToPixel(geo.centerLat, geo.centerLng);
-            // Rayon calculé en pixels selon l'échelle mercator courante
-            const edgePoint = projectGeoToPixel(
-              geo.centerLat,
-              geo.centerLng + (geo.radiusKm / (111.32 * Math.cos((geo.centerLat * Math.PI) / 180)))
-            );
-            const radiusPx = Math.max(12, Math.abs(edgePoint.x - x));
+          {/* 3. MARQUEURS VÉHICULES INTERACTIFS (HAUTE PRÉCISION) */}
+          <div suppressHydrationWarning style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+            {vehicles.map((v) => {
+              if (!v.gps) return null;
+              const { x, y } = projectGeoToPixel(v.gps.latitude, v.gps.longitude);
 
-            return (
-              <g key={geo.id}>
-                <circle cx={x} cy={y} r={radiusPx} fill={geo.colorHex} fillOpacity="0.12" />
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={radiusPx}
-                  fill="none"
-                  stroke={geo.colorHex}
-                  strokeWidth="1.5"
-                  strokeDasharray="4,3"
-                />
-                <text
-                  x={x}
-                  y={y - radiusPx - 6}
-                  textAnchor="middle"
-                  fill={geo.colorHex}
-                  fontSize="11"
-                  fontFamily="JetBrains Mono, monospace"
-                  fontWeight="bold"
-                >
-                  {geo.name}
-                </text>
-              </g>
-            );
-          })}
+              // Si le véhicule est hors du viewport, ne pas rendre le composant lourd
+              if (x < -100 || x > dims.width + 100 || y < -100 || y > dims.height + 100) {
+                return null;
+              }
 
-        {/* Trace Historique 15 min (Breadcrumbs) du Véhicule Sélectionné */}
-        {showBreadcrumbs && selectedVehicle && selectedVehicle.breadcrumbs.length > 1 && (
-          <g>
-            {selectedVehicle.breadcrumbs.map((pt, index) => {
-              if (index === 0) return null;
-              const prev = selectedVehicle.breadcrumbs[index - 1];
-              const p1 = projectGeoToPixel(prev.latitude, prev.longitude);
-              const p2 = projectGeoToPixel(pt.latitude, pt.longitude);
-              const opacity = 0.3 + (index / selectedVehicle.breadcrumbs.length) * 0.7;
+              const isSelected = v.id === selectedVehicle?.id;
+
+              let colorHex = '#64748B'; // slate
+              if (v.status === 'MOTION') colorHex = '#10B981'; // emerald
+              if (v.status === 'IDLE_WARNING') colorHex = '#F59E0B'; // amber
+              if (v.status === 'DTC_CRITICAL' || v.dvirStatus?.isBlocked) colorHex = '#EF4444'; // rose/rouge
 
               return (
-                <line
-                  key={index}
-                  x1={p1.x}
-                  y1={p1.y}
-                  x2={p2.x}
-                  y2={p2.y}
-                  stroke="#10B981"
-                  strokeWidth="3"
-                  strokeOpacity={opacity}
-                  strokeLinecap="round"
-                />
-              );
-            })}
-          </g>
-        )}
-      </svg>
-
-      {/* 3. MARQUEURS VÉHICULES INTERACTIFS (HAUTE PRÉCISION) */}
-      <div suppressHydrationWarning style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        {vehicles.map((v) => {
-          const { x, y } = projectGeoToPixel(v.gps.latitude, v.gps.longitude);
-
-          // Si le véhicule est hors du viewport, ne pas rendre le composant lourd
-          if (x < -100 || x > dims.width + 100 || y < -100 || y > dims.height + 100) {
-            return null;
-          }
-
-          const isSelected = v.id === selectedVehicle?.id;
-
-          let colorHex = '#64748B'; // slate
-          if (v.status === 'MOTION') colorHex = '#10B981'; // emerald
-          if (v.status === 'IDLE_WARNING') colorHex = '#F59E0B'; // amber
-          if (v.status === 'DTC_CRITICAL' || v.dvirStatus?.isBlocked) colorHex = '#EF4444'; // rose/rouge
-
-          return (
-            <div
-              key={v.id}
-              suppressHydrationWarning
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelectVehicle(v.id);
-                setFollowVehicle(true);
-              }}
+                <div
+                  key={v.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Véhicule ${v.registrationNumber || ''} ${v.make || ''} ${v.model || ''} — Statut: ${v.status}`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onSelectVehicle(v.id);
+                      setFollowVehicle(true);
+                    }
+                  }}
+                  suppressHydrationWarning
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectVehicle(v.id);
+                    setFollowVehicle(true);
+                  }}
               style={{
                 position: 'absolute',
                 left: `${x}px`,
@@ -837,7 +982,7 @@ export function FleetMap({
                     </span>
                   </span>
                 )}
-                {v.can.fuelDropAnomalyDetected && (
+                {v.can?.fuelDropAnomalyDetected && (
                   <span
                     style={{
                       background: '#991B1B',
@@ -926,14 +1071,9 @@ export function FleetMap({
         {/* Bouton de bascule rapide 1-clic */}
         <button
           onClick={() => {
-            if (mapEngine === 'OSM_TILES') {
-              setMapEngine('SOVEREIGN_LOCAL');
-              setShowTiles(false);
-            } else {
-              setMapEngine('OSM_TILES');
-              setShowTiles(true);
-            }
+            setMapEngine(mapEngine === 'OSM_TILES' ? 'SOVEREIGN_LOCAL' : 'OSM_TILES');
           }}
+          aria-label="Basculer instantanément entre OpenStreetMap et le mode 100% Souverain Local"
           style={{
             marginLeft: '6px',
             padding: '2px 8px',
@@ -964,8 +1104,9 @@ export function FleetMap({
         }}
       >
         <button
-          onClick={() => setZoom((z) => Math.min(14, z + 0.5))}
+          onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + 0.5))}
           title="Zoomer (+)"
+          aria-label="Zoomer sur la carte (+)"
           style={{
             width: '34px',
             height: '34px',
@@ -989,8 +1130,9 @@ export function FleetMap({
         </button>
 
         <button
-          onClick={() => setZoom((z) => Math.max(4.5, z - 0.5))}
+          onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - 0.5))}
           title="Dézoomer (-)"
+          aria-label="Dézoomer sur la carte (-)"
           style={{
             width: '34px',
             height: '34px',
@@ -1016,6 +1158,7 @@ export function FleetMap({
         <button
           onClick={() => setFollowVehicle(!followVehicle)}
           title={followVehicle ? 'Suivi caméra verrouillé sur véhicule' : 'Activer le mode suivi'}
+          aria-label={followVehicle ? 'Désactiver le suivi caméra du véhicule' : 'Activer le suivi caméra du véhicule'}
           style={{
             width: '34px',
             height: '34px',
@@ -1048,6 +1191,7 @@ export function FleetMap({
         <button
           onClick={recenterAlgeria}
           title="Recentrer sur la carte de l'Algérie"
+          aria-label="Recentrer la carte sur le territoire national algérien"
           style={{
             width: '34px',
             height: '34px',
@@ -1121,7 +1265,6 @@ export function FleetMap({
             <button
               onClick={() => {
                 setMapEngine('OSM_TILES');
-                setShowTiles(true);
               }}
               style={{
                 padding: '3px 8px',
@@ -1157,7 +1300,6 @@ export function FleetMap({
             <button
               onClick={() => {
                 setMapEngine('SOVEREIGN_LOCAL');
-                setShowTiles(false);
               }}
               style={{
                 padding: '3px 8px',
@@ -1193,7 +1335,6 @@ export function FleetMap({
             <button
               onClick={() => {
                 setMapEngine('PMTILES');
-                setShowTiles(false);
               }}
               style={{
                 padding: '3px 8px',
@@ -1365,15 +1506,11 @@ export function FleetMap({
               Zoom: <strong style={{ color: isLight ? '#0F172A' : '#F8FAFC' }}>{zoom.toFixed(1)}x</strong>
             </span>
             <span style={{ color: isLight ? '#CBD5E1' : '#475569', flexShrink: 0 }}>•</span>
-            {cursorGeo ? (
-              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                GPS: <strong style={{ color: isLight ? '#0F172A' : '#F8FAFC' }}>{cursorGeo.lat.toFixed(4)}°N, {cursorGeo.lng.toFixed(4)}°E</strong>
-              </span>
-            ) : (
-              <span style={{ color: isLight ? '#94A3B8' : '#64748B', whiteSpace: 'nowrap' }}>
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              GPS: <strong ref={cursorCoordsRef} style={{ color: isLight ? '#0F172A' : '#F8FAFC' }}>
                 Survolez la carte pour les coordonnées
-              </span>
-            )}
+              </strong>
+            </span>
           </div>
 
           {/* Attribution Cartographique & Souveraineté */}
