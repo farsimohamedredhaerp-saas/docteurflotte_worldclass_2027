@@ -34,7 +34,7 @@ describe('HealthController', () => {
   });
 
   describe('GET /health', () => {
-    it('should return ok health status with service metadata', () => {
+    it('should return ok health status with service metadata and memory metrics', () => {
       const response = controller.getHealth();
       expect(response).toBeDefined();
       expect(response.status).toBe('ok');
@@ -43,6 +43,22 @@ describe('HealthController', () => {
       expect(typeof response.uptime).toBe('number');
       expect(typeof response.timestamp).toBe('string');
       expect(response.environment).toBe('test');
+      expect(response.memory).toBeDefined();
+      expect(typeof response.memory?.ramUsagePercent).toBe('number');
+    });
+  });
+
+  describe('GET /health/memory', () => {
+    it('should return valid system and process memory metrics', () => {
+      const memory = controller.getSystemMemory();
+      expect(memory).toBeDefined();
+      expect(typeof memory.totalRamMb).toBe('number');
+      expect(typeof memory.freeRamMb).toBe('number');
+      expect(typeof memory.usedRamMb).toBe('number');
+      expect(typeof memory.ramUsagePercent).toBe('number');
+      expect(typeof memory.processWorkingSetMb).toBe('number');
+      expect(typeof memory.isSaturated).toBe('boolean');
+      expect(['OPTIMAL', 'WARNING', 'CRITICAL']).toContain(memory.status);
     });
   });
 

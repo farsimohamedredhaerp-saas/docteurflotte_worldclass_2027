@@ -34,6 +34,18 @@ export interface PlatformHealthSummary {
   };
 }
 
+export interface SystemMemoryMetrics {
+  totalRamMb: number;
+  freeRamMb: number;
+  usedRamMb: number;
+  ramUsagePercent: number;
+  processWorkingSetMb: number;
+  processHeapUsedMb: number;
+  isSaturated: boolean;
+  status: 'OPTIMAL' | 'WARNING' | 'CRITICAL';
+  timestamp: string;
+}
+
 export interface HealthResponse {
   status: ServiceStatus;
   service: string;
@@ -41,6 +53,7 @@ export interface HealthResponse {
   uptime: number;
   timestamp: string;
   environment: string;
+  memory?: SystemMemoryMetrics;
 }
 
 export interface DependencyCheckResult {

@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { FleetAggregateStats } from './types';
 import { ThemeToggle } from '../ThemeToggle';
+import { useSystemMemory } from '../../hooks/useSystemMemory';
 import {
   IconActivity,
   IconSearch,
@@ -53,6 +54,8 @@ export function TopCommandBar({
   isDemoMode = true,
   onToggleDemoMode,
 }: TopCommandBarProps) {
+  const memory = useSystemMemory(4000);
+
   return (
     <header
       className="h-12 w-full backdrop-blur-md px-2.5 flex items-center justify-between shrink-0 select-none z-30 transition-colors overflow-hidden"
@@ -442,6 +445,55 @@ export function TopCommandBar({
           <span className="tabular-nums">
             WS: <strong style={{ color: 'var(--df-status-ok)' }}>{stats.wsLatencyMs}ms</strong>
           </span>
+        </div>
+
+        {/* Badge Télémétrique Mémoire Système (Hôte & Saturation RAM) */}
+        <div
+          className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-sm text-[10px] font-mono shrink-0 whitespace-nowrap cursor-help"
+          style={{
+            backgroundColor: memory.systemRam.isSaturated
+              ? 'rgba(239, 68, 68, 0.15)'
+              : memory.systemRam.status === 'WARNING'
+              ? 'rgba(245, 158, 11, 0.15)'
+              : 'var(--df-cockpit-card-bg)',
+            border: `1px solid ${
+              memory.systemRam.isSaturated
+                ? '#EF4444'
+                : memory.systemRam.status === 'WARNING'
+                ? '#F59E0B'
+                : 'var(--df-cockpit-border)'
+            }`,
+            color: memory.systemRam.isSaturated
+              ? '#EF4444'
+              : memory.systemRam.status === 'WARNING'
+              ? '#F59E0B'
+              : 'var(--df-cockpit-text-title)',
+          }}
+          title={`RAM Hôte: ${memory.systemRam.usedGb} Go / ${memory.systemRam.totalGb} Go (${memory.systemRam.pct}%) — ${
+            memory.systemRam.isSaturated
+              ? 'CRITIQUE : RAM saturée (>85%). Risque de gels d\'affichage temporaires dus au swap disque Windows.'
+              : 'Empreinte nominale.'
+          }${memory.browserHeap ? ` | Heap JS: ${memory.browserHeap.usedMb} Mo` : ''}`}
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{
+              backgroundColor: memory.systemRam.isSaturated
+                ? '#EF4444'
+                : memory.systemRam.status === 'WARNING'
+                ? '#F59E0B'
+                : '#10B981',
+              boxShadow: memory.systemRam.isSaturated ? '0 0 6px #EF4444' : 'none',
+            }}
+          />
+          <span className="tabular-nums">
+            RAM: <strong>{memory.systemRam.pct}%</strong>
+          </span>
+          {memory.systemRam.isSaturated && (
+            <span className="text-[9px] px-1 py-0.2 rounded font-bold" style={{ backgroundColor: 'rgba(239, 68, 68, 0.25)', color: '#EF4444' }}>
+              SATURÉE
+            </span>
+          )}
         </div>
 
         {/* BOUTON COCKPIT HUD TACTIQUE (CHÂSSIS SCANNER) */}

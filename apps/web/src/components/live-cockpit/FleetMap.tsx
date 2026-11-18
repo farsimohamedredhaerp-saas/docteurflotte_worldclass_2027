@@ -17,6 +17,7 @@ import {
 } from '../navigation/TechIcons';
 import { SovereignMapLibre } from './SovereignMapLibre';
 import { useTheme } from '../../context/ThemeContext';
+import { useSystemMemory } from '../../hooks/useSystemMemory';
 
 interface FleetMapProps {
   vehicles: VehicleTelemetryState[];
@@ -214,6 +215,20 @@ export function FleetMap({
   const [centerLng, setCenterLng] = useState(3.0);
   const [zoom, setZoom] = useState(6.2); // Zoom idéal pour visualiser le réseau national algérien
 
+  // Synchronisation des références d'ancrage synchrone (évite les conflits d'état au zoom molette)
+  const zoomRef = useRef(zoom);
+  const centerLatRef = useRef(centerLat);
+  const centerLngRef = useRef(centerLng);
+  useEffect(() => {
+    zoomRef.current = zoom;
+    centerLatRef.current = centerLat;
+    centerLngRef.current = centerLng;
+  }, [zoom, centerLat, centerLng]);
+
+  // Télémétrie de saturation mémoire en temps réel (hôte Windows & JS Heap)
+  const memory = useSystemMemory(3000);
+  const [showSatAlert, setShowSatAlert] = useState(true);
+
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [followVehicle, setFollowVehicle] = useState(true);
@@ -316,8 +331,9 @@ export function FleetMap({
   const visibleTiles = useMemo(() => {
     if (!isOsmActive) return [];
 
-    // OpenTopoMap plafonne nativement à zoom 17 ; au-delà, étirement fluide sans erreur 404
-    const maxNativeZ = mapTileLayer === 'RELIEF_TOPO' ? 17 : 19;
+    // Plafonds natifs pour éviter les 404 tout en permettant le zoom jusqu'à 19
+    // OpenTopoMap plafonne nativement à 17 ; ESRI World Imagery plafonne à 18 en zones sahariennes ; OSM va à 19
+    const maxNativeZ = mapTileLayer === 'RELIEF_TOPO' ? 17 : mapTileLayer === 'SATELLITE' ? 18 : 19;
     const intZoom = Math.min(maxNativeZ, Math.floor(zoom));
     const scale = Math.pow(2, zoom - intZoom);
     const tileSize = 256 * scale;
@@ -333,8 +349,9 @@ export function FleetMap({
     const tiles: { x: number; y: number; z: number; left: number; top: number; size: number }[] = [];
     const maxCoord = Math.pow(2, intZoom);
 
-    for (let x = minX; x <= maxX; x++) {
-      for (let y = minY; y <= maxY; y++) {
+    // Sécurité anti-saturation mémoire : plafond strict de 48 tuiles actives simultanément
+    for (let x = minX; x <= maxX && tiles.length < 48; x++) {
+      for (let y = minY; y <= maxY && tiles.length < 48; y++) {
         if (y < 0 || y >= maxCoord) continue;
         const normalizedX = ((x % maxCoord) + maxCoord) % maxCoord;
 
@@ -447,34 +464,39 @@ export function FleetMap({
 
     const handleNativeWheel = (e: WheelEvent) => {
       e.preventDefault();
-      const zoomDelta = e.deltaY < 0 ? 0.25 : -0.25;
+      const zoomDelta = e.deltaY < 0 ? 0.35 : -0.35;
 
       const rect = el.getBoundingClientRect();
       const px = e.clientX - rect.left;
       const py = e.clientY - rect.top;
 
-      setZoom((prevZoom) => {
-        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prevZoom + zoomDelta));
-        if (Math.abs(newZoom - prevZoom) < 0.001) return prevZoom;
+      const prevZoom = zoomRef.current;
+      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prevZoom + zoomDelta));
+      if (Math.abs(newZoom - prevZoom) < 0.001) return;
 
-        // Position géographique exacte sous le curseur avant redimensionnement
-        const centerTileX = lon2tile(centerLng, prevZoom);
-        const centerTileY = lat2tile(centerLat, prevZoom);
-        const cursorTileX = centerTileX + (px - dims.width / 2) / 256;
-        const cursorTileY = centerTileY + (py - dims.height / 2) / 256;
-        const cursorLat = tile2lat(cursorTileY, prevZoom);
-        const cursorLng = tile2lon(cursorTileX, prevZoom);
+      // Position géographique exacte sous le curseur avant redimensionnement
+      const centerTileX = lon2tile(centerLngRef.current, prevZoom);
+      const centerTileY = lat2tile(centerLatRef.current, prevZoom);
+      const cursorTileX = centerTileX + (px - dims.width / 2) / 256;
+      const cursorTileY = centerTileY + (py - dims.height / 2) / 256;
+      const cursorLat = tile2lat(cursorTileY, prevZoom);
+      const cursorLng = tile2lon(cursorTileX, prevZoom);
 
-        // Repositionnement dynamique du centre pour ancrer le point sous le curseur
-        const newCenterTileX = lon2tile(cursorLng, newZoom) - (px - dims.width / 2) / 256;
-        const newCenterTileY = lat2tile(cursorLat, newZoom) - (py - dims.height / 2) / 256;
+      // Repositionnement dynamique du centre pour ancrer le point sous le curseur
+      const newCenterTileX = lon2tile(cursorLng, newZoom) - (px - dims.width / 2) / 256;
+      const newCenterTileY = lat2tile(cursorLat, newZoom) - (py - dims.height / 2) / 256;
 
-        setCenterLng(tile2lon(newCenterTileX, newZoom));
-        setCenterLat(Math.max(-MERCATOR_MAX_LAT, Math.min(MERCATOR_MAX_LAT, tile2lat(newCenterTileY, newZoom))));
+      const newLng = tile2lon(newCenterTileX, newZoom);
+      const newLat = Math.max(-MERCATOR_MAX_LAT, Math.min(MERCATOR_MAX_LAT, tile2lat(newCenterTileY, newZoom)));
 
-        return newZoom;
-      });
+      // Mise à jour synchrone des refs puis des états
+      centerLngRef.current = newLng;
+      centerLatRef.current = newLat;
+      zoomRef.current = newZoom;
 
+      setCenterLng(newLng);
+      setCenterLat(newLat);
+      setZoom(newZoom);
       setFollowVehicle(false);
     };
 
@@ -482,7 +504,7 @@ export function FleetMap({
     return () => {
       el.removeEventListener('wheel', handleNativeWheel);
     };
-  }, [centerLat, centerLng, dims.width, dims.height]);
+  }, [dims.width, dims.height]);
 
   // Navigation accessible au clavier (Flèches pour pan, +/- pour zoom)
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -583,6 +605,53 @@ export function FleetMap({
         transition: 'background-color 0.2s ease-in-out',
       }}
     >
+      {/* Alerte Saturation Mémoire Flottante (Hôte Windows) */}
+      {memory.systemRam.isSaturated && showSatAlert && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '12px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 45,
+            background: isLight ? 'rgba(254, 242, 242, 0.95)' : 'rgba(30, 15, 15, 0.95)',
+            border: '1px solid rgba(239, 68, 68, 0.5)',
+            color: isLight ? '#991B1B' : '#FCA5A5',
+            padding: '5px 12px',
+            borderRadius: '4px',
+            fontSize: '11px',
+            fontFamily: 'JetBrains Mono, monospace',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            backdropFilter: 'blur(8px)',
+            maxWidth: '90%',
+          }}
+        >
+          <IconAlertOctagon size={14} color="#EF4444" />
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <strong>Saturation RAM ({memory.systemRam.pct}%) :</strong> {memory.systemRam.usedGb}/{memory.systemRam.totalGb} Go utilisés ({memory.systemRam.freeGb} Go libres). Les ralentissements d'affichage sont causés par le fichier d'échange (swap) Windows.
+          </span>
+          <button
+            onClick={() => setShowSatAlert(false)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              padding: '0 4px',
+              fontSize: '14px',
+              lineHeight: 1,
+            }}
+            title="Masquer cet avertissement"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {mapEngine === 'PMTILES' ? (
         <SovereignMapLibre
           vehicles={vehicles}
@@ -615,14 +684,20 @@ export function FleetMap({
                   key={`${mapTileLayer}-${t.z}-${t.x}-${t.y}`}
                   src={getTileUrl(t.x, t.y, t.z, mapTileLayer)}
                   alt=""
-                  loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    // Masquage transparent en cas de 404/429 pour éviter les blocages de rendu DOM
+                    e.currentTarget.style.opacity = '0';
+                  }}
                   style={{
                     position: 'absolute',
                     left: `${t.left}px`,
                     top: `${t.top}px`,
                     width: `${t.size}px`,
+                    height: `${t.size}px`,
                     opacity: mapTileLayer === 'OSM_DARK' ? 0.88 : 1,
                     pointerEvents: 'none',
+                    transition: 'opacity 0.15s ease-in',
                   }}
                 />
               ))}
@@ -1132,7 +1207,10 @@ export function FleetMap({
         }}
       >
         <button
-          onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + 0.5))}
+          onClick={() => {
+            setFollowVehicle(false);
+            setZoom((z) => Math.min(MAX_ZOOM, z + 0.5));
+          }}
           title="Zoomer (+)"
           aria-label="Zoomer sur la carte (+)"
           style={{
@@ -1158,7 +1236,10 @@ export function FleetMap({
         </button>
 
         <button
-          onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - 0.5))}
+          onClick={() => {
+            setFollowVehicle(false);
+            setZoom((z) => Math.max(MIN_ZOOM, z - 0.5));
+          }}
           title="Dézoomer (-)"
           aria-label="Dézoomer sur la carte (-)"
           style={{
@@ -1604,11 +1685,19 @@ export function FleetMap({
             boxSizing: 'border-box',
           }}
         >
-          {/* Données de Zoom & Coordonnées GPS Curseur */}
+          {/* Données de Zoom, Tuiles & Coordonnées GPS Curseur */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, overflow: 'hidden' }}>
             <span style={{ flexShrink: 0 }}>
               Zoom: <strong style={{ color: isLight ? '#0F172A' : '#F8FAFC' }}>{zoom.toFixed(1)}x</strong>
             </span>
+            {isOsmActive && (
+              <>
+                <span style={{ color: isLight ? '#CBD5E1' : '#475569', flexShrink: 0 }}>•</span>
+                <span style={{ flexShrink: 0 }} title="Nombre de tuiles Slippy Map actuellement chargées dans le viewport">
+                  Tuiles: <strong style={{ color: isLight ? '#0F172A' : '#F8FAFC' }}>{visibleTiles.length}</strong>
+                </span>
+              </>
+            )}
             <span style={{ color: isLight ? '#CBD5E1' : '#475569', flexShrink: 0 }}>•</span>
             <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               GPS: <strong ref={cursorCoordsRef} style={{ color: isLight ? '#0F172A' : '#F8FAFC' }}>
@@ -1617,8 +1706,66 @@ export function FleetMap({
             </span>
           </div>
 
-          {/* Attribution Cartographique & Souveraineté */}
+          {/* Télémétrie Mémoire Système & Attribution Cartographique */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            {/* Télémétrie Saturation Mémoire */}
+            <div
+              title={`RAM Système: ${memory.systemRam.usedGb} Go / ${memory.systemRam.totalGb} Go (${memory.systemRam.pct}%) — ${
+                memory.systemRam.isSaturated
+                  ? 'CRITIQUE : RAM hôte saturée (>85%). Risque de saccade/blocage graphique causé par le swap Windows.'
+                  : 'Empreinte nominale.'
+              }${memory.browserHeap ? ` | Heap JS Navigateur: ${memory.browserHeap.usedMb} Mo` : ''}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '1px 6px',
+                borderRadius: '3px',
+                fontSize: '9px',
+                fontWeight: 700,
+                background: memory.systemRam.isSaturated
+                  ? (isLight ? '#FEE2E2' : 'rgba(239, 68, 68, 0.2)')
+                  : memory.systemRam.status === 'WARNING'
+                  ? (isLight ? '#FEF3C7' : 'rgba(245, 158, 11, 0.2)')
+                  : (isLight ? '#ECFDF5' : 'rgba(16, 185, 129, 0.15)'),
+                color: memory.systemRam.isSaturated
+                  ? '#EF4444'
+                  : memory.systemRam.status === 'WARNING'
+                  ? '#F59E0B'
+                  : '#10B981',
+                border: `1px solid ${
+                  memory.systemRam.isSaturated
+                    ? 'rgba(239, 68, 68, 0.4)'
+                    : memory.systemRam.status === 'WARNING'
+                    ? 'rgba(245, 158, 11, 0.4)'
+                    : 'rgba(16, 185, 129, 0.3)'
+                }`,
+                cursor: 'help',
+                flexShrink: 0,
+              }}
+            >
+              <span
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: 'currentColor',
+                  boxShadow: memory.systemRam.isSaturated ? '0 0 6px #EF4444' : 'none',
+                }}
+              />
+              <span>
+                RAM: {memory.systemRam.pct}%
+                {memory.systemRam.isSaturated ? ' [SATURÉE]' : ''}
+              </span>
+              <span style={{ opacity: 0.8 }}>
+                ({memory.systemRam.usedGb}/{memory.systemRam.totalGb} Go)
+              </span>
+              {memory.browserHeap && (
+                <span style={{ borderLeft: '1px solid currentColor', paddingLeft: '4px', opacity: 0.8 }}>
+                  JS: {memory.browserHeap.usedMb} Mo
+                </span>
+              )}
+            </div>
             {isOsmActive && (
               <>
                 <span style={{ fontSize: '9px', color: isLight ? '#64748B' : '#94A3B8', whiteSpace: 'nowrap' }}>

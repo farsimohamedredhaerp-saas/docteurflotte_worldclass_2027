@@ -1,11 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as os from 'node:os';
 import {
   HealthResponse,
   ReadinessResponse,
   DependencyCheckResult,
   PlatformHealthSummary,
   ServiceHealthIndicator,
+  SystemMemoryMetrics,
 } from '@docteurflotte/contracts';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
@@ -17,6 +19,30 @@ export class HealthService {
 
   constructor(private readonly configService: ConfigService) {}
 
+  getSystemMemory(): SystemMemoryMetrics {
+    const totalBytes = os.totalmem();
+    const freeBytes = os.freemem();
+    const usedBytes = totalBytes - freeBytes;
+    const ramUsagePercent = Math.round((usedBytes / totalBytes) * 1000) / 10;
+    const memUsage = process.memoryUsage();
+
+    const isSaturated = ramUsagePercent >= 85;
+    const status: 'OPTIMAL' | 'WARNING' | 'CRITICAL' =
+      ramUsagePercent >= 90 ? 'CRITICAL' : ramUsagePercent >= 75 ? 'WARNING' : 'OPTIMAL';
+
+    return {
+      totalRamMb: Math.round(totalBytes / (1024 * 1024)),
+      freeRamMb: Math.round(freeBytes / (1024 * 1024)),
+      usedRamMb: Math.round(usedBytes / (1024 * 1024)),
+      ramUsagePercent,
+      processWorkingSetMb: Math.round(memUsage.rss / (1024 * 1024)),
+      processHeapUsedMb: Math.round(memUsage.heapUsed / (1024 * 1024)),
+      isSaturated,
+      status,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
   getHealth(): HealthResponse {
     return {
       status: 'ok',
@@ -25,6 +51,7 @@ export class HealthService {
       uptime: Math.floor((Date.now() - this.startTime) / 1000),
       timestamp: new Date().toISOString(),
       environment: this.configService.get<string>('NODE_ENV', 'development'),
+      memory: this.getSystemMemory(),
     };
   }
 

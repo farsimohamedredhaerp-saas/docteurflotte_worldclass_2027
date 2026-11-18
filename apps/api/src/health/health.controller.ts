@@ -1,7 +1,12 @@
 import { Controller, Get, Res, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { HealthService } from './health.service';
-import { HealthResponse, ReadinessResponse, PlatformHealthSummary } from '@docteurflotte/contracts';
+import {
+  HealthResponse,
+  ReadinessResponse,
+  PlatformHealthSummary,
+  SystemMemoryMetrics,
+} from '@docteurflotte/contracts';
 
 @Controller()
 export class HealthController {
@@ -10,6 +15,11 @@ export class HealthController {
   @Get('health')
   getHealth(): HealthResponse {
     return this.healthService.getHealth();
+  }
+
+  @Get('health/memory')
+  getSystemMemory(): SystemMemoryMetrics {
+    return this.healthService.getSystemMemory();
   }
 
   @Get('platform/health-summary')
