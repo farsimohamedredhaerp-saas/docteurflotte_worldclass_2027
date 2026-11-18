@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import { ExecutiveDashboardClient } from '../components/dashboard/ExecutiveDashboardClient';
+import { LandingPageClient } from '../components/landing/LandingPageClient';
 
 export const metadata: Metadata = {
-  title: 'DocteurFlotte — Cockpit Décisionnel & Maintenance des Actifs',
+  title: 'DocteurFlotte — Plateforme Souveraine de Télémétrie & Maintenance 5.0',
   description:
-    'Console souveraine de pilotage opérationnel, contrôle de gestion et maintenance 5.0 prescriptive des flottes.',
+    'Solution souveraine de télémétrie, IoT multi-métiers et maintenance prescriptive déterministe. Calibrée pour les 58 Wilayas et conforme Loi 18-07.',
 };
 
 export default function HomePage() {
-  return <ExecutiveDashboardClient />;
+  return <LandingPageClient />;
 }
