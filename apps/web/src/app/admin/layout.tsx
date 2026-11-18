@@ -129,6 +129,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { href: '/admin/tenants', label: 'Tenants & Organisations', icon: <IconLayers size={15} /> },
     { href: '/admin/subscriptions', label: 'Plans & Abonnements DZ', icon: <IconCreditCard size={15} /> },
     { href: '/admin/decision-engine', label: 'Moteur Décisionnel (6 Physiques)', icon: <IconCpu size={15} /> },
+    { href: '/admin/regulatory-studio', label: 'Regulatory Studio (Packs Bitemporels)', icon: <IconFileText size={15} /> },
     { href: '/admin/ai-observability', label: 'Observabilité IA Ollama', icon: <IconZap size={15} /> },
     { href: '/admin/fiscal', label: 'Barèmes Fiscaux & Naftal', icon: <IconFuel size={15} /> },
     { href: '/admin/gateways', label: 'Passerelles IoT & Traccar', icon: <IconRadio size={15} /> },
